@@ -1,3 +1,4 @@
+import { render } from '@react-email/render';
 import { ClientReplyEmail } from '@/components/email/ClientReplyEmail';
 
 export async function POST(req) {
@@ -11,16 +12,25 @@ export async function POST(req) {
       );
     }
 
-    const html = ClientReplyEmail({ name, clientMessage, replyMessage });
+    const html = await render(
+      <ClientReplyEmail 
+        name={name} 
+        clientMessage={clientMessage} 
+        replyMessage={replyMessage} 
+      />
+    );
 
     return Response.json(
       { html },
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
     );
   } catch (error) {
     console.error('Error rendering client reply email:', error);
     return Response.json(
-      { error: 'Failed to render email' },
+      { error: 'Failed to render email', details: error.message },
       { status: 500 }
     );
   }

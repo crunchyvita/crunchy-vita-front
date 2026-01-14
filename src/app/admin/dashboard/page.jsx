@@ -4,7 +4,14 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Mail, Package, Users, MessageSquare, Bell, CheckCircle, Trash2, Reply } from 'lucide-react';
+import { 
+  Mail, Package, Users, MessageSquare, Bell, 
+  CheckCircle, Trash2, Reply, LayoutDashboard, 
+  Box, ShoppingCart, User, LogOut, ChevronDown, 
+  AlertTriangle, X, Clock, CheckCircle2 
+} from 'lucide-react';
+import { notificationAPI, messageAPI } from '@/lib/api';
+import { toast } from 'sonner';
 
 function AdminDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -15,476 +22,341 @@ function AdminDashboard() {
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const [showMessagesDropdown, setShowMessagesDropdown] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); // all, unread, replied, unanswered
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
       fetchMessages();
-      const interval = setInterval(fetchMessages, 10000); // Rafraîchir chaque 10 secondes
+      fetchNotifications();
+      const interval = setInterval(() => {
+        fetchMessages();
+        fetchNotifications();
+      }, 10000);
       return () => clearInterval(interval);
     }
   }, [isAuthenticated, user]);
 
   const fetchMessages = async () => {
     try {
-      // Construire l'URL correctement
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      // Enlever le /api s'il est déjà dans baseUrl
       const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
       const apiUrl = `${cleanBaseUrl}/api/contact`;
-      
-      console.log('Fetching messages from:', apiUrl);
-      
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
       });
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        console.error('API error:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        setMessages([]);
-        setUnreadMessages(0);
-        return;
-      }
-      
+      if (!response.ok) return;
       const data = await response.json();
-      console.log('Raw data:', data);
-      console.log('Data keys:', Object.keys(data));
-      console.log('Data type:', typeof data);
-      console.log('Is array:', Array.isArray(data));
-      console.log('Data length:', data?.length);
-      console.log('Full data structure:', JSON.stringify(data).substring(0, 500));
-      
-      // Vérifier que data est un array
-      let messagesArray = data;
-      
-      // Si data est un objet mais pas un array, chercher une propriété contenant le array
-      if (!Array.isArray(data)) {
-        if (data && typeof data === 'object') {
-          // Chercher les propriétés communes qui pourraient contenir les messages
-          if (Array.isArray(data.messages)) {
-            messagesArray = data.messages;
-            console.log('Found messages in data.messages');
-          } else if (Array.isArray(data.data)) {
-            messagesArray = data.data;
-            console.log('Found messages in data.data');
-          } else {
-            console.error('Les données ne contiennent pas d\'array de messages');
-            console.log('Available properties:', Object.keys(data));
-            messagesArray = [];
-          }
-        } else {
-          console.error('Format de données invalide, type:', typeof data);
-          messagesArray = [];
-        }
-      }
-      
-      if (Array.isArray(messagesArray) && messagesArray.length > 0) {
-        console.log('Setting messages to:', messagesArray);
-        setMessages(messagesArray);
-        const unread = messagesArray.filter(m => !m.read).length;
-        setUnreadMessages(unread);
-        console.log('Messages loaded:', messagesArray.length, 'Unread:', unread);
-      } else {
-        console.error('Messages array is empty or invalid');
-        setMessages([]);
-        setUnreadMessages(0);
-      }
+      let messagesArray = Array.isArray(data) ? data : (data.messages || data.data || []);
+      setMessages(messagesArray);
+      setUnreadMessages(messagesArray.filter(m => m.status === 'new' || (!m.status && !m.read)).length);
     } catch (error) {
-      console.error('Erreur fetch messages:', error);
-      console.error('Error stack:', error.stack);
-      setMessages([]);
-      setUnreadMessages(0);
+      console.error('Fetch error:', error);
     }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const countData = await notificationAPI.getUnreadCount(true);
+      if (countData?.unreadCount !== undefined) setUnreadNotifications(countData.unreadCount);
+      const data = await notificationAPI.list(20, null, true);
+      setNotifications(data?.notifications || (Array.isArray(data) ? data : []));
+    } catch (error) {
+      setNotifications([]);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const handleMarkAsRead = async (id) => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
-      const apiUrl = `${cleanBaseUrl}/api/contact/${id}/read`;
-      
-      const response = await fetch(apiUrl, {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      await fetch(`${cleanBaseUrl}/api/contact/${id}/read`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
       });
-      const updatedMessage = await response.json();
-      setMessages(messages.map(m => m._id === id ? updatedMessage : m));
-      setUnreadMessages(unreadMessages - 1);
-      setSelectedMessage(updatedMessage);
-    } catch (error) {
-      console.error('Erreur:', error);
-    }
+      fetchMessages();
+    } catch (error) { console.error(error); }
   };
 
   const handleReply = async (id) => {
     if (!replyText.trim()) return;
-
     setSendingReply(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
-      const apiUrl = `${cleanBaseUrl}/api/contact/${id}/reply`;
+      // Backend handles email sending automatically when replying
+      await messageAPI.reply(id, replyText.trim());
       
-      const response = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ replyMessage: replyText }),
-      });
-      const updatedMessage = await response.json();
-      setMessages(messages.map(m => m._id === id ? updatedMessage : m));
-      setSelectedMessage(updatedMessage);
+      toast.success("Réponse envoyée");
       setReplyText('');
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setSendingReply(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return;
-
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
-      const apiUrl = `${cleanBaseUrl}/api/contact/${id}`;
-      
-      await fetch(apiUrl, {
-        method: 'DELETE',
-      });
-      setMessages(messages.filter(m => m._id !== id));
+      fetchMessages();
       setSelectedMessage(null);
-      setUnreadMessages(Math.max(0, unreadMessages - 1));
+    } catch (error) { 
+      toast.error("Erreur d'envoi");
+      console.error(error);
+    } finally { setSendingReply(false); }
+  };
+
+  const handleDeleteClick = (id) => {
+    setMessageToDelete(id);
+    setDeleteAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!messageToDelete) return;
+    try {
+      await messageAPI.delete(messageToDelete);
+      setMessages(prev => prev.filter(m => m._id !== messageToDelete));
+      if (selectedMessage?._id === messageToDelete) setSelectedMessage(null);
+      setDeleteAlertOpen(false);
+      setMessageToDelete(null);
+      toast.success("Message supprimé");
     } catch (error) {
-      console.error('Erreur:', error);
+      toast.error("Erreur lors de la suppression");
+      setDeleteAlertOpen(false);
     }
-  };
-
-  // Filtrer les messages
-  const filteredMessages = messages.filter(message => {
-    // Appliquer le filtre de statut
-    if (filterStatus === 'unread' && message.read) return false;
-    if (filterStatus === 'replied' && !message.replied) return false;
-    if (filterStatus === 'unanswered' && message.replied) return false;
-
-    // Appliquer la recherche
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      return (
-        message.name.toLowerCase().includes(search) ||
-        message.email.toLowerCase().includes(search) ||
-        message.message.toLowerCase().includes(search)
-      );
-    }
-    return true;
-  });
-
-  // Exporter les messages en CSV
-  const exportToCSV = () => {
-    const headers = ['Nom', 'Email', 'Message', 'Date', 'Lu', 'Répondu', 'Réponse'];
-    const rows = filteredMessages.map(m => [
-      m.name,
-      m.email,
-      `"${m.message.replace(/"/g, '""')}"`,
-      new Date(m.createdAt).toLocaleString('fr-FR'),
-      m.read ? 'Oui' : 'Non',
-      m.replied ? 'Oui' : 'Non',
-      m.replyMessage ? `"${m.replyMessage.replace(/"/g, '""')}"` : '',
-    ]);
-
-    const csv = [
-      headers.join(','),
-      ...rows.map(row => row.join(',')),
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `messages-crunchy-vita-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleLogout = () => {
-    logout();
   };
 
   return (
     <ProtectedRoute allowedRoles={['ADMIN']}>
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 flex flex-col w-full font-sans text-slate-900">
+        
+        {/* NAVBAR */}
+        <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 w-full shadow-sm">
+          <div className="w-full px-4 sm:px-8">
             <div className="flex h-16 justify-between items-center">
-              <div className="flex items-center">
-                <h1 className="text-xl font-bold text-gray-900">CrunchyVita Admin</h1>
+              <div className="flex items-center gap-2">
+                <div className="bg-green-600 p-1.5 rounded-lg">
+                  <LayoutDashboard className="text-white h-5 w-5" />
+                </div>
+                <h1 className="text-lg font-bold">Crunchy Vita <span className="text-green-600">Admin</span></h1>
               </div>
-              <div className="flex items-center gap-6">
-                {/* Bell Notification */}
+
+              <div className="flex items-center gap-3">
+                {/* Notifications */}
                 <div className="relative">
-                  <button
-                    onClick={() => {
-                      setShowMessagesDropdown(!showMessagesDropdown);
-                      if (!showMessagesDropdown) {
-                        // Recharger les messages quand on ouvre le dropdown
-                        fetchMessages();
-                      }
-                    }}
-                    className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                  >
-                    <Bell className="h-6 w-6 text-yellow-600" />
-                    {unreadMessages > 0 && (
-                      <span className="absolute top-0 right-0 inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-600 text-xs font-bold text-white">
-                        {unreadMessages}
-                      </span>
-                    )}
+                  <button onClick={() => { setShowNotificationsDropdown(!showNotificationsDropdown); setShowMessagesDropdown(false); setShowProfileDropdown(false); }} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition">
+                    <Bell className="h-6 w-6" />
+                    {unreadNotifications > 0 && <span className="absolute top-1 right-1 h-4 w-4 bg-red-600 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">{unreadNotifications}</span>}
                   </button>
-
-                  {/* Messages Dropdown */}
-                  {showMessagesDropdown && (
-                    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                      <div className="p-4 border-b border-gray-200 sticky top-0 bg-white">
-                        <h3 className="text-sm font-bold text-gray-900">Messages de Contact</h3>
-                        <p className="text-xs text-gray-500">{messages.length} message{messages.length > 1 ? 's' : ''}</p>
+                  {showNotificationsDropdown && (
+                    <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 bg-slate-100 flex justify-between items-center font-bold text-sm">Alertes Système <button onClick={async () => { await notificationAPI.markAllAsRead(); fetchNotifications(); }} className="text-blue-600 text-xs font-medium">Tout marquer</button></div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length === 0 ? <div className="p-8 text-center text-slate-400 text-sm">Aucune notification</div> : notifications.map(n => (
+                          <div key={n._id} className="p-4  hover:bg-slate-50 transition text-sm cursor-pointer" onClick={() => setShowNotificationsDropdown(false)}>
+                            <p className="font-bold">{n.title}</p>
+                            <p className="text-slate-600 text-xs line-clamp-1">{n.message}</p>
+                          </div>
+                        ))}
                       </div>
-
-                      {messages.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
-                          <p className="text-sm">Aucun message pour le moment</p>
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-gray-200">
-                          {messages.map((message) => (
-                            <div
-                              key={message._id}
-                              onClick={() => {
-                                setSelectedMessage(message);
-                                if (!message.read) handleMarkAsRead(message._id);
-                                setShowMessagesDropdown(false);
-                              }}
-                              className={`p-3 cursor-pointer hover:bg-gray-50 transition ${
-                                !message.read ? 'bg-blue-50' : ''
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-gray-900 truncate">{message.name}</p>
-                                  <p className="text-xs text-gray-600 truncate">{message.email}</p>
-                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{message.message}</p>
-                                  <p className="text-xs text-gray-400 mt-1">
-                                    {new Date(message.createdAt).toLocaleString('fr-FR')}
-                                  </p>
-                                </div>
-                                <div className="flex gap-1 mt-1">
-                                  {!message.read && (
-                                    <div className="h-2 w-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
-                                  )}
-                                  {message.replied && (
-                                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
 
-                <span className="text-sm text-gray-700">
-                  Welcome, {user?.name || 'Admin'}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Logout
-                </button>
+                {/* Messages Dropdown */}
+                <div className="relative">
+                  <button onClick={() => { setShowMessagesDropdown(!showMessagesDropdown); setShowNotificationsDropdown(false); setShowProfileDropdown(false); }} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition">
+                    <MessageSquare className="h-6 w-6" />
+                    {unreadMessages > 0 && <span className="absolute top-1 right-1 h-4 w-4 bg-orange-500 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">{unreadMessages}</span>}
+                  </button>
+                  {showMessagesDropdown && (
+                    <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 bg-slate-100  font-bold text-sm">Nouveaux Messages</div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {messages.length === 0 ? <div className="p-8 text-center text-slate-400 text-sm">Aucun message</div> : messages.map(m => (
+                          <div key={m._id} className="p-4  hover:bg-slate-50 cursor-pointer flex items-center justify-between group">
+                            <div onClick={() => { setSelectedMessage(m); if (m.status === 'new' || (!m.status && !m.read)) handleMarkAsRead(m._id); setShowMessagesDropdown(false); }} className="flex-1 min-w-0 flex items-start gap-2">
+                              {(m.status === 'new' || (!m.status && !m.read)) && <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1" />}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-bold">{m.name}</p>
+                                <p className="text-xs text-slate-500 line-clamp-1">{m.message}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteClick(m._id); }}
+                              className="ml-2 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-8 w-px bg-slate-200 mx-2" />
+
+                {/* Profile */}
+                <div className="relative">
+                  <button onClick={() => { setShowProfileDropdown(!showProfileDropdown); setShowMessagesDropdown(false); setShowNotificationsDropdown(false); }} className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition">
+                    <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm uppercase">
+                      {user?.name?.[0] || <User className="h-4 w-4" />}
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4  bg-slate-50">
+                        <p className="text-sm font-bold">{user?.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                      </div>
+                      <div className="p-2">
+                        <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium">
+                          <LogOut className="h-4 w-4" /> Déconnexion
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </nav>
 
-        <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900">
-              Admin Dashboard
-            </h2>
-
-            <div className="space-y-6">
-              {/* User Information */}
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h3 className="text-lg font-semibold text-gray-900">Informations utilisateur</h3>
-                <dl className="mt-4 space-y-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Nom</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user?.name}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Email</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user?.email}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Rôle</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user?.role}</dd>
-                  </div>
-                </dl>
+        {/* MAIN CONTENT */}
+        <main className="flex-1 w-full p-6 lg:p-8">
+          <div className="w-full space-y-8">
+            <section>
+              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Actions Rapides</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <QuickLinkCard icon={<Package className="text-blue-600" />} title="Produits" desc="Catalogue" onClick={() => router.push('/admin/products')} />
+                <QuickLinkCard icon={<Box className="text-orange-600" />} title="Stock" desc="Inventaire" onClick={() => router.push('/admin/products')} />
+                <QuickLinkCard icon={<Mail className="text-green-600" />} title="Contacts" desc="Messages" onClick={() => router.push('/admin/contact')} />
+                <QuickLinkCard icon={<ShoppingCart className="text-purple-600" />} title="Commandes" desc="Ventes" onClick={() => router.push('/admin/orders')} />
               </div>
+            </section>
 
-              {/* Quick Actions */}
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h3 className="text-lg font-semibold text-gray-900">Actions rapides</h3>
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <button 
-                    onClick={() => router.push('/admin/products')}
-                    className="rounded-lg bg-green-600 px-4 py-3 text-white hover:bg-green-700 flex items-center justify-center gap-2"
-                  >
-                    <Package className="h-5 w-5" />
-                    Produits
-                  </button>
-                  <button 
-                    onClick={() => router.push('/admin/orders')}
-                    className="rounded-lg bg-green-600 px-4 py-3 text-white hover:bg-green-700 flex items-center justify-center gap-2"
-                  >
-                    <Mail className="h-5 w-5" />
-                    Commandes
-                  </button>
-                  <button 
-                    onClick={() => router.push('/admin/users')}
-                    className="rounded-lg bg-green-600 px-4 py-3 text-white hover:bg-green-700 flex items-center justify-center gap-2"
-                  >
-                    <Users className="h-5 w-5" />
-                    Utilisateurs
-                  </button>
-                 
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 flex flex-col items-center justify-center text-center">
+                <div className="bg-blue-50 p-4 rounded-full mb-4">
+                  <LayoutDashboard className="h-12 w-12 text-blue-200" />
                 </div>
-              </div>
-
-
-              {/* Info Box */}
-              <div className="rounded-lg bg-blue-50 p-6 border border-blue-200">
-                <p className="text-sm text-blue-800">
-                  Bienvenue dans le tableau de bord administrateur. Gérez les messages de contact directement ici.
-                </p>
-              </div>
+                <h3 className="text-lg font-bold">Bienvenue, {user?.name}</h3>
+                <p className="text-slate-500 max-w-sm">Gérez votre boutique Crunchy Vita en toute simplicité.</p>
             </div>
           </div>
         </main>
 
-        {/* Modal pour afficher le message sélectionné */}
+        {/* --- MODAL CONVERSATION --- */}
         {selectedMessage && (
-          <div 
-            className="fixed inset-0 flex items-center justify-center p-4 z-50"
-            onClick={() => setSelectedMessage(null)}
-          >
-            <div 
-              className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-start">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{selectedMessage.name}</h2>
-                  <p className="text-gray-600">{selectedMessage.email}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {selectedMessage.createdAt ? new Date(selectedMessage.createdAt).toLocaleString('fr-FR') : 'Date non disponible'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedMessage(null)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
-                  ✕
+          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[100]" onClick={() => setSelectedMessage(null)}>
+            <div className="bg-white rounded-[1.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+              <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Détails du message</span>
+                <button onClick={() => setSelectedMessage(null)} className="p-1.5 hover:bg-slate-200 rounded-full transition-colors">
+                  <X size={18} className="text-slate-400" />
                 </button>
               </div>
-
-              {/* Modal Body */}
+              
               <div className="p-6">
-                {/* Message Content */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Message:</h3>
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.message || 'Aucun contenu'}</p>
-                  </div>
-                </div>
-
-                {/* Status Indicators */}
-                <div className="flex gap-4 mb-6 text-sm">
-                  <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${selectedMessage.read ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
-                    <CheckCircle className="h-4 w-4" />
-                    {selectedMessage.read ? 'Lu' : 'Non lu'}
-                  </div>
-                  {selectedMessage.replied && (
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-700">
-                      <CheckCircle className="h-4 w-4" />
-                      Répondu
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-lg font-bold">
+                      {selectedMessage.name.charAt(0).toUpperCase()}
                     </div>
+                    <div className="min-w-0">
+                      <h2 className="text-lg font-bold text-slate-900 truncate leading-tight">{selectedMessage.name}</h2>
+                      <p className="text-xs text-blue-600 truncate">{selectedMessage.email}</p>
+                    </div>
+                  </div>
+                  {selectedMessage.status === 'replied' && (
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20">
+                      Répondu
+                    </span>
                   )}
                 </div>
 
-                {/* Previous Reply */}
-                {selectedMessage.replied && selectedMessage.replyMessage && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Votre réponse:</h3>
-                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.replyMessage}</p>
+                <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
+                  <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
+                  <div className="mt-3 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+                    <Clock size={12}/> Reçu le {formatDate(selectedMessage.createdAt)}
+                  </div>
+                </div>
+
+                {selectedMessage.status === 'replied' && selectedMessage.replyMessage && (
+                  <div className="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100">
+                    <span className="text-[10px] font-black text-emerald-600 uppercase mb-2 block tracking-wider">Votre Réponse</span>
+                    <p className="text-slate-700 text-sm leading-relaxed">{selectedMessage.replyMessage}</p>
+                  </div>
+                )}
+
+                {selectedMessage.status !== 'replied' && (
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase px-1">
+                      <Reply size={14} className="text-blue-600" /> Réponse rapide
+                    </label>
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[120px] text-sm text-slate-700 resize-none"
+                      placeholder="Écrivez votre réponse..."
+                    />
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={() => handleReply(selectedMessage._id)}
+                        disabled={sendingReply || !replyText.trim()}
+                        className="flex-1 bg-green-900 text-white font-bold py-3 rounded-xl hover:bg-green-800 transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {sendingReply ? 'Envoi...' : 'Envoyer la réponse'}
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Reply Form */}
-                {!selectedMessage.replied && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Votre réponse:</h3>
-                    <textarea
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      rows={4}
-                      className="w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                      placeholder="Écrivez votre réponse..."
-                    />
-                  </div>
-                )}
+                <div className="flex justify-center mt-4">
+                   <button 
+                    onClick={() => handleDeleteClick(selectedMessage._id)}
+                    className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 hover:text-red-700 uppercase transition-colors"
+                   >
+                    <Trash2 size={14} /> Supprimer ce message
+                   </button>
+                </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex gap-3 justify-end">
-                <button
-                  onClick={() => {
-                    handleDelete(selectedMessage._id);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 border border-red-200 transition"
+        {/* --- CONFIRM DELETE MODAL  --- */}
+        {deleteAlertOpen && (
+          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-6 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Supprimer le message ?</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Cette action est définitive. Les données de ce contact seront définitivement effacées.
+                </p>
+              </div>
+              <div className="flex border-t border-slate-100">
+                <button 
+                  onClick={() => setDeleteAlertOpen(false)}
+                  className="flex-1 px-4 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors border-r border-slate-100"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer
+                  Annuler
                 </button>
-
-                {!selectedMessage.replied && (
-                  <button
-                    onClick={() => handleReply(selectedMessage._id)}
-                    disabled={sendingReply || !replyText.trim()}
-                    className="flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
-                  >
-                    <Reply className="h-4 w-4" />
-                    {sendingReply ? 'Envoi...' : 'Répondre'}
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setSelectedMessage(null)}
-                  className="px-4 py-2 rounded-lg bg-gray-300 text-gray-900 hover:bg-gray-400 transition"
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors  tracking-tight"
                 >
-                  Fermer
+                  Supprimer
                 </button>
               </div>
             </div>
@@ -495,5 +367,16 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+function QuickLinkCard({ icon, title, desc, onClick }) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all text-left group">
+      <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-blue-50 transition-colors text-xl">{icon}</div>
+      <div>
+        <p className="text-sm font-bold text-slate-900">{title}</p>
+        <p className="text-xs text-slate-500">{desc}</p>
+      </div>
+    </button>
+  );
+}
 
+export default AdminDashboard;

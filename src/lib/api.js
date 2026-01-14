@@ -268,3 +268,76 @@ export const stockAPI = {
     }),
 };
 
+// Contact/Message API functions
+export const messageAPI = {
+  // Get all messages (admin only)
+  list: async () => apiRequest("/contact", { method: "GET" }),
+
+  // Get a single message by ID (admin only)
+  getById: async (id) => apiRequest(`/contact/${id}`, { method: "GET" }),
+
+  // Update message status (admin only)
+  updateStatus: async (id, status) =>
+    apiRequest(`/contact/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
+
+  // Delete message (admin only)
+  delete: async (id) => apiRequest(`/contact/${id}`, { method: "DELETE" }),
+
+  // Reply to message (admin only) - Backend handles email sending automatically
+  reply: async (id, replyMessage) =>
+    apiRequest(`/contact/${id}/reply`, {
+      method: "POST",
+      body: JSON.stringify({ message: replyMessage }),
+    }),
+};
+
+// Notification API functions
+export const notificationAPI = {
+  // Get all notifications for current user
+  list: async (limit = 50, isRead = null, excludeContactMessages = true) => {
+    const params = new URLSearchParams({ limit: limit.toString() });
+    if (isRead !== null) {
+      params.append('isRead', isRead.toString());
+    }
+    if (excludeContactMessages) {
+      params.append('excludeContactMessages', 'true');
+    }
+    return apiRequest(`/notifications?${params.toString()}`, { method: "GET" });
+  },
+
+  // Get unread notification count
+  getUnreadCount: async (excludeContactMessages = true) => {
+    const params = new URLSearchParams();
+    if (excludeContactMessages) {
+      params.append('excludeContactMessages', 'true');
+    }
+    return apiRequest(`/notifications/unread/count?${params.toString()}`, { method: "GET" });
+  },
+
+  // Get single notification by ID
+  getById: async (id) => 
+    apiRequest(`/notifications/${id}`, { method: "GET" }),
+
+  // Mark notification as read
+  markAsRead: async (id) =>
+    apiRequest(`/notifications/${id}/read`, {
+      method: "PUT",
+    }),
+
+  // Mark all notifications as read
+  markAllAsRead: async () =>
+    apiRequest("/notifications/read/all", {
+      method: "PUT",
+    }),
+
+  // Delete notification
+  delete: async (id) => 
+    apiRequest(`/notifications/${id}`, { method: "DELETE" }),
+
+  // Delete all notifications
+  deleteAll: async () =>
+    apiRequest("/notifications/all", { method: "DELETE" }),
+};

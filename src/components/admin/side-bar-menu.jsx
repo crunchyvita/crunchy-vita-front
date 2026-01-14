@@ -20,6 +20,7 @@ import {
 	Settings,
 	Users,
 	Package,
+	MessageSquare,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
 	{ label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
 	{ label: "Products", href: "/admin/products", icon: Boxes },
 	{ label: "Stock", href: "/admin/stock", icon: Package },
+	{ label: "Contact", href: "/admin/contact", icon: MessageSquare },
 	{ label: "Reports", href: "/admin/reports", icon: BarChart3 },
 	{ label: "Checkout", href: "/admin/checkout", icon: ShoppingCart },
 ];

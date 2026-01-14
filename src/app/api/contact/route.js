@@ -11,7 +11,8 @@ export async function POST(request) {
     }
 
     // Envoyer le message au backend
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contact`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const response = await fetch(`${apiUrl}/contact`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

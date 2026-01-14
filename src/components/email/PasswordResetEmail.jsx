@@ -67,7 +67,7 @@ export function PasswordResetEmail({ name, resetLink }) {
         <h2 style={{ color: '#0f172a', fontSize: '20px', margin: '0 0 15px' }}>
           Réinitialisation de votre mot de passe
         </h2>
-        <p>Bonjour {name},</p>
+        <p>Bonjour{name ? ` ${name}` : ''},</p>
         <p>
           Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte Crunchy Vita. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :
         </p>

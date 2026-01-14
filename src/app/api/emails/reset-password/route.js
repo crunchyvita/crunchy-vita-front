@@ -13,7 +13,7 @@ export async function POST(request) {
       );
     }
 
-    const html = await render(<PasswordResetEmail resetUrl={resetUrl} />);
+    const html = await render(<PasswordResetEmail resetLink={resetUrl} />);
     
     return NextResponse.json({ html });
   } catch (error) {
