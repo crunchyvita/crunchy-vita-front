@@ -1,19 +1,22 @@
 // API base URL - adjust this to match your backend URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Helper function to make API requests
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
   
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  };
+  const defaultHeaders = {};
+
+  // Only set JSON content type when body is not FormData
+  if (!(options.body instanceof FormData)) {
+    defaultHeaders["Content-Type"] = "application/json";
+  }
 
   // Add auth token if available (client-side only)
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
+      defaultHeaders["Authorization"] = `Bearer ${token}`;
     }
   }
 
@@ -27,14 +30,59 @@ async function apiRequest(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
-
+    
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      // Try to parse error response
+      let errorMessage = "An error occurred";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch (parseError) {
+        // If JSON parsing fails, use status text or status code
+        errorMessage = response.statusText || `HTTP ${response.status}` || errorMessage;
+      }
+      // Ensure errorMessage is always a string and not empty
+      if (typeof errorMessage !== 'string' || !errorMessage.trim()) {
+        errorMessage = `HTTP ${response.status}: An error occurred`;
+      }
+      
+      // Create error with proper message
+      const error = new Error(errorMessage.trim());
+      
+      // Safely add additional properties
+      if (response.status) {
+        error.status = response.status;
+      }
+      if (response.statusText) {
+        error.statusText = response.statusText;
+      }
+      error.url = url; // Include URL for debugging
+      
+      throw error;
     }
 
-    return data;
+    // Handle empty responses
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const data = await response.json();
+      return data;
+    } else {
+      // Return empty object for non-JSON responses
+      return {};
+    }
   } catch (error) {
+    // Re-throw with additional context if it's a network error
+    if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+      const networkError = new Error('Network error: Unable to connect to server');
+      networkError.status = 0;
+      networkError.statusText = 'Network Error';
+      networkError.url = url;
+      throw networkError;
+    }
+    // Ensure error has a message
+    if (!error.message) {
+      error.message = 'An unexpected error occurred';
+    }
     throw error;
   }
 }
@@ -92,5 +140,131 @@ export const authAPI = {
   getGoogleAuthUrl: () => {
     return `${API_URL}/auth/google`;
   },
+};
+
+// Product API functions
+export const productAPI = {
+  list: async () => apiRequest("/products", { method: "GET" }),
+
+  getById: async (id) => apiRequest(`/products/${id}`, { method: "GET" }),
+
+  // Get all available tags (public/shared across all products)
+  getAllTags: async () => apiRequest("/products/tags", { method: "GET" }),
+
+  // Search tags for autocomplete (searches across all products)
+  searchTags: async (query) => {
+    if (!query || !query.trim()) {
+      // If no query, return all tags
+      return apiRequest("/products/tags", { method: "GET" });
+    }
+    return apiRequest(`/products/tags/search?q=${encodeURIComponent(query.trim())}`, { method: "GET" });
+  },
+
+  create: async (payload) => {
+    const formData = new FormData();
+
+    formData.append("name", payload.name);
+    formData.append("price", payload.price);
+    formData.append("stock", payload.stock);
+    
+    // Category can be either ID or name
+    if (payload.category) {
+      formData.append("category", payload.category);
+    }
+    
+    formData.append("description", payload.description || "");
+    
+    // Tags as comma-separated string
+    if (payload.tags) {
+      formData.append("tags", payload.tags);
+    }
+
+    (payload.files || []).forEach((file) => {
+      formData.append("images", file);
+    });
+
+    return apiRequest("/products", {
+      method: "POST",
+      body: formData,
+    });
+  },
+ update: async (id, payload) => {
+  // If payload is FormData, use it directly
+  if (payload instanceof FormData) {
+    return apiRequest(`/products/${id}`, { 
+      method: "PUT", 
+      body: payload 
+    });
+  }
+  
+  // Otherwise, handle as JSON
+  return apiRequest(`/products/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+},
+// Delete product
+delete: async (id) => apiRequest(`/products/${id}`, { method: "DELETE" }),
+
+// Delete comment (admin only)
+deleteComment: async (productId, commentId) => 
+  apiRequest(`/products/${productId}/comments/${commentId}`, { method: "DELETE" })
+};
+// Category API functions
+export const categoryAPI = {
+  // Get all categories
+  list: async () => apiRequest("/categories", { method: "GET" }),
+
+  // Search categories for autocomplete
+  search: async (query) => apiRequest(`/categories/search?q=${encodeURIComponent(query)}`, { method: "GET" }),
+
+  // Create new category (admin)
+  create: async (payload) => {
+    return apiRequest("/categories", {
+      method: "POST",
+      body: JSON.stringify({ name: payload.name }),
+    });
+  },
+
+  // Update category (admin)
+  update: async (id, payload) => {
+    const formData = new FormData();
+    formData.append("name", payload.name);
+
+    return apiRequest(`/categories/${id}`, {
+      method: "PUT",
+      body: formData,
+    });
+  },
+
+  // Delete category (admin)
+  remove: async (id) =>
+    apiRequest(`/categories/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+// Stock API functions
+export const stockAPI = {
+  // Get all stocks with product info
+  list: async () => apiRequest("/stocks", { method: "GET" }),
+
+  // Get stock for a specific product
+  getByProductId: async (productId) =>
+    apiRequest(`/products/${productId}/stock`, { method: "GET" }),
+
+  // Update stock (quantity, reserved, alertThreshold)
+  update: async (productId, payload) =>
+    apiRequest(`/products/${productId}/stock`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  // Adjust quantity (IN/OUT)
+  adjustQuantity: async (productId, quantity, type = "IN") =>
+    apiRequest(`/products/${productId}/stock`, {
+      method: "PUT",
+      body: JSON.stringify({ quantity, type }),
+    }),
 };
 
