@@ -31,10 +31,11 @@ const NAV_ITEMS = [
 	{ label: "Customers", href: "/admin/customers", icon: Users },
 	{ label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
 	{ label: "Products", href: "/admin/products", icon: Boxes },
-	{ label: "Stock", href: "/admin/stock", icon: Package },
+	{ label: "Packages", href: "/admin/package", icon: Package },
+	{ label: "Stock", href: "/admin/stock", icon: ShoppingCart },
 	{ label: "Contact", href: "/admin/contact", icon: MessageSquare },
 	{ label: "Reports", href: "/admin/reports", icon: BarChart3 },
-	{ label: "Checkout", href: "/admin/checkout", icon: ShoppingCart },
+	{ label: "Checkout", href: "/admin/checkout", icon: CreditCard },
 ];
 
 export default function AdminSideBarMenu() {
