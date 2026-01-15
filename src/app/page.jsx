@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import HeaderHome from '@/components/header-home';
+import Footer from '@/components/footer';
 import { 
   Leaf,
   BadgeCheck,
@@ -18,7 +20,7 @@ import {
   User,
   Mail,
   MessageSquare,
-  Forbidden
+  Forbidden,ban,Award,Sparkle,MapPinHouse
 } from 'lucide-react';
 
 // Composant ContactForm
@@ -65,19 +67,19 @@ function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50 p-8 rounded-2xl shadow-lg">
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-          ✓ Message envoyé avec succès ! Nous vous répondrons très bientôt.
+        <div className="p-4 bg-green-50 border border-green-300 rounded-lg text-green-700">
+           Message envoyé avec succès ! Nous vous répondrons très bientôt.
         </div>
       )}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          ✗ {error}
+           {error}
         </div>
       )}
       
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <User className="h-4 w-4 text-green-400" strokeWidth={2} />
+          <User className="h-4 w-4 text-[#469165]" strokeWidth={2} />
           <label className="text-sm font-medium text-gray-700">Votre nom</label>
         </div>
         <input
@@ -93,7 +95,7 @@ function ContactForm() {
       
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Mail className="h-4 w-4 text-green-600" strokeWidth={2} />
+          <Mail className="h-4 w-4 text-[#469165]" strokeWidth={2} />
           <label className="text-sm font-medium text-gray-700">Votre email</label>
         </div>
         <input
@@ -109,7 +111,7 @@ function ContactForm() {
       
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="h-4 w-4 text-green-400" strokeWidth={2} />
+          <MessageSquare className="h-4 w-4 text-[#469165]" strokeWidth={2} />
           <label className="text-sm font-medium text-gray-700">Votre message</label>
         </div>
         <textarea
@@ -126,7 +128,7 @@ function ContactForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-green-600 py-3 font-semibold text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-full bg-[#469165] py-3 font-semibold text-white hover:bg-[#3a7a4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Envoi en cours...' : 'Envoyer le message'}
       </button>
@@ -157,28 +159,12 @@ function FeatureCard({
         {description}
       </p>
       
-      <div className="group inline-flex flex-col items-center cursor-pointer">
-        <Link 
-          href="#" 
-          className="text-green-600 hover:text-green-800 text-base font-semibold transition-colors duration-300 flex items-center gap-1"
-        >
-          En savoir plus
-          <svg 
-            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </Link>
-        <div className="h-0.5 w-16 bg-green-100 mt-1 group-hover:bg-green-300 transition-colors duration-300"></div>
-      </div>
+     
     </div>
   );
 }
 
-// Composant FeaturesSection
+// Composant 
 function FeaturesSection() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -192,7 +178,7 @@ function FeaturesSection() {
       />
       
       <FeatureCard
-        icon={BadgeCheck}
+        icon={Award}
         title="Certifié BIO"
         description="Des fruits & ingrédients sélectionnés avec soin."
         iconColorClass="text-teal-600"
@@ -201,7 +187,7 @@ function FeaturesSection() {
       />
       
       <FeatureCard
-        icon={Cookie}
+        icon={Sparkle}
         title="Ultra-croquant & gourmand"
         description="Une texture unique, naturellement sucrée."
         iconColorClass="text-amber-500"
@@ -210,9 +196,9 @@ function FeaturesSection() {
       />
       
       <FeatureCard
-        icon={ShoppingBag}
+        icon={MapPinHouse}
         title="Pratique au quotidien"
-        description="À emporter partout : travail, sport, écoute."
+        description="À emporter partout : travail, sport, école."
         iconColorClass="text-pink-500"
         bgColorClass="bg-pink-50"
         borderColorClass="border-pink-100"
@@ -253,36 +239,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navigation */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm">
-        <nav className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🌿</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">Crunchy<span className="text-green-700">Vita</span></span>
-          </div>
-          <div className="hidden space-x-8 md:flex items-center">
-            <Link href="/" className="text-gray-700 hover:text-green-600 font-medium">
-              Accueil
-            </Link>
-            <Link href="/products" className="text-gray-700 hover:text-green-600 font-medium">
-              Nos produits
-            </Link>
-            <Link href="/commitments" className="text-gray-700 hover:text-green-600 font-medium">
-              Nos engagements
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-green-600 font-medium">
-              Contact
-            </Link>
-            <Link
-              href="*"
-              className="rounded-full bg-green-600 px-6 py-2 text-white hover:bg-green-700 transition-colors font-medium"
-            >
-              Commander
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <HeaderHome />
 
       {/* Hero Section */}
       <section className="bg-[#f5f3ed] py-20">
@@ -291,7 +248,7 @@ export default function Home() {
             <div>
               <h1 className="mb-6 text-5xl font-bold text-gray-900 leading-tight">
                 Croquez la nature<br />
-                avec <br/><span className="text-green-700">CrunchyVita</span>
+                avec <br/><span className="text-[#469165] font-bold ">CrunchyVita</span>
               </h1>
               <p className="mb-8 text-lg text-gray-700">
                 Naturellement croquant, irrésistiblement bon.
@@ -299,7 +256,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="https://localhost:3000/shop"
-                  className="rounded-full bg-green-600 px-8 py-3 text-center font-semibold text-white hover:bg-green-700 transition-colors"
+                  className="rounded-full bg-[#469165] px-8 py-3 text-center font-semibold text-white hover:bg-green-700 transition-colors"
                 >
                   Découvrir nos produits
                 </Link>
@@ -323,7 +280,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Choose CrunchyVita - SECTION MODIFIÉE */}
+      {/* Why Choose CrunchyVita  */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
@@ -340,7 +297,7 @@ export default function Home() {
       </section>
 
       {/* Our Products */}
-      <section className="bg-[#f5f3ed] py-20">
+      <section id="produits" className="bg-[#f5f3ed] py-20">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
             Nos fruits <span className="text-green-700">lyophilisés</span>
@@ -397,7 +354,7 @@ export default function Home() {
                 Découvrez notre coffret découverte, idéal pour gouter plusieurs fruits</p>
               <Link
                 href="/products"
-                className="inline-block rounded-full bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700 transition-colors"
+                className="inline-block rounded-full bg-[#469165] px-8 py-3 font-semibold text-white hover:bg-[#3a7a4a] transition-colors"
               >
                 Decouvrer les produits
               </Link>
@@ -415,7 +372,7 @@ export default function Home() {
       </section>
 
       {/* Commitments avec icônes React Lucide */}
-      <section className="py-20 bg-[#f5f3ed]">
+      <section id="engagements" className="py-20 bg-[#f5f3ed]">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
             Nos <span className="text-green-700">engagements</span>
@@ -427,7 +384,7 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
             {[
               {
-                icon: <OctagonX className="h-10 w-10 text-red-500" strokeWidth={1.8} />,
+                icon: <Ban className="h-10 w-10 text-red-500" strokeWidth={1.8} />,
                 title: "Sans additifs",
                 desc: "Aucun additif, aucun conservateur. Juste des fruits purs et naturels pour une alimentation saine."
               },
@@ -454,8 +411,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section avec icônes React Lucide */}
-      <section className="bg-white py-20">
+      {/* Contact Section   */}
+      <section id="contact" className="bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl">
             <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
@@ -471,83 +428,8 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#3d2f28] text-white py-16">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-4 mb-12">
-            {/* Company Info */}
-            <div>
-              <h3 className="mb-6 text-2xl font-bold">CrunchyVita</h3>
-              <p className="mb-6 text-gray-300 text-sm leading-relaxed">
-                Découvrez nos fruits lyophilisés bio, parfaits pour sublimer vos recettes ou comme snack naturel.
-              </p>
-              <div className="space-y-3 text-sm">
-                <p className="flex items-start">
-                  <span className="mr-3">📍</span>
-                  <span className="text-gray-300">123 rue de la Nature, 75001 Paris</span>
-                </p>
-                <p className="flex items-center">
-                  <span className="mr-3">📞</span>
-                  <span className="text-gray-300">+33 (0)1 23 45 67 89</span>
-                </p>
-                <p className="flex items-center">
-                  <span className="mr-3">✉️</span>
-                  <span className="text-gray-300">contact@crunchyvita.fr</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Products */}
-            <div>
-              <h4 className="mb-6 text-lg font-bold">Nos produits</h4>
-              <ul className="space-y-3 text-sm">
-                {['Fruits lyophilisés', 'Coffrets découverte', 'Nouveautés', 'Meilleures ventes'].map((item, index) => (
-                  <li key={index}>
-                    <Link href="#" className="text-gray-300 hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Help */}
-            <div>
-              <h4 className="mb-6 text-lg font-bold">Aide</h4>
-              <ul className="space-y-3 text-sm">
-                {['FAQ', 'Livraison', 'Retours', 'Service client'].map((item, index) => (
-                  <li key={index}>
-                    <Link href="#" className="text-gray-300 hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Newsletter */}
-            <div>
-              <h4 className="mb-6 text-lg font-bold">Newsletter</h4>
-              <p className="mb-4 text-gray-300 text-sm">
-                Inscrivez-vous pour recevoir nos dernières offres et nouveautés.
-              </p>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Votre email"
-                  className="flex-grow rounded-l-full px-4 py-2 text-gray-900 text-sm focus:outline-none"
-                />
-                <button className="rounded-r-full bg-green-600 px-6 py-2 hover:bg-green-700 transition-colors font-medium text-sm">
-                  S'inscrire
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-600 pt-8 text-center">
-            <p className="text-gray-400 text-sm">© 2025 CrunchyVita - Tous droits réservés</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
+    
     </div>
   );
 }
