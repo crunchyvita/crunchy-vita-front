@@ -99,8 +99,17 @@ function AdminDashboard() {
     if (!replyText.trim()) return;
     setSendingReply(true);
     try {
-      // Backend handles email sending automatically when replying
+      const message = await messageAPI.getById(id);
       await messageAPI.reply(id, replyText.trim());
+      await messageAPI.updateStatus(id, 'replied');
+      
+      // Send email to client
+      await messageAPI.sendClientReplyEmail(
+        message.name,
+        message.email,
+        message.message,
+        replyText.trim()
+      );
       
       toast.success("Réponse envoyée");
       setReplyText('');

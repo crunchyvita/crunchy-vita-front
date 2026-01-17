@@ -99,7 +99,7 @@ export default function HeaderHome() {
                 </Link>
               ) : (
                 <Link
-                  href="/client/shop"
+                  href="/shop"
                   className="block w-full px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >

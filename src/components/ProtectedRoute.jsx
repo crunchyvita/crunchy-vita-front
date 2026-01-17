@@ -20,7 +20,7 @@ export function ProtectedRoute({ children, allowedRoles = [] }) {
         if (user.role === 'ADMIN') {
           router.push('/admin/dashboard');
         } else if (user.role === 'CLIENT') {
-          router.push('/client/shop');
+          router.push('/shop');
         } else {
           router.push('/');
         }

@@ -206,10 +206,68 @@ export const productAPI = {
 // Delete product
 delete: async (id) => apiRequest(`/products/${id}`, { method: "DELETE" }),
 
-// Delete comment (admin only)
+// Delete comment/review (client - own comments only)
 deleteComment: async (productId, commentId) => 
-  apiRequest(`/products/${productId}/comments/${commentId}`, { method: "DELETE" })
+  apiRequest(`/reviews/products/${productId}/comments/${commentId}`, { method: "DELETE" }),
+
+// Delete comment/review (admin - any comment)
+deleteCommentAsAdmin: async (productId, commentId) => 
+  apiRequest(`/reviews/products/${productId}/comments/${commentId}/admin`, { method: "DELETE" }),
+
+// Add rating to product
+addRating: async (productId, rating) => 
+  apiRequest(`/reviews/products/${productId}/ratings`, {
+    method: "POST",
+    body: JSON.stringify({ rating }),
+  }),
+
+// Add comment to product
+addComment: async (productId, content) => 
+  apiRequest(`/reviews/products/${productId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  }),
+
+// Add review (rating and/or comment) to product
+addReview: async (productId, rating, content) => 
+  apiRequest(`/reviews/products/${productId}`, {
+    method: "POST",
+    body: JSON.stringify({ rating, content }),
+  }),
 };
+
+// Review API functions
+export const reviewAPI = {
+  // Add review to a product
+  create: async (productId, { rating, content }) =>
+    apiRequest(`/reviews/products/${productId}`, {
+      method: "POST",
+      body: JSON.stringify({ rating, content }),
+    }),
+
+  // Add rating only
+  addRating: async (productId, rating) =>
+    apiRequest(`/reviews/products/${productId}/ratings`, {
+      method: "POST",
+      body: JSON.stringify({ rating }),
+    }),
+
+  // Add comment only
+  addComment: async (productId, content) =>
+    apiRequest(`/reviews/products/${productId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+
+  // Delete own comment (CLIENT)
+  deleteOwn: async (productId, commentId) =>
+    apiRequest(`/reviews/products/${productId}/comments/${commentId}`, { method: "DELETE" }),
+
+  // Delete any comment (ADMIN)
+  deleteAsAdmin: async (productId, commentId) =>
+    apiRequest(`/reviews/products/${productId}/comments/${commentId}/admin`, { method: "DELETE" }),
+};
+
 // Category API functions
 export const categoryAPI = {
   // Get all categories
@@ -286,12 +344,40 @@ export const messageAPI = {
   // Delete message (admin only)
   delete: async (id) => apiRequest(`/contact/${id}`, { method: "DELETE" }),
 
-  // Reply to message (admin only) - Backend handles email sending automatically
+  // Reply to message (admin only)
   reply: async (id, replyMessage) =>
     apiRequest(`/contact/${id}/reply`, {
       method: "POST",
       body: JSON.stringify({ message: replyMessage }),
     }),
+
+  // Send client reply email
+  sendClientReplyEmail: async (name, email, clientMessage, replyMessage) => {
+    try {
+      const response = await fetch('/api/emails/send-client-reply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          clientMessage,
+          replyMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send email');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending client reply email:', error);
+      throw error;
+    }
+  },
 };
 
 // Notification API functions

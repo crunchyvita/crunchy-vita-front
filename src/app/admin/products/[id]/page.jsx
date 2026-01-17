@@ -19,7 +19,8 @@ import {
   Globe,
   Star,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  User
 } from "lucide-react";
 
 export default function ProductDetailPage() {
@@ -30,14 +31,17 @@ export default function ProductDetailPage() {
   const [imageIdx, setImageIdx] = useState(0);
   const [commentsToShow, setCommentsToShow] = useState(3);
   const [deletingCommentId, setDeletingCommentId] = useState(null);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
   const loadProduct = async () => {
+    setLoading(true);
     try {
       const res = await productAPI.getById(productId);
       setProduct(res?.data || res);
+      setLoading(false); // Set loading false immediately on success
     } catch (err) {
       console.error("Error loading product", err);
-    } finally {
       setLoading(false);
     }
   };
@@ -46,13 +50,9 @@ export default function ProductDetailPage() {
     if (productId) loadProduct();
   }, [productId]);
 
-  if (loading) return (
-    <div className="flex h-screen items-center justify-center">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
-    </div>
-  );
-
-  if (!product) return <div className="p-20 text-center text-slate-500">Product not found.</div>;
+  if (!product && !loading) return <div className="p-20 text-center text-slate-500">Product not found.</div>;
+  
+  if (!product) return null; // Return nothing while loading, page will appear instantly once data arrives
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -79,43 +79,82 @@ export default function ProductDetailPage() {
     );
 
     return comments.map(comment => {
-      // Find matching rating by userId (same user, within reasonable time)
-      const matchingRating = (product.ratings || []).find(rating => 
-        rating.userId?._id?.toString() === comment.userId?._id?.toString() ||
-        rating.userId?.toString() === comment.userId?._id?.toString() ||
-        rating.userId?.toString() === comment.userId?.toString()
-      );
+      // Get user IDs for comparison
+      const commentUserId = comment.userId?._id?.toString() || comment.userId?.toString();
+      
+      // Find matching rating by userId
+      const matchingRating = (product.ratings || []).find(rating => {
+        const ratingUserId = rating.userId?._id?.toString() || rating.userId?.toString();
+        return ratingUserId && commentUserId && ratingUserId === commentUserId;
+      });
+
+      // Only include rating if it exists and is a valid number
+      const ratingValue = matchingRating?.rating;
+      const validRating = (typeof ratingValue === 'number' && ratingValue >= 1 && ratingValue <= 5) 
+        ? ratingValue 
+        : null;
 
       return {
         ...comment,
-        rating: matchingRating?.rating || null,
+        rating: validRating,
         ratingId: matchingRating?._id || null
       };
-    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by newest first
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
   const commentsWithRatings = getCommentsWithRatings();
   const displayedComments = commentsWithRatings.slice(0, commentsToShow);
   const hasMoreComments = commentsWithRatings.length > commentsToShow;
 
-  const handleDeleteComment = async (commentId) => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
+  const handleDeleteComment = (commentId) => {
+    setCommentToDelete(commentId);
+    setDeleteAlertOpen(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
     
-    setDeletingCommentId(commentId);
+    const commentIdToDelete = commentToDelete;
+    
+    // Store original state for rollback
+    const originalProduct = { ...product };
+    const originalCommentsToShow = commentsToShow;
+    
+    // Optimistic update: Remove comment immediately
+    setProduct(prevProduct => ({
+      ...prevProduct,
+      comments: prevProduct.comments.filter(c => c._id !== commentIdToDelete)
+    }));
+    
+    // Reset comments to show count if needed
+    const remainingComments = product.comments.filter(c => c._id !== commentIdToDelete && c.content?.trim());
+    if (remainingComments.length <= commentsToShow) {
+      setCommentsToShow(3);
+    }
+    
+    // Close modal immediately
+    setDeleteAlertOpen(false);
+    setCommentToDelete(null);
+    
+    // Make API call in background
     try {
-      await productAPI.deleteComment(productId, commentId);
-      // Reload product to refresh comments
-      await loadProduct();
+      await productAPI.deleteCommentAsAdmin(productId, commentIdToDelete);
     } catch (err) {
       console.error("Error deleting comment:", err);
+      
+      // Rollback on error
+      setProduct(originalProduct);
+      setCommentsToShow(originalCommentsToShow);
+      
       alert("Failed to delete comment. Please try again.");
-    } finally {
-      setDeletingCommentId(null);
     }
   };
 
   const renderStars = (rating) => {
-    if (!rating) return null;
+    // Strict validation: only render if rating is a valid number between 1-5
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+      return null;
+    }
     return (
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -215,15 +254,15 @@ export default function ProductDetailPage() {
             {/* COMMENTS & HISTORY */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="flex border-b border-slate-100">
-                <button onClick={() => setActiveTab("reviews")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "reviews" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
+                <button onClick={() => setActiveTab("reviews")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "reviews" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
                   <MessageSquare size={16} /> Reviews
                   {commentsWithRatings.length > 0 && (
-                    <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
+                    <span className="ml-1 px-2 py-0.5 bg-blue-100 text-gray-700 rounded-full text-xs">
                       {commentsWithRatings.length}
                     </span>
                   )}
                 </button>
-                <button onClick={() => setActiveTab("history")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "history" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
+                <button onClick={() => setActiveTab("history")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "history" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
                   <History size={16} /> Pricing History
                 </button>
               </div>
@@ -240,14 +279,13 @@ export default function ProductDetailPage() {
                       <>
                         {displayedComments.map((comment) => {
                           const userName = comment.userId?.name || "Anonymous";
-                          const userInitials = getInitials(userName);
                           
                           return (
                             <div key={comment._id} className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                               {/* Avatar */}
                               <div className="flex-shrink-0">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                                  {userInitials}
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white shadow-md">
+                                  <User size={24} />
                                 </div>
                               </div>
                               
@@ -257,7 +295,7 @@ export default function ProductDetailPage() {
                                   <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-1">
                                       <h4 className="font-bold text-slate-900">{userName}</h4>
-                                      {comment.rating && renderStars(comment.rating)}
+                                      {renderStars(comment.rating)}
                                     </div>
                                     <p className="text-xs text-slate-500 font-medium">
                                       {formatDate(comment.createdAt)}
@@ -292,7 +330,7 @@ export default function ProductDetailPage() {
                           <div className="pt-4 border-t border-slate-100">
                             <button
                               onClick={() => setCommentsToShow(prev => prev + 3)}
-                              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-bold text-sm transition-colors group"
+                              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-bold text-sm transition-colors group"
                             >
                               <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
                               Load More Reviews
@@ -328,7 +366,7 @@ export default function ProductDetailPage() {
                 }`}>
                   <div className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider ${
                     product.status === "ACTIVE" 
-                      ? "text-emerald-700" 
+                      ? "text-emerald-900" 
                       : "text-slate-600"
                   }`}>
                     <Globe size={14} />
@@ -336,7 +374,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase ${
                     product.status === "ACTIVE" 
-                      ? "text-emerald-500" 
+                      ? "text-emerald-900" 
                       : "text-slate-500"
                   }`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${
@@ -349,12 +387,12 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-4xl font-black tracking-tight leading-tight">{product.name}</h2>
+                  <h2 className="text-3xl font-black  leading-tight">{product.name}</h2>
                   <p className="text-slate-500 text-sm leading-relaxed">{product.description}</p>
                 </div>
                 
                 <div className="pt-2">
-                  <p className="text-2xl font-black text-slate-900 tracking-tighter">
+                  <p className="text-2xl font-black text-slate-900 ">
                     ${Number(latestPrice).toFixed(2)}
                   </p>
                 </div>
@@ -370,13 +408,13 @@ export default function ProductDetailPage() {
                 <div>
                   <h4 className="text-orange-900 font-bold text-xs uppercase">Low Inventory Alert</h4>
                   <p className="text-orange-700 text-[11px] mt-1">
-                    Only <span className="font-bold">{availableQty} units</span> remaining in stock.
+                    Only <span className="font-bold">{availableQty} items</span> remaining in stock.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* PRODUCT METRICS CARD */}
+            {/* STOCK INFORMATION CARD */}
             <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm">
               <h3 className="flex items-center gap-2 text-slate-900 font-bold uppercase text-[10px] tracking-widest mb-6 pb-4 border-b border-slate-100">
                 <Layers size={14} className="text-blue-600"/> Stock Information
@@ -399,6 +437,41 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteAlertOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Delete this review?</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                This action is permanent. The review will be permanently deleted from the database.
+              </p>
+            </div>
+            <div className="flex border-t border-gray-100">
+              <button 
+                onClick={() => {
+                  setDeleteAlertOpen(false);
+                  setCommentToDelete(null);
+                }}
+                className="flex-1 px-4 py-4 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteComment}
+                disabled={deletingCommentId === commentToDelete}
+                className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
+              >
+                {deletingCommentId === commentToDelete ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

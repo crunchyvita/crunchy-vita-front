@@ -89,8 +89,17 @@ export default function ContactMessagesPage() {
   const handleReply = async (id) => {
     if (!replyText.trim()) return console.log('Veuillez saisir une réponse');
     try {
-      // Backend handles email sending automatically when replying
+      const message = await messageAPI.getById(id);
       await messageAPI.reply(id, replyText.trim());
+      await messageAPI.updateStatus(id, 'replied');
+      
+      // Send email to client
+      await messageAPI.sendClientReplyEmail(
+        message.name,
+        message.email,
+        message.message,
+        replyText.trim()
+      );
       
       setReplyText('');
       fetchMessages();
@@ -138,7 +147,7 @@ export default function ContactMessagesPage() {
       
       {/* HEADER FULL WIDTH */}
       <header className="w-full bg-white border-b border-slate-200 px-8 py-6 sticky top-0 z-10">
-        <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="max-w-450 mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="bg-slate-900 p-2 rounded-lg text-white">
               <Inbox size={22} />
@@ -160,7 +169,7 @@ export default function ContactMessagesPage() {
       </header>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-6 max-w-[1800px] mx-auto w-full">
+      <main className="flex-1 p-6 max-w-450 mx-auto w-full">
         
         {/* SEARCH & FILTERS */}
         <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-col lg:flex-row gap-4 items-center">
@@ -286,7 +295,7 @@ export default function ContactMessagesPage() {
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[100px] text-sm text-slate-700"
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-25 text-sm text-slate-700"
                   placeholder="Écrivez votre réponse..."
                 />
                 <div className="flex gap-2 pt-2">

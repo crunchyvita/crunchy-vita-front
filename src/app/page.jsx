@@ -216,7 +216,7 @@ export default function Home() {
       if (user.role === 'ADMIN') {
         router.push('/admin/dashboard');
       } else if (user.role === 'CLIENT') {
-        router.push('/client/shop');
+        router.push('/shop');
       }
     }
   }, [loading, isAuthenticated, user, router]);
@@ -248,7 +248,7 @@ export default function Home() {
             <div>
               <h1 className="mb-6 text-5xl font-bold text-gray-900 leading-tight">
                 Croquez la nature<br />
-                avec <br/><span className="text-[#469165] font-bold ">CrunchyVita</span>
+                avec <br/><span className="text-[#469165] font-bold ">Crunchy Vita</span>
               </h1>
               <p className="mb-8 text-lg text-gray-700">
                 Naturellement croquant, irrésistiblement bon.

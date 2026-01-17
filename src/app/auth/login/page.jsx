@@ -24,7 +24,7 @@ export default function LoginPage() {
 
   const redirectBasedOnRole = (role) => {
     if (role === 'ADMIN') router.push('/admin/dashboard');
-    else if (role === 'CLIENT') router.push('/client/shop');
+    else if (role === 'CLIENT') router.push('/shop');
   };
 
   const handleSubmit = async (e) => {
