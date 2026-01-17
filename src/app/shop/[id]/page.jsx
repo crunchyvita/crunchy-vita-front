@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Star, Heart, ShoppingCart, Plus, Minus, ChevronLeft, Package, Shield, Truck, Send, MessageSquare, Trash2, Loader2, AlertTriangle, X, RefreshCw, User } from 'lucide-react';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
-import { productAPI } from '@/lib/api';
+import { productAPI, reviewAPI } from '@/lib/api';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 
@@ -18,7 +17,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [deletingCommentId, setDeletingCommentId] = useState(null);
@@ -40,6 +39,7 @@ export default function ProductDetailPage() {
       }
 
       const data = await response.json();
+      console.log('Fetched product data:', data);
       setProduct(data);
     } catch (err) {
       setError(err.message);
@@ -154,6 +154,7 @@ export default function ProductDetailPage() {
           userId: comment.userId,
           content: comment.content,
           rating: matchingRating?.rating || null,
+          isAnonymous: comment.isAnonymous || false,
           createdAt: comment.createdAt,
         });
 
@@ -222,7 +223,9 @@ export default function ProductDetailPage() {
       }
 
       const { rating, comment } = reviewForm;
+      const isAnonymous = reviewForm.isAnonymous; 
       
+   
       // Validate that at least one field is provided
       if (!rating && (!comment || !comment.trim())) {
         setReviewError('Please provide a rating or comment (or both)');
@@ -269,9 +272,10 @@ export default function ProductDetailPage() {
             _id: tempCommentId,
             userId: {
               _id: user.id,
-              name: user.name
+              name: isAnonymous ? 'Anonymous' : user.name
             },
             content: comment.trim(),
+            isAnonymous: isAnonymous,
             createdAt: new Date().toISOString()
           };
           updatedProduct.comments = [...(updatedProduct.comments || []), newComment];
@@ -281,25 +285,28 @@ export default function ProductDetailPage() {
       });
 
       // Reset form immediately for better UX
-      setReviewForm({ rating: 0, comment: '' });
+      setReviewForm({ rating: 0, comment: '', isAnonymous: false });
       setSubmittingReview(false);
 
-      // Make API call in background
-      const response = await fetch(`/api/products/${params.id}/reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          rating: rating || undefined,
-          content: comment?.trim() || undefined,
-        }),
+      // Make API call in background using reviewAPI
+      console.log('Sending to backend:', {
+        rating: rating || undefined,
+        content: comment?.trim() || undefined,
+        isAnonymous: isAnonymous,
+        displayName: null
+      });
+      
+      const data = await reviewAPI.create(params.id, {
+        rating: rating || undefined,
+        content: comment?.trim() || undefined,
+        isAnonymous: isAnonymous,
+        displayName: null
       });
 
-      const data = await response.json();
+   
 
-      if (!response.ok) {
+      // Handle success
+      if (!data || data.error) {
         // Rollback optimistic update on error
         setProduct(prevProduct => {
           const updatedProduct = { ...prevProduct };
@@ -340,15 +347,17 @@ export default function ProductDetailPage() {
         if (data.data?.comment) {
           const tempIndex = updatedProduct.comments?.findIndex(c => c._id === tempCommentId);
           if (tempIndex !== -1) {
-            updatedProduct.comments[tempIndex] = {
+            const updatedComment = {
               _id: data.data.comment._id,
               userId: {
                 _id: user.id,
-                name: user.name
+                name: isAnonymous ? 'Anonymous' : user.name
               },
               content: data.data.comment.content,
+              isAnonymous: data.data.comment.isAnonymous || isAnonymous,
               createdAt: data.data.comment.createdAt
             };
+            updatedProduct.comments[tempIndex] = updatedComment;
           }
         }
         
@@ -375,7 +384,6 @@ export default function ProductDetailPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Please login to delete your review');
         setDeleteAlertOpen(false);
         setCommentToDelete(null);
         return;
@@ -404,7 +412,6 @@ export default function ProductDetailPage() {
       setCommentToDelete(null);
     } catch (err) {
       console.error('Error deleting comment:', err);
-      alert(err.message || 'Failed to delete review. Please try again.');
       setDeleteAlertOpen(false);
       setCommentToDelete(null);
     } finally {
@@ -414,20 +421,17 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute allowedRoles={['CLIENT']}>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#469165] mb-4"></div>
             <p className="text-gray-600">Loading product...</p>
           </div>
         </div>
-      </ProtectedRoute>
     );
   }
 
   if (error || !product) {
     return (
-      <ProtectedRoute allowedRoles={['CLIENT']}>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-600 text-xl mb-4">{error || 'Product not found'}</p>
@@ -439,7 +443,6 @@ export default function ProductDetailPage() {
             </button>
           </div>
         </div>
-      </ProtectedRoute>
     );
   }
 
@@ -449,7 +452,6 @@ export default function ProductDetailPage() {
   const totalPrice = productPrice * quantity;
 
   return (
-    <ProtectedRoute allowedRoles={['CLIENT']}>
       <div className="min-h-screen bg-gray-50">
         <Header />
 
@@ -689,6 +691,39 @@ export default function ProductDetailPage() {
                       />
                     </div>
 
+                    {/* Anonymous Option */}
+                    <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <User className={`h-5 w-5 transition-colors ${reviewForm.isAnonymous ? 'text-gray-400' : 'text-[#064E3B]'}`} />
+                        <div>
+                          <label htmlFor="anonymous-toggle" className="text-sm font-semibold text-gray-900 cursor-pointer block">
+                            Post as Anonymous
+                          </label>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {reviewForm.isAnonymous ? 'Your name will be hidden' : 'Your name will be visible'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Toggle Switch */}
+                      <button
+                        type="button"
+                        id="anonymous-toggle"
+                        role="switch"
+                        aria-checked={reviewForm.isAnonymous}
+                        onClick={() => setReviewForm({ ...reviewForm, isAnonymous: !reviewForm.isAnonymous })}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:ring-offset-2 ${
+                          reviewForm.isAnonymous ? 'bg-[#064E3B]' : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            reviewForm.isAnonymous ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
                     {/* Error Message */}
                     {reviewError && (
                       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -703,7 +738,7 @@ export default function ProductDetailPage() {
                       className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-colors ${
                         submittingReview || (!reviewForm.rating && !reviewForm.comment.trim())
                           ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-gray-900 hover:bg-[#064E3B]'
+                          : 'bg-[#064E3B] hover:bg-[#3a7a4a]'
                       }`}
                     >
                       {submittingReview ? (
@@ -746,7 +781,7 @@ export default function ProductDetailPage() {
               return (
                 <div className="space-y-4">
                   {displayedReviews.map((review) => {
-                    const userName = review.userId?.name || 'Anonymous';
+                    const userName = review.isAnonymous ? 'Anonymous' : (review.userId?.name || 'Anonymous');
                     const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
                     
                     return (
@@ -869,6 +904,5 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
-    </ProtectedRoute>
   );
 }

@@ -16,7 +16,6 @@ export default function Footer() {
       // Add your newsletter subscription API here
       console.log('Subscribing:', email);
       setEmail('');
-      alert('Merci de votre inscription !');
     } catch (error) {
       console.error('Error subscribing:', error);
     } finally {

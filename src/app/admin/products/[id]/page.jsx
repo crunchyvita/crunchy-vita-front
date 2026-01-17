@@ -278,7 +278,7 @@ export default function ProductDetailPage() {
                     ) : (
                       <>
                         {displayedComments.map((comment) => {
-                          const userName = comment.userId?.name || "Anonymous";
+                          const userName = comment.isAnonymous ? "Anonymous" : (comment.userId?.name || "Anonymous");
                           
                           return (
                             <div key={comment._id} className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0">

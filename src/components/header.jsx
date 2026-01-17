@@ -65,75 +65,84 @@ export default function Header() {
             <Heart size={20} className="text-gray-700" />
           </button>
 
-          {/* User Profile with Dropdown */}
-          <div className="hidden sm:block relative" ref={dropdownRef}>
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-3 pl-3 border-l border-gray-200 hover:bg-gray-50 py-2 px-3 rounded-lg transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-gray-900">
-                <User size={20} />
-              </div>
-             
-            </button>
+          {/* User Profile with Dropdown or Sign Up Button */}
+          {user ? (
+            <div className="hidden sm:block relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center gap-3 pl-3 border-l border-gray-200 hover:bg-gray-50 py-2 px-3 rounded-lg transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-gray-900">
+                  <User size={20} />
+                </div>
+               
+              </button>
 
-            {/* Dropdown Menu */}
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                {/* Profile Section */}
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white">
-                      <User size={24} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{user?.name || 'Customer'}</p>
-                      <p className="text-xs text-gray-500 truncate">{user?.email || 'customer@crunchyvita.com'}</p>
+              {/* Dropdown Menu */}
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Profile Section */}
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white">
+                        <User size={24} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-900 truncate">{user?.name || 'Customer'}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email || 'customer@crunchyvita.com'}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Menu Items */}
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      router.push('/profile');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <User size={18} />
-                    <span className="font-medium">Account</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      router.push('/settings');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <Settings size={18} />
-                    <span className="font-medium">Settings</span>
-                  </button>
-                </div>
+                  {/* Menu Items */}
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        router.push('/profile');
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <User size={18} />
+                      <span className="font-medium">Account</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        router.push('/settings');
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Settings size={18} />
+                      <span className="font-medium">Settings</span>
+                    </button>
+                  </div>
 
-                {/* Logout */}
-                <div className="border-t border-gray-100 pt-2">
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut size={18} />
-                    <span className="font-medium">Log Out</span>
-                  </button>
+                  {/* Logout */}
+                  <div className="border-t border-gray-100 pt-2">
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={18} />
+                      <span className="font-medium">Log Out</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => router.push('/auth/register')}
+              className="hidden sm:block rounded-lg border border-gray-300 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>

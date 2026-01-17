@@ -71,7 +71,6 @@ export default function ProductDetailModal({
   // Handlers
   const handleAddToCart = () => {
     console.log('Cart:', product.name, quantity);
-    alert(`🛒 ${quantity} x ${product.name} added to your cart!`);
   };
 
   return (

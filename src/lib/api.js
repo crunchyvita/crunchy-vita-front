@@ -222,27 +222,27 @@ addRating: async (productId, rating) =>
   }),
 
 // Add comment to product
-addComment: async (productId, content) => 
+addComment: async (productId, content, isAnonymous = false, displayName = null) => 
   apiRequest(`/reviews/products/${productId}/comments`, {
     method: "POST",
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, isAnonymous, displayName }),
   }),
 
 // Add review (rating and/or comment) to product
-addReview: async (productId, rating, content) => 
+addReview: async (productId, rating, content, isAnonymous = false, displayName = null) => 
   apiRequest(`/reviews/products/${productId}`, {
     method: "POST",
-    body: JSON.stringify({ rating, content }),
+    body: JSON.stringify({ rating, content, isAnonymous, displayName }),
   }),
 };
 
 // Review API functions
 export const reviewAPI = {
   // Add review to a product
-  create: async (productId, { rating, content }) =>
+  create: async (productId, { rating, content, isAnonymous, displayName }) =>
     apiRequest(`/reviews/products/${productId}`, {
       method: "POST",
-      body: JSON.stringify({ rating, content }),
+      body: JSON.stringify({ rating, content, isAnonymous, displayName }),
     }),
 
   // Add rating only
@@ -253,10 +253,10 @@ export const reviewAPI = {
     }),
 
   // Add comment only
-  addComment: async (productId, content) =>
+  addComment: async (productId, content, isAnonymous = false, displayName = null) =>
     apiRequest(`/reviews/products/${productId}/comments`, {
       method: "POST",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, isAnonymous, displayName }),
     }),
 
   // Delete own comment (CLIENT)

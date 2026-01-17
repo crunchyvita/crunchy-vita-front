@@ -8,7 +8,6 @@ import {
   LogOut, ShoppingBag, CheckCircle2, Search, X
 } from 'lucide-react';
 
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import ProductDetailModal from '@/components/detailProduct';
 import Footer from '@/components/footer';
@@ -166,7 +165,6 @@ function ProductCard({ product, onOpenDetail }) {
                   }`}
                 />
               ))}
-              <span className="text-xs font-medium text-gray-600">{ratingCount}</span>
             </div>
           )}
         </div>
@@ -291,7 +289,6 @@ function ClientShop() {
   }, []);
 
   return (
-    <ProtectedRoute allowedRoles={['CLIENT']}>
       <div className="min-h-screen bg-[#FBFBFB] text-gray-900">
 
         <Header />
@@ -447,7 +444,6 @@ function ClientShop() {
 
         <Footer />
       </div>
-    </ProtectedRoute>
   );
 }
 

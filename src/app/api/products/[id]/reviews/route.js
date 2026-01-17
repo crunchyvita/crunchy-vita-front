@@ -5,6 +5,8 @@ export async function POST(request, { params }) {
 		const body = await request.json();
 		const token = request.headers.get('authorization') || request.headers.get('Authorization');
 
+		console.log('[Review API] Sending to backend:', body);
+
 		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 		const response = await fetch(`${backendUrl}/api/reviews/products/${id}`, {
@@ -17,6 +19,8 @@ export async function POST(request, { params }) {
 		});
 
 		const data = await response.json();
+		
+		console.log('[Review API] Backend response:', data);
 
 		if (!response.ok) {
 			return Response.json(data, { status: response.status });
