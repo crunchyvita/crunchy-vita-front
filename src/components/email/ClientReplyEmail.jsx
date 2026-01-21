@@ -129,18 +129,12 @@ export function ClientReplyEmail({ name, clientMessage, replyMessage }) {
               </p>
             </div>
 
-            <p style="margin-top: 30px; font-size: 14px;">
-              À très bientôt,<br />
-              <strong style="color: #065f46;">L'équipe Crunchy Vita</strong>
-            </p>
+        
           </div>
 
           <!-- Footer -->
           <div style="${styleToString(footerStyle)}">
-            <div style="margin-bottom: 15px;">
-              <a href="https://crunchyvita.com" style="${styleToString(linkStyle)}">Site Web</a>
-              <a href="https://instagram.com/crunchyvita" style="${styleToString(linkStyle)}">Instagram</a>
-            </div>
+           
             <p style="margin: 5px 0;">
               Questions ? Répondez directement à cet email.
             </p>

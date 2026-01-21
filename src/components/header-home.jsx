@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X } from 'lucide-react';
 
@@ -20,17 +21,18 @@ export default function HeaderHome() {
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-[#469165] rounded-full flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <span className="text-xl font-bold text-slate-900">
-              Crunchy<span className="text-[#469165]">Vita</span>
-            </span>
-          </Link>
+                <Link href="/" className="flex items-center gap-3">
+                <Image
+                  src="/assets/images/logo.png"
+                  alt="Crunchy Vita Logo"
+                  width={250}
+                  height={100}
+                  className="h-24 w-auto"
+                  priority
+                />
+                </Link>
 
-          {/* Desktop Navigation */}
+                {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
@@ -31,9 +32,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Crunchy<span className="text-[#469165]">Vita</span>
-            </h2>
+            <div className="mb-1">
+              <Image
+                src="/assets/images/logo.png"
+                alt="Crunchy Vita Logo"
+                width={150}
+                height={50}
+                className="h-24 w-auto"
+              />
+            </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
               Fruits lyophilisés bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.
             </p>

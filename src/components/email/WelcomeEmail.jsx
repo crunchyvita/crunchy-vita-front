@@ -63,7 +63,7 @@ export function WelcomeEmail({ name }) {
         </p>
         
         <div style={{ textAlign: 'center' }}>
-          <a href="https://localhost:3000/shop" style={buttonStyle}>
+          <a href="http://localhost:3000/shop" style={buttonStyle}>
             Découvrir la boutique
           </a>
         </div>
