@@ -8,7 +8,7 @@ import {
   Mail, Package, Users, MessageSquare, Bell, 
   CheckCircle, Trash2, Reply, LayoutDashboard, 
   Box, ShoppingCart, User, LogOut, ChevronDown, 
-  AlertTriangle, X, Clock, CheckCircle2 
+  AlertTriangle, X, Clock, CheckCircle2, Building2
 } from 'lucide-react';
 import { notificationAPI, messageAPI } from '@/lib/api';
 import { toast } from 'sonner';
@@ -191,10 +191,15 @@ function AdminDashboard() {
                         {messages.length === 0 ? <div className="p-8 text-center text-slate-400 text-sm">Aucun message</div> : messages.map(m => (
                           <div key={m._id} className="p-4  hover:bg-slate-50 cursor-pointer flex items-center justify-between group">
                             <div onClick={() => { setSelectedMessage(m); if (m.status === 'new' || (!m.status && !m.read)) handleMarkAsRead(m._id); setShowMessagesDropdown(false); }} className="flex-1 min-w-0 flex items-start gap-2">
-                              {(m.status === 'new' || (!m.status && !m.read)) && <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1" />}
+                              {(m.status === 'new' || (!m.status && !m.read)) && <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1" />}
                               <div className="min-w-0 flex-1">
                                 <p className="text-sm font-bold">{m.name}</p>
                                 <p className="text-xs text-slate-500 line-clamp-1">{m.message}</p>
+                                {m.type === 'professionnel' && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset flex items-center gap-1 w-fit mt-1.5 bg-purple-50 text-purple-700 ring-purple-600/20">
+                                    <Building2 size={12} /> Pro
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <button
@@ -264,7 +269,7 @@ function AdminDashboard() {
 
         {/* --- MODAL CONVERSATION --- */}
         {selectedMessage && (
-          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[100]" onClick={() => setSelectedMessage(null)}>
+          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-100" onClick={() => setSelectedMessage(null)}>
             <div className="bg-white rounded-[1.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
               <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Détails du message</span>
@@ -282,6 +287,12 @@ function AdminDashboard() {
                     <div className="min-w-0">
                       <h2 className="text-lg font-bold text-slate-900 truncate leading-tight">{selectedMessage.name}</h2>
                       <p className="text-xs text-blue-600 truncate">{selectedMessage.email}</p>
+                      {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Building2 size={12} className="text-purple-600" />
+                          <span className="text-[12px] font-semibold text-purple-600">{selectedMessage.companyName}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   {selectedMessage.status === 'replied' && (
@@ -313,7 +324,7 @@ function AdminDashboard() {
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[120px] text-sm text-slate-700 resize-none"
+                      className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-30 text-sm text-slate-700 resize-none"
                       placeholder="Écrivez votre réponse..."
                     />
                     <div className="flex gap-2 pt-2">
@@ -343,7 +354,7 @@ function AdminDashboard() {
 
         {/* --- CONFIRM DELETE MODAL  --- */}
         {deleteAlertOpen && (
-          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-600 flex items-center justify-center p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               <div className="p-6 text-center">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">

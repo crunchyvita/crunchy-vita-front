@@ -1,9 +1,9 @@
 export async function POST(request) {
   try {
-    const { name, email, message } = await request.json();
+    const { name, email, message, subject, contactType, companyName } = await request.json();
 
     // Validation
-    if (!name || !email || !message) {
+    if (!name || !email || !message || !subject || !contactType) {
       return Response.json(
         { error: 'Tous les champs sont requis' },
         { status: 400 }
@@ -20,7 +20,10 @@ export async function POST(request) {
       body: JSON.stringify({
         name,
         email,
+        type: contactType,
+        object: subject,
         message,
+        companyName: companyName || '',
       }),
     });
 

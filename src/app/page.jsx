@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
@@ -9,126 +8,10 @@ import {
   Leaf,
   Ban,        
   CandyOff,
-  User,
-  Mail,
-  MessageSquare,
   Award,
   Sparkle,
   MapPinHouse
 } from 'lucide-react';
-
-// Composant ContactForm
-function ContactForm() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess(false);
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess(true);
-        setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => setSuccess(false), 3000);
-      } else {
-        setError(data.error || 'Une erreur est survenue');
-      }
-    } catch (err) {
-      setError('Erreur lors de l\'envoi du message');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50 p-8 rounded-2xl shadow-lg">
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-300 rounded-lg text-green-700">
-           Message envoyé avec succès ! Nous vous répondrons très bientôt.
-        </div>
-      )}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-           {error}
-        </div>
-      )}
-      
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <User className="h-4 w-4 text-[#469165]" strokeWidth={2} />
-          <label className="text-sm font-medium text-gray-700">Votre nom</label>
-        </div>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
-          placeholder="Jean Dupont"
-          required
-        />
-      </div>
-      
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Mail className="h-4 w-4 text-[#469165]" strokeWidth={2} />
-          <label className="text-sm font-medium text-gray-700">Votre email</label>
-        </div>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
-          placeholder="jean.dupont@email.com"
-          required
-        />
-      </div>
-      
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="h-4 w-4 text-[#469165]" strokeWidth={2} />
-          <label className="text-sm font-medium text-gray-700">Votre message</label>
-        </div>
-        <textarea
-          rows={5}
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
-          placeholder="Écrire votre message ici..."
-          required
-        />
-      </div>
-      
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-full bg-[#469165] py-3 font-semibold text-white hover:bg-[#3a7a4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Envoi en cours...' : 'Envoyer le message'}
-      </button>
-    </form>
-  );
-}
 
 // Composant FeatureCard avec rectangles arrondis
 function FeatureCard({ 
@@ -234,7 +117,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="relative h-[400px]">
+            <div className="relative h-100">
               <Image
                 src="/assets/images/pic3.png"
                 alt="CrunchyVita Products"
@@ -298,7 +181,7 @@ export default function Home() {
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                   <p className="text-sm text-gray-200">{item.desc}</p>
                 </div>
@@ -325,7 +208,7 @@ export default function Home() {
                 Decouvrer les produits
               </Link>
             </div>
-            <div className="relative h-[400px]">
+            <div className="relative h-100">
               <Image
                 src="/assets/images/coffret.png"
                 alt="Produits préférés"
@@ -373,22 +256,6 @@ export default function Home() {
                 <p className="text-gray-600">{item.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section   */}
-      <section id="contact" className="bg-white py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl">
-            <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
-              Une question ? <span className="text-green-700">Contactez-nous</span>
-            </h2>
-            <p className="mb-12 text-center text-gray-600">
-              Notre équipe est à votre écoute pour répondre à toutes vos questions sur nos produits et notre démarche.
-            </p>
-            
-            <ContactForm />
           </div>
         </div>
       </section>

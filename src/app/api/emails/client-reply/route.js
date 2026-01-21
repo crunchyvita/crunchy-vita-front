@@ -1,3 +1,4 @@
+import { render } from '@react-email/render';
 import { ClientReplyEmail } from '@/components/email/ClientReplyEmail';
 
 export async function POST(req) {
@@ -12,7 +13,9 @@ export async function POST(req) {
     }
 
     console.log('📧 Rendering client reply email for:', name);
-    const html = ClientReplyEmail({ name, clientMessage, replyMessage });
+    const html = await render(
+      <ClientReplyEmail name={name} clientMessage={clientMessage} replyMessage={replyMessage} />
+    );
 
     if (!html || html.trim().length === 0) {
       console.error('❌ Generated HTML is empty');

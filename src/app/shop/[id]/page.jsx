@@ -594,7 +594,7 @@ export default function ProductDetailPage() {
                     >
                       <Minus className="h-5 w-5" />
                     </button>
-                    <span className="px-6 py-3 font-semibold text-lg border-x-2 border-gray-300 min-w-[60px] text-center">
+                    <span className="px-6 py-3 font-semibold text-lg border-x-2 border-gray-300 min-w-15 text-center">
                       {quantity}
                     </span>
                     <button
@@ -788,7 +788,7 @@ export default function ProductDetailPage() {
                       <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                         <div className="flex items-start gap-4">
                           {/* Avatar */}
-                          <div className="w-12 h-12 rounded-full bg-[#064E3B] flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+                          <div className="w-12 h-12 rounded-full bg-[#064E3B] flex items-center justify-center text-white shrink-0 shadow-sm">
                             <User size={24} />
                           </div>
                           
@@ -820,7 +820,7 @@ export default function ProductDetailPage() {
                                 <button
                                   onClick={() => handleDeleteComment(review.id)}
                                   disabled={deletingCommentId === review.id}
-                                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                                   title="Delete your review"
                                 >
                                   {deletingCommentId === review.id ? (

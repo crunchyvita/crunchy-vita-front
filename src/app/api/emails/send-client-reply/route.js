@@ -1,14 +1,5 @@
-import nodemailer from 'nodemailer';
+import { render } from '@react-email/render';
 import { ClientReplyEmail } from '@/components/email/ClientReplyEmail';
-
-// Create transporter (use your email config here)
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 export async function POST(req) {
   try {
@@ -23,26 +14,18 @@ export async function POST(req) {
     }
 
     // Generate HTML email
-    const emailHTML = ClientReplyEmail({ name, clientMessage, replyMessage });
-
-    // Send email
-    const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@crunchyvita.com',
-      to: email,
-      subject: 'Crunchy Vita - Réponse à votre message',
-      html: emailHTML,
-    };
-
-    await transporter.sendMail(mailOptions);
+    const html = await render(
+      <ClientReplyEmail name={name} clientMessage={clientMessage} replyMessage={replyMessage} />
+    );
 
     return Response.json(
-      { success: true, message: 'Email sent successfully' },
-      { status: 200 }
+      { html },
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error sending client reply email:', error);
+    console.error('Error rendering client reply email:', error);
     return Response.json(
-      { error: error.message || 'Failed to send email' },
+      { error: 'Failed to render email' },
       { status: 500 }
     );
   }

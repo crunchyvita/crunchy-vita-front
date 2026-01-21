@@ -56,7 +56,7 @@ export default function Footer() {
                 +33 7 45 15 07 88
               </a>
               <div className="flex items-start gap-2 text-sm text-slate-400">
-                <MapPin size={16} className="flex-shrink-0 mt-1" />
+                <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
                   <p>1460 Chemin des Terriers</p>
                   <p>Bâtiment B-04</p>
@@ -73,7 +73,7 @@ export default function Footer() {
               <li><a href="/" className="text-sm text-slate-400 hover:text-[#469165] transition">Accueil</a></li>
               <li><a href="/#produits" className="text-sm text-slate-400 hover:text-[#469165] transition">Nos produits</a></li>
               <li><a href="/#engagements" className="text-sm text-slate-400 hover:text-[#469165] transition">Nos engagements</a></li>
-              <li><a href="/#contact" className="text-sm text-slate-400 hover:text-[#469165] transition">Contact</a></li>
+              <li><a href="/contact" className="text-sm text-slate-400 hover:text-[#469165] transition">Contact</a></li>
             </ul>
           </div>
 

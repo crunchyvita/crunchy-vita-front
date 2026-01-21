@@ -14,7 +14,7 @@ export default function HeaderHome() {
     { label: 'Accueil', href: '/' },
     { label: 'Nos produits', href: '/#produits' },
     { label: 'Nos engagements', href: '/#engagements' },
-    { label: 'Contact', href: '/#contact' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (

@@ -4,65 +4,77 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { messageAPI } from '@/lib/api';
 import { 
-  Mail, 
-  MailOpen, 
-  Trash2, 
-  RefreshCw, 
-  Reply, 
-  Search,
-  CheckCircle2,
-  Clock,
-  X,
-  Inbox,
-  ChevronRight,
-  AlertTriangle
+  Mail, MailOpen, Trash2, RefreshCw, Reply, Search,
+  CheckCircle2, Clock, Inbox, ChevronRight, AlertTriangle,
+  Filter, RotateCcw, User, Building2, Send
 } from 'lucide-react';
 
 export default function ContactMessagesPage() {
   const router = useRouter();
   const [messages, setMessages] = useState([]);
-  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
-  const [messageToDelete, setMessageToDelete] = useState(null);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return date.toLocaleDateString('fr-FR', options);
-  };
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState('');
-  const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState(null);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (!token) {
-      setError('Accès refusé. Redirection...');
-      setTimeout(() => router.push('/auth/login'), 2000);
-      return;
-    }
     fetchMessages();
-  }, [router]);
+  }, []);
 
   const fetchMessages = async () => {
     try {
       setLoading(true);
       const data = await messageAPI.list();
       setMessages(data.messages || data || []);
-      setError('');
     } catch (err) {
-      if (err.status === 401) {
-        setError('Session expirée.');
-        localStorage.removeItem('token');
-        router.push('/auth/login');
-      } else {
-        setError(err.message || 'Erreur de chargement');
-      }
+      console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectMessage = async (msg) => {
+    setSelectedMessage(msg);
+    if (msg.status === 'new') {
+      try {
+        await messageAPI.updateStatus(msg._id, 'read');
+        setMessages(messages.map(m => m._id === msg._id ? {...m, status: 'read'} : m));
+      } catch (err) { console.error(err); }
+    }
+  };
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !selectedMessage) return;
+    
+    setSending(true);
+    try {
+      // Run all operations in parallel for faster response
+      await Promise.all([
+        messageAPI.reply(selectedMessage._id, replyText.trim()),
+        messageAPI.updateStatus(selectedMessage._id, 'replied'),
+        messageAPI.sendClientReplyEmail(
+          selectedMessage.name,
+          selectedMessage.email,
+          selectedMessage.message,
+          replyText.trim()
+        )
+      ]);
+      
+      // Update state without reloading
+      setMessages(messages.map(m => 
+        m._id === selectedMessage._id ? {...m, status: 'replied'} : m
+      ));
+      setSelectedMessage({...selectedMessage, status: 'replied'});
+      setReplyText('');
+      setSending(false);
+    } catch (err) {
+      console.error('Erreur lors de l\'envoi de la réponse:', err);
+      setSending(false);
     }
   };
 
@@ -86,237 +98,209 @@ export default function ContactMessagesPage() {
     }
   };
 
-  const handleReply = async (id) => {
-    if (!replyText.trim()) return console.log('Veuillez saisir une réponse');
-    try {
-      const message = await messageAPI.getById(id);
-      await messageAPI.reply(id, replyText.trim());
-      await messageAPI.updateStatus(id, 'replied');
-      
-      // Send email to client
-      await messageAPI.sendClientReplyEmail(
-        message.name,
-        message.email,
-        message.message,
-        replyText.trim()
-      );
-      
-      setReplyText('');
-      fetchMessages();
-      setSelectedMessage(null); // Fermeture auto après réponse
-    } catch (err) {
-        console.error(err);
-    }
-  };
-
-  const handleOpenMessage = async (message) => {
-    setSelectedMessage(message);
-    if (message.status === 'new') {
-      try {
-        await messageAPI.updateStatus(message._id, 'read');
-        setMessages(messages.map(m => m._id === message._id ? {...m, status: 'read'} : m));
-      } catch (err) { console.error(err); }
-    }
-  };
-
   const filteredMessages = messages
     .filter(msg => filter === 'all' ? true : msg.status === filter)
+    .filter(msg => typeFilter === 'all' ? true : msg.type === typeFilter)
     .filter(msg => 
       msg.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       msg.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  const getStatusConfig = (status) => {
-    const configs = {
-      new: { color: 'bg-blue-100 text-blue-700 ring-blue-600/20', label: 'Nouveau', icon: <Clock size={12}/> },
-      read: { color: 'bg-slate-100 text-slate-700 ring-slate-600/20', label: 'Lu', icon: <MailOpen size={12}/> },
-      replied: { color: 'bg-emerald-100 text-emerald-700 ring-emerald-600/20', label: 'Répondu', icon: <CheckCircle2 size={12}/> },
-    };
-    return configs[status] || configs.new;
-  };
-
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-      <RefreshCw className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-      <p className="text-slate-500 font-medium">Chargement...</p>
-    </div>
-  );
-
   return (
-    <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="flex h-screen bg-white overflow-hidden font-sans">
       
-      {/* HEADER FULL WIDTH */}
-      <header className="w-full bg-white border-b border-slate-200 px-8 py-6 sticky top-0 z-10">
-        <div className="max-w-450 mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-900 p-2 rounded-lg text-white">
-              <Inbox size={22} />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-none">Gestion Contacts</h1>
-              <p className="text-xs text-slate-500 mt-1 font-medium italic">
-                {messages.filter(m => m.status === 'new').length} non lus
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={fetchMessages}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all shadow-sm text-sm font-semibold"
-          >
-            <RefreshCw size={16} /> Actualiser
-          </button>
-        </div>
-      </header>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-6 max-w-450 mx-auto w-full">
+      {/* SIDEBAR : LISTE DES MESSAGES */}
+      <div className="w-full md:w-100 flex flex-col border-r border-slate-200 bg-slate-50/50">
         
-        {/* SEARCH & FILTERS */}
-        <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-col lg:flex-row gap-4 items-center">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+        {/* Header Liste */}
+        <div className="p-4 border-b border-slate-200 bg-white space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Inbox size={20} className="text-blue-600" /> Inbox
+            </h1>
+            <button onClick={fetchMessages} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+              <RefreshCw size={18} />
+            </button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               type="text"
-              placeholder="Rechercher un contact..."
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-slate-700 text-sm"
+              placeholder="Rechercher..."
+              className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
-            {['all', 'new', 'read', 'replied'].map((f) => (
+
+          {/* Onglets Rapides */}
+          <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+            {['all', 'new', 'replied'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider ${
                   filter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                {f === 'all' ? 'Tous' : f === 'new' ? 'Nouveaux' : f === 'read' ? 'Lus' : 'Répondus'}
+                {f === 'all' ? 'Tous' : f === 'new' ? 'Nouveaux' : 'Répondus'}
               </button>
             ))}
           </div>
         </div>
 
-        {/* GRID LAYOUT */}
-        {filteredMessages.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 border-dashed">
-            <Mail className="mx-auto text-slate-300 mb-2" size={40} />
-            <p className="text-slate-500 text-sm font-medium">Aucun message trouvé</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-            {filteredMessages.map((msg) => {
-              const config = getStatusConfig(msg.status);
-              return (
-                <div
-                  key={msg._id}
-                  onClick={() => handleOpenMessage(msg)}
-                  className={`group bg-white rounded-2xl p-5 border transition-all cursor-pointer hover:border-blue-300 hover:shadow-md ${
-                    msg.status === 'new' ? 'border-l-4 border-l-blue-600 shadow-sm' : 'border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200">
-                      {msg.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ring-1 ring-inset ${config.color}`}>
-                      {config.label}
+        {/* Scrollable Area */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredMessages.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-sm">Aucun message trouvé</div>
+          ) : (
+            filteredMessages.map((msg) => (
+              <div
+                key={msg._id}
+                onClick={() => handleSelectMessage(msg)}
+                className={`relative p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-white ${
+                  selectedMessage?._id === msg._id ? 'bg-white ring-1 ring-inset ring-blue-500/10' : ''
+                }`}
+              >
+                {msg.status === 'new' && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />
+                )}
+                <div className="flex justify-between items-start mb-1">
+                  <span className={`text-sm font-bold ${msg.status === 'new' ? 'text-slate-900' : 'text-slate-600'}`}>
+                    {msg.name}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {new Date(msg.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
-                  </div>
-                  <h3 className="font-bold text-slate-900 truncate text-sm mb-1">{msg.name}</h3>
-                  <p className="text-[11px] text-slate-400 truncate mb-3">{msg.email}</p>
-                  <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed mb-4 flex-1">
-                    {msg.message}
-                  </p>
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                    <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                      <Clock size={12} /> {formatDate(msg.createdAt)}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(msg._id);
-                        }}
-                        className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        title="Supprimer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(msg._id);
+                      }}
+                      className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                      title="Supprimer"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
-              );
-            })}
+                <p className="text-xs text-slate-500 line-clamp-1"> Objet :<span className="text-xs text-blue-600 font-semibold truncate mb-1">{msg.object || "Sans objet"}</span></p>
+                <p className="text-xs text-slate-500 line-clamp-1">{msg.message}</p>
+                
+                {msg.type === 'professionnel' && (
+                  <div className="mt-2 flex gap-2">
+                    <span className="text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset flex items-center gap-1 bg-purple-50 text-purple-700 ring-purple-600/20">
+                      <Building2 size={12} /> Pro
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* MAIN CONTENT : DETAIL DU MESSAGE */}
+      <div className="hidden md:flex flex-1 flex-col bg-white">
+        {selectedMessage ? (
+          <>
+            {/* Toolbar Detail */}
+            <div className="h-18.25 border-b border-slate-200 px-8 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                 <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-900">{selectedMessage.name}</span>
+                    <span className="text-xs text-slate-500">{selectedMessage.email}</span>
+                 </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleDelete(selectedMessage._id)}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Corps du Message */}
+            <div className="flex-1 overflow-y-auto p-8 lg:p-12">
+              <div className="max-w-3xl mx-auto">
+                <div className="flex items-center gap-3 mb-8">
+                   <div className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold">
+                      {selectedMessage.name.charAt(0).toUpperCase()}
+                   </div>
+                   <div>
+                      <h2 className="text-2xl font-bold text-slate-900"> {selectedMessage.object || "Demande de contact"}</h2>
+                      <p className="text-sm text-slate-500 flex items-center gap-2">
+                        De: <span className="font-semibold text-slate-700">{selectedMessage.name}</span> 
+                      </p>
+                   </div>
+                </div>
+
+                <div className="prose prose-slate max-w-none mb-12">
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {selectedMessage.message}
+                  </div>
+                </div>
+
+                {/* Section Réponse */}
+                <div className="border-t border-slate-200 pt-8">
+                  <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
+                    <Reply size={18} className="text-blue-600" /> Répondre à ce message
+                  </div>
+                  
+                  {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                    <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
+                      <Building2 size={16} className="text-purple-600" />
+                      <div>
+                        <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
+                        <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
+                    placeholder="Votre message..."
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <button 
+                      onClick={handleReply}
+                      disabled={sending || !replyText.trim()}
+                      className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {sending ? (
+                        <>
+                          <RefreshCw className="animate-spin" size={16} />
+                          Envoi en cours...
+                        </>
+                      ) : (
+                        <>
+                          Envoyer la réponse <Send size={16} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/30">
+            <MailOpen size={48} className="mb-4 opacity-20" />
+            <p className="font-medium text-sm">Sélectionnez un message pour le lire</p>
           </div>
         )}
-      </main>
+      </div>
 
-      {/* MODAL CONVERSATION (Taille réduite) */}
-      {selectedMessage && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-[1.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Détails de la conversation</span>
-              <button onClick={() => setSelectedMessage(null)} className="p-1.5 hover:bg-slate-200 rounded-full transition-colors">
-                <X size={18} className="text-slate-400" />
-              </button>
-            </div>
-            
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                   <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-lg font-bold">
-                    {selectedMessage.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-slate-900 truncate leading-tight">{selectedMessage.name}</h2>
-                    <p className="text-xs text-blue-600 truncate">{selectedMessage.email}</p>
-                  </div>
-                </div>
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${getStatusConfig(selectedMessage.status).color}`}>
-                  {getStatusConfig(selectedMessage.status).label}
-                </span>
-              </div>
-
-              <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
-                <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
-                <div className="mt-3 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
-                  <Clock size={12}/> Reçu le {formatDate(selectedMessage.createdAt)}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase px-1">
-                  <Reply size={14} className="text-blue-600" /> Réponse rapide
-                </label>
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-25 text-sm text-slate-700"
-                  placeholder="Écrivez votre réponse..."
-                />
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={() => handleReply(selectedMessage._id)}
-                    className="flex-1 bg-green-900 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-all text-sm flex items-center justify-center gap-2"
-                  >
-                    Envoyer
-                  </button>
-                
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- CONFIRM DELETE MODAL  --- */}
+      {/* Delete Confirmation Modal */}
       {deleteAlertOpen && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
