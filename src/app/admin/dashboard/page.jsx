@@ -251,7 +251,7 @@ function AdminDashboard() {
               <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Actions Rapides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <QuickLinkCard icon={<Package className="text-blue-600" />} title="Produits" desc="Catalogue" onClick={() => router.push('/admin/products')} />
-                <QuickLinkCard icon={<Box className="text-orange-600" />} title="Stock" desc="Inventaire" onClick={() => router.push('/admin/products')} />
+                <QuickLinkCard icon={<Box className="text-orange-600" />} title="Stock" desc="Inventaire" onClick={() => router.push('/admin/stock')} />
                 <QuickLinkCard icon={<Mail className="text-green-600" />} title="Contacts" desc="Messages" onClick={() => router.push('/admin/contact')} />
                 <QuickLinkCard icon={<ShoppingCart className="text-purple-600" />} title="Commandes" desc="Ventes" onClick={() => router.push('/admin/orders')} />
               </div>
