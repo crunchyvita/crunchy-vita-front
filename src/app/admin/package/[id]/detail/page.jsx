@@ -6,12 +6,11 @@ import Link from "next/link";
 import {
 	ArrowLeft,
 	Package,
-	DollarSign,
 	Percent,
 	Edit2,
 	Eye,
 	EyeOff,
-	Tag,
+	Package2,
 } from "lucide-react";
 
 function formatDate(dateString) {
@@ -87,15 +86,7 @@ export default function PackageDetailPage({ params }) {
 		);
 	}
 
-	const totalOriginalPrice = packageData.products?.reduce((sum, item) => {
-		const price = item.productId?.price || 0;
-		return sum + price;
-	}, 0) || 0;
 
-	const totalSavings = totalOriginalPrice - (packageData.price || 0);
-	const effectiveDiscount = totalOriginalPrice > 0 
-		? ((totalSavings / totalOriginalPrice) * 100).toFixed(1)
-		: 0;
 
 	return (
 		<div className="space-y-6">
@@ -156,82 +147,30 @@ export default function PackageDetailPage({ params }) {
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
-						<DollarSign className="h-4 w-4" />
-						Package Price
+						<Percent className="h-4 w-4" />
+						Discount Percentage
 					</div>
-					<p className="text-2xl font-bold text-emerald-700">
-						${Number(packageData.price || 0).toFixed(2)}
+					<p className="text-2xl font-bold text-orange-600">
+						{packageData.discountPercentage}%
 					</p>
 				</div>
 
 				<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
-						<Percent className="h-4 w-4" />
-						Total Discount
+						<Package2 className="h-4 w-4" />
+						Maximum Products
 					</div>
-					<p className="text-2xl font-bold text-orange-600">
-						{packageData.overallDiscountPercentage}%
+					<p className="text-2xl font-bold text-emerald-700">
+						{packageData.allowAllProducts ? (
+							<span className="text-purple-700">All Active</span>
+						) : (
+							packageData.maxProducts
+						)}
 					</p>
 				</div>
 			</div>
 
-			{/* Products in Package */}
-			<div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-				<div className="border-b border-slate-200 px-6 py-4">
-					<h2 className="text-lg font-semibold text-slate-900">
-						Products in Package ({packageData.products?.length || 0})
-					</h2>
-				</div>
-				<div className="p-6">
-					{packageData.products && packageData.products.length > 0 ? (
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-							{packageData.products.map((item, index) => {
-								const product = item.productId;
-								if (!product) return null;
-
-								const imageUrl = product.imageUrl || 
-									(product.media?.[0]?.url
-										? (product.media[0].url.startsWith('http')
-											? product.media[0].url
-											: `http://localhost:5000${product.media[0].url}`)
-										: '/placeholder-product.png');
-
-								return (
-									<div
-										key={product._id || index}
-										className="rounded-lg border border-slate-200 p-4 transition hover:shadow-md"
-									>
-										<div className="aspect-square relative mb-3 overflow-hidden rounded-md bg-slate-100">
-											<img
-												src={imageUrl}
-												alt={product.name}
-												className="h-full w-full object-cover"
-											/>
-										</div>
-										<h3 className="font-semibold text-slate-900 mb-1">
-											{product.name}
-										</h3>
-										<p className="text-sm text-slate-600 mb-2 line-clamp-2">
-											{product.description}
-										</p>
-										<div className="flex items-center justify-between">
-											<span className="text-lg font-bold text-emerald-700">
-												${Number(product.price || 0).toFixed(2)}
-											</span>
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					) : (
-						<div className="text-center py-8 text-slate-500">
-							No products in this package
-						</div>
-					)}
-				</div>
-			</div>
-
-			{/* Additional Info */}
+			{/* Package Info */}
 			<div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
 				<h2 className="text-lg font-semibold text-slate-900 mb-4">Package Information</h2>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -246,6 +185,15 @@ export default function PackageDetailPage({ params }) {
 						</p>
 					</div>
 					<div>
+						<p className="text-sm text-slate-600">Product Selection</p>
+						<p className="text-sm text-slate-900 mt-1">
+							{packageData.allowAllProducts 
+								? "All active products available" 
+								: `Maximum ${packageData.maxProducts} product${packageData.maxProducts !== 1 ? 's' : ''}`
+							}
+						</p>
+					</div>
+					<div>
 						<p className="text-sm text-slate-600">Created At</p>
 						<p className="text-sm text-slate-900 mt-1">{formatDate(packageData.createdAt)}</p>
 					</div>
@@ -255,6 +203,7 @@ export default function PackageDetailPage({ params }) {
 					</div>
 				</div>
 			</div>
+
 		</div>
 	);
 }

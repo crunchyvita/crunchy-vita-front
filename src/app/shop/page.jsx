@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   ImageIcon, ChevronLeft, ChevronRight, Eye,
   ShoppingCart, Heart, Star, Package,
-  LogOut, ShoppingBag, CheckCircle2, Search, X
+  LogOut, ShoppingBag, CheckCircle2, Search, X, Check, Gift
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -385,45 +386,74 @@ function ClientShop() {
                       <p className="text-sm text-gray-500 mt-2">Try adjusting your search terms</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredPackages.map((pkg, pkgIndex) => (
-                        <div key={pkg._id || pkg.id || `package-${pkgIndex}`} className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col md:flex-row">
-                          <div className="md:w-2/5 h-64 md:h-auto">
-                            <PackageImageCarousel packageData={pkg} />
-                          </div>
-                          <div className="p-8 md:w-3/5 flex flex-col">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 text-green-900 mb-2">
-                                <ShoppingBag size={16} />
-                                <span className="text-xs font-bold uppercase tracking-widest">Special Package</span>
+                        <Link 
+                          key={pkg._id || pkg.id || `package-${pkgIndex}`}
+                          href={`/shop/packages/${pkg._id}`}
+                          className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
+                        >
+                          {/* Empty Package Visual */}
+                          <div className="relative h-40 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border-b border-gray-200">
+                            <div className="text-center">
+                              <div className="w-16 h-16 mx-auto bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center mb-2 group-hover:border-emerald-500 transition-colors">
+                                <Package className="h-8 w-8 text-gray-300 group-hover:text-emerald-500 transition-colors" />
                               </div>
-                              <h3 className="text-2xl font-bold mb-3">{pkg.name}</h3>
-                              <p className="text-gray-500 text-sm line-clamp-2 mb-4">{pkg.description}</p>
-
-                              <div className="space-y-2 mb-6">
-                                {pkg.products?.slice(0, 3).map((item, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
-                                    <CheckCircle2 size={14} className="text-green-900" />
-                                    <span>{item.productId?.name || item.name}</span>
-                                  </div>
-                                ))}
-                              </div>
+                              <p className="text-xs text-gray-500 font-medium">Empty Package</p>
                             </div>
 
-                            <div className="flex items-center justify-between pt-6 border-t">
-                              <div>
-                                <p className="text-xs text-gray-400 font-medium uppercase tracking-tighter">Package Price</p>
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-3xl font-black text-gray-900">${Number(pkg.price).toFixed(2)}</span>
-                                  {pkg.originalPrice}
-                                </div>
-                              </div>
-                              <button className="bg-[#064E3B] text-white px-6 py-3 rounded-2xl font-bold hover:bg-[#065F46] transition-colors shadow-lg shadow-gray-200">
-                                Add To cart
+                            {/* Plus Button Overlay */}
+                            <div className="absolute top-3 right-3">
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  window.location.href = `/shop/packages/${pkg._id}`;
+                                }}
+                                className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg hover:bg-emerald-700 shadow-lg transition-all transform hover:scale-110"
+                              >
+                                +
                               </button>
                             </div>
                           </div>
-                        </div>
+
+                          {/* Package Info */}
+                          <div className="p-4 flex-1 flex flex-col">
+                            <div className="flex items-center gap-1 text-emerald-700 mb-2">
+                              <ShoppingBag size={14} />
+                              <span className="text-xs font-bold uppercase tracking-wide">Build Package</span>
+                            </div>
+                            
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">{pkg.name}</h3>
+                            <p className="text-xs text-gray-500 mb-3 line-clamp-1">{pkg.description}</p>
+
+                            {/* Details */}
+                            <div className="space-y-1.5 mb-4 text-xs">
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <div className="w-3.5 h-3.5 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                                  <Check size={10} className="text-white" />
+                                </div>
+                                <span>
+                                  {pkg.allowAllProducts 
+                                    ? "All products" 
+                                    : `Up to ${pkg.maxProducts} product${pkg.maxProducts !== 1 ? 's' : ''}`
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-orange-600 font-medium">
+                                <Gift size={10} />
+                                <span>{pkg.discountPercentage}% discount</span>
+                              </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                              <span className="text-sm font-bold text-orange-600">{pkg.discountPercentage}% OFF</span>
+                              <button className="text-xs font-bold text-emerald-700 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors">
+                                Customize →
+                              </button>
+                            </div>
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   )}

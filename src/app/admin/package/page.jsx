@@ -86,12 +86,6 @@ export default function PackagesPage() {
 		try {
 			const token = localStorage.getItem("token");
 			
-			// Transform products array to only include productId and discountPercentage
-			const productsForApi = pkg.products?.map((p) => ({
-				productId: p.productId?._id || p.productId,
-				discountPercentage: p.discountPercentage || 0,
-			})) || [];
-
 			const response = await fetch(`/api/packages/${pkg._id}`, {
 				method: "PUT",
 				headers: {
@@ -101,9 +95,9 @@ export default function PackagesPage() {
 				body: JSON.stringify({
 					name: pkg.name,
 					description: pkg.description,
-					products: productsForApi,
-					price: pkg.price,
-					overallDiscountPercentage: pkg.overallDiscountPercentage,
+					discountPercentage: pkg.discountPercentage,
+					maxProducts: pkg.maxProducts,
+					allowAllProducts: pkg.allowAllProducts,
 					isActive: !pkg.isActive,
 				}),
 			});
@@ -189,11 +183,9 @@ export default function PackagesPage() {
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
 										Package Name
 									</th>
+									
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Price
-									</th>
-									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Products
+										Max Products
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
 										Discount
@@ -225,14 +217,20 @@ export default function PackagesPage() {
 												)}
 											</div>
 										</td>
-										<td className="px-4 py-3 text-sm font-medium text-slate-900">
-											${Number(pkg.price || 0).toFixed(2)}
+										
+										<td className="px-4 py-3 text-sm text-slate-600">
+											{pkg.allowAllProducts ? (
+												<span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700">
+													All products
+												</span>
+											) : (
+												<span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+													{pkg.maxProducts} products
+												</span>
+											)}
 										</td>
 										<td className="px-4 py-3 text-sm text-slate-600">
-											{pkg.products?.length || 0} product{pkg.products?.length !== 1 ? "s" : ""}
-										</td>
-										<td className="px-4 py-3 text-sm text-slate-600">
-											{pkg.overallDiscountPercentage}%
+											{pkg.discountPercentage}%
 										</td>
 										<td className="px-4 py-3">
 											<button
