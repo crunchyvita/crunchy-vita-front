@@ -98,17 +98,17 @@ export default function CGV() {
           </ul>
         </section>
 
-        {/* Article 7 */}
+        {/* Article 6 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 7. Paiement</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 6. Paiement</h2>
           <p className="text-slate-700 leading-relaxed">
             Le paiement s'effectue au moment de la commande, par carte bancaire (Carte Bleue, Visa, Mastercard, etc.) via Stripe.
           </p>
         </section>
 
-        {/* Article 10 */}
+        {/* Article 7 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 10. Livraison</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 7. Livraison</h2>
           <p className="text-slate-700 leading-relaxed mb-3">
             La livraison est effectuée à l'adresse indiquée par l'Acheteur.
           </p>
@@ -120,9 +120,9 @@ export default function CGV() {
           </p>
         </section>
 
-        {/* Article 12 */}
+        {/* Article 8 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 12. Rétractation</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 8. Rétractation</h2>
           <p className="text-slate-700 leading-relaxed mb-3">
             Conformément à l'article L221-18 du Code de la consommation, l'Acheteur dispose de 14 jours à compter de la réception pour se rétracter. Les frais de retour sont à la charge de l'Acheteur.
           </p>
@@ -137,9 +137,9 @@ export default function CGV() {
           </p>
         </section>
 
-        {/* Article 13 */}
+        {/* Article 9 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 13. Garanties</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 9. Garanties</h2>
           <p className="text-slate-700 leading-relaxed mb-3">
             Les Produits bénéficient de :
           </p>
@@ -149,9 +149,9 @@ export default function CGV() {
           </ul>
         </section>
 
-        {/* Article 21 */}
+        {/* Article 10 */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 21. Litiges</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 10. Litiges</h2>
           <p className="text-slate-700 leading-relaxed mb-4">
             En cas de litige :
           </p>

@@ -31,10 +31,11 @@ export default function Header() {
           onClick={() => router.push('/shop')}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
-            C
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900">CrunchyVita</h1>
+          <img 
+            src="/assets/images/logo.png" 
+            alt="Crunchy Vita Logo" 
+            className="h-24 w-auto"
+          />
         </button>
 
         {/* Right Section */}

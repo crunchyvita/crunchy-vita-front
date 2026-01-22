@@ -8,8 +8,6 @@ import {
 	MoreVertical,
 	Plus,
 	Search,
-	Upload,
-	ChevronDown,
     Edit2,
 	Info,
 	Package
@@ -106,10 +104,7 @@ export default function ProductsPage() {
 						<Download className="h-4 w-4" />
 						Download
 					</button>
-					<button className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-						<Upload className="h-4 w-4" />
-						Import
-					</button>
+
 					<Link
 						href="/admin/products/create"
 						className="flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"

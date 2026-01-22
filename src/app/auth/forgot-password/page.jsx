@@ -32,10 +32,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
       {/* Logo Central */}
       <div className="mb-10 flex flex-col items-center">
-        <div className="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
-          <Leaf className="text-white h-8 w-8" />
+        <div className="w-24 h-24 bg-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
+          <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Crunchy Vita</h1>
       </div>
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-8 md:p-10">

@@ -60,11 +60,10 @@ export default function LoginPage() {
         </div>
         
         <div className="relative z-20 max-w-lg">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-              <Leaf className="text-emerald-400 h-8 w-8" />
+          <div className="flex flex-col items-center mb-8">
+            <div className="p-3 backdrop-blur-md rounded-2xl border border-white/20">
+              <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-40 w-40" />
             </div>
-            <span className="text-3xl font-bold text-white tracking-tight">Crunchy Vita</span>
           </div>
           <h2 className="text-5xl font-bold text-white leading-tight mb-6">
             Essayez, <br /> 
@@ -83,8 +82,8 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16">
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden flex flex-col items-center">
-             <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
-               <Leaf className="text-white h-6 w-6" />
+             <div className="w-24 h-24 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
+               <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
              </div>
              <h1 className="text-2xl font-bold text-slate-900">Crunchy Vita</h1>
           </div>
