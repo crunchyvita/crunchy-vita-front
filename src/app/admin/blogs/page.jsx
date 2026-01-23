@@ -1,0 +1,193 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Trash2, Edit, Plus, AlertCircle } from "lucide-react";
+
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+export default function BlogsPage() {
+  const router = useRouter();
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${backendUrl}/api/blogs/admin/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch blogs");
+      }
+
+      const result = await response.json();
+      setBlogs(result.data || []);
+    } catch (err) {
+      setError(err.message || "Failed to fetch blogs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${backendUrl}/api/blogs/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete blog");
+      }
+
+      setBlogs(blogs.filter((blog) => blog._id !== id));
+      setDeleteConfirm(null);
+    } catch (err) {
+      setError(err.message || "Failed to delete blog");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Blog Posts</h1>
+          <p className="text-gray-600 mt-2">Manage your blog posts</p>
+        </div>
+        <Link href="/admin/blogs/create">
+          <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create Blog Post
+          </button>
+        </Link>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 mb-6">
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        {blogs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">No blog posts yet</p>
+            <Link href="/admin/blogs/create">
+              <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">
+                Create your first blog post
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="border-b border-gray-200 bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Author</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Publication Date</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {blogs.map((blog) => (
+                <tr key={blog._id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                  <td className="px-6 py-4">
+                    <p className="font-medium text-gray-900">{blog.title}</p>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {blog.authorId?.name || "Unknown"}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {new Date(blog.publicationDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                        blog.isPublished
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {blog.isPublished ? "Published" : "Draft"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 flex gap-2">
+                    <Link href={`/admin/blogs/${blog._id}/edit`}>
+                      <button className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => setDeleteConfirm(blog._id)}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Blog Post?</h3>
+            <p className="text-gray-600 mb-6">This action cannot be undone.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-900 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

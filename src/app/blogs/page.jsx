@@ -1,0 +1,169 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import HeaderHome from "@/components/header-home";
+import Footer from "@/components/footer";
+import { Calendar, ArrowRight } from "lucide-react";
+
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+export default function BlogsPage() {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/blogs`);
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Blogs fetched:", result.data);
+        setBlogs(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch blogs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getBlogSummary = (content) => {
+    return content.length > 200 ? content.substring(0, 200) + "..." : content;
+  };
+
+  const getShortSummary = (content) => {
+    return content.length > 100 ? content.substring(0, 100) + "..." : content;
+  };
+
+  const featuredBlog = blogs.length > 0 ? blogs[0] : null;
+  const otherBlogs = blogs.slice(1);
+
+  return (
+    <>
+      <HeaderHome />
+      <div className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <section className="bg-white py-16 border-b border-gray-200">
+          <div className="container mx-auto px-6">
+            <h1 className="text-5xl font-bold text-center text-gray-900 uppercase">
+              Le blog du bien-être :<br />
+              <span className="text-gray-700">Astuces, alimentation & santé</span>
+            </h1>
+          </div>
+        </section>
+
+        {/* Main Content */}
+        <section className="py-16">
+          <div className="container mx-auto px-6">
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+              </div>
+            ) : blogs.length > 0 ? (
+              <>
+                {/* Featured Blog Post */}
+                {featuredBlog && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
+                    {/* Featured Image */}
+                    <div className="lg:col-span-2">
+                      <Link href={`/blogs/${featuredBlog._id}`}>
+                        <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer group">
+                          {featuredBlog.imageUrl ? (
+                            <Image
+                              src={`${backendUrl}${featuredBlog.imageUrl}`}
+                              alt={featuredBlog.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              unoptimized={true}
+                              priority
+                            />
+                          ) : (
+                            <div className="h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
+                              <span className="text-gray-400">Image non disponible</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    </div>
+
+                    {/* Featured Blog Sidebar */}
+                    <div className="flex flex-col justify-center">
+                      <Link href={`/blogs/${featuredBlog._id}`}>
+                        <div className="cursor-pointer">
+                          <h2 className="text-2xl font-bold text-gray-900 mb-4 hover:text-green-600 transition-colors uppercase leading-tight">
+                            {featuredBlog.title}
+                          </h2>
+                          <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                            {getShortSummary(featuredBlog.content)}
+                          </p>
+                          <div className="flex items-center gap-2 text-green-600 font-semibold hover:gap-3 transition-all">
+                            Lire plus...
+                            <ArrowRight className="h-4 w-4" />
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* Blog Grid */}
+                {otherBlogs.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    {otherBlogs.map((blog) => (
+                      <Link key={blog._id} href={`/blogs/${blog._id}`}>
+                        <div className="cursor-pointer group">
+                          <div className="relative h-64 w-full bg-gray-200 rounded-lg overflow-hidden mb-6">
+                            {blog.imageUrl ? (
+                              <Image
+                                src={`${backendUrl}${blog.imageUrl}`}
+                                alt={blog.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                unoptimized={true}
+                              />
+                            ) : (
+                              <div className="h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
+                                <span className="text-gray-400 text-sm">Image non disponible</span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-green-600 transition-colors uppercase">
+                              {blog.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                              {getShortSummary(blog.content)}
+                            </p>
+                            <div className="flex items-center gap-2 text-green-600 font-semibold text-sm hover:gap-3 transition-all">
+                              Lire plus...
+                              <ArrowRight className="h-4 w-4" />
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-gray-600 text-lg mb-4">
+                  Aucun article disponible pour le moment.
+                </p>
+                <p className="text-gray-500">
+                  Revenez bientôt pour découvrir nos nouveaux articles !
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+      <Footer />
+    </>
+  );
+}
