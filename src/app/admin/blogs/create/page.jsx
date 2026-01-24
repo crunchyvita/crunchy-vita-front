@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
+import AdminHeader from "@/components/admin/header";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -90,7 +91,9 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <>
+      <AdminHeader />
+      <div className="max-w-4xl mx-auto p-6 lg:p-8">
       {/* Back Button */}
       <Link href="/admin/blogs">
         <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6 transition">
@@ -236,5 +239,6 @@ export default function CreateBlogPage() {
         </div>
       </form>
     </div>
+    </>
   );
 }

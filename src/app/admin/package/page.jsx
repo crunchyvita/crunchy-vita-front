@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import AdminHeader from "@/components/admin/header";
 import {
 	Download,
 	MoreVertical,
@@ -115,7 +116,9 @@ export default function PackagesPage() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<>
+		<AdminHeader />
+		<div className="space-y-6 p-6 lg:p-8">
 			<div className="flex items-center justify-between">
 				<div>
 					<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
@@ -323,5 +326,6 @@ export default function PackagesPage() {
 				</div>
 			)}
 		</div>
+		</>
 	);
 }

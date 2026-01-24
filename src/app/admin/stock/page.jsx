@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { stockAPI } from "@/lib/api";
+import AdminHeader from "@/components/admin/header";
 import { Search, Edit2, AlertCircle, Package, AlertTriangle, CheckCircle2, Download, MoreVertical } from "lucide-react";
 
 export default function StockPage() {
@@ -40,7 +41,9 @@ export default function StockPage() {
   }), [stocks]);
 
   return (
-    <div className="space-y-6">
+    <>
+    <AdminHeader />
+    <div className="space-y-6 p-6 lg:p-8">
       {/* Header Section - Matches Product Page Layout */}
       <div className="flex items-center justify-between">
         <div>
@@ -185,5 +188,6 @@ export default function StockPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

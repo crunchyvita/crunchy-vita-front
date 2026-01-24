@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { productAPI } from "@/lib/api";
+import AdminHeader from "@/components/admin/header";
 import {
   ArrowLeft,
   Calendar,
@@ -179,6 +180,8 @@ export default function ProductDetailPage() {
   };
 
   return (
+    <>
+    <AdminHeader />
     <div className="min-h-screen bg-[#f8fafc]">
       <header className="bg-white border-b border-slate-200 px-8 py-4">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between">
@@ -284,7 +287,21 @@ export default function ProductDetailPage() {
                             <div key={comment._id} className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                               {/* Avatar */}
                               <div className="flex-shrink-0">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white shadow-md">
+                                {!comment.isAnonymous && comment.userId?.photo ? (
+                                  <img
+                                    src={comment.userId.photo}
+                                    alt={userName}
+                                    className="w-12 h-12 rounded-full object-cover shadow-md border-2 border-white"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div 
+                                  className="w-12 h-12 rounded-full bg-gradient-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white shadow-md"
+                                  style={{ display: !comment.isAnonymous && comment.userId?.photo ? 'none' : 'flex' }}
+                                >
                                   <User size={24} />
                                 </div>
                               </div>
@@ -473,5 +490,6 @@ export default function ProductDetailPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

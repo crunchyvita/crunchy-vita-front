@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { productAPI } from "@/lib/api";
+import AdminHeader from "@/components/admin/header";
 import {
 	Download,
 	MoreVertical,
@@ -87,7 +88,9 @@ export default function ProductsPage() {
 	const isAllSelected = filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length;
 
 	return (
-		<div className="space-y-6">
+		<>
+		<AdminHeader />
+		<div className="space-y-6 p-6 lg:p-8">
 			<div className="flex items-center justify-between">
 				<div>
 					<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
@@ -246,5 +249,6 @@ export default function ProductsPage() {
 				</div>
 			</div>
 		</div>
+		</>
 	);
 }

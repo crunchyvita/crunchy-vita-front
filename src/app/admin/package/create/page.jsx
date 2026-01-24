@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader, Package, Percent, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import AdminHeader from "@/components/admin/header";
 
 export default function CreateEditPackagePage() {
 	const router = useRouter();
@@ -135,7 +136,9 @@ export default function CreateEditPackagePage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-slate-50 p-6">
+		<>
+			<AdminHeader />
+			<div className="min-h-screen bg-slate-50 p-6 lg:p-8">
 			<div className="max-w-4xl mx-auto space-y-6">
 				{/* Header */}
 				<div className="flex items-center justify-between">
@@ -431,5 +434,4 @@ export default function CreateEditPackagePage() {
 				</form>
 			</div>
 		</div>
-	);
-}
+	</>

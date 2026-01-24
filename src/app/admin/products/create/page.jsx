@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AdminHeader from "@/components/admin/header";
 import { 
   Plus, 
   Upload, 
@@ -109,7 +110,9 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="w-full px-4 sm:px-8 py-6 space-y-8 animate-in fade-in duration-500">
+    <>
+      <AdminHeader />
+      <div className="w-full p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-8">
         <div className="space-y-1">
           <Link href="/admin/products" className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">
@@ -335,5 +338,6 @@ export default function CreateProductPage() {
         </div>
       </form>
     </div>
+    </>
   );
 }

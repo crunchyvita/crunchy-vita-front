@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { messageAPI } from '@/lib/api';
+import AdminHeader from '@/components/admin/header';
 import { 
   Mail, MailOpen, Trash2, RefreshCw, Reply, Search,
   CheckCircle2, Clock, Inbox, ChevronRight, AlertTriangle,
@@ -107,6 +108,8 @@ export default function ContactMessagesPage() {
     );
 
   return (
+    <>
+    <AdminHeader />
     <div className="flex h-screen bg-white overflow-hidden font-sans">
       
       {/* SIDEBAR : LISTE DES MESSAGES */}
@@ -328,5 +331,6 @@ export default function ContactMessagesPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

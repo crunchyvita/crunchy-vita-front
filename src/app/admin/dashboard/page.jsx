@@ -220,14 +220,47 @@ function AdminDashboard() {
                 {/* Profile */}
                 <div className="relative">
                   <button onClick={() => { setShowProfileDropdown(!showProfileDropdown); setShowMessagesDropdown(false); setShowNotificationsDropdown(false); }} className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition">
-                    <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm uppercase">
+                    {user?.photo ? (
+                      <img
+                        src={user.photo}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm uppercase"
+                      style={{ display: user?.photo ? 'none' : 'flex' }}
+                    >
                       {user?.name?.[0] || <User className="h-4 w-4" />}
                     </div>
                     <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
                   </button>
                   {showProfileDropdown && (
                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="p-4  bg-slate-50">
+                      <div className="p-4 bg-slate-50">
+                        <div className="flex items-center gap-3 mb-2">
+                          {user?.photo ? (
+                            <img
+                              src={user.photo}
+                              alt={user.name}
+                              className="h-12 w-12 rounded-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="h-12 w-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase"
+                            style={{ display: user?.photo ? 'none' : 'flex' }}
+                          >
+                            {user?.name?.[0] || <User className="h-5 w-5" />}
+                          </div>
+                        </div>
                         <p className="text-sm font-bold">{user?.name}</p>
                         <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                       </div>

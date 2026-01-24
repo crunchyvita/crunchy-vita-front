@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AdminHeader from "@/components/admin/header";
 import {
 	ArrowLeft,
 	Package,
@@ -89,7 +90,9 @@ export default function PackageDetailPage({ params }) {
 
 
 	return (
-		<div className="space-y-6">
+		<>
+			<AdminHeader />
+			<div className="space-y-6 p-6 lg:p-8">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<button
@@ -205,5 +208,4 @@ export default function PackageDetailPage({ params }) {
 			</div>
 
 		</div>
-	);
-}
+	</>

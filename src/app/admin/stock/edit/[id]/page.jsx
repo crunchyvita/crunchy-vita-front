@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import AdminHeader from "@/components/admin/header";
 import { stockAPI } from "@/lib/api";
 import { ArrowLeft, Info, AlertTriangle, CheckCircle2, TrendingUp, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
 
@@ -124,7 +125,9 @@ export default function EditStockPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <AdminHeader />
+      <div className="space-y-6 p-6 lg:p-8">
       {/* --- TOP NAVIGATION --- */}
       <div className="flex items-center justify-between">
         <div>
@@ -306,5 +309,6 @@ export default function EditStockPage() {
       )}
 
     </div>
+    </>
   );
 }

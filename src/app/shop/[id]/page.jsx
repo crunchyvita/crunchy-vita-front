@@ -40,6 +40,12 @@ export default function ProductDetailPage() {
 
       const data = await response.json();
       console.log('Fetched product data:', data);
+      console.log('Comments:', data.comments);
+      if (data.comments && data.comments.length > 0) {
+        console.log('First comment:', data.comments[0]);
+        console.log('First comment userId:', data.comments[0].userId);
+        console.log('First comment userId photo:', data.comments[0].userId?.photo);
+      }
       setProduct(data);
     } catch (err) {
       setError(err.message);
@@ -272,7 +278,8 @@ export default function ProductDetailPage() {
             _id: tempCommentId,
             userId: {
               _id: user.id,
-              name: isAnonymous ? 'Anonymous' : user.name
+              name: isAnonymous ? 'Anonymous' : user.name,
+              photo: user.photo  // Include photo for immediate display
             },
             content: comment.trim(),
             isAnonymous: isAnonymous,
@@ -351,7 +358,8 @@ export default function ProductDetailPage() {
               _id: data.data.comment._id,
               userId: {
                 _id: user.id,
-                name: isAnonymous ? 'Anonymous' : user.name
+                name: isAnonymous ? 'Anonymous' : user.name,
+                photo: user.photo  // Include photo in backend update too
               },
               content: data.data.comment.content,
               isAnonymous: data.data.comment.isAnonymous || isAnonymous,
@@ -380,16 +388,32 @@ export default function ProductDetailPage() {
   const confirmDeleteComment = async () => {
     if (!commentToDelete) return;
     
-    setDeletingCommentId(commentToDelete);
+    const commentIdToDelete = commentToDelete;
+    
+    // Store original state for potential rollback
+    const originalProduct = { ...product };
+    
+    // Optimistic update: Remove comment immediately from UI
+    setProduct(prevProduct => ({
+      ...prevProduct,
+      comments: prevProduct.comments.filter(c => c._id !== commentIdToDelete)
+    }));
+    
+    // Close modal and reset state immediately
+    setDeleteAlertOpen(false);
+    setCommentToDelete(null);
+    setDeletingCommentId(null);
+    
+    // Make API call in background
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setDeleteAlertOpen(false);
-        setCommentToDelete(null);
+        // Rollback if no token
+        setProduct(originalProduct);
         return;
       }
 
-      const response = await fetch(`/api/products/${params.id}/reviews?commentId=${commentToDelete}`, {
+      const response = await fetch(`/api/products/${params.id}/reviews?commentId=${commentIdToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -399,23 +423,14 @@ export default function ProductDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Failed to delete review');
+        // Rollback on error
+        setProduct(originalProduct);
+        console.error('Failed to delete comment:', data.error || data.message);
       }
-
-      // Optimized update: Remove comment from state without full reload
-      setProduct(prevProduct => ({
-        ...prevProduct,
-        comments: prevProduct.comments.filter(c => c._id !== commentToDelete)
-      }));
-      
-      setDeleteAlertOpen(false);
-      setCommentToDelete(null);
     } catch (err) {
+      // Rollback on error
+      setProduct(originalProduct);
       console.error('Error deleting comment:', err);
-      setDeleteAlertOpen(false);
-      setCommentToDelete(null);
-    } finally {
-      setDeletingCommentId(null);
     }
   };
 
@@ -788,8 +803,20 @@ export default function ProductDetailPage() {
                       <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                         <div className="flex items-start gap-4">
                           {/* Avatar */}
-                          <div className="w-12 h-12 rounded-full bg-[#064E3B] flex items-center justify-center text-white shrink-0 shadow-sm">
-                            <User size={24} />
+                          <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 shadow-sm bg-[#064E3B]">
+                            {review.userId?.photo && !review.isAnonymous ? (
+                              <img
+                                src={review.userId.photo}
+                                alt={userName}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                                }}
+                              />
+                            ) : (
+                              <User size={24} />
+                            )}
                           </div>
                           
                           <div className="flex-1 min-w-0">
