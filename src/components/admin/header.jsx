@@ -257,6 +257,17 @@ export default function AdminHeader() {
                     <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                   </div>
                   <div className="p-2">
+                    <button
+                      onClick={() => {
+                        router.push('/profile');
+                        setShowProfileDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition font-medium"
+                    >
+                      <User className="h-4 w-4" /> Account
+                    </button>
+                  </div>
+                  <div className="p-2 border-t border-slate-100">
                     <button 
                       onClick={logout} 
                       className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium"

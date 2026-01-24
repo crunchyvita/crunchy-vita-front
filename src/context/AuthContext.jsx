@@ -25,7 +25,19 @@ export function AuthProvider({ children }) {
       }
 
       const response = await authAPI.getMe();
-      setUser(response.user);
+      
+      // Handle photo URL construction for local uploads
+      let userData = response.user;
+      if (userData?.photo && !userData.photo.startsWith('http')) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+        userData = {
+          ...userData,
+          photo: `${cleanBaseUrl}${userData.photo}`
+        };
+      }
+      
+      setUser(userData);
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
@@ -39,8 +51,20 @@ export function AuthProvider({ children }) {
     try {
       const response = await authAPI.login(email, password);
       localStorage.setItem('token', response.token);
-      setUser(response.user);
-      return { success: true, user: response.user };
+      
+      // Handle photo URL construction for local uploads
+      let userData = response.user;
+      if (userData?.photo && !userData.photo.startsWith('http')) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+        userData = {
+          ...userData,
+          photo: `${cleanBaseUrl}${userData.photo}`
+        };
+      }
+      
+      setUser(userData);
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -50,8 +74,20 @@ export function AuthProvider({ children }) {
     try {
       const response = await authAPI.register(name, email, password);
       localStorage.setItem('token', response.token);
-      setUser(response.user);
-      return { success: true, user: response.user };
+      
+      // Handle photo URL construction for local uploads
+      let userData = response.user;
+      if (userData?.photo && !userData.photo.startsWith('http')) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+        userData = {
+          ...userData,
+          photo: `${cleanBaseUrl}${userData.photo}`
+        };
+      }
+      
+      setUser(userData);
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -67,6 +103,30 @@ export function AuthProvider({ children }) {
     if (token) {
       localStorage.setItem('token', token);
     }
+    
+    // Handle photo URL construction for local uploads
+    if (userData?.photo && !userData.photo.startsWith('http')) {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+      userData = {
+        ...userData,
+        photo: `${cleanBaseUrl}${userData.photo}`
+      };
+    }
+    
+    setUser(userData);
+  };
+
+  const updateUser = (userData) => {
+    // Handle photo URL construction for local uploads
+    if (userData?.photo && !userData.photo.startsWith('http')) {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+      userData = {
+        ...userData,
+        photo: `${cleanBaseUrl}${userData.photo}`
+      };
+    }
     setUser(userData);
   };
 
@@ -77,6 +137,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     setUserData,
+    updateUser,
     isAuthenticated: !!user,
   };
 

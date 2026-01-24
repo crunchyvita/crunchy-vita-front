@@ -39,13 +39,26 @@ export default function ProductDetailPage() {
       }
 
       const data = await response.json();
-      console.log('Fetched product data:', data);
-      console.log('Comments:', data.comments);
+      
+      // Process comment photos to construct full URLs for local uploads
       if (data.comments && data.comments.length > 0) {
-        console.log('First comment:', data.comments[0]);
-        console.log('First comment userId:', data.comments[0].userId);
-        console.log('First comment userId photo:', data.comments[0].userId?.photo);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
+        
+        data.comments = data.comments.map(comment => {
+          if (comment.userId?.photo && !comment.userId.photo.startsWith('http')) {
+            return {
+              ...comment,
+              userId: {
+                ...comment.userId,
+                photo: `${cleanBaseUrl}${comment.userId.photo}`
+              }
+            };
+          }
+          return comment;
+        });
       }
+      
       setProduct(data);
     } catch (err) {
       setError(err.message);
