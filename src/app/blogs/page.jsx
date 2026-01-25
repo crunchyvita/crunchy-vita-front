@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import HeaderHome from "@/components/header-home";
 import Footer from "@/components/footer";
-import { Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -42,6 +42,7 @@ export default function BlogsPage() {
 
   const featuredBlog = blogs.length > 0 ? blogs[0] : null;
   const otherBlogs = blogs.slice(1);
+  const hasFeaturedImage = Boolean(featuredBlog?.imageUrl);
 
   return (
     <>
@@ -68,12 +69,12 @@ export default function BlogsPage() {
               <>
                 {/* Featured Blog Post */}
                 {featuredBlog && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
+                  <div className={`grid grid-cols-1 gap-12 mb-16 ${hasFeaturedImage ? "lg:grid-cols-3" : ""}`}>
                     {/* Featured Image */}
-                    <div className="lg:col-span-2">
-                      <Link href={`/blogs/${featuredBlog._id}`}>
-                        <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer group">
-                          {featuredBlog.imageUrl ? (
+                    {hasFeaturedImage && (
+                      <div className="lg:col-span-2">
+                        <Link href={`/blogs/${featuredBlog._id}`}>
+                          <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer group">
                             <Image
                               src={`${backendUrl}${featuredBlog.imageUrl}`}
                               alt={featuredBlog.title}
@@ -82,14 +83,10 @@ export default function BlogsPage() {
                               unoptimized={true}
                               priority
                             />
-                          ) : (
-                            <div className="h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
-                              <span className="text-gray-400">Image non disponible</span>
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                    </div>
+                          </div>
+                        </Link>
+                      </div>
+                    )}
 
                     {/* Featured Blog Sidebar */}
                     <div className="flex flex-col justify-center">
@@ -117,8 +114,8 @@ export default function BlogsPage() {
                     {otherBlogs.map((blog) => (
                       <Link key={blog._id} href={`/blogs/${blog._id}`}>
                         <div className="cursor-pointer group">
-                          <div className="relative h-64 w-full bg-gray-200 rounded-lg overflow-hidden mb-6">
-                            {blog.imageUrl ? (
+                          {blog.imageUrl && (
+                            <div className="relative h-64 w-full bg-gray-200 rounded-lg overflow-hidden mb-6">
                               <Image
                                 src={`${backendUrl}${blog.imageUrl}`}
                                 alt={blog.title}
@@ -126,12 +123,8 @@ export default function BlogsPage() {
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                                 unoptimized={true}
                               />
-                            ) : (
-                              <div className="h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
-                                <span className="text-gray-400 text-sm">Image non disponible</span>
-                              </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-green-600 transition-colors uppercase">
                               {blog.title}

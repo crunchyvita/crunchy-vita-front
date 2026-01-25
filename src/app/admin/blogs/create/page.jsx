@@ -13,7 +13,6 @@ export default function CreateBlogPage() {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    publicationDate: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -49,8 +48,8 @@ export default function CreateBlogPage() {
 
     try {
       // Validate required fields
-      if (!formData.title || !formData.content || !formData.publicationDate) {
-        setError("All fields are required");
+      if (!formData.title || !formData.content) {
+        setError("Title and content are required");
         setLoading(false);
         return;
       }
@@ -59,7 +58,6 @@ export default function CreateBlogPage() {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
       formDataToSend.append("content", formData.content);
-      formDataToSend.append("publicationDate", formData.publicationDate);
 
       if (imageFile) {
         formDataToSend.append("image", imageFile);
@@ -137,20 +135,6 @@ export default function CreateBlogPage() {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter blog title"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-          />
-        </div>
-
-        {/* Publication Date */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Publication Date <span className="text-red-600">*</span>
-          </label>
-          <input
-            type="datetime-local"
-            name="publicationDate"
-            value={formData.publicationDate}
-            onChange={handleInputChange}
             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
