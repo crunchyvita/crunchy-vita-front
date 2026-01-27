@@ -127,13 +127,14 @@ export default function AdminHeader() {
     
     if (notification?.type === 'new_comment') {
       // Navigate to ADMIN product detail page with comment ID for moderation
+      // and show the Pending comments tab with the list of pending comments
       const productId = notification?.metadata?.productId;
       const commentId = notification?.relatedId;
       
       console.log('[Notification Click] Extracted - ProductId:', productId, 'CommentId:', commentId);
       
       if (productId && commentId) {
-        const url = `/admin/products/${productId}?review=${commentId}&moderateMode=true`;
+        const url = `/admin/products/${productId}?review=${commentId}&moderateMode=true&tab=pending`;
         console.log('[Notification Click] Navigating to:', url);
         router.push(url);
       } else {
@@ -317,7 +318,17 @@ export default function AdminHeader() {
               </button>
               {showNotificationsDropdown && (
                 <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 bg-slate-100 font-bold text-sm">Notifications</div>
+                  <div className="p-4 bg-slate-100 font-bold text-sm flex items-center justify-between">
+                    <span>Notifications</span>
+                    {unreadNotifications > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                      >
+                        Marquer tout comme lu
+                      </button>
+                    )}
+                  </div>
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center text-slate-400 text-sm">Aucune notification</div>
@@ -337,6 +348,18 @@ export default function AdminHeader() {
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-bold">{n.title}</p>
                               <p className="text-xs text-slate-500 line-clamp-1">{n.message}</p>
+                              {n.createdAt && (
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                  {new Date(n.createdAt).toLocaleDateString('fr-FR', { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                  })} à {new Date(n.createdAt).toLocaleTimeString('fr-FR', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <button

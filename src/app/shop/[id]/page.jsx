@@ -840,8 +840,27 @@ export default function ProductDetailPage() {
 
                 {(() => {
               const allReviews = getAllReviews();
-              // Filter to show only reviews with comments
-              const reviews = allReviews.filter(review => review.content && review.content.trim());
+              // Filter based on user role
+              const reviews = allReviews.filter(review => {
+                if (!review.content || !review.content.trim()) return false;
+                
+                // Admin sees only approved
+                if (user?.role === 'ADMIN') {
+                  return review.status === 'approved' || !review.status;
+                }
+                
+                // Client sees approved + their own pending
+                if (user) {
+                  const isOwnComment = review.userId?._id?.toString() === user.id?.toString();
+                  const isApproved = review.status === 'approved' || !review.status;
+                  const isPending = review.status === 'pending';
+                  
+                  return isApproved || (isPending && isOwnComment);
+                }
+                
+                // Non-logged in users see only approved
+                return review.status === 'approved' || !review.status;
+              });
               const displayedReviews = reviews.slice(0, commentsToShow);
               const hasMoreReviews = reviews.length > commentsToShow;
               
@@ -869,15 +888,15 @@ export default function ProductDetailPage() {
                       <div 
                         key={review.id} 
                         id={`comment-${review.id}`}
-                        className={`bg-white border transition-all rounded-lg overflow-hidden ${
+                        className={`bg-white border transition-all rounded-xl overflow-hidden ${
                           isBeingModerated
                             ? 'border-2 border-blue-500 ring-4 ring-blue-100 shadow-lg'
                             : 'border border-slate-200 hover:bg-slate-50'
                         }`}
                       >
-                        <div className="flex gap-3 p-4 group">
+                        <div className="flex gap-4 p-6 group">
                           {/* User Avatar */}
-                          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#064E3B]">
+                          <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#064E3B]">
                             {review.userId?.photo && !review.isAnonymous ? (
                               <img
                                 src={review.userId.photo}
@@ -890,44 +909,44 @@ export default function ProductDetailPage() {
                               />
                             ) : null}
                             <User 
-                              size={20} 
+                              size={24} 
                               style={{ display: (review.userId?.photo && !review.isAnonymous) ? 'none' : 'block' }}
                             />
                           </div>
                           
                           <div className="min-w-0 flex-1">
                             {/* Name and actions */}
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <p className="text-sm font-bold text-slate-900">{userName}</p>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <p className="text-base font-bold text-slate-900">{userName}</p>
                               {isOwnComment && (
                                 <button
                                   onClick={() => handleDeleteComment(review.id)}
                                   disabled={deletingCommentId === review.id}
-                                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                                  className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
                                   title={isPending ? "Delete your pending review" : "Delete your review"}
                                 >
                                   {deletingCommentId === review.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Loader2 className="h-5 w-5 animate-spin" />
                                   ) : (
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="h-5 w-5" />
                                   )}
                                 </button>
                               )}
                             </div>
                             
                             {/* Comment text */}
-                            <p className="text-xs text-slate-500 mb-1.5">
+                            <p className="text-base text-slate-700 mb-3 leading-relaxed">
                               {review.content}
                             </p>
                             
                             {/* Rating badge */}
                             {review.rating && (
-                              <div className="flex items-center gap-1 w-fit mb-1.5">
-                                <div className="flex items-center gap-0.5">
+                              <div className="flex items-center gap-1 w-fit mb-2">
+                                <div className="flex items-center gap-1">
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`h-3 w-3 ${
+                                      className={`h-4 w-4 ${
                                         i < review.rating
                                           ? 'fill-yellow-400 text-yellow-400'
                                           : 'fill-gray-300 text-gray-300'
@@ -935,76 +954,6 @@ export default function ProductDetailPage() {
                                     />
                                   ))}
                                 </div>
-                              </div>
-                            )}
-                            
-
-
-                            {/* Status badges for admin */}
-                            {user?.role === 'ADMIN' && (
-                              <div className="flex items-center gap-1.5 mt-1.5">
-                                {isPending && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-yellow-50 text-yellow-700 ring-yellow-600/20">
-                                    Pending
-                                  </span>
-                                )}
-                                {review.status === 'rejected' && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-orange-50 text-orange-700 ring-orange-600/20">
-                                    Rejected
-                                  </span>
-                                )}
-                                {review.status === 'deleted' && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-red-50 text-red-700 ring-red-600/20">
-                                    Deleted
-                                  </span>
-                                )}
-                                {review.status === 'approved' && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-green-50 text-green-700 ring-green-600/20">
-                                    Approved
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Admin moderation buttons (always show for pending comments) */}
-                            {user?.role === 'ADMIN' && isPending && (
-                              <div className="flex gap-2 mt-2">
-                                <button
-                                  onClick={() => handleApproveComment(review.id)}
-                                  disabled={approvingComment}
-                                  className="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-bold rounded transition-colors flex items-center justify-center gap-1"
-                                  title="Approve this comment"
-                                >
-                                  {approvingComment ? (
-                                    <>
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                      <span>Approving...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Check className="h-3 w-3" />
-                                      <span>Approve</span>
-                                    </>
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => handleRejectComment(review.id)}
-                                  disabled={rejectingComment}
-                                  className="flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-xs font-bold rounded transition-colors flex items-center justify-center gap-1"
-                                  title="Reject this comment"
-                                >
-                                  {rejectingComment ? (
-                                    <>
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                      <span>Rejecting...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <X className="h-3 w-3" />
-                                      <span>Reject</span>
-                                    </>
-                                  )}
-                                </button>
                               </div>
                             )}
                             

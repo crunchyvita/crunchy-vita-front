@@ -40,6 +40,18 @@ export default function ProductDetailPage() {
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
 
+  // Parse URL params on mount to set active tab
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'pending') {
+        setActiveTab('pending');
+        console.log('[Admin Product] Set active tab to pending from URL');
+      }
+    }
+  }, []);
+
   const loadProduct = async () => {
     setLoading(true);
     try {
@@ -103,14 +115,21 @@ export default function ProductDetailPage() {
   });
 
   // Combine comments with ratings and filter out rating-only entries
-  const getCommentsWithRatings = () => {
+  const getCommentsWithRatings = (statusFilter = null) => {
     const comments = (product.comments || [])
-      .filter(comment => 
-        comment.content && 
-        comment.content.trim().length > 0 &&
-        // Only show approved and pending comments, hide rejected and deleted
-        (comment.status === 'approved' || comment.status === 'pending' || !comment.status)
-      );
+      .filter(comment => {
+        const hasContent = comment.content && comment.content.trim().length > 0;
+        const isVisible = (comment.status === 'approved' || comment.status === 'pending' || !comment.status);
+        
+        // Apply status filter if provided
+        if (statusFilter === 'approved') {
+          return hasContent && isVisible && (comment.status === 'approved' || !comment.status);
+        } else if (statusFilter === 'pending') {
+          return hasContent && isVisible && comment.status === 'pending';
+        }
+        // No filter - show all approved and pending
+        return hasContent && isVisible;
+      });
 
     return comments.map(comment => {
       // Get user IDs for comparison
@@ -136,9 +155,12 @@ export default function ProductDetailPage() {
     }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
-  const commentsWithRatings = getCommentsWithRatings();
-  const displayedComments = commentsWithRatings.slice(0, commentsToShow);
-  const hasMoreComments = commentsWithRatings.length > commentsToShow;
+  const approvedComments = getCommentsWithRatings('approved');
+  const pendingComments = getCommentsWithRatings('pending');
+  const displayedComments = activeTab === 'reviews' 
+    ? approvedComments.slice(0, commentsToShow)
+    : pendingComments.slice(0, commentsToShow);
+  const hasMoreComments = (activeTab === 'reviews' ? approvedComments.length : pendingComments.length) > commentsToShow;
 
   const handleDeleteComment = (commentId) => {
     setCommentToDelete(commentId);
@@ -335,9 +357,17 @@ export default function ProductDetailPage() {
               <div className="flex border-b border-slate-100">
                 <button onClick={() => setActiveTab("reviews")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "reviews" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
                   <MessageSquare size={16} /> Reviews
-                  {commentsWithRatings.length > 0 && (
+                  {approvedComments.length > 0 && (
                     <span className="ml-1 px-2 py-0.5 bg-blue-100 text-gray-700 rounded-full text-xs">
-                      {commentsWithRatings.length}
+                      {approvedComments.length}
+                    </span>
+                  )}
+                </button>
+                <button onClick={() => setActiveTab("pending")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "pending" ? "text-gray-800 border-b-2 border-gray-600 bg-yellow-50/30" : "text-slate-400 hover:text-slate-600"}`}>
+                  <AlertTriangle size={16} /> Pending
+                  {pendingComments.length > 0 && (
+                    <span className="ml-1 px-2 py-0.5 bg-yellow-100 text-gray-700 rounded-full text-xs">
+                      {pendingComments.length}
                     </span>
                   )}
                 </button>
@@ -346,7 +376,7 @@ export default function ProductDetailPage() {
                 </button>
               </div>
               <div className="p-8">
-                {activeTab === "reviews" ? (
+                {(activeTab === "reviews" || activeTab === "pending") ? (
                   <div className="space-y-6">
                     {displayedComments.length === 0 ? (
                       <div className="text-center py-12 text-slate-400">
@@ -367,9 +397,7 @@ export default function ProductDetailPage() {
                             <div
                               key={comment._id}
                               id={`admin-comment-${comment._id}`}
-                              className={`flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0 transition-all ${
-                                isTarget ? 'ring-4 ring-blue-300 border-2 border-blue-500 rounded-xl bg-blue-50/30 p-4 -mx-4 shadow-lg' : ''
-                              }`}
+                              className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0 transition-all hover:bg-slate-50/50 rounded-lg p-2 -mx-2"
                             >
                               {/* Avatar */}
                               <div className="flex-shrink-0">
@@ -420,64 +448,59 @@ export default function ProductDetailPage() {
                                     )}
                                   </div>
                                   
-                                  {/* Delete Button (Admin only) */}
-                                  <button
-                                    onClick={() => handleDeleteComment(comment._id)}
-                                    disabled={deletingCommentId === comment._id || isDeleted}
-                                    className={`p-2 ${isDeleted ? 'text-slate-400' : 'text-red-600 hover:bg-red-50'} rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-                                    title={isDeleted ? "Already deleted" : "Delete comment"}
-                                  >
-                                    {deletingCommentId === comment._id ? (
-                                      <Loader2 size={16} className="animate-spin" />
-                                    ) : (
-                                      <Trash2 size={16} />
+                                  {/* Action Buttons (top right) */}
+                                  <div className="flex items-center gap-1">
+                                    {/* Moderation actions for ALL pending comments */}
+                                    {isPending && (
+                                      <>
+                                        <button
+                                          onClick={() => handleApprovePending(comment._id)}
+                                          disabled={approvingId === comment._id}
+                                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                          title="Approve this comment"
+                                        >
+                                          {approvingId === comment._id ? (
+                                            <Loader2 size={16} className="animate-spin" />
+                                          ) : (
+                                            <Check size={16} />
+                                          )}
+                                        </button>
+                                        <button
+                                          onClick={() => handleRejectPending(comment._id)}
+                                          disabled={rejectingId === comment._id}
+                                          className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                          title="Reject this comment"
+                                        >
+                                          {rejectingId === comment._id ? (
+                                            <Loader2 size={16} className="animate-spin" />
+                                          ) : (
+                                            <X size={16} />
+                                          )}
+                                        </button>
+                                      </>
                                     )}
-                                  </button>
+                                    
+                                    {/* Delete Button (Admin only) - Only show in Reviews tab */}
+                                    {!isPending && (
+                                      <button
+                                        onClick={() => handleDeleteComment(comment._id)}
+                                        disabled={deletingCommentId === comment._id || isDeleted}
+                                        className={`p-2 ${isDeleted ? 'text-slate-400' : 'text-red-600 hover:bg-red-50'} rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        title={isDeleted ? "Already deleted" : "Delete comment"}
+                                      >
+                                        {deletingCommentId === comment._id ? (
+                                          <Loader2 size={16} className="animate-spin" />
+                                        ) : (
+                                          <Trash2 size={16} />
+                                        )}
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                                 
                                 <p className="text-slate-700 leading-relaxed text-sm">
                                   {comment.content}
                                 </p>
-
-                                {/* Moderation actions for ALL pending comments */}
-                                {isPending && (
-                                  <div className="flex gap-2 pt-3">
-                                    <button
-                                      onClick={() => handleApprovePending(comment._id)}
-                                      disabled={approvingId === comment._id}
-                                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 disabled:bg-green-400 flex items-center justify-center gap-2 transition-all shadow-sm"
-                                    >
-                                      {approvingId === comment._id ? (
-                                        <>
-                                          <Loader2 size={16} className="animate-spin" />
-                                          <span>Approving...</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Check size={16} />
-                                          <span>Approve</span>
-                                        </>
-                                      )}
-                                    </button>
-                                    <button
-                                      onClick={() => handleRejectPending(comment._id)}
-                                      disabled={rejectingId === comment._id}
-                                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:bg-red-400 flex items-center justify-center gap-2 transition-all shadow-sm"
-                                    >
-                                      {rejectingId === comment._id ? (
-                                        <>
-                                          <Loader2 size={16} className="animate-spin" />
-                                          <span>Rejecting...</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <X size={16} />
-                                          <span>Reject</span>
-                                        </>
-                                      )}
-                                    </button>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           );
