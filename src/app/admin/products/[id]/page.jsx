@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { productAPI } from "@/lib/api";
+import { productAPI, reviewAPI } from "@/lib/api";
 import AdminHeader from "@/components/admin/header";
-import {
+import  {
   ArrowLeft,
   Calendar,
   History,
@@ -21,7 +21,9 @@ import {
   Star,
   Trash2,
   RefreshCw,
-  User
+  User,
+  X,
+  Check
 } from "lucide-react";
 
 export default function ProductDetailPage() {
@@ -34,6 +36,9 @@ export default function ProductDetailPage() {
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
+  const [moderateParams, setModerateParams] = useState({ review: null, moderateMode: false });
+  const [approvingId, setApprovingId] = useState(null);
+  const [rejectingId, setRejectingId] = useState(null);
 
   const loadProduct = async () => {
     setLoading(true);
@@ -50,6 +55,30 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (productId) loadProduct();
   }, [productId]);
+
+  // Parse URL search params for moderation mode
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const review = params.get('review');
+      const moderateMode = params.get('moderateMode') === 'true';
+      console.log('[Admin Product] URL Params - review:', review, 'moderateMode:', moderateMode);
+      setModerateParams({ review, moderateMode });
+      // Auto-scroll to targeted comment
+      if (review && moderateMode) {
+        console.log('[Admin Product] Will scroll to comment:', review);
+        setTimeout(() => {
+          const el = document.getElementById(`admin-comment-${review}`);
+          if (el) {
+            console.log('[Admin Product] Scrolling to element:', el);
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            console.warn('[Admin Product] Comment element not found:', `admin-comment-${review}`);
+          }
+        }, 600);
+      }
+    }
+  }, []);
 
   if (!product && !loading) return <div className="p-20 text-center text-slate-500">Product not found.</div>;
   
@@ -75,9 +104,13 @@ export default function ProductDetailPage() {
 
   // Combine comments with ratings and filter out rating-only entries
   const getCommentsWithRatings = () => {
-    const comments = (product.comments || []).filter(comment => 
-      comment.content && comment.content.trim().length > 0
-    );
+    const comments = (product.comments || [])
+      .filter(comment => 
+        comment.content && 
+        comment.content.trim().length > 0 &&
+        // Only show approved and pending comments, hide rejected and deleted
+        (comment.status === 'approved' || comment.status === 'pending' || !comment.status)
+      );
 
     return comments.map(comment => {
       // Get user IDs for comparison
@@ -114,40 +147,82 @@ export default function ProductDetailPage() {
 
   const confirmDeleteComment = async () => {
     if (!commentToDelete) return;
-    
     const commentIdToDelete = commentToDelete;
-    
+
     // Store original state for rollback
     const originalProduct = { ...product };
-    const originalCommentsToShow = commentsToShow;
-    
-    // Optimistic update: Remove comment immediately
+
+    // Optimistic update: mark as deleted
     setProduct(prevProduct => ({
       ...prevProduct,
-      comments: prevProduct.comments.filter(c => c._id !== commentIdToDelete)
+      comments: (prevProduct.comments || []).map(c => c._id === commentIdToDelete ? { ...c, status: 'deleted' } : c)
     }));
-    
-    // Reset comments to show count if needed
-    const remainingComments = product.comments.filter(c => c._id !== commentIdToDelete && c.content?.trim());
-    if (remainingComments.length <= commentsToShow) {
-      setCommentsToShow(3);
-    }
-    
+
     // Close modal immediately
     setDeleteAlertOpen(false);
     setCommentToDelete(null);
-    
-    // Make API call in background
+
     try {
       await productAPI.deleteCommentAsAdmin(productId, commentIdToDelete);
     } catch (err) {
       console.error("Error deleting comment:", err);
-      
       // Rollback on error
       setProduct(originalProduct);
-      setCommentsToShow(originalCommentsToShow);
-      
       alert("Failed to delete comment. Please try again.");
+    }
+  };
+
+  // Admin moderation: approve pending comment
+  const handleApprovePending = async (commentId) => {
+    console.log('[Admin Product] Approving comment:', commentId);
+    setApprovingId(commentId);
+    try {
+      await reviewAPI.approve(productId, commentId);
+      console.log('[Admin Product] Comment approved successfully');
+      // Update local state to mark as approved
+      setProduct(prev => ({
+        ...prev,
+        comments: (prev.comments || []).map(c => c._id === commentId ? { ...c, status: 'approved' } : c)
+      }));
+      // Clear moderation mode after approval
+      if (moderateParams.moderateMode) {
+        setTimeout(() => {
+          window.history.replaceState({}, '', `/admin/products/${productId}`);
+          setModerateParams({ review: null, moderateMode: false });
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Error approving comment:', err);
+      alert("Failed to approve comment. Please try again.");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // Admin moderation: reject pending comment
+  const handleRejectPending = async (commentId) => {
+    console.log('[Admin Product] Rejecting comment:', commentId);
+    setRejectingId(commentId);
+    try {
+      await reviewAPI.reject(productId, commentId);
+      console.log('[Admin Product] Comment rejected successfully');
+      // Update comment status to rejected (soft delete)
+      setProduct(prev => ({
+        ...prev,
+        comments: (prev.comments || []).map(c => c._id === commentId ? { ...c, status: 'rejected' } : c)
+      }));
+      // Clear moderation mode after rejection
+      if (moderateParams.moderateMode) {
+        setTimeout(() => {
+          window.history.replaceState({}, '', `/admin/products/${productId}`);
+          setModerateParams({ review: null, moderateMode: false });
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Error rejecting comment:', err);
+      alert("Failed to reject comment. Please try again.");
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -256,6 +331,7 @@ export default function ProductDetailPage() {
 
             {/* COMMENTS & HISTORY */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              
               <div className="flex border-b border-slate-100">
                 <button onClick={() => setActiveTab("reviews")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "reviews" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
                   <MessageSquare size={16} /> Reviews
@@ -282,9 +358,19 @@ export default function ProductDetailPage() {
                       <>
                         {displayedComments.map((comment) => {
                           const userName = comment.isAnonymous ? "Anonymous" : (comment.userId?.name || "Anonymous");
+                          const isPending = comment.status === 'pending';
+                          const isRejected = comment.status === 'rejected';
+                          const isDeleted = comment.status === 'deleted';
+                          const isTarget = moderateParams.moderateMode && moderateParams.review === comment._id?.toString();
                           
                           return (
-                            <div key={comment._id} className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
+                            <div
+                              key={comment._id}
+                              id={`admin-comment-${comment._id}`}
+                              className={`flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0 transition-all ${
+                                isTarget ? 'ring-4 ring-blue-300 border-2 border-blue-500 rounded-xl bg-blue-50/30 p-4 -mx-4 shadow-lg' : ''
+                              }`}
+                            >
                               {/* Avatar */}
                               <div className="flex-shrink-0">
                                 {!comment.isAnonymous && comment.userId?.photo ? (
@@ -317,14 +403,29 @@ export default function ProductDetailPage() {
                                     <p className="text-xs text-slate-500 font-medium">
                                       {formatDate(comment.createdAt)}
                                     </p>
+                                    {isPending && (
+                                      <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-yellow-50 text-yellow-700 ring-yellow-600/20">
+                                        Pending
+                                      </span>
+                                    )}
+                                    {isRejected && (
+                                      <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-orange-50 text-orange-700 ring-orange-600/20">
+                                        Rejected
+                                      </span>
+                                    )}
+                                    {isDeleted && (
+                                      <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-red-50 text-red-700 ring-red-600/20">
+                                        Deleted
+                                      </span>
+                                    )}
                                   </div>
                                   
                                   {/* Delete Button (Admin only) */}
                                   <button
                                     onClick={() => handleDeleteComment(comment._id)}
-                                    disabled={deletingCommentId === comment._id}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Delete comment"
+                                    disabled={deletingCommentId === comment._id || isDeleted}
+                                    className={`p-2 ${isDeleted ? 'text-slate-400' : 'text-red-600 hover:bg-red-50'} rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    title={isDeleted ? "Already deleted" : "Delete comment"}
                                   >
                                     {deletingCommentId === comment._id ? (
                                       <Loader2 size={16} className="animate-spin" />
@@ -337,6 +438,46 @@ export default function ProductDetailPage() {
                                 <p className="text-slate-700 leading-relaxed text-sm">
                                   {comment.content}
                                 </p>
+
+                                {/* Moderation actions for ALL pending comments */}
+                                {isPending && (
+                                  <div className="flex gap-2 pt-3">
+                                    <button
+                                      onClick={() => handleApprovePending(comment._id)}
+                                      disabled={approvingId === comment._id}
+                                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 disabled:bg-green-400 flex items-center justify-center gap-2 transition-all shadow-sm"
+                                    >
+                                      {approvingId === comment._id ? (
+                                        <>
+                                          <Loader2 size={16} className="animate-spin" />
+                                          <span>Approving...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Check size={16} />
+                                          <span>Approve</span>
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectPending(comment._id)}
+                                      disabled={rejectingId === comment._id}
+                                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:bg-red-400 flex items-center justify-center gap-2 transition-all shadow-sm"
+                                    >
+                                      {rejectingId === comment._id ? (
+                                        <>
+                                          <Loader2 size={16} className="animate-spin" />
+                                          <span>Rejecting...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <X size={16} />
+                                          <span>Reject</span>
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           );

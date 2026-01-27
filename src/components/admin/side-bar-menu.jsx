@@ -36,7 +36,7 @@ const NAV_ITEMS = [
 	{ label: "Packages", href: "/admin/package", icon: Package },
 	{ label: "Stock", href: "/admin/stock", icon: ShoppingCart },
 	{ label: "Blog", href: "/admin/blogs", icon: FileText },
-	{ label: "Comments", href: "/admin/comments", icon: MessageCircle },
+	
 	{ label: "Contact", href: "/admin/contact", icon: MessageSquare },
 	{ label: "Reports", href: "/admin/reports", icon: BarChart3 },
 	{ label: "Checkout", href: "/admin/checkout", icon: CreditCard },

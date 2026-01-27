@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Star, Heart, ShoppingCart, Plus, Minus, ChevronLeft, Package, Shield, Truck, Send, MessageSquare, Trash2, Loader2, AlertTriangle, X, RefreshCw, User } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Plus, Minus, ChevronLeft, Package, Shield, Truck, Send, MessageSquare, Trash2, Loader2, AlertTriangle, X, RefreshCw, User, Clock, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { productAPI, reviewAPI } from '@/lib/api';
 import Footer from '@/components/footer';
@@ -12,6 +12,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useState({});
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,10 +26,43 @@ export default function ProductDetailPage() {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
   const [commentsToShow, setCommentsToShow] = useState(3);
+  const [moderatingCommentId, setModeratingCommentId] = useState(null);
+  const [approvingComment, setApprovingComment] = useState(false);
+  const [rejectingComment, setRejectingComment] = useState(false);
+  const [moderateError, setModerateError] = useState('');
+
+  // Parse URL params on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setSearchParams({
+        review: params.get('review'),
+        moderateMode: params.get('moderateMode') === 'true'
+      });
+      // Debug logging
+      console.log('URL Params:', {
+        review: params.get('review'),
+        moderateMode: params.get('moderateMode')
+      });
+    }
+  }, []);
 
   useEffect(() => {
     fetchProduct();
   }, [params.id]);
+
+  // Auto-scroll to moderated comment when in moderation mode
+  useEffect(() => {
+    if (searchParams.moderateMode && searchParams.review) {
+      setTimeout(() => {
+        const element = document.getElementById(`comment-${searchParams.review}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          console.log('Scrolled to comment:', searchParams.review);
+        }
+      }, 500);
+    }
+  }, [searchParams, product]);
 
   const fetchProduct = async () => {
     try {
@@ -47,6 +81,11 @@ export default function ProductDetailPage() {
       }
 
       const data = await response.json();
+      
+      console.log(`[Product ${params.id}] Received comments:`, data.comments?.length || 0, 'comments');
+      if (data.comments) {
+        console.log('Comment statuses:', data.comments.map(c => ({ id: c._id, status: c.status })));
+      }
       
       // Process comment photos to construct full URLs for local uploads
       if (data.comments && data.comments.length > 0) {
@@ -278,11 +317,62 @@ export default function ProductDetailPage() {
         throw new Error(data?.message || 'Failed to submit review');
       }
 
+      const result = data.data || data;
+
       // Reset form after successful submission
       setReviewForm({ rating: 0, comment: '', isAnonymous: false });
 
-      // Refresh product to pick up updated ratings and comments
-      await fetchProduct();
+      // Optimistically update product state without refetching
+      setProduct((prev) => {
+        if (!prev) return prev;
+
+        // Update or add rating if returned
+        let updatedRatings = prev.ratings || [];
+        if (result?.rating) {
+          const existingIdx = updatedRatings.findIndex(r => (r.userId?._id?.toString?.() || r.userId?.toString?.()) === user?.id?.toString());
+          const ratingEntry = {
+            _id: result.rating._id,
+            userId: user?.id || result.rating.userId,
+            rating: result.rating.rating,
+            createdAt: result.rating.createdAt,
+          };
+          if (existingIdx !== -1) {
+            updatedRatings = [...updatedRatings];
+            updatedRatings[existingIdx] = ratingEntry;
+          } else {
+            updatedRatings = [...updatedRatings, ratingEntry];
+          }
+        }
+
+        // Add new comment if returned
+        let updatedComments = prev.comments || [];
+        if (result?.comment) {
+          const newComment = {
+            _id: result.comment._id,
+            userId: result.comment.isAnonymous
+              ? null
+              : {
+                  _id: user?.id,
+                  name: user?.name,
+                  photo: user?.photo,
+                },
+            content: result.comment.content,
+            isAnonymous: result.comment.isAnonymous,
+            displayName: result.comment.displayName,
+            status: result.comment.status || 'pending',
+            createdAt: result.comment.createdAt,
+          };
+          updatedComments = [newComment, ...updatedComments];
+        }
+
+        return {
+          ...prev,
+          ratings: updatedRatings,
+          comments: updatedComments,
+        };
+      });
+
+
       
       // Show success message briefly then clear it
       setTimeout(() => setReviewSuccess(''), 5000);
@@ -298,6 +388,48 @@ export default function ProductDetailPage() {
   const handleDeleteComment = (commentId) => {
     setCommentToDelete(commentId);
     setDeleteAlertOpen(true);
+  };
+
+  // Admin: Approve pending comment
+  const handleApproveComment = async (commentId) => {
+    setApprovingComment(true);
+    setModerateError('');
+    try {
+      await reviewAPI.approve(params.id, commentId);
+      // Update local state to reflect approval
+      setProduct(prev => ({
+        ...prev,
+        comments: prev.comments.map(c => 
+          c._id === commentId ? { ...c, status: 'approved' } : c
+        )
+      }));
+      setModeratingCommentId(null);
+    } catch (err) {
+      setModerateError(err.message || 'Erreur lors de l\'approbation');
+      console.error('Error approving comment:', err);
+    } finally {
+      setApprovingComment(false);
+    }
+  };
+
+  // Admin: Reject pending comment
+  const handleRejectComment = async (commentId) => {
+    setRejectingComment(true);
+    setModerateError('');
+    try {
+      await reviewAPI.reject(params.id, commentId);
+      // Remove comment from UI
+      setProduct(prev => ({
+        ...prev,
+        comments: prev.comments.filter(c => c._id !== commentId)
+      }));
+      setModeratingCommentId(null);
+    } catch (err) {
+      setModerateError(err.message || 'Erreur lors du rejet');
+      console.error('Error rejecting comment:', err);
+    } finally {
+      setRejectingComment(false);
+    }
   };
 
   const confirmDeleteComment = async () => {
@@ -696,6 +828,16 @@ export default function ProductDetailPage() {
 
               {/* Right Column: Reviews List */}
               <div className={user ? '' : 'lg:col-span-2'}>
+                {/* Moderation Mode Banner */}
+                {searchParams.moderateMode && user?.role === 'ADMIN' && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-900">
+                      Mode modération activé - Cliquez sur un commentaire en attente pour l'approuver ou le rejeter
+                    </span>
+                  </div>
+                )}
+
                 {(() => {
               const allReviews = getAllReviews();
               // Filter to show only reviews with comments
@@ -716,17 +858,26 @@ export default function ProductDetailPage() {
               }
 
               return (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {displayedReviews.map((review) => {
                     const userName = review.isAnonymous ? 'Anonymous' : (review.userId?.name || 'Anonymous');
                     const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
                     const isPending = review.status === 'pending';
+                    const isBeingModerated = searchParams.review === review.id?.toString() && searchParams.moderateMode;
                     
                     return (
-                      <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="flex items-start gap-4">
-                          {/* Avatar */}
-                          <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 shadow-sm bg-[#064E3B]">
+                      <div 
+                        key={review.id} 
+                        id={`comment-${review.id}`}
+                        className={`bg-white border transition-all rounded-lg overflow-hidden ${
+                          isBeingModerated
+                            ? 'border-2 border-blue-500 ring-4 ring-blue-100 shadow-lg'
+                            : 'border border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex gap-3 p-4 group">
+                          {/* User Avatar */}
+                          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#064E3B]">
                             {review.userId?.photo && !review.isAnonymous ? (
                               <img
                                 src={review.userId.photo}
@@ -734,45 +885,26 @@ export default function ProductDetailPage() {
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                                  e.target.nextElementSibling.style.display = 'flex';
                                 }}
                               />
-                            ) : (
-                              <User size={24} />
-                            )}
+                            ) : null}
+                            <User 
+                              size={20} 
+                              style={{ display: (review.userId?.photo && !review.isAnonymous) ? 'none' : 'block' }}
+                            />
                           </div>
                           
-                          <div className="flex-1 min-w-0">
-                            {/* Header with name, rating, and delete button */}
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                  <h4 className="font-bold text-gray-900 text-sm">{userName}</h4>
-                                 
-                                  {review.rating && (
-                                    <div className="flex items-center gap-0.5">
-                                      {[...Array(5)].map((_, i) => (
-                                        <Star
-                                          key={i}
-                                          className={`h-3.5 w-3.5 ${
-                                            i < review.rating
-                                              ? 'fill-yellow-400 text-yellow-400'
-                                              : 'fill-gray-200 text-gray-200'
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              
-                              {/* Delete button */}
+                          <div className="min-w-0 flex-1">
+                            {/* Name and actions */}
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <p className="text-sm font-bold text-slate-900">{userName}</p>
                               {isOwnComment && (
                                 <button
                                   onClick={() => handleDeleteComment(review.id)}
                                   disabled={deletingCommentId === review.id}
-                                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                                  title="Delete your review"
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                                  title={isPending ? "Delete your pending review" : "Delete your review"}
                                 >
                                   {deletingCommentId === review.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -784,14 +916,98 @@ export default function ProductDetailPage() {
                             </div>
                             
                             {/* Comment text */}
-                            <p className="text-gray-700 leading-relaxed text-sm mb-2">
+                            <p className="text-xs text-slate-500 mb-1.5">
                               {review.content}
                             </p>
                             
-                            {/* Date */}
-                            <p className="text-xs text-gray-500">
-                              {formatDate(review.createdAt)}
-                            </p>
+                            {/* Rating badge */}
+                            {review.rating && (
+                              <div className="flex items-center gap-1 w-fit mb-1.5">
+                                <div className="flex items-center gap-0.5">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`h-3 w-3 ${
+                                        i < review.rating
+                                          ? 'fill-yellow-400 text-yellow-400'
+                                          : 'fill-gray-300 text-gray-300'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+
+
+                            {/* Status badges for admin */}
+                            {user?.role === 'ADMIN' && (
+                              <div className="flex items-center gap-1.5 mt-1.5">
+                                {isPending && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-yellow-50 text-yellow-700 ring-yellow-600/20">
+                                    Pending
+                                  </span>
+                                )}
+                                {review.status === 'rejected' && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-orange-50 text-orange-700 ring-orange-600/20">
+                                    Rejected
+                                  </span>
+                                )}
+                                {review.status === 'deleted' && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-red-50 text-red-700 ring-red-600/20">
+                                    Deleted
+                                  </span>
+                                )}
+                                {review.status === 'approved' && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ring-1 ring-inset bg-green-50 text-green-700 ring-green-600/20">
+                                    Approved
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Admin moderation buttons (always show for pending comments) */}
+                            {user?.role === 'ADMIN' && isPending && (
+                              <div className="flex gap-2 mt-2">
+                                <button
+                                  onClick={() => handleApproveComment(review.id)}
+                                  disabled={approvingComment}
+                                  className="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-bold rounded transition-colors flex items-center justify-center gap-1"
+                                  title="Approve this comment"
+                                >
+                                  {approvingComment ? (
+                                    <>
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      <span>Approving...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Check className="h-3 w-3" />
+                                      <span>Approve</span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleRejectComment(review.id)}
+                                  disabled={rejectingComment}
+                                  className="flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-xs font-bold rounded transition-colors flex items-center justify-center gap-1"
+                                  title="Reject this comment"
+                                >
+                                  {rejectingComment ? (
+                                    <>
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      <span>Rejecting...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <X className="h-3 w-3" />
+                                      <span>Reject</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                            
                           </div>
                         </div>
                       </div>
