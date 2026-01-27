@@ -5,6 +5,7 @@ export async function GET(request, { params }) {
 		const { id } = resolvedParams;
 		
 		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const authHeader = request.headers.get('authorization');
 		
 		console.log(`[API] Fetching product ID: ${id} from ${backendUrl}/api/products/${id}`);
 		
@@ -13,6 +14,7 @@ export async function GET(request, { params }) {
 			cache: 'no-store',
 			headers: {
 				'Content-Type': 'application/json',
+				...(authHeader ? { Authorization: authHeader } : {}),
 			},
 		});
 

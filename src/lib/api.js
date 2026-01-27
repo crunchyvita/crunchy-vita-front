@@ -4,6 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 // Helper function to make API requests
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  console.log(`[API] Making ${options.method || 'GET'} request to: ${url}`);
   
   const defaultHeaders = {};
 
@@ -71,6 +72,7 @@ async function apiRequest(endpoint, options = {}) {
       return {};
     }
   } catch (error) {
+    console.log(`[API] Request to ${url} failed:`, error.message);
     // Re-throw with additional context if it's a network error
     if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
       const networkError = new Error('Network error: Unable to connect to server');
@@ -266,6 +268,20 @@ export const reviewAPI = {
   // Delete any comment (ADMIN)
   deleteAsAdmin: async (productId, commentId) =>
     apiRequest(`/reviews/products/${productId}/comments/${commentId}/admin`, { method: "DELETE" }),
+
+  // List pending comments for moderation (ADMIN)
+  listPending: async () => apiRequest(`/reviews/comments/pending`, { method: "GET" }),
+
+  // List approved comments (ADMIN)
+  listApproved: async () => apiRequest(`/reviews/comments/approved`, { method: "GET" }),
+
+  // Approve a pending comment (ADMIN)
+  approve: async (productId, commentId) =>
+    apiRequest(`/reviews/products/${productId}/comments/${commentId}/approve`, { method: "PATCH" }),
+
+  // Reject/delete a pending comment (ADMIN)
+  reject: async (productId, commentId) =>
+    apiRequest(`/reviews/products/${productId}/comments/${commentId}/reject`, { method: "PATCH" }),
 };
 
 // Category API functions
@@ -410,6 +426,12 @@ export const notificationAPI = {
   // Mark notification as read
   markAsRead: async (id) =>
     apiRequest(`/notifications/${id}/read`, {
+      method: "PUT",
+    }),
+
+  // Mark notification as unread
+  markAsUnread: async (id) =>
+    apiRequest(`/notifications/${id}/unread`, {
       method: "PUT",
     }),
 

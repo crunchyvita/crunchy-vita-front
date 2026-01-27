@@ -55,12 +55,20 @@ function AdminDashboard() {
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
       });
-      if (!response.ok) return;
+      if (!response.ok) {
+        // Silently handle errors, keep existing messages
+        return;
+      }
       const data = await response.json();
       let messagesArray = Array.isArray(data) ? data : (data.messages || data.data || []);
       setMessages(messagesArray);
       setUnreadMessages(messagesArray.filter(m => m.status === 'new' || (!m.status && !m.read)).length);
     } catch (error) {
+      // Backend connection failed, silently continue without messages
+      if (error.message === 'Failed to fetch') {
+        // This is expected when backend is not running
+        return;
+      }
       console.error('Fetch error:', error);
     }
   };

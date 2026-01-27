@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2 } from "lucide-react";
-import { notificationAPI } from "@/lib/api";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, Eye, EyeOff, CheckCheck, X } from "lucide-react";
+import { notificationAPI, reviewAPI } from "@/lib/api";
 
 export default function AdminHeader() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -16,6 +16,12 @@ export default function AdminHeader() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [pendingModal, setPendingModal] = useState(null);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState('');
+  const [selectedNotifications, setSelectedNotifications] = useState(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [deletingNotification, setDeletingNotification] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
@@ -25,7 +31,17 @@ export default function AdminHeader() {
         fetchMessages();
         fetchNotifications();
       }, 10000);
-      return () => clearInterval(interval);
+      
+      // Listen for notification read events from other components
+      const handleNotificationRead = () => {
+        fetchNotifications();
+      };
+      window.addEventListener('notificationRead', handleNotificationRead);
+      
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('notificationRead', handleNotificationRead);
+      };
     }
   }, [isAuthenticated, user]);
 
@@ -54,13 +70,91 @@ export default function AdminHeader() {
 
   const fetchNotifications = async () => {
     try {
-      const countData = await notificationAPI.getUnreadCount(true);
-      if (countData?.unreadCount !== undefined) setUnreadNotifications(countData.unreadCount);
       const data = await notificationAPI.list(20, null, true);
-      setNotifications(data?.notifications || (Array.isArray(data) ? data : []));
+      const notificationsList = data?.notifications || (Array.isArray(data) ? data : []);
+      setNotifications(notificationsList);
+      
+      // Get pending comments to accurately count comment notifications
+      const pendingResponse = await reviewAPI.listPending();
+      const pendingComments = pendingResponse?.data || pendingResponse || [];
+      const pendingCommentIds = new Set(pendingComments.map(c => c.commentId?.toString()));
+      
+      // Count only unread notifications that either:
+      // 1. Are not comment notifications, OR
+      // 2. Are comment notifications with still-pending comments
+      const unreadCount = notificationsList.filter(n => 
+        !n.isRead && (
+          n.type !== 'new_comment' || 
+          pendingCommentIds.has(n.relatedId?.toString())
+        )
+      ).length;
+      
+      setUnreadNotifications(unreadCount);
     } catch (error) {
       console.error('Fetch notifications error:', error);
       setNotifications([]);
+      setUnreadNotifications(0);
+    }
+  };
+
+  const openCommentModeration = async (notification) => {
+    setPendingError('');
+    setPendingLoading(true);
+    try {
+      const pending = await reviewAPI.listPending();
+      const list = pending?.data || pending || [];
+      const match = list.find((c) => c.commentId?.toString() === notification?.relatedId?.toString());
+
+      if (!match) {
+        setPendingError("Commentaire introuvable ou déjà modéré.");
+        setPendingModal(null);
+      } else {
+        setPendingModal(match);
+      }
+    } catch (err) {
+      setPendingError(err.message || 'Impossible de charger le commentaire.');
+      setPendingModal(null);
+    } finally {
+      setPendingLoading(false);
+      setShowNotificationsDropdown(false);
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (notification?.type === 'new_comment') {
+      openCommentModeration(notification);
+    } else {
+      setShowNotificationsDropdown(false);
+    }
+  };
+
+  const approvePending = async () => {
+    if (!pendingModal) return;
+    setPendingLoading(true);
+    setPendingError('');
+    try {
+      await reviewAPI.approve(pendingModal.productId, pendingModal.commentId);
+      setPendingModal(null);
+      fetchNotifications();
+    } catch (err) {
+      setPendingError(err.message || "Impossible d'approuver le commentaire.");
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
+  const rejectPending = async () => {
+    if (!pendingModal) return;
+    setPendingLoading(true);
+    setPendingError('');
+    try {
+      await reviewAPI.reject(pendingModal.productId, pendingModal.commentId);
+      setPendingModal(null);
+      fetchNotifications();
+    } catch (err) {
+      setPendingError(err.message || 'Impossible de refuser le commentaire.');
+    } finally {
+      setPendingLoading(false);
     }
   };
 
@@ -74,12 +168,91 @@ export default function AdminHeader() {
         headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
       });
       fetchMessages();
-    } catch (error) { 
-      console.error('Mark as read error:', error); 
+    } catch (error) {
+      console.error('Mark as read error:', error);
+    }
+  };
+    
+
+  const handleToggleNotificationRead = async (notificationId, currentReadStatus, e) => {
+    e.stopPropagation();
+    try {
+      if (currentReadStatus) {
+        await notificationAPI.markAsUnread(notificationId);
+      } else {
+        await notificationAPI.markAsRead(notificationId);
+      }
+      fetchNotifications();
+    } catch (error) {
+      console.error('Toggle read status error:', error);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId, e) => {
+    e.stopPropagation();
+    setDeletingNotification(notificationId);
+    try {
+      await notificationAPI.delete(notificationId);
+    } catch (error) {
+      // If notification not found, it was already deleted - this is OK
+      if (error.message?.includes('non trouvée') || error.status === 404) {
+        console.log('Notification already deleted, removing from UI');
+      } else {
+        console.error('Delete notification error:', error);
+      }
+    } finally {
+      // Always refresh to sync with backend state
+      setDeletingNotification(null);
+      fetchNotifications();
+    }
+  };
+
+  const handleToggleSelectNotification = (notificationId, e) => {
+    e.stopPropagation();
+    setSelectedNotifications(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(notificationId)) {
+        newSet.delete(notificationId);
+      } else {
+        newSet.add(notificationId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllNotifications = () => {
+    setSelectedNotifications(prev => {
+      const allIds = notifications.map(n => n._id);
+      const alreadyAll = prev.size === allIds.length && allIds.every(id => prev.has(id));
+      return alreadyAll ? new Set() : new Set(allIds);
+    });
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead();
+      fetchNotifications();
+    } catch (error) {
+      console.error('Mark all as read error:', error);
+    }
+  };
+
+  const handleDeleteSelectedNotifications = async () => {
+    if (selectedNotifications.size === 0) return;
+    try {
+      await Promise.all(
+        Array.from(selectedNotifications).map(id => notificationAPI.delete(id))
+      );
+      setSelectedNotifications(new Set());
+      setIsSelectionMode(false);
+      fetchNotifications();
+    } catch (error) {
+      console.error('Delete selected notifications error:', error);
     }
   };
 
   return (
+    <>
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 w-full shadow-sm">
       <div className="w-full px-4 sm:px-8">
         <div className="flex h-16 justify-between items-center">
@@ -109,50 +282,158 @@ export default function AdminHeader() {
                 )}
               </button>
               {showNotificationsDropdown && (
-                <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 bg-slate-100 flex justify-between items-center font-bold text-sm">
-                    Alertes Système 
-                    <button 
-                      onClick={async () => { 
-                        await notificationAPI.markAllAsRead(); 
-                        fetchNotifications(); 
-                      }} 
-                      className="text-blue-600 text-xs font-medium"
-                    >
-                      Tout marquer
-                    </button>
+                <div className="absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Header */}
+                  <div className="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-lg">Notifications</h3>
+                      <div className="flex items-center gap-2">
+                        {!isSelectionMode ? (
+                          <>
+                            <button 
+                              onClick={handleMarkAllAsRead}
+                              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+                              title="Tout marquer comme lu"
+                            >
+                              <CheckCheck className="w-3 h-3" />
+                              Tout marquer
+                            </button>
+                            <button
+                              onClick={() => setIsSelectionMode(true)}
+                              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition"
+                              title="Sélectionner des notifications"
+                            >
+                              Sélectionner
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={handleSelectAllNotifications}
+                              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+                              title="Sélectionner ou désélectionner tout"
+                            >
+                              {selectedNotifications.size === notifications.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+                            </button>
+                            <button
+                              onClick={handleDeleteSelectedNotifications}
+                              disabled={selectedNotifications.size === 0}
+                              className="text-xs bg-red-500 hover:bg-red-600 disabled:bg-white/20 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Supprimer ({selectedNotifications.size})
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsSelectionMode(false);
+                                setSelectedNotifications(new Set());
+                              }}
+                              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition"
+                            >
+                              Annuler
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="max-h-80 overflow-y-auto">
+
+                  {/* Notifications List */}
+                  <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-slate-400 text-sm">Aucune notification</div>
+                      <div className="p-12 text-center text-slate-400">
+                        <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">Aucune notification</p>
+                      </div>
                     ) : (
                       notifications.map(n => (
                         <div 
                           key={n._id} 
-                          className="p-4 hover:bg-slate-50 transition text-sm cursor-pointer" 
-                          onClick={() => setShowNotificationsDropdown(false)}
+                          className={`group relative transition-colors ${
+                            n.isRead ? 'bg-white hover:bg-slate-50' : 'bg-blue-50 hover:bg-blue-100'
+                          } ${isSelectionMode ? 'cursor-default' : 'cursor-pointer'}`}
                         >
-                          <p className="font-bold">{n.title}</p>
-                          <p className="text-slate-600 text-xs line-clamp-1">{n.message}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+                          <div className="flex items-start gap-3 p-4">
+                            {/* Selection Checkbox */}
+                            {isSelectionMode && (
+                              <input
+                                type="checkbox"
+                                checked={selectedNotifications.has(n._id)}
+                                onChange={(e) => handleToggleSelectNotification(n._id, e)}
+                                className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                              />
+                            )}
 
-            {/* Messages Dropdown */}
-            <div className="relative">
-              <button 
-                onClick={() => { 
-                  setShowMessagesDropdown(!showMessagesDropdown); 
-                  setShowNotificationsDropdown(false); 
-                  setShowProfileDropdown(false); 
-                }} 
-                className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
-              >
-                <MessageSquare className="h-6 w-6" />
+                            {/* Unread Indicator */}
+                            {!n.isRead && !isSelectionMode && (
+                              <div className="mt-1.5 h-2.5 w-2.5 rounded-full bg-blue-600 shrink-0" />
+                            )}
+
+                            {/* Content */}
+                            <div 
+                              className="flex-1 min-w-0"
+                              onClick={() => !isSelectionMode && handleNotificationClick(n)}
+                            >
+                              <p className={`text-sm ${n.isRead ? 'font-medium' : 'font-bold'} text-slate-900 mb-0.5`}>
+                                {n.title}
+                              </p>
+                              <p className="text-xs text-slate-600 line-clamp-2 mb-1">
+                                {n.message}
+                              </p>
+                              <p className="text-xs text-slate-400">
+                                {new Date(n.createdAt).toLocaleDateString('fr-FR', { 
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            {!isSelectionMode && (
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={(e) => handleToggleNotificationRead(n._id, n.isRead, e)}
+                                  className="p-1.5 rounded-full hover:bg-slate-200 transition"
+                                  title={n.isRead ? 'Marquer comme non lu' : 'Marquer comme lu'}
+                                >
+                                  {n.isRead ? (
+                                    <EyeOff className="w-4 h-4 text-slate-500" />
+                                  ) : (
+                                    <Eye className="w-4 h-4 text-blue-600" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteNotification(n._id, e)}
+                                  disabled={deletingNotification === n._id}
+                                  className="p-1.5 rounded-full hover:bg-red-50 transition disabled:opacity-50"
+                                  title="Supprimer"
+                                >
+                                  <X className="w-4 h-4 text-red-600" />
+                                </button>
+                              </div>
+                            )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+  
+              {/* Messages Dropdown */}
+              <div className="relative">
+                <button 
+                  onClick={() => { 
+                    setShowMessagesDropdown(!showMessagesDropdown); 
+                    setShowNotificationsDropdown(false); 
+                    setShowProfileDropdown(false); 
+                  }} 
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
+                >
+                  <MessageSquare className="h-6 w-6" />
                 {unreadMessages > 0 && (
                   <span className="absolute top-1 right-1 h-4 w-4 bg-orange-500 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">
                     {unreadMessages}
@@ -282,5 +563,47 @@ export default function AdminHeader() {
         </div>
       </div>
     </nav>
+
+      {/* Comment moderation modal */}
+    {pendingModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-sm px-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase text-slate-500 font-semibold">Nouveau commentaire</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{pendingModal.productName}</h3>
+            </div>
+            <button onClick={() => setPendingModal(null)} className="text-slate-400 hover:text-slate-700">✕</button>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
+            <p className="text-sm text-slate-600"><span className="font-semibold">Auteur :</span> {pendingModal.authorName || 'Client'}</p>
+            <p className="text-sm text-slate-600"><span className="font-semibold">Commentaire :</span> {pendingModal.content}</p>
+          </div>
+
+          {pendingError && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{pendingError}</div>
+          )}
+
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={rejectPending}
+              disabled={pendingLoading}
+              className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Refuser
+            </button>
+            <button
+              onClick={approvePending}
+              disabled={pendingLoading}
+              className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {pendingLoading ? 'Traitement...' : 'Accepter'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

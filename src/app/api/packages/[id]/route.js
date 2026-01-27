@@ -25,10 +25,10 @@ export async function GET(request, { params }) {
 		return Response.json(data);
 	} catch (error) {
 		console.error('[API] Error fetching package:', error);
-		return Response.json(
-			{ error: error.message || 'Failed to fetch package' },
-			{ status: 500 }
-		);
+		const isConnRefused = error?.cause?.code === 'ECONNREFUSED' || error?.code === 'ECONNREFUSED';
+		const status = isConnRefused ? 503 : 500;
+		const message = isConnRefused ? 'Backend unreachable. Is the API running?' : (error.message || 'Failed to fetch package');
+		return Response.json({ error: message }, { status });
 	}
 }
 

@@ -20,6 +20,7 @@ export default function ProductDetailPage() {
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState('');
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
@@ -32,7 +33,14 @@ export default function ProductDetailPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/products/${params.id}`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const response = await fetch(`/api/products/${params.id}`, {
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Product not found');
@@ -174,6 +182,7 @@ export default function ProductDetailPage() {
           content: comment.content,
           rating: matchingRating?.rating || null,
           isAnonymous: comment.isAnonymous || false,
+          status: comment.status || 'approved',
           createdAt: comment.createdAt,
         });
 
@@ -232,6 +241,7 @@ export default function ProductDetailPage() {
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     setReviewError('');
+    setReviewSuccess('');
     setSubmittingReview(true);
 
     try {
@@ -257,65 +267,6 @@ export default function ProductDetailPage() {
         return;
       }
 
-      // Create temporary IDs for optimistic update
-      const tempCommentId = `temp-${Date.now()}`;
-      const tempRatingId = `temp-rating-${Date.now()}`;
-      
-      // Optimistic update - show immediately
-      setProduct(prevProduct => {
-        const updatedProduct = { ...prevProduct };
-        
-        // Add rating optimistically if provided
-        if (rating) {
-          const existingRatingIndex = updatedProduct.ratings?.findIndex(
-            r => r.userId?._id?.toString() === user.id?.toString() || r.userId?.toString() === user.id?.toString()
-          );
-          
-          const newRating = {
-            _id: tempRatingId,
-            userId: user.id,
-            rating: rating,
-            createdAt: new Date().toISOString()
-          };
-          
-          if (existingRatingIndex !== -1) {
-            updatedProduct.ratings[existingRatingIndex] = newRating;
-          } else {
-            updatedProduct.ratings = [...(updatedProduct.ratings || []), newRating];
-          }
-        }
-        
-        // Add comment optimistically if provided
-        if (comment?.trim()) {
-          const newComment = {
-            _id: tempCommentId,
-            userId: {
-              _id: user.id,
-              name: isAnonymous ? 'Anonymous' : user.name,
-              photo: user.photo  // Include photo for immediate display
-            },
-            content: comment.trim(),
-            isAnonymous: isAnonymous,
-            createdAt: new Date().toISOString()
-          };
-          updatedProduct.comments = [...(updatedProduct.comments || []), newComment];
-        }
-        
-        return updatedProduct;
-      });
-
-      // Reset form immediately for better UX
-      setReviewForm({ rating: 0, comment: '', isAnonymous: false });
-      setSubmittingReview(false);
-
-      // Make API call in background using reviewAPI
-      console.log('Sending to backend:', {
-        rating: rating || undefined,
-        content: comment?.trim() || undefined,
-        isAnonymous: isAnonymous,
-        displayName: null
-      });
-      
       const data = await reviewAPI.create(params.id, {
         rating: rating || undefined,
         content: comment?.trim() || undefined,
@@ -323,67 +274,18 @@ export default function ProductDetailPage() {
         displayName: null
       });
 
-   
-
-      // Handle success
       if (!data || data.error) {
-        // Rollback optimistic update on error
-        setProduct(prevProduct => {
-          const updatedProduct = { ...prevProduct };
-          
-          // Remove optimistic rating
-          if (rating) {
-            updatedProduct.ratings = updatedProduct.ratings?.filter(r => r._id !== tempRatingId);
-          }
-          
-          // Remove optimistic comment
-          if (comment?.trim()) {
-            updatedProduct.comments = updatedProduct.comments?.filter(c => c._id !== tempCommentId);
-          }
-          
-          return updatedProduct;
-        });
-        throw new Error(data.message || 'Failed to submit review');
+        throw new Error(data?.message || 'Failed to submit review');
       }
 
-      // Update with real IDs from backend
-      setProduct(prevProduct => {
-        const updatedProduct = { ...prevProduct };
-        
-        // Replace temp rating with real one
-        if (data.data?.rating) {
-          const tempIndex = updatedProduct.ratings?.findIndex(r => r._id === tempRatingId);
-          if (tempIndex !== -1) {
-            updatedProduct.ratings[tempIndex] = {
-              _id: data.data.rating._id,
-              userId: user.id,
-              rating: data.data.rating.rating,
-              createdAt: data.data.rating.createdAt
-            };
-          }
-        }
-        
-        // Replace temp comment with real one
-        if (data.data?.comment) {
-          const tempIndex = updatedProduct.comments?.findIndex(c => c._id === tempCommentId);
-          if (tempIndex !== -1) {
-            const updatedComment = {
-              _id: data.data.comment._id,
-              userId: {
-                _id: user.id,
-                name: isAnonymous ? 'Anonymous' : user.name,
-                photo: user.photo  // Include photo in backend update too
-              },
-              content: data.data.comment.content,
-              isAnonymous: data.data.comment.isAnonymous || isAnonymous,
-              createdAt: data.data.comment.createdAt
-            };
-            updatedProduct.comments[tempIndex] = updatedComment;
-          }
-        }
-        
-        return updatedProduct;
-      });
+      // Reset form after successful submission
+      setReviewForm({ rating: 0, comment: '', isAnonymous: false });
+
+      // Refresh product to pick up updated ratings and comments
+      await fetchProduct();
+      
+      // Show success message briefly then clear it
+      setTimeout(() => setReviewSuccess(''), 5000);
     } catch (err) {
       setReviewError(err.message || 'Failed to submit review');
       console.error('Error submitting review:', err);
@@ -759,6 +661,13 @@ export default function ProductDetailPage() {
                       </div>
                     )}
 
+                    {/* Success Message */}
+                    {reviewSuccess && (
+                      <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                        {reviewSuccess}
+                      </div>
+                    )}
+
                     {/* Submit Button */}
                     <button
                       type="submit"
@@ -811,6 +720,7 @@ export default function ProductDetailPage() {
                   {displayedReviews.map((review) => {
                     const userName = review.isAnonymous ? 'Anonymous' : (review.userId?.name || 'Anonymous');
                     const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
+                    const isPending = review.status === 'pending';
                     
                     return (
                       <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -836,8 +746,9 @@ export default function ProductDetailPage() {
                             {/* Header with name, rating, and delete button */}
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-1">
+                                <div className="flex items-center gap-3 mb-1 flex-wrap">
                                   <h4 className="font-bold text-gray-900 text-sm">{userName}</h4>
+                                 
                                   {review.rating && (
                                     <div className="flex items-center gap-0.5">
                                       {[...Array(5)].map((_, i) => (

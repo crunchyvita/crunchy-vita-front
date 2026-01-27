@@ -25,9 +25,9 @@ export async function GET() {
 		return Response.json(data);
 	} catch (error) {
 		console.error('Error fetching available products:', error);
-		return Response.json(
-			{ error: error.message || 'Failed to fetch available products' },
-			{ status: 500 }
-		);
+		const isConnRefused = error?.cause?.code === 'ECONNREFUSED' || error?.code === 'ECONNREFUSED';
+		const status = isConnRefused ? 503 : 500;
+		const message = isConnRefused ? 'Backend unreachable. Is the API running?' : (error.message || 'Failed to fetch available products');
+		return Response.json({ error: message }, { status });
 	}
 }
