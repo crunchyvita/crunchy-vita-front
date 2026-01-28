@@ -25,6 +25,14 @@ export default function ContactMessagesPage() {
 
   useEffect(() => {
     fetchMessages();
+    
+    // Set up polling for real-time updates (every 2 seconds)
+    const pollInterval = setInterval(() => {
+      fetchMessages();
+    }, 2000);
+    
+    // Cleanup on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const fetchMessages = async () => {

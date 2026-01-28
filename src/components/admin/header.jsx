@@ -30,8 +30,6 @@ export default function AdminHeader() {
     }
     return new Set();
   });
-  const [notificationToDelete, setNotificationToDelete] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
@@ -251,17 +249,6 @@ export default function AdminHeader() {
 
   const handleDeleteNotification = async (notificationId, e) => {
     e.stopPropagation();
-    
-    const notification = notifications.find(n => n._id === notificationId);
-    
-    // For comment notifications that haven't been read/opened, show confirmation
-    if (notification?.type === 'new_comment' && !notification?.isRead) {
-      setNotificationToDelete(notification);
-      setShowDeleteConfirm(true);
-      return;
-    }
-    
-    // For other notifications or read comment notifications, proceed with deletion
     await deleteNotification(notificationId);
   };
 
@@ -308,35 +295,7 @@ export default function AdminHeader() {
       }
     } finally {
       setDeletingNotification(null);
-      setShowDeleteConfirm(false);
-      setNotificationToDelete(null);
     }
-  };
-
-  const confirmDeleteNotification = async () => {
-    if (notificationToDelete) {
-      // First mark the notification as read
-      if (!notificationToDelete.isRead) {
-        await markNotificationAsRead(notificationToDelete._id);
-      }
-      
-      // Navigate to the comment first
-      const productId = notificationToDelete?.metadata?.productId;
-      const commentId = notificationToDelete?.relatedId;
-      
-      if (productId && commentId) {
-        const url = `/admin/products/${productId}?review=${commentId}&moderateMode=true&tab=pending`;
-        router.push(url);
-      }
-      
-      // Then delete the notification
-      await deleteNotification(notificationToDelete._id);
-    }
-  };
-
-  const cancelDeleteNotification = () => {
-    setShowDeleteConfirm(false);
-    setNotificationToDelete(null);
   };
 
   const handleToggleSelectNotification = (notificationId, e) => {
@@ -747,49 +706,6 @@ export default function AdminHeader() {
       </div>
     )}
 
-      {/* Delete confirmation modal for unread comment notifications */}
-      {showDeleteConfirm && notificationToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Notification non lue</h3>
-                <p className="text-sm text-slate-600 mt-1">
-                  Cette notification concerne un commentaire qui n'a pas encore été modéré. 
-                  Souhaitez-vous d'abord voir le commentaire avant de supprimer la notification ?
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={cancelDeleteNotification}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  // Delete without viewing
-                  deleteNotification(notificationToDelete._id);
-                }}
-                className="px-4 py-2 rounded-lg bg-slate-600 text-white hover:bg-slate-700"
-              >
-                Supprimer directement
-              </button>
-              <button
-                onClick={confirmDeleteNotification}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Voir d'abord
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
