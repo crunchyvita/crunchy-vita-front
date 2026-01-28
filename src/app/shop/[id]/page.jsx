@@ -350,7 +350,7 @@ export default function ProductDetailPage() {
           const newComment = {
             _id: result.comment._id,
             userId: result.comment.isAnonymous
-              ? null
+              ? { _id: user?.id, name: 'Anonymous' }  // For anonymous, show "Anonymous"
               : {
                   _id: user?.id,
                   name: user?.name,

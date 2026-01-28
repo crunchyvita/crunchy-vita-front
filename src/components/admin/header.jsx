@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, Eye, EyeOff, CheckCheck, X } from "lucide-react";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
 
 export default function AdminHeader() {
@@ -22,26 +22,31 @@ export default function AdminHeader() {
   const [selectedNotifications, setSelectedNotifications] = useState(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [deletingNotification, setDeletingNotification] = useState(null);
+  const [deletedNotificationIds, setDeletedNotificationIds] = useState(() => {
+    // Load deleted IDs from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('deletedNotificationIds');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
+  const [notificationToDelete, setNotificationToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
+      // Initial fetch
       fetchMessages();
       fetchNotifications();
-      const interval = setInterval(() => {
+      
+      // Set up polling for real-time updates (every 2 seconds)
+      const pollInterval = setInterval(() => {
         fetchMessages();
         fetchNotifications();
-      }, 10000);
+      }, 2000);
       
-      // Listen for notification read events from other components
-      const handleNotificationRead = () => {
-        fetchNotifications();
-      };
-      window.addEventListener('notificationRead', handleNotificationRead);
-      
-      return () => {
-        clearInterval(interval);
-        window.removeEventListener('notificationRead', handleNotificationRead);
-      };
+      // Cleanup on unmount
+      return () => clearInterval(pollInterval);
     }
   }, [isAuthenticated, user]);
 
@@ -61,8 +66,12 @@ export default function AdminHeader() {
       if (!response.ok) return;
       const data = await response.json();
       let messagesArray = Array.isArray(data) ? data : (data.messages || data.data || []);
+      
+      // Only show messages with status 'new' (unread/not dismissed)
+      messagesArray = messagesArray.filter(m => m.status === 'new' || !m.status);
+      
       setMessages(messagesArray);
-      setUnreadMessages(messagesArray.filter(m => m.status === 'new' || (!m.status && !m.read)).length);
+      setUnreadMessages(messagesArray.length);
     } catch (error) {
       console.error('Fetch messages error:', error);
     }
@@ -72,7 +81,11 @@ export default function AdminHeader() {
     try {
       const data = await notificationAPI.list(20, null, true);
       const notificationsList = data?.notifications || (Array.isArray(data) ? data : []);
-      setNotifications(notificationsList);
+      
+      // Filter out notifications that we've deleted (from local cache)
+      const filteredNotifications = notificationsList.filter(n => !deletedNotificationIds.has(n._id));
+      
+      setNotifications(filteredNotifications);
       
       // Get pending comments to accurately count comment notifications
       const pendingResponse = await reviewAPI.listPending();
@@ -82,7 +95,7 @@ export default function AdminHeader() {
       // Count only unread notifications that either:
       // 1. Are not comment notifications, OR
       // 2. Are comment notifications with still-pending comments
-      const unreadCount = notificationsList.filter(n => 
+      const unreadCount = filteredNotifications.filter(n => 
         !n.isRead && (
           n.type !== 'new_comment' || 
           pendingCommentIds.has(n.relatedId?.toString())
@@ -125,6 +138,11 @@ export default function AdminHeader() {
     console.log('[Notification Click] Metadata:', notification?.metadata);
     console.log('[Notification Click] RelatedId:', notification?.relatedId);
     
+    // Mark as read when clicked
+    if (!notification.isRead) {
+      markNotificationAsRead(notification._id);
+    }
+    
     if (notification?.type === 'new_comment') {
       // Navigate to ADMIN product detail page with comment ID for moderation
       // and show the Pending comments tab with the list of pending comments
@@ -140,8 +158,36 @@ export default function AdminHeader() {
       } else {
         console.error('[Notification Click] Missing productId or commentId');
       }
+    } else if (notification?.type === 'contact_message') {
+      // Navigate to contact message detail with specific message ID
+      const messageId = notification?.relatedId;
+      
+      console.log('[Notification Click] Contact message ID:', messageId);
+      
+      if (messageId) {
+        const url = `/admin/contact?messageId=${messageId}&highlight=true`;
+        console.log('[Notification Click] Navigating to message:', url);
+        router.push(url);
+      } else {
+        console.error('[Notification Click] Missing messageId for contact_message');
+      }
+    } else {
+      // For other notifications, just mark as read and close dropdown
+      setShowNotificationsDropdown(false);
     }
-    setShowNotificationsDropdown(false);
+  };
+
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      await notificationAPI.markAsRead(notificationId);
+      // Update local state immediately for better UX
+      setNotifications(prev => prev.map(n => 
+        n._id === notificationId ? { ...n, isRead: true } : n
+      ));
+      setUnreadNotifications(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Mark as read error:', error);
+    }
   };
 
   const approvePending = async () => {
@@ -188,7 +234,6 @@ export default function AdminHeader() {
       console.error('Mark as read error:', error);
     }
   };
-    
 
   const handleToggleNotificationRead = async (notificationId, currentReadStatus, e) => {
     e.stopPropagation();
@@ -206,21 +251,92 @@ export default function AdminHeader() {
 
   const handleDeleteNotification = async (notificationId, e) => {
     e.stopPropagation();
-    setDeletingNotification(notificationId);
+    
+    const notification = notifications.find(n => n._id === notificationId);
+    
+    // For comment notifications that haven't been read/opened, show confirmation
+    if (notification?.type === 'new_comment' && !notification?.isRead) {
+      setNotificationToDelete(notification);
+      setShowDeleteConfirm(true);
+      return;
+    }
+    
+    // For other notifications or read comment notifications, proceed with deletion
+    await deleteNotification(notificationId);
+  };
+
+  const deleteNotification = async (notificationId) => {
     try {
+      // Add to deleted cache first
+      const newDeletedIds = new Set([...deletedNotificationIds, notificationId]);
+      setDeletedNotificationIds(newDeletedIds);
+      
+      // Save to localStorage to persist across refreshes
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deletedNotificationIds', JSON.stringify([...newDeletedIds]));
+      }
+      
+      // Delete from backend
       await notificationAPI.delete(notificationId);
+      console.log('[Admin Header] Notification deleted successfully');
+      
+      // Immediately remove from UI
+      setNotifications(prev => prev.filter(n => n._id !== notificationId));
+      setUnreadNotifications(prev => {
+        const notification = notifications.find(n => n._id === notificationId);
+        return notification && !notification.isRead ? Math.max(0, prev - 1) : prev;
+      });
+      
     } catch (error) {
       // If notification not found, it was already deleted - this is OK
       if (error.message?.includes('non trouvée') || error.status === 404) {
-        console.log('Notification already deleted, removing from UI');
+        console.log('[Admin Header] Notification already deleted, removing from UI');
+        // Still remove from UI
+        setNotifications(prev => prev.filter(n => n._id !== notificationId));
       } else {
-        console.error('Delete notification error:', error);
+        console.error('[Admin Header] Delete notification error:', error);
+        // Remove from cache on error so it can be retried
+        setDeletedNotificationIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(notificationId);
+          // Update localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('deletedNotificationIds', JSON.stringify([...newSet]));
+          }
+          return newSet;
+        });
       }
     } finally {
-      // Always refresh to sync with backend state
       setDeletingNotification(null);
-      fetchNotifications();
+      setShowDeleteConfirm(false);
+      setNotificationToDelete(null);
     }
+  };
+
+  const confirmDeleteNotification = async () => {
+    if (notificationToDelete) {
+      // First mark the notification as read
+      if (!notificationToDelete.isRead) {
+        await markNotificationAsRead(notificationToDelete._id);
+      }
+      
+      // Navigate to the comment first
+      const productId = notificationToDelete?.metadata?.productId;
+      const commentId = notificationToDelete?.relatedId;
+      
+      if (productId && commentId) {
+        const url = `/admin/products/${productId}?review=${commentId}&moderateMode=true&tab=pending`;
+        router.push(url);
+      }
+      
+      // Then delete the notification
+      await deleteNotification(notificationToDelete._id);
+    }
+  };
+
+  const cancelDeleteNotification = () => {
+    setShowDeleteConfirm(false);
+    setNotificationToDelete(null);
   };
 
   const handleToggleSelectNotification = (notificationId, e) => {
@@ -236,22 +352,66 @@ export default function AdminHeader() {
     });
   };
 
-  const handleDeleteMessage = async (messageId, e) => {
-    e.stopPropagation();
+  const handleMarkAllMessagesAsRead = async () => {
     try {
+      console.log('[Admin Header] Marking all messages as read');
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const response = await fetch(`${cleanBaseUrl}/api/contact/${messageId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
-      });
-      if (response.ok) {
-        console.log('[Admin Header] Message deleted:', messageId);
-        fetchMessages();
-      }
+      
+      // Mark all new messages as read
+      await Promise.all(
+        messages.map(m => 
+          fetch(`${cleanBaseUrl}/api/contact/${m._id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+            body: JSON.stringify({ status: 'read' })
+          })
+        )
+      );
+      
+      console.log('[Admin Header] All messages marked as read');
+      
+      // Clear UI immediately
+      setMessages([]);
+      setUnreadMessages(0);
+      
     } catch (error) {
-      console.error('Error deleting message:', error);
+      console.error('[Admin Header] Error marking all messages as read:', error);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId, e) => {
+    e.stopPropagation();
+    try {
+      console.log('[Admin Header] Marking message as read:', messageId);
+      
+      // Mark message as read in the database
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      
+      await fetch(`${cleanBaseUrl}/api/contact/${messageId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ status: 'read' })
+      });
+      
+      console.log('[Admin Header] Message marked as read successfully');
+      
+      // Remove from UI
+      setMessages(prev => prev.filter(m => m._id !== messageId));
+      setUnreadMessages(prev => Math.max(0, prev - 1));
+      
+      setShowMessagesDropdown(true);
+    } catch (error) {
+      console.error('[Admin Header] Error marking message as read:', error);
     }
   };
 
@@ -364,8 +524,8 @@ export default function AdminHeader() {
                           </div>
                           <button
                             onClick={(e) => handleDeleteNotification(n._id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 ml-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
-                            title="Delete notification"
+                            className="p-1.5 ml-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                            title="Supprimer la notification"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -396,7 +556,17 @@ export default function AdminHeader() {
               </button>
               {showMessagesDropdown && (
                 <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 bg-slate-100 font-bold text-sm">Nouveaux Messages</div>
+                  <div className="p-4 bg-slate-100 font-bold text-sm flex items-center justify-between">
+                    <span>Nouveaux Messages</span>
+                    {unreadMessages > 0 && (
+                      <button
+                        onClick={handleMarkAllMessagesAsRead}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                      >
+                        Marquer tout comme lu
+                      </button>
+                    )}
+                  </div>
                   <div className="max-h-80 overflow-y-auto">
                     {messages.length === 0 ? (
                       <div className="p-8 text-center text-slate-400 text-sm">Aucun message</div>
@@ -404,22 +574,33 @@ export default function AdminHeader() {
                       messages.map(m => (
                         <div 
                           key={m._id} 
-                          className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between group"
+                          className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between group border-b border-slate-100 last:border-0"
                         >
                           <div 
                             onClick={() => { 
                               router.push('/admin/contact');
-                              if (m.status === 'new' || (!m.status && !m.read)) handleMarkAsRead(m._id); 
                               setShowMessagesDropdown(false); 
                             }} 
                             className="flex-1 min-w-0 flex items-start gap-2"
                           >
-                            {(m.status === 'new' || (!m.status && !m.read)) && (
+                            {(m.status === 'new' || !m.status) && (
                               <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1" />
                             )}
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-bold">{m.name}</p>
                               <p className="text-xs text-slate-500 line-clamp-1">{m.message}</p>
+                              {m.createdAt && (
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                  {new Date(m.createdAt).toLocaleDateString('fr-FR', { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                  })} à {new Date(m.createdAt).toLocaleTimeString('fr-FR', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </p>
+                              )}
                               {m.type === 'professionnel' && (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset flex items-center gap-1 w-fit mt-1.5 bg-purple-50 text-purple-700 ring-purple-600/20">
                                   <Building2 size={12} /> Pro
@@ -429,10 +610,10 @@ export default function AdminHeader() {
                           </div>
                           <button
                             onClick={(e) => handleDeleteMessage(m._id, e)}
-                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                            title="Delete message"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 ml-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                            title="Marquer comme lu"
                           >
-                            <Trash2 size={16} className="text-red-500" />
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       ))
@@ -565,6 +746,50 @@ export default function AdminHeader() {
         </div>
       </div>
     )}
+
+      {/* Delete confirmation modal for unread comment notifications */}
+      {showDeleteConfirm && notificationToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
+                <AlertCircle className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Notification non lue</h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Cette notification concerne un commentaire qui n'a pas encore été modéré. 
+                  Souhaitez-vous d'abord voir le commentaire avant de supprimer la notification ?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelDeleteNotification}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => {
+                  // Delete without viewing
+                  deleteNotification(notificationToDelete._id);
+                }}
+                className="px-4 py-2 rounded-lg bg-slate-600 text-white hover:bg-slate-700"
+              >
+                Supprimer directement
+              </button>
+              <button
+                onClick={confirmDeleteNotification}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Voir d'abord
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

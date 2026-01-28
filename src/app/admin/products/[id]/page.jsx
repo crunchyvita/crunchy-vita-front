@@ -65,7 +65,17 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => {
-    if (productId) loadProduct();
+    if (productId) {
+      loadProduct();
+      
+      // Set up polling for real-time updates (every 2 seconds)
+      const pollInterval = setInterval(() => {
+        loadProduct();
+      }, 2000);
+      
+      // Cleanup on unmount
+      return () => clearInterval(pollInterval);
+    }
   }, [productId]);
 
   // Parse URL search params for moderation mode
