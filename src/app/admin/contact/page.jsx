@@ -309,10 +309,7 @@ export default function ContactMessagesPage() {
                                   </p>
                                 </div>
                               </div>
-                              <div className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-[11px] font-bold rounded-full shadow-md shadow-emerald-200 flex items-center gap-1.5 flex-shrink-0">
-                                <Lock size={12} />
-                                PROTÉGÉ
-                              </div>
+                            
                             </div>
                             
                             {/* Content */}

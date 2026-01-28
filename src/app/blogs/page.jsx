@@ -40,6 +40,7 @@ export default function BlogsPage() {
     return content.length > 100 ? content.substring(0, 100) + "..." : content;
   };
 
+  const recentBlogs = blogs.slice(0, 3);
   const featuredBlog = blogs.length > 0 ? blogs[0] : null;
   const otherBlogs = blogs.slice(1);
   const hasFeaturedImage = Boolean(featuredBlog?.imageUrl);
@@ -67,7 +68,46 @@ export default function BlogsPage() {
               </div>
             ) : blogs.length > 0 ? (
               <>
+                {/* Recent Blog Posts Section */}
+                {recentBlogs.length > 0 && (
+                  <div className="mb-20">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8">Articles récents</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {recentBlogs.map((blog) => (
+                        <Link key={`recent-${blog._id}`} href={`/blogs/${blog._id}`}>
+                          <div className="cursor-pointer group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            {blog.imageUrl && (
+                              <div className="relative h-48 w-full bg-gray-200">
+                                <Image
+                                  src={`${backendUrl}${blog.imageUrl}`}
+                                  alt={blog.title}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                  unoptimized={true}
+                                />
+                              </div>
+                            )}
+                            <div className="p-6">
+                              <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-green-600 transition-colors line-clamp-2">
+                                {blog.title}
+                              </h3>
+                              <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                {getShortSummary(blog.content)}
+                              </p>
+                              <div className="flex items-center gap-2 text-green-600 font-semibold text-sm hover:gap-3 transition-all">
+                                Lire plus...
+                                <ArrowRight className="h-4 w-4" />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Featured Blog Post */}
+                <h2 className="text-3xl font-bold text-gray-900 mb-8">Tous les articles </h2>
                 {featuredBlog && (
                   <div className={`grid grid-cols-1 gap-12 mb-16 ${hasFeaturedImage ? "lg:grid-cols-3" : ""}`}>
                     {/* Featured Image */}
