@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { messageAPI } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 import AdminHeader from '@/components/admin/header';
 import { 
   Mail, MailOpen, Trash2, RefreshCw, Reply, Search,
   CheckCircle2, Clock, Inbox, ChevronRight, AlertTriangle,
-  Filter, RotateCcw, User, Building2, Send
+  Filter, RotateCcw, User, Building2, Send, Lock
 } from 'lucide-react';
 
 export default function ContactMessagesPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -62,23 +64,36 @@ export default function ContactMessagesPage() {
     
     setSending(true);
     try {
-      // Run all operations in parallel for faster response
-      await Promise.all([
-        messageAPI.reply(selectedMessage._id, replyText.trim()),
-        messageAPI.updateStatus(selectedMessage._id, 'replied'),
-        messageAPI.sendClientReplyEmail(
-          selectedMessage.name,
-          selectedMessage.email,
-          selectedMessage.message,
-          replyText.trim()
-        )
-      ]);
+      // Send reply and get updated message with new reply in array
+      const response = await messageAPI.reply(selectedMessage._id, replyText.trim());
+      const updatedMessage = response.data || response;
       
-      // Update state without reloading
+      // Update status
+      await messageAPI.updateStatus(selectedMessage._id, 'replied');
+      
+      // Send email
+      await messageAPI.sendClientReplyEmail(
+        selectedMessage.name,
+        selectedMessage.email,
+        selectedMessage.message,
+        replyText.trim()
+      );
+      
+      // Update state with the new reply included
+      const messageWithReply = {
+        ...selectedMessage,
+        status: 'replied',
+        replies: updatedMessage.replies || [...(selectedMessage.replies || []), {
+          message: replyText.trim(),
+          sentAt: new Date().toISOString(),
+          sentBy: 'Admin'
+        }]
+      };
+      
       setMessages(messages.map(m => 
-        m._id === selectedMessage._id ? {...m, status: 'replied'} : m
+        m._id === selectedMessage._id ? messageWithReply : m
       ));
-      setSelectedMessage({...selectedMessage, status: 'replied'});
+      setSelectedMessage(messageWithReply);
       setReplyText('');
       setSending(false);
     } catch (err) {
@@ -256,47 +271,112 @@ export default function ContactMessagesPage() {
                   </div>
                 </div>
 
-                {/* Section Réponse */}
-                <div className="border-t border-slate-200 pt-8">
-                  <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
-                    <Reply size={18} className="text-blue-600" /> Répondre à ce message
-                  </div>
-                  
-                  {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                    <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
-                      <Building2 size={16} className="text-purple-600" />
+                {/* Section Réponses précédentes */}
+                {selectedMessage.replies && selectedMessage.replies.length > 0 && (
+                  <div className="border-t border-slate-200 pt-8 mb-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                        <CheckCircle2 size={22} className="text-emerald-600" />
+                      </div>
                       <div>
-                        <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
-                        <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                        <h3 className="text-lg font-bold text-slate-900">Votre réponse</h3>
                       </div>
                     </div>
-                  )}
-                  
-                  <textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
-                    placeholder="Votre message..."
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <button 
-                      onClick={handleReply}
-                      disabled={sending || !replyText.trim()}
-                      className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {sending ? (
-                        <>
-                          <RefreshCw className="animate-spin" size={16} />
-                          Envoi en cours...
-                        </>
-                      ) : (
-                        <>
-                          Envoyer la réponse <Send size={16} />
-                        </>
-                      )}
-                    </button>
+                    <div className="space-y-4">
+                      {selectedMessage.replies.map((reply, index) => (
+                        <div key={index} className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-300 transition-all duration-300 pointer-events-none select-none">
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-4 mb-4">
+                              <div className="flex items-center gap-3 flex-1">
+                                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-sm font-bold text-emerald-700">A</span>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-slate-900">
+                                    {user?.name || 'Admin'}
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    {new Date(reply.sentAt).toLocaleDateString('fr-FR', { 
+                                      day: '2-digit', 
+                                      month: 'long', 
+                                      year: 'numeric'
+                                    })} à {new Date(reply.sentAt).toLocaleTimeString('fr-FR', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-[11px] font-bold rounded-full shadow-md shadow-emerald-200 flex items-center gap-1.5 flex-shrink-0">
+                                <Lock size={12} />
+                                PROTÉGÉ
+                              </div>
+                            </div>
+                            
+                            {/* Content */}
+                            <div className="ml-11 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
+                                {reply.message}
+                              </p>
+                            </div>
+                            
+                            {/* Footer indicator */}
+                            <div className="mt-3 ml-11 flex items-center gap-2">
+                              <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                              <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Section Réponse - Disponible seulement si pas de réponse précédente */}
+                {(!selectedMessage.replies || selectedMessage.replies.length === 0) && (
+                  <div className="border-t border-slate-200 pt-8">
+                    <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
+                      <Reply size={18} className="text-blue-600" /> Répondre à ce message
+                    </div>
+                    
+                    {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                      <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
+                        <Building2 size={16} className="text-purple-600" />
+                        <div>
+                          <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
+                          <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
+                      placeholder="Votre message..."
+                    />
+                    <div className="mt-4 flex justify-end">
+                      <button 
+                        onClick={handleReply}
+                        disabled={sending || !replyText.trim()}
+                        className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {sending ? (
+                          <>
+                            <RefreshCw className="animate-spin" size={16} />
+                            Envoi en cours...
+                          </>
+                        ) : (
+                          <>
+                            Envoyer la réponse <Send size={16} />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </>
