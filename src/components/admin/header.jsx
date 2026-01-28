@@ -30,6 +30,14 @@ export default function AdminHeader() {
     }
     return new Set();
   });
+  const [deletedMessageIds, setDeletedMessageIds] = useState(() => {
+    // Load deleted message IDs from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('deletedMessageIds');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
@@ -65,8 +73,8 @@ export default function AdminHeader() {
       const data = await response.json();
       let messagesArray = Array.isArray(data) ? data : (data.messages || data.data || []);
       
-      // Only show messages with status 'new' (unread/not dismissed)
-      messagesArray = messagesArray.filter(m => m.status === 'new' || !m.status);
+      // Only show messages with status 'new' (unread/not dismissed) and not in deleted cache
+      messagesArray = messagesArray.filter(m => (m.status === 'new' || !m.status) && !deletedMessageIds.has(m._id));
       
       setMessages(messagesArray);
       setUnreadMessages(messagesArray.length);
@@ -318,7 +326,10 @@ export default function AdminHeader() {
       const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       
-      // Mark all new messages as read
+      // Get all message IDs before marking as read
+      const messageIds = messages.map(m => m._id);
+      
+      // Mark all new messages as read in backend
       await Promise.all(
         messages.map(m => 
           fetch(`${cleanBaseUrl}/api/contact/${m._id}`, {
@@ -331,6 +342,15 @@ export default function AdminHeader() {
           })
         )
       );
+      
+      // Add to deleted cache to prevent them from reappearing on refresh
+      const newDeletedIds = new Set([...deletedMessageIds, ...messageIds]);
+      setDeletedMessageIds(newDeletedIds);
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deletedMessageIds', JSON.stringify([...newDeletedIds]));
+      }
       
       console.log('[Admin Header] All messages marked as read');
       
@@ -345,8 +365,19 @@ export default function AdminHeader() {
 
   const handleDeleteMessage = async (messageId, e) => {
     e.stopPropagation();
+    await deleteMessage(messageId);
+  };
+
+  const deleteMessage = async (messageId) => {
     try {
-      console.log('[Admin Header] Marking message as read:', messageId);
+      // Add to deleted cache first
+      const newDeletedIds = new Set([...deletedMessageIds, messageId]);
+      setDeletedMessageIds(newDeletedIds);
+      
+      // Save to localStorage to persist across refreshes
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deletedMessageIds', JSON.stringify([...newDeletedIds]));
+      }
       
       // Mark message as read in the database
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -368,9 +399,18 @@ export default function AdminHeader() {
       setMessages(prev => prev.filter(m => m._id !== messageId));
       setUnreadMessages(prev => Math.max(0, prev - 1));
       
-      setShowMessagesDropdown(true);
     } catch (error) {
       console.error('[Admin Header] Error marking message as read:', error);
+      // Remove from cache on error so it can be retried
+      setDeletedMessageIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(messageId);
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('deletedMessageIds', JSON.stringify([...newSet]));
+        }
+        return newSet;
+      });
     }
   };
 
