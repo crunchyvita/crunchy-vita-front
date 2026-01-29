@@ -619,9 +619,8 @@ export default function AdminHeader() {
                         
                         const senderName = n.metadata?.senderName || 'Contact';
                         const senderEmail = n.metadata?.senderEmail || '';
-                        const displayName = isProfessional && companyName 
-                          ? companyName 
-                          : senderName;
+                        // For professional, show sender name. For personal, also show sender name
+                        const displayName = senderName;
                         
                         // Extract subject from the message (first part before ':')
                         const subject = n.message?.split(':')[1]?.trim() || '';
@@ -660,11 +659,7 @@ export default function AdminHeader() {
                                   </p>
                                 </div>
                                 
-                                {/* Email */}
-                                <p className="text-xs text-slate-500 line-clamp-1 mt-1 flex items-center gap-1">
-                                  <Mail className="h-3 w-3 flex-shrink-0" />
-                                  {senderEmail}
-                                </p>
+                               
                                 
                             
                                 

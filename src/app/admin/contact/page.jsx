@@ -43,11 +43,13 @@ export default function ContactMessagesPage() {
     const messageId = searchParams.get('message');
     if (messageId && messages.length > 0) {
       const message = messages.find(m => m._id === messageId);
-      if (message && !selectedMessage) {
+      if (message) {
         handleSelectMessage(message);
+        // Remove the query parameter after handling it
+        window.history.replaceState({}, '', '/admin/contact');
       }
     }
-  }, [searchParams, messages]);
+  }, [searchParams, messages, loading]);
 
   const fetchMessages = async () => {
     try {
@@ -287,12 +289,16 @@ export default function ContactMessagesPage() {
                 {selectedMessage.replies && selectedMessage.replies.length > 0 && (
                   <div className="border-t border-slate-200 pt-8 mb-8">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
-                        <CheckCircle2 size={22} className="text-emerald-600" />
+                     
+                     {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                      <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
+                        <Building2 size={16} className="text-purple-600" />
+                        <div>
+                          <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
+                          <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-900">Votre réponse</h3>
-                      </div>
+                    )}
                     </div>
                     <div className="space-y-4">
                       {selectedMessage.replies.map((reply, index) => (
@@ -302,9 +308,7 @@ export default function ContactMessagesPage() {
                             {/* Header */}
                             <div className="flex items-start justify-between gap-4 mb-4">
                               <div className="flex items-center gap-3 flex-1">
-                                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-sm font-bold text-emerald-700">A</span>
-                                </div>
+                              
                                 <div>
                                   <p className="text-sm font-bold text-slate-900">
                                     {user?.name || 'Admin'}
