@@ -251,7 +251,7 @@ export default function ContactMessagesPage() {
               <div className="flex items-center gap-4">
                  <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-900">{selectedMessage.name}</span>
-                    <span className="text-xs text-slate-500">{selectedMessage.email}</span>
+                    <a href={`mailto:${selectedMessage.email}`} className="text-xs text-blue-500 hover:underline cursor-pointer">{selectedMessage.email}</a>
                  </div>
               </div>
               <div className="flex items-center gap-2">
