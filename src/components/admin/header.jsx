@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle } from "lucide-react";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
 
 export default function AdminHeader() {
@@ -13,19 +13,31 @@ export default function AdminHeader() {
   const [messages, setMessages] = useState([]);
   const [showMessagesDropdown, setShowMessagesDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showContactNotificationsDropdown, setShowContactNotificationsDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [contactNotifications, setContactNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [unreadContactNotifications, setUnreadContactNotifications] = useState(0);
   const [pendingModal, setPendingModal] = useState(null);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingError, setPendingError] = useState('');
   const [selectedNotifications, setSelectedNotifications] = useState(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [deletingNotification, setDeletingNotification] = useState(null);
+  const [skipNextPoll, setSkipNextPoll] = useState(false);
   const [deletedNotificationIds, setDeletedNotificationIds] = useState(() => {
     // Load deleted IDs from localStorage on mount
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('deletedNotificationIds');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
+  const [deletedContactNotificationIds, setDeletedContactNotificationIds] = useState(() => {
+    // Load deleted contact notification IDs from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('deletedContactNotificationIds');
       return stored ? new Set(JSON.parse(stored)) : new Set();
     }
     return new Set();
@@ -44,17 +56,24 @@ export default function AdminHeader() {
       // Initial fetch
       fetchMessages();
       fetchNotifications();
+      fetchContactNotifications();
       
       // Set up polling for real-time updates (every 2 seconds)
       const pollInterval = setInterval(() => {
+        // Skip polling if we just deleted something
+        if (skipNextPoll) {
+          setSkipNextPoll(false);
+          return;
+        }
         fetchMessages();
         fetchNotifications();
+        fetchContactNotifications();
       }, 2000);
       
       // Cleanup on unmount
       return () => clearInterval(pollInterval);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, skipNextPoll]);
 
   const fetchMessages = async () => {
     try {
@@ -116,6 +135,29 @@ export default function AdminHeader() {
     }
   };
 
+  const fetchContactNotifications = async () => {
+    try {
+      // Fetch only contact message notifications
+      const data = await notificationAPI.list(20, null, false);
+      const notificationsList = data?.notifications || (Array.isArray(data) ? data : []);
+      
+      // Filter to show only contact_message type and not in deleted cache
+      const filteredContactNotifications = notificationsList.filter(n => 
+        n.type === 'contact_message' && !deletedContactNotificationIds.has(n._id)
+      );
+      
+      setContactNotifications(filteredContactNotifications);
+      
+      // Count unread contact notifications
+      const unreadCount = filteredContactNotifications.filter(n => !n.isRead).length;
+      setUnreadContactNotifications(unreadCount);
+    } catch (error) {
+      console.error('Fetch contact notifications error:', error);
+      setContactNotifications([]);
+      setUnreadContactNotifications(0);
+    }
+  };
+
   const openCommentModeration = async (notification) => {
     setPendingError('');
     setPendingLoading(true);
@@ -164,23 +206,29 @@ export default function AdminHeader() {
       } else {
         console.error('[Notification Click] Missing productId or commentId');
       }
-    } else if (notification?.type === 'contact_message') {
-      // Navigate to contact message detail with specific message ID
-      const messageId = notification?.relatedId;
-      
-      console.log('[Notification Click] Contact message ID:', messageId);
-      
-      if (messageId) {
-        const url = `/admin/contact?messageId=${messageId}&highlight=true`;
-        console.log('[Notification Click] Navigating to message:', url);
-        router.push(url);
-      } else {
-        console.error('[Notification Click] Missing messageId for contact_message');
-      }
     } else {
       // For other notifications, just mark as read and close dropdown
       setShowNotificationsDropdown(false);
     }
+  };
+
+  const handleContactNotificationClick = (notification) => {
+    console.log('[Contact Notification Click] Full notification:', notification);
+    
+    // Mark as read when clicked
+    if (!notification.isRead) {
+      markContactNotificationAsRead(notification._id);
+    }
+    
+    // Navigate to contact page
+    const messageId = notification?.relatedId;
+    if (messageId) {
+      router.push(`/admin/contact?message=${messageId}`);
+    } else {
+      router.push('/admin/contact');
+    }
+    
+    setShowContactNotificationsDropdown(false);
   };
 
   const markNotificationAsRead = async (notificationId) => {
@@ -193,6 +241,19 @@ export default function AdminHeader() {
       setUnreadNotifications(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Mark as read error:', error);
+    }
+  };
+
+  const markContactNotificationAsRead = async (notificationId) => {
+    try {
+      await notificationAPI.markAsRead(notificationId);
+      // Update local state immediately for better UX
+      setContactNotifications(prev => prev.map(n => 
+        n._id === notificationId ? { ...n, isRead: true } : n
+      ));
+      setUnreadContactNotifications(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Mark contact notification as read error:', error);
     }
   };
 
@@ -262,6 +323,11 @@ export default function AdminHeader() {
 
   const deleteNotification = async (notificationId) => {
     try {
+      const notification = notifications.find(n => n._id === notificationId);
+      
+      // Skip next polling cycle to avoid refetching
+      setSkipNextPoll(true);
+      
       // Add to deleted cache first
       const newDeletedIds = new Set([...deletedNotificationIds, notificationId]);
       setDeletedNotificationIds(newDeletedIds);
@@ -271,36 +337,29 @@ export default function AdminHeader() {
         localStorage.setItem('deletedNotificationIds', JSON.stringify([...newDeletedIds]));
       }
       
-      // Delete from backend
-      await notificationAPI.delete(notificationId);
-      console.log('[Admin Header] Notification deleted successfully');
-      
       // Immediately remove from UI
       setNotifications(prev => prev.filter(n => n._id !== notificationId));
       setUnreadNotifications(prev => {
-        const notification = notifications.find(n => n._id === notificationId);
-        return notification && !notification.isRead ? Math.max(0, prev - 1) : prev;
+        const notif = notifications.find(n => n._id === notificationId);
+        return notif && !notif.isRead ? Math.max(0, prev - 1) : prev;
       });
       
+      // For other notifications, use the standard delete endpoint
+      await notificationAPI.delete(notificationId);
+      console.log('[Admin Header] Notification deleted successfully');
+      
     } catch (error) {
-      // If notification not found, it was already deleted - this is OK
-      if (error.message?.includes('non trouvée') || error.status === 404) {
-        console.log('[Admin Header] Notification already deleted, removing from UI');
-        // Still remove from UI
-        setNotifications(prev => prev.filter(n => n._id !== notificationId));
-      } else {
-        console.error('[Admin Header] Delete notification error:', error);
-        // Remove from cache on error so it can be retried
-        setDeletedNotificationIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(notificationId);
-          // Update localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('deletedNotificationIds', JSON.stringify([...newSet]));
-          }
-          return newSet;
-        });
-      }
+      console.error('[Admin Header] Delete notification error:', error);
+      // Remove from cache on error so it can be retried
+      setDeletedNotificationIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('deletedNotificationIds', JSON.stringify([...newSet]));
+        }
+        return newSet;
+      });
     } finally {
       setDeletingNotification(null);
     }
@@ -431,6 +490,59 @@ export default function AdminHeader() {
     }
   };
 
+  const handleMarkAllContactNotificationsAsRead = async () => {
+    try {
+      // Mark all contact notifications as read individually
+      await Promise.all(
+        contactNotifications.filter(n => !n.isRead).map(n => notificationAPI.markAsRead(n._id))
+      );
+      fetchContactNotifications();
+    } catch (error) {
+      console.error('Mark all contact notifications as read error:', error);
+    }
+  };
+
+  const handleDeleteContactNotification = async (notificationId, e) => {
+    e.stopPropagation();
+    try {
+      // Skip next polling cycle to avoid refetching
+      setSkipNextPoll(true);
+      
+      // Add to deleted cache first
+      const newDeletedIds = new Set([...deletedContactNotificationIds, notificationId]);
+      setDeletedContactNotificationIds(newDeletedIds);
+      
+      // Save to localStorage to persist across refreshes
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deletedContactNotificationIds', JSON.stringify([...newDeletedIds]));
+      }
+      
+      // Immediately remove from UI
+      setContactNotifications(prev => prev.filter(n => n._id !== notificationId));
+      setUnreadContactNotifications(prev => {
+        const notif = contactNotifications.find(n => n._id === notificationId);
+        return notif && !notif.isRead ? Math.max(0, prev - 1) : prev;
+      });
+      
+      // Delete from backend
+      await notificationAPI.delete(notificationId);
+      console.log('[Admin Header] Contact notification deleted successfully');
+      
+    } catch (error) {
+      console.error('[Admin Header] Delete contact notification error:', error);
+      // Remove from cache on error so it can be retried
+      setDeletedContactNotificationIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('deletedContactNotificationIds', JSON.stringify([...newSet]));
+        }
+        return newSet;
+      });
+    }
+  };
+
   const handleDeleteSelectedNotifications = async () => {
     if (selectedNotifications.size === 0) return;
     try {
@@ -458,11 +570,174 @@ export default function AdminHeader() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Contact Notifications */}
+            <div className="relative">
+              <button 
+                onClick={() => { 
+                  setShowContactNotificationsDropdown(!showContactNotificationsDropdown); 
+                  setShowNotificationsDropdown(false);
+                  setShowMessagesDropdown(false); 
+                  setShowProfileDropdown(false); 
+                }} 
+                className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
+                title="Notifications de contact"
+              >
+                <Mail className="h-6 w-6" />
+                {unreadContactNotifications > 0 && (
+                  <span className="absolute top-1 right-1 h-4 w-4 bg-blue-600 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">
+                    {unreadContactNotifications}
+                  </span>
+                )}
+              </button>
+              {showContactNotificationsDropdown && (
+                <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-4 bg-blue-50 font-bold text-sm flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-blue-600" />
+                      Messages de contact
+                    </span>
+                    {unreadContactNotifications > 0 && (
+                      <button
+                        onClick={handleMarkAllContactNotificationsAsRead}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                      >
+                        Marquer tout comme lu
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {contactNotifications.length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 text-sm">Aucune notification de contact</div>
+                    ) : (
+                      contactNotifications.map(n => {
+                        // Extract contact type and info from metadata - better detection
+                        const contactType = n.metadata?.contactType;
+                        const companyName = n.metadata?.companyName;
+                        
+                        // Determine if professional based on metadata or company name
+                        const isProfessional = contactType === 'professionnel' || !!companyName;
+                        
+                        const senderName = n.metadata?.senderName || 'Contact';
+                        const displayName = isProfessional && companyName 
+                          ? companyName 
+                          : senderName;
+                        
+                        return (
+                          <div 
+                            key={n._id} 
+                            className={`group relative hover:bg-gradient-to-r ${
+                              isProfessional 
+                                ? 'hover:from-purple-50 hover:to-blue-50' 
+                                : 'hover:from-blue-50 hover:to-cyan-50'
+                            } cursor-pointer border-b border-slate-100 last:border-0 transition-all duration-200`}
+                          >
+                            <div 
+                              onClick={() => handleContactNotificationClick(n)}
+                              className="p-4 flex items-start gap-3"
+                            >
+                              {/* Icon and unread indicator */}
+                              <div className="relative flex-shrink-0">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                  isProfessional 
+                                    ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
+                                    : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                                } shadow-md`}>
+                                  {isProfessional ? (
+                                    <Building2 className="h-5 w-5 text-white" />
+                                  ) : (
+                                    <User className="h-5 w-5 text-white" />
+                                  )}
+                                </div>
+                                {!n.isRead && (
+                                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 border-2 border-white animate-pulse" />
+                                )}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold shadow-sm ${
+                                        isProfessional 
+                                          ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white' 
+                                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                                      }`}>
+                                        {isProfessional ? (
+                                          <>
+                                            <Building2 className="h-3.5 w-3.5 mr-1.5" />
+                                            Professionnel
+                                          </>
+                                        ) : (
+                                          <>
+                                            <User className="h-3.5 w-3.5 mr-1.5" />
+                                            Particulier
+                                          </>
+                                        )}
+                                      </span>
+                                      {!n.isRead && (
+                                        <span className="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md">NOUVEAU</span>
+                                      )}
+                                    </div>
+                                    <p className={`text-sm font-semibold ${
+                                      n.isRead ? 'text-slate-600' : 'text-slate-900'
+                                    }`}>
+                                      {displayName}
+                                    </p>
+                                    <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 flex items-center gap-1">
+                                      <Mail className="h-3 w-3" />
+                                      {n.metadata?.senderEmail || 'Email non disponible'}
+                                    </p>
+                                    {isProfessional && companyName && (
+                                      <p className="text-xs text-purple-600 font-medium mt-1 flex items-center gap-1">
+                                        <Building2 className="h-3 w-3" />
+                                        Contact: {senderName}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Timestamp */}
+                                {n.createdAt && (
+                                  <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400">
+                                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {new Date(n.createdAt).toLocaleDateString('fr-FR', { 
+                                      day: '2-digit', 
+                                      month: 'short'
+                                    })} à {new Date(n.createdAt).toLocaleTimeString('fr-FR', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Delete button */}
+                              <button
+                                onClick={(e) => handleDeleteContactNotification(n._id, e)}
+                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0 opacity-0 group-hover:opacity-100"
+                                title="Supprimer la notification"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Notifications */}
             <div className="relative">
               <button 
                 onClick={() => { 
                   setShowNotificationsDropdown(!showNotificationsDropdown); 
+                  setShowContactNotificationsDropdown(false);
                   setShowMessagesDropdown(false); 
                   setShowProfileDropdown(false); 
                 }} 
@@ -527,6 +802,8 @@ export default function AdminHeader() {
                             title="Supprimer la notification"
                           >
                             <Trash2 className="h-4 w-4" />
+
+                      
                           </button>
                         </div>
                       ))
@@ -536,91 +813,7 @@ export default function AdminHeader() {
               )}
             </div>
   
-              {/* Messages Dropdown */}
-              <div className="relative">
-                <button 
-                  onClick={() => { 
-                    setShowMessagesDropdown(!showMessagesDropdown); 
-                    setShowNotificationsDropdown(false); 
-                    setShowProfileDropdown(false); 
-                  }} 
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
-                >
-                  <MessageSquare className="h-6 w-6" />
-                {unreadMessages > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 bg-orange-500 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">
-                    {unreadMessages}
-                  </span>
-                )}
-              </button>
-              {showMessagesDropdown && (
-                <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 bg-slate-100 font-bold text-sm flex items-center justify-between">
-                    <span>Nouveaux Messages</span>
-                    {unreadMessages > 0 && (
-                      <button
-                        onClick={handleMarkAllMessagesAsRead}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-                      >
-                        Marquer tout comme lu
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {messages.length === 0 ? (
-                      <div className="p-8 text-center text-slate-400 text-sm">Aucun message</div>
-                    ) : (
-                      messages.map(m => (
-                        <div 
-                          key={m._id} 
-                          className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between group border-b border-slate-100 last:border-0"
-                        >
-                          <div 
-                            onClick={() => { 
-                              router.push('/admin/contact');
-                              setShowMessagesDropdown(false); 
-                            }} 
-                            className="flex-1 min-w-0 flex items-start gap-2"
-                          >
-                            {(m.status === 'new' || !m.status) && (
-                              <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1" />
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-bold">{m.name}</p>
-                              <p className="text-xs text-slate-500 line-clamp-1">{m.message}</p>
-                              {m.createdAt && (
-                                <p className="text-[10px] text-slate-400 mt-0.5">
-                                  {new Date(m.createdAt).toLocaleDateString('fr-FR', { 
-                                    day: '2-digit', 
-                                    month: 'short', 
-                                    year: 'numeric' 
-                                  })} à {new Date(m.createdAt).toLocaleTimeString('fr-FR', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </p>
-                              )}
-                              {m.type === 'professionnel' && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset flex items-center gap-1 w-fit mt-1.5 bg-purple-50 text-purple-700 ring-purple-600/20">
-                                  <Building2 size={12} /> Pro
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <button
-                            onClick={(e) => handleDeleteMessage(m._id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 ml-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
-                            title="Marquer comme lu"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+             
 
             <div className="h-8 w-px bg-slate-200 mx-2" />
 
@@ -630,7 +823,8 @@ export default function AdminHeader() {
                 onClick={() => { 
                   setShowProfileDropdown(!showProfileDropdown); 
                   setShowMessagesDropdown(false); 
-                  setShowNotificationsDropdown(false); 
+                  setShowNotificationsDropdown(false);
+                  setShowContactNotificationsDropdown(false);
                 }} 
                 className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition"
               >
