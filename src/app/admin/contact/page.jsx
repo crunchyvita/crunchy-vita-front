@@ -288,18 +288,20 @@ export default function ContactMessagesPage() {
                 {/* Section Réponses précédentes */}
                 {selectedMessage.replies && selectedMessage.replies.length > 0 && (
                   <div className="border-t border-slate-200 pt-8 mb-8">
-                    <div className="flex items-center gap-3 mb-6">
-                     
-                     {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                      <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
-                        <Building2 size={16} className="text-purple-600" />
+                    {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                      <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                          <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                            <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                            <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                          </div>
+                        </div>
                         <div>
-                          <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
-                          <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                          <p className="text-sm font-semibold text-purple-900">{selectedMessage.companyName}</p>
+                          <p className="text-xs text-purple-600">Contact professionnel</p>
                         </div>
                       </div>
                     )}
-                    </div>
                     <div className="space-y-4">
                       {selectedMessage.replies.map((reply, index) => (
                         <div key={index} className="relative group">
@@ -355,11 +357,16 @@ export default function ContactMessagesPage() {
                     </div>
                     
                     {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                      <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-2">
-                        <Building2 size={16} className="text-purple-600" />
+                      <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                          <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                            <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                            <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                          </div>
+                        </div>
                         <div>
-                          <p className="text-xs font-semibold text-purple-900">{selectedMessage.companyName}</p>
-                          <p className="text-[10px] text-purple-600">Contact professionnel</p>
+                          <p className="text-sm font-semibold text-purple-900">{selectedMessage.companyName}</p>
+                          <p className="text-xs text-purple-600">Contact professionnel</p>
                         </div>
                       </div>
                     )}
