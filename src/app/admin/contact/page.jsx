@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { messageAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import AdminHeader from '@/components/admin/header';
@@ -13,6 +13,7 @@ import {
 
 export default function ContactMessagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,17 @@ export default function ContactMessagesPage() {
     // Cleanup on unmount
     return () => clearInterval(pollInterval);
   }, []);
+
+  // Handle opening a specific message from URL parameter
+  useEffect(() => {
+    const messageId = searchParams.get('message');
+    if (messageId && messages.length > 0) {
+      const message = messages.find(m => m._id === messageId);
+      if (message && !selectedMessage) {
+        handleSelectMessage(message);
+      }
+    }
+  }, [searchParams, messages]);
 
   const fetchMessages = async () => {
     try {

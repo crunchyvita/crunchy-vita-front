@@ -584,7 +584,7 @@ export default function AdminHeader() {
               >
                 <Mail className="h-6 w-6" />
                 {unreadContactNotifications > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 bg-blue-600 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">
+                  <span className="absolute top-1 right-1 h-4 w-4 bg-orange-500 rounded-full border-2 border-white text-[10px] text-white font-bold flex items-center justify-center">
                     {unreadContactNotifications}
                   </span>
                 )}
@@ -618,84 +618,62 @@ export default function AdminHeader() {
                         const isProfessional = contactType === 'professionnel' || !!companyName;
                         
                         const senderName = n.metadata?.senderName || 'Contact';
+                        const senderEmail = n.metadata?.senderEmail || '';
                         const displayName = isProfessional && companyName 
                           ? companyName 
                           : senderName;
                         
+                        // Extract subject from the message (first part before ':')
+                        const subject = n.message?.split(':')[1]?.trim() || '';
+                        
                         return (
                           <div 
                             key={n._id} 
-                            className={`group relative hover:bg-gradient-to-r ${
-                              isProfessional 
-                                ? 'hover:from-purple-50 hover:to-blue-50' 
-                                : 'hover:from-blue-50 hover:to-cyan-50'
-                            } cursor-pointer border-b border-slate-100 last:border-0 transition-all duration-200`}
+                            className="group relative hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 transition-all duration-200"
                           >
                             <div 
                               onClick={() => handleContactNotificationClick(n)}
-                              className="p-4 flex items-start gap-3"
+                              className="p-4 flex items-start gap-3 relative"
                             >
-                              {/* Icon and unread indicator */}
-                              <div className="relative flex-shrink-0">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                  isProfessional 
-                                    ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
-                                    : 'bg-gradient-to-br from-blue-500 to-cyan-500'
-                                } shadow-md`}>
-                                  {isProfessional ? (
-                                    <Building2 className="h-5 w-5 text-white" />
-                                  ) : (
-                                    <User className="h-5 w-5 text-white" />
-                                  )}
-                                </div>
-                                {!n.isRead && (
-                                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 border-2 border-white animate-pulse" />
-                                )}
-                              </div>
-
-                              {/* Content */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold shadow-sm ${
-                                        isProfessional 
-                                          ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white' 
-                                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                                      }`}>
-                                        {isProfessional ? (
-                                          <>
-                                            <Building2 className="h-3.5 w-3.5 mr-1.5" />
-                                            Professionnel
-                                          </>
-                                        ) : (
-                                          <>
-                                            <User className="h-3.5 w-3.5 mr-1.5" />
-                                            Particulier
-                                          </>
-                                        )}
-                                      </span>
-                                      {!n.isRead && (
-                                        <span className="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md">NOUVEAU</span>
-                                      )}
-                                    </div>
-                                    <p className={`text-sm font-semibold ${
-                                      n.isRead ? 'text-slate-600' : 'text-slate-900'
-                                    }`}>
-                                      {displayName}
-                                    </p>
-                                    <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 flex items-center gap-1">
-                                      <Mail className="h-3 w-3" />
-                                      {n.metadata?.senderEmail || 'Email non disponible'}
-                                    </p>
-                                    {isProfessional && companyName && (
-                                      <p className="text-xs text-purple-600 font-medium mt-1 flex items-center gap-1">
-                                        <Building2 className="h-3 w-3" />
-                                        Contact: {senderName}
-                                      </p>
-                                    )}
+                              {/* PRO Badge in bottom right for professional only */}
+                              {isProfessional && (
+                                <div className="absolute bottom-2 right-2">
+                                  <div className="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-100 border border-purple-200">
+                                    <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                                    <span className="text-[10px] font-bold text-purple-600">PRO</span>
                                   </div>
                                 </div>
+                              )}
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0 pr-12">
+                                
+                                {/* Sender name with blue dot for unread */}
+                                <div className="flex items-center gap-2">
+                                  {!n.isRead && (
+                                    <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0 animate-pulse" />
+                                  )}
+                                  <p className={`text-sm font-semibold ${
+                                    n.isRead ? 'text-slate-600' : 'text-slate-900'
+                                  }`}>
+                                    {displayName}
+                                  </p>
+                                </div>
+                                
+                                {/* Email */}
+                                <p className="text-xs text-slate-500 line-clamp-1 mt-1 flex items-center gap-1">
+                                  <Mail className="h-3 w-3 flex-shrink-0" />
+                                  {senderEmail}
+                                </p>
+                                
+                            
+                                
+                                {/* Subject/Object */}
+                                {subject && (
+                                  <p className="text-xs text-slate-600 font-medium mt-2 line-clamp-2">
+                                    {subject}
+                                  </p>
+                                )}
                                 
                                 {/* Timestamp */}
                                 {n.createdAt && (
