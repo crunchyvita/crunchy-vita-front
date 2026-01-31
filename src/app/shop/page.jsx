@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ImageIcon, ChevronLeft, ChevronRight, Eye,
@@ -183,6 +183,8 @@ function ProductCard({ product, onOpenDetail }) {
 
 function ClientShop() {
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState([]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -252,6 +254,13 @@ function ClientShop() {
       return nameMatch || descMatch || productMatch;
     });
   }, [packages, searchQuery]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && (tab === 'products' || tab === 'packages')) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
