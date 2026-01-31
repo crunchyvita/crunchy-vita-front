@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer components {
   .feature-card-hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

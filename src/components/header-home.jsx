@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X } from 'lucide-react';
+import '../app/fonts.css';
 
 export default function HeaderHome() {
   const { isAuthenticated, user } = useAuth();
@@ -19,9 +20,9 @@ export default function HeaderHome() {
   ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
                 <Link href="/" className="flex items-center gap-3">
                 <Image
                   src="/assets/images/logo.png"
@@ -39,7 +40,8 @@ export default function HeaderHome() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-slate-700 hover:text-green-600 font-medium text-sm transition-colors"
+                className="text-slate-700 hover:text-[#556822] font-medium text-sm transition-colors"
+                style={{ fontFamily: 'Maison Neue, sans-serif' }}
               >
                 {link.label}
               </Link>
@@ -51,14 +53,14 @@ export default function HeaderHome() {
             {isAuthenticated ? (
               <Link
                 href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/shop'}
-                className="px-6 py-2 bg-[#469165] hover:bg-[#3a7a4a] text-white font-bold rounded-lg transition-colors text-sm"
+                className="px-6 py-2 bg-[#556822] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm"
               >
-                {user?.role === 'ADMIN' ? 'Tableau de bord' : 'Mon compte'}
+                {user?.role === 'ADMIN' ? 'Tableau de bord' : 'Commander'}
               </Link>
             ) : (
               <Link
                 href="/shop"
-                className="px-6 py-2 bg-[#469165] hover:bg-[#3a7a4a] text-white font-bold rounded-lg transition-colors text-sm"
+                className="px-6 py-2 bg-[#469165] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm"
               >
                 Commander
               </Link>
@@ -86,6 +88,7 @@ export default function HeaderHome() {
                 key={link.href}
                 href={link.href}
                 className="block px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                style={{ fontFamily: 'Maison Neue, sans-serif' }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
@@ -95,7 +98,7 @@ export default function HeaderHome() {
               {isAuthenticated ? (
                 <Link
                   href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/account'}
-                  className="block w-full px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors text-sm text-center"
+                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#469165] text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {user?.role === 'ADMIN' ? 'Tableau de bord' : 'Mon compte'}
@@ -103,7 +106,7 @@ export default function HeaderHome() {
               ) : (
                 <Link
                   href="/shop"
-                  className="block w-full px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors text-sm text-center"
+                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#469165] text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Commander

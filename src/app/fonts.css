@@ -1,0 +1,47 @@
+/* Agrandir Bold */
+@font-face {
+  font-family: 'Agrandir';
+  src: url('/fonts/agrandir-bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Erica One */
+@font-face {
+  font-family: 'Erica One';
+  src: url('/fonts/EricaOne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Maison Neue Bold */
+@font-face {
+  font-family: 'Maison Neue';
+  src: url('/fonts/fonnts.com-Maison_Neue_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Maison Neue Book */
+@font-face {
+  font-family: 'Maison Neue';
+  src: url('/fonts/fonnts.com-Maison_Neue_Book.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Maison Neue Light */
+@font-face {
+  font-family: 'Maison Neue';
+  src: url('/fonts/fonnts.com-Maison_Neue_Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Maison Neue Mono */
+@font-face {
+  font-family: 'Maison Neue Mono';
+  src: url('/fonts/fonnts.com-Maison_Neue_Mono.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
