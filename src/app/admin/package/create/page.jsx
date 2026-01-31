@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Loader, Package, Percent, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { ArrowLeft, Save, Loader, Package, Percent, AlertCircle, CheckCircle2, Info, Trash2 } from "lucide-react";
 import AdminHeader from "@/components/admin/header";
 
 export default function CreateEditPackagePage() {
@@ -15,14 +15,42 @@ export default function CreateEditPackagePage() {
 		name: "",
 		description: "",
 		discountPercentage: 0,
+		minProducts: 1,
 		maxProducts: 5,
 		allowAllProducts: false,
+		allowMultipleQuantities: true,
 		isActive: true,
+		products: [], // Array of {productId, quantity}
 	});
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
+	const [availableProducts, setAvailableProducts] = useState([]);
+	const [loadingProducts, setLoadingProducts] = useState(false);
+
+	// Load available products
+	useEffect(() => {
+		const fetchProducts = async () => {
+			setLoadingProducts(true);
+			try {
+				const token = localStorage.getItem("token");
+				const response = await fetch(`/api/products`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				if (!response.ok) throw new Error("Failed to load products");
+				const result = await response.json();
+				setAvailableProducts(result.products || result || []);
+			} catch (err) {
+				console.error("Error loading products:", err);
+			} finally {
+				setLoadingProducts(false);
+			}
+		};
+		fetchProducts();
+	}, []);
 
 	// Load package data if editing
 	useEffect(() => {
@@ -43,9 +71,12 @@ export default function CreateEditPackagePage() {
 						name: result.data.name,
 						description: result.data.description || "",
 						discountPercentage: result.data.discountPercentage || 0,
+						minProducts: result.data.minProducts || 1,
 						maxProducts: result.data.maxProducts || 5,
 						allowAllProducts: result.data.allowAllProducts || false,
+						allowMultipleQuantities: result.data.allowMultipleQuantities !== undefined ? result.data.allowMultipleQuantities : true,
 						isActive: result.data.isActive,
+						products: result.data.products || [],
 					});
 				} catch (err) {
 					setError(err.message || "Failed to load package");
@@ -66,6 +97,45 @@ export default function CreateEditPackagePage() {
 		}));
 	};
 
+	const handleAddProduct = (productId) => {
+		if (formData.products.find(p => p.productId === productId)) return;
+		
+		setFormData(prev => ({
+			...prev,
+			products: [...prev.products, { productId, quantity: 1 }]
+		}));
+	};
+
+	const handleRemoveProduct = (productId) => {
+		setFormData(prev => ({
+			...prev,
+			products: prev.products.filter(p => p.productId !== productId)
+		}));
+	};
+
+	const handleQuantityChange = (productId, quantity) => {
+		const newQuantity = Math.max(1, parseInt(quantity) || 1);
+		setFormData(prev => ({
+			...prev,
+			products: prev.products.map(p =>
+				p.productId === productId ? { ...p, quantity: newQuantity } : p
+			)
+		}));
+	};
+
+	const handleToggleMultipleQuantities = () => {
+		setFormData(prev => {
+			const newValue = !prev.allowMultipleQuantities;
+			// If disabling multiple quantities, reset all quantities to 1
+			const updatedProducts = newValue ? prev.products : prev.products.map(p => ({ ...p, quantity: 1 }));
+			return {
+				...prev,
+				allowMultipleQuantities: newValue,
+				products: updatedProducts
+			};
+		});
+	};
+
 	const handleSave = async (e) => {
 		e.preventDefault();
 		setSaving(true);
@@ -80,8 +150,11 @@ export default function CreateEditPackagePage() {
 			if (formData.discountPercentage < 0 || formData.discountPercentage > 100) {
 				throw new Error("Discount percentage must be between 0 and 100");
 			}
-			if (formData.maxProducts < 1) {
-				throw new Error("Maximum products must be at least 1");
+			if (formData.minProducts < 1) {
+				throw new Error("Minimum products must be at least 1");
+			}
+			if (formData.maxProducts < formData.minProducts) {
+				throw new Error("Maximum products must be greater than or equal to minimum products");
 			}
 
 			const token = localStorage.getItem("token");
@@ -98,8 +171,11 @@ export default function CreateEditPackagePage() {
 					name: formData.name,
 					description: formData.description,
 					discountPercentage: Number(formData.discountPercentage),
+					minProducts: Number(formData.minProducts),
 					maxProducts: Number(formData.maxProducts),
 					allowAllProducts: formData.allowAllProducts,
+					allowMultipleQuantities: formData.allowMultipleQuantities,
+					products: formData.products,
 					isActive: formData.isActive,
 				}),
 			});
@@ -264,53 +340,77 @@ export default function CreateEditPackagePage() {
 										</p>
 									</div>
 
-									<div>
-										<label className="block text-sm font-semibold text-slate-900 mb-2">
-											Maximum Number of Products <span className="text-red-500">*</span>
-										</label>
-										{!formData.allowAllProducts ? (
+									<div className="grid grid-cols-2 gap-4">
+										<div>
+											<label className="block text-sm font-semibold text-slate-900 mb-2">
+												Minimum Products <span className="text-red-500">*</span>
+											</label>
 											<input
 												type="number"
-												name="maxProducts"
-												value={formData.maxProducts}
+												name="minProducts"
+												value={formData.minProducts}
 												onChange={handleInputChange}
 												min="1"
-												placeholder="5"
+												placeholder="3"
 												className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 placeholder:text-slate-400 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
 												required
 											/>
-										) : (
-											<div className="w-full rounded-lg border border-slate-300 px-4 py-2.5 bg-slate-50 text-slate-500">
-												All active products will be available
-											</div>
-										)}
-										<p className="text-xs text-slate-500 mt-2">
-											{formData.allowAllProducts 
-												? "Customers can select from all active products in the system" 
-												: "The maximum number of products customers can select for this package"
-											}
-										</p>
+											<p className="text-xs text-slate-500 mt-2">
+												Minimum products required
+											</p>
+										</div>
+
+										<div>
+											<label className="block text-sm font-semibold text-slate-900 mb-2">
+												Maximum Products <span className="text-red-500">*</span>
+											</label>
+											{!formData.allowAllProducts ? (
+												<input
+													type="number"
+													name="maxProducts"
+													value={formData.maxProducts}
+													onChange={handleInputChange}
+													min="1"
+													placeholder="5"
+													className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 placeholder:text-slate-400 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+													required
+												/>
+											) : (
+												<div className="w-full rounded-lg border border-slate-300 px-4 py-2.5 bg-slate-50 text-slate-500">
+													All products
+												</div>
+											)}
+											<p className="text-xs text-slate-500 mt-2">
+												{formData.allowAllProducts 
+													? "All active products" 
+													: "Maximum products allowed"
+												}
+											</p>
+										</div>
 									</div>
+
+								
 
 									<div>
 										<label className="relative flex items-start gap-3 cursor-pointer group">
 											<input
 												type="checkbox"
-												name="allowAllProducts"
-												checked={formData.allowAllProducts}
-												onChange={handleInputChange}
+												checked={formData.allowMultipleQuantities}
+												onChange={handleToggleMultipleQuantities}
 												className="mt-1 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition"
 											/>
 											<div className="flex-1">
 												<p className="font-medium text-slate-900 group-hover:text-slate-700 transition">
-													Allow All Active Products
+													Allow Multiple Quantities Per Product
 												</p>
 												<p className="text-xs text-slate-500 mt-0.5">
-													Enable customers to select from all active products in the catalog
+													When disabled, each product can only be added once with a fixed quantity of 1
 												</p>
 											</div>
 										</label>
 									</div>
+
+								
 								</div>
 							</div>
 						</div>
@@ -435,3 +535,5 @@ export default function CreateEditPackagePage() {
 			</div>
 		</div>
 	</>
+	);
+}

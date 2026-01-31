@@ -197,6 +197,15 @@ export default function PackageDetailPage({ params }) {
 						</p>
 					</div>
 					<div>
+						<p className="text-sm text-slate-600">Quantity Policy</p>
+						<p className="text-sm text-slate-900 mt-1">
+							{packageData.allowMultipleQuantities 
+								? "Variable quantities allowed" 
+								: "Fixed quantity (1 per product)"
+							}
+						</p>
+					</div>
+					<div>
 						<p className="text-sm text-slate-600">Created At</p>
 						<p className="text-sm text-slate-900 mt-1">{formatDate(packageData.createdAt)}</p>
 					</div>
@@ -208,4 +217,5 @@ export default function PackageDetailPage({ params }) {
 			</div>
 
 		</div>
-	</>
+	</>	);
+}

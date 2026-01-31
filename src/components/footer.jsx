@@ -25,7 +25,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#32241B] text-slate-100">
+    <footer className="bg-[#EF8EB8] text-slate-100">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         {/* Top Section: Company Info & Navigation */}
@@ -34,28 +34,28 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <div className="mb-1">
               <Image
-                src="/assets/images/logo.png"
+                src="/assets/images/logo2.png"
                 alt="Crunchy Vita Logo"
-                width={150}
-                height={50}
-                className="h-24 w-auto"
+                width={280}
+                height={120}
+                className="h-40 w-auto -rotate-6 hover:rotate-0 transition-transform duration-500 animate-pulse"
               />
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+            <p className="text-sm text-white leading-relaxed mb-6">
               Fruits lyophilisés bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.
             </p>
             
             {/* Contact Info */}
             <div className="space-y-3">
-              <a href="mailto:contact@crunchyvita.com" className="flex items-center gap-2 text-sm text-slate-400 hover:text-[#469165] transition">
+              <a href="mailto:contact@crunchyvita.com" className="flex items-center gap-2 text-sm text-white hover:text-[#469165] transition">
                 <Mail size={16} />
                 contact@crunchyvita.com
               </a>
-              <a href="tel:+33745150788" className="flex items-center gap-2 text-sm text-slate-400 hover:text-[#469165] transition">
+              <a href="tel:+33745150788" className="flex items-center gap-2 text-sm text-white hover:text-[#469165] transition">
                 <Phone size={16} />
                 +33 7 45 15 07 88
               </a>
-              <div className="flex items-start gap-2 text-sm text-slate-400">
+              <div className="flex items-start gap-2 text-sm text-white">
                 <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
                   <p>1460 Chemin des Terriers</p>
@@ -68,44 +68,44 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-6">Navigation</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Navigation</h3>
             <ul className="space-y-3">
-              <li><a href="/" className="text-sm text-slate-400 hover:text-[#469165] transition">Accueil</a></li>
-              <li><a href="/#produits" className="text-sm text-slate-400 hover:text-[#469165] transition">Nos produits</a></li>
-              <li><a href="/#engagements" className="text-sm text-slate-400 hover:text-[#469165] transition">Nos engagements</a></li>
-              <li><a href="/contact" className="text-sm text-slate-400 hover:text-[#469165] transition">Contact</a></li>
+              <li><a href="/" className="text-sm text-white hover:text-[#469165] transition">Accueil</a></li>
+              <li><a href="/#produits" className="text-sm text-white hover:text-[#469165] transition">Nos produits</a></li>
+              <li><a href="/#engagements" className="text-sm text-white hover:text-[#469165] transition">Nos engagements</a></li>
+              <li><a href="/contact" className="text-sm text-white hover:text-[#469165] transition">Contact</a></li>
             </ul>
           </div>
 
           {/* Aide */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-6">Aide</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Aide</h3>
             <ul className="space-y-3">
-              <li><a href="/politique-retour" className="text-sm text-slate-400 hover:text-[#469165] transition">Retours</a></li>
-              <li><a href="/politique-livraison" className="text-sm text-slate-400 hover:text-[#469165] transition">Informations sur les livraisons</a></li>
-              <li><a href="/cgv/#paiement" className="text-sm text-slate-400 hover:text-[#469165] transition">Moyens de paiement</a></li>
+              <li><a href="/politique-retour" className="text-sm text-white hover:text-[#469165] transition">Retours</a></li>
+              <li><a href="/politique-livraison" className="text-sm text-white hover:text-[#469165] transition">Informations sur les livraisons</a></li>
+              <li><a href="/cgv/#paiement" className="text-sm text-white hover:text-[#469165] transition">Moyens de paiement</a></li>
             </ul>
           </div>
 
           {/* CrunchyVita */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-6">CrunchyVita</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">CrunchyVita</h3>
             <ul className="space-y-3">
-              <li><a href="/about-us" className="text-sm text-slate-400 hover:text-[#469165] transition">À propos de nous</a></li>
-              <li><a href="/about-us/#lyophilisation" className="text-sm text-slate-400 hover:text-[#469165] transition">La lyophilisation</a></li>
-              <li><a href="/about-us/#clients-b2b" className="text-sm text-slate-400 hover:text-[#469165] transition">Clients Professionnels B2B</a></li>
-              <li><a href="/about-us/#collaboration-sponsoring" className="text-sm text-slate-400 hover:text-[#469165] transition">Collaboration & Sponsoring</a></li>
+              <li><a href="/about-us" className="text-sm text-white hover:text-[#469165] transition">À propos de nous</a></li>
+              <li><a href="/about-us/#lyophilisation" className="text-sm text-white hover:text-[#469165] transition">La lyophilisation</a></li>
+              <li><a href="/about-us/#clients-b2b" className="text-sm text-white hover:text-[#469165] transition">Clients Professionnels B2B</a></li>
+              <li><a href="/about-us/#collaboration-sponsoring" className="text-sm text-white hover:text-[#469165] transition">Collaboration & Sponsoring</a></li>
             </ul>
           </div>
 
           {/* Informations légales */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-6">Informations légales</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Informations légales</h3>
             <ul className="space-y-3">
-              <li><a href="/mentions-legales" className="text-sm text-slate-400 hover:text-[#469165] transition">Mentions légales</a></li>
-              <li><a href="/cgu" className="text-sm text-slate-400 hover:text-[#469165] transition">CGU</a></li>
-              <li><a href="/cgv" className="text-sm text-slate-400 hover:text-[#469165] transition">CGV</a></li>
-              <li><a href="/politique-confidentialite" className="text-sm text-slate-400 hover:text-[#469165] transition">Politique de confidentialité</a></li>
+              <li><a href="/mentions-legales" className="text-sm text-white hover:text-[#469165] transition">Mentions légales</a></li>
+              <li><a href="/cgu" className="text-sm text-white hover:text-[#469165] transition">CGU</a></li>
+              <li><a href="/cgv" className="text-sm text-white hover:text-[#469165] transition">CGV</a></li>
+              <li><a href="/politique-confidentialite" className="text-sm text-white hover:text-[#469165] transition">Politique de confidentialité</a></li>
             </ul>
           </div>
         </div>
@@ -115,8 +115,8 @@ export default function Footer() {
 
         {/* Newsletter Section */}
         <div className="mb-12">
-          <h3 className="text-2xl font-bold text-white mb-2">Newsletter</h3>
-          <p className="text-slate-400 text-sm mb-6">
+          <h3 className="text-2xl font-bold text-[#E10C69] mb-2">Newsletter</h3>
+          <p className="text-white text-sm mb-6">
             Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.
           </p>
           
@@ -132,7 +132,7 @@ export default function Footer() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-[#469165] hover:bg-[#3a7a4a] text-white font-bold rounded-full transition-colors text-sm whitespace-nowrap disabled:opacity-50"
+              className="px-6 py-3 bg-[#E10C69] hover:bg-[#EF8EB8] text-white font-bold rounded-full transition-colors text-sm whitespace-nowrap disabled:opacity-50"
             >
               {loading ? 'Inscription...' : "S'inscrire"}
             </button>
@@ -144,7 +144,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="pt-8 text-center">
-          <p className="text-slate-500 text-xs">
+          <p className="text-[#E10C69] text-xs">
             © 2026 CrunchyVita - ALTERORA SAS. Tous droits réservés.
           </p>
         </div>

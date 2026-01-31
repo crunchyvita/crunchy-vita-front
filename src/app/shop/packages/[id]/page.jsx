@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +24,52 @@ import Footer from "@/components/footer";
 import { useAuth } from "@/context/AuthContext";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+/* ================= PROMO BADGE ================= */
+function PromoBadge() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 80 }}
+      animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
+      transition={{
+        opacity: { duration: 0.6 },
+        x: { duration: 0.6 },
+        y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+      }}
+      className="fixed top-24 right-6 z-50 hidden lg:block"
+    >
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-3xl shadow-2xl border border-emerald-300/30 max-w-xs">
+        <div className="flex items-start gap-3">
+          <motion.span
+            animate={{ rotate: [0, 12, -12, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-2xl flex-shrink-0"
+          >
+            🚚
+          </motion.span>
+          
+          <div className="flex-1">
+            <h3 className="font-black text-base leading-tight mb-1">
+              Livraison offerte en France
+            </h3>
+            <p className="text-xs font-bold opacity-95">
+              Point relais Chronopost dès <span className="underline font-black">40€</span> d'achats
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 const getProductImageUrl = (product) => {
   if (!product) return null;
@@ -115,6 +162,10 @@ export default function PackageCustomizationPage() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
+    // Don't allow quantity changes if allowMultipleQuantities is false
+    if (packageData?.allowMultipleQuantities === false) {
+      return;
+    }
     if (newQuantity >= 1) {
       setQuantities((prev) => ({ ...prev, [productId]: newQuantity }));
     }
@@ -123,7 +174,8 @@ export default function PackageCustomizationPage() {
   const getTotalPrice = () => {
     return selectedProducts.reduce((total, id) => {
       const product = products.find((p) => p._id === id);
-      return total + (getProductPrice(product) * (quantities[id] || 0));
+      const quantity = packageData?.allowMultipleQuantities === false ? 1 : (quantities[id] || 0);
+      return total + (getProductPrice(product) * quantity);
     }, 0);
   };
 
@@ -147,7 +199,7 @@ export default function PackageCustomizationPage() {
         packageName: packageData.name,
         selectedProducts: selectedProducts.map((productId) => ({
           productId,
-          quantity: quantities[productId] || 1,
+          quantity: packageData.allowMultipleQuantities === false ? 1 : (quantities[productId] || 1),
         })),
         discountPercentage: getDiscountPercentage(),
         totalPrice: getTotalPrice(),
@@ -177,6 +229,10 @@ export default function PackageCustomizationPage() {
   return (
     <>
       <Header />
+      
+      {/* 🎁 PROMO BADGE */}
+      <PromoBadge />
+      
       <div className="min-h-screen bg-[#fafafa] pb-24">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-8 pt-12">
           {/* Header Section */}
@@ -192,11 +248,10 @@ export default function PackageCustomizationPage() {
                 {packageData?.description || "Curate your perfect selection and enjoy exclusive pack discounts."}
               </p>
             </div>
-            <div className="bg-green-50 px-8 py-6 rounded-3xl border border-green-100 hidden lg:block">
-              <p className="text-sm font-black text-green-800 uppercase tracking-widest mb-2">Pack Offer</p>
-              <p className="text-3xl font-black text-green-900 leading-none">SAVE {getDiscountPercentage()}% OFF</p>
-            </div>
+          
           </div>
+
+          
 
           <div className="grid lg:grid-cols-12 gap-12">
             {/* Products Grid */}
@@ -244,15 +299,22 @@ export default function PackageCustomizationPage() {
                           </div>
                         )}
                         <div className="mt-2">
-                          <span className="text-2xl font-bold text-gray-900">${(getProductPrice(product) * (quantities[product._id] || 1)).toFixed(2)}</span>
+                          <span className="text-2xl font-bold text-gray-900">${(getProductPrice(product) * (packageData?.allowMultipleQuantities === false ? 1 : (quantities[product._id] || 1))).toFixed(2)}</span>
                         </div>
                         
                         <div className="mt-5 flex items-center gap-3">
-                          <div className="flex items-center bg-gray-100 rounded-xl p-1.5">
-                            <button onClick={() => handleQuantityChange(product._id, Math.max(1, qty - 1))} className="w-10 h-10 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg transition-all" disabled={qty <= 1}><Minus size={16}/></button>
-                            <span className="w-10 text-center font-bold text-base">{qty}</span>
-                            <button onClick={() => handleQuantityChange(product._id, qty + 1)} className="w-10 h-10 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg transition-all"><Plus size={16}/></button>
-                          </div>
+                          {packageData?.allowMultipleQuantities !== false ? (
+                            <div className="flex items-center bg-gray-100 rounded-xl p-1.5">
+                              <button onClick={() => handleQuantityChange(product._id, Math.max(1, qty - 1))} className="w-10 h-10 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg transition-all" disabled={qty <= 1}><Minus size={16}/></button>
+                              <span className="w-10 text-center font-bold text-base">{qty}</span>
+                              <button onClick={() => handleQuantityChange(product._id, qty + 1)} className="w-10 h-10 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg transition-all"><Plus size={16}/></button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center bg-green-50 text-green-800 rounded-xl px-4 py-2.5 border border-green-200">
+                              <Info size={16} className="mr-2" />
+                              <span className="text-xs font-bold uppercase tracking-wide">Qty: 1 Only</span>
+                            </div>
+                          )}
                           <button 
                             onClick={() => handleProductSelect(product._id)}
                             className={`flex-1 py-3 rounded-xl font-bold text-s   transition-all ${isSelected ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-900 text-white hover:bg-green-800'}`}

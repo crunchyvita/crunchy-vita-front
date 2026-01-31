@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "CrunchyVita - E-commerce Platform",
   description: "Healthy lifestyle products",
+ 
 };
 
 export default function RootLayout({ children }) {

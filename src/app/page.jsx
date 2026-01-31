@@ -49,7 +49,7 @@ function FeaturesSection() {
         icon={Leaf}
         title="100% fruits, 100% Naturel"
         description="Uniquement des fruits, rien d'autre."
-        iconColorClass="text-green-600"
+        iconColorClass="text-[#556822]"
         bgColorClass="bg-green-50"
         borderColorClass="border-green-100"
       />
@@ -97,7 +97,7 @@ export default function Home() {
             <div>
               <h1 className="mb-6 text-5xl font-bold text-gray-900 leading-tight">
                 Croquez la nature<br />
-                avec <br/><span className="text-[#469165] font-bold ">Crunchy Vita</span>
+                avec <br/><span className="text-[#556822] font-bold ">Crunchy Vita</span>
               </h1>
               <p className="mb-8 text-lg text-gray-700">
                 Naturellement croquant, irrésistiblement bon.
@@ -105,7 +105,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="https://localhost:3000/shop"
-                  className="rounded-full bg-[#469165] px-8 py-3 text-center font-semibold text-white hover:bg-green-700 transition-colors"
+                  className="rounded-full bg-[#556822] px-8 py-3 text-center font-semibold text-white hover:bg-[#3d4d18] transition-colors"
                 >
                   Découvrir nos produits
                 </Link>
@@ -133,7 +133,7 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
-            Pourquoi choisir <span className="text-green-700">CrunchyVita</span> ?
+            Pourquoi choisir <span className="text-[#556822]">CrunchyVita</span> ?
           </h2>
           <p className="mb-16 text-center text-gray-600 max-w-3xl mx-auto">
             Découvrez ce qui rend nos fruits lyophilisés uniques et pourquoi ils sont le snack<br/> préferé des amateurs de bien-être
@@ -149,7 +149,7 @@ export default function Home() {
       <section id="produits" className="bg-[#f5f3ed] py-20">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
-            Nos fruits <span className="text-green-700">lyophilisés</span>
+            Nos fruits <span className="text-[#556822]">lyophilisés</span>
           </h2>
           <p className="mb-16 text-center text-gray-600 max-w-3xl mx-auto">
             Découvrez nos fruits lyophilisés BIO, parfaits pour un snack sain ou pour sublimer<br/> vos recettes du quotidien.
@@ -197,13 +197,13 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="mb-6 text-4xl font-bold text-gray-900">
-                Le préféré de <span className="text-green-700">nos clients</span>
+                Le préféré de <span className="text-[#556822]">nos clients</span>
               </h2>
               <p className="mb-8 text-gray-600 leading-relaxed">
                 Découvrez notre coffret découverte, idéal pour gouter plusieurs fruits</p>
               <Link
                 href="/products"
-                className="inline-block rounded-full bg-[#469165] px-8 py-3 font-semibold text-white hover:bg-[#3a7a4a] transition-colors"
+                className="inline-block rounded-full bg-[#556822] px-8 py-3 font-semibold text-white hover:bg-[#3d4d18] transition-colors"
               >
                 Decouvrer les produits
               </Link>
@@ -224,7 +224,7 @@ export default function Home() {
       <section id="engagements" className="py-20 bg-[#f5f3ed]">
         <div className="container mx-auto px-6">
           <h2 className="mb-4 text-center text-4xl font-bold text-gray-900">
-            Nos <span className="text-green-700">engagements</span>
+            Nos <span className="text-[#556822]">engagements</span>
           </h2>
           <p className="mb-16 text-center text-gray-600 max-w-3xl mx-auto">
             Chez CrunchyVita, nous nous engageons à vous offrir le meilleur de la nature, sans compromis sur la qualité ni sur vos valeurs.
@@ -243,7 +243,7 @@ export default function Home() {
                 desc: "Le goût sucré provient uniquement des fruits. Pas de sucres ajoutés, pas de compromis."
               },
               {
-                icon: <Leaf className="h-10 w-10 text-green-600" strokeWidth={1.8} />,
+                icon: <Leaf className="h-10 w-10 text-[#556822]" strokeWidth={1.8} />,
                 title: "100% Bio et naturel",
                 desc: "Tous nos fruits sont issus de l'agriculture biologique certifiée, respectueuse de l'environnement."
               }
