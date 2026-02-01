@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Star, Heart, ShoppingCart, Plus, Minus, ChevronLeft, Package, Shield, Truck, Send, MessageSquare, Trash2, Loader2, AlertTriangle, X, RefreshCw, User, Clock, Check } from 'lucide-react';
@@ -8,52 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { productAPI, reviewAPI } from '@/lib/api';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-
-/* ================= PROMO BADGE ================= */
-function PromoBadge() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 80 }}
-      animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-      transition={{
-        opacity: { duration: 0.6 },
-        x: { duration: 0.6 },
-        y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-      }}
-      className="fixed top-24 right-6 z-50 hidden lg:block"
-    >
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-3xl shadow-2xl border border-emerald-300/30 max-w-xs">
-        <div className="flex items-start gap-3">
-          <motion.span
-            animate={{ rotate: [0, 12, -12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-2xl flex-shrink-0"
-          >
-            🎁
-          </motion.span>
-          
-          <div className="flex-1">
-            <h3 className="font-black text-base leading-tight mb-1">
-              Livraison offerte en France 
-            </h3>
-            <p className="text-xs font-bold opacity-95">
-              Point relais Chronopost dès <span className="underline font-black">40€</span> d'achats
-            </p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+import PromoBadge from '@/components/PromoBadge';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -116,7 +71,7 @@ export default function ProductDetailPage() {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch(`/api/products/${params.id}`, {
-        cache: 'no-store',
+        next: { revalidate: 30 },
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -128,89 +83,52 @@ export default function ProductDetailPage() {
       }
 
       const data = await response.json();
-      
-      console.log(`[Product ${params.id}] Received comments:`, data.comments?.length || 0, 'comments');
-      if (data.comments) {
-        console.log('Comment statuses:', data.comments.map(c => ({ id: c._id, status: c.status })));
-      }
-      
-      // Process comment photos to construct full URLs for local uploads
-      if (data.comments && data.comments.length > 0) {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
-        
-        data.comments = data.comments.map(comment => {
-          if (comment.userId?.photo && !comment.userId.photo.startsWith('http')) {
-            return {
-              ...comment,
-              userId: {
-                ...comment.userId,
-                photo: `${cleanBaseUrl}${comment.userId.photo}`
-              }
-            };
-          }
-          return comment;
-        });
-      }
-      
       setProduct(data);
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching product:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getProductImages = () => {
+  const productImages = useMemo(() => {
     if (!product) return [];
     const images = [];
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-
-    // Check media array for multiple images
     if (product.media && product.media.length > 0) {
       product.media.forEach((mediaItem) => {
         const url = mediaItem.url || mediaItem;
         if (url && url !== 'undefined') {
-          const fullUrl = url.startsWith('http') ? url : `${backendUrl}${url}`;
-          images.push(fullUrl);
+          images.push(url);
         }
       });
     }
-
-    // Fallback to single image fields
     if (images.length === 0) {
       const imageFields = ['imageUrl', 'productImage', 'image'];
       for (const field of imageFields) {
         if (product[field] && product[field] !== 'undefined') {
-          const url = product[field];
-          const fullUrl = url.startsWith('http') ? url : `${backendUrl}${url}`;
-          images.push(fullUrl);
+          images.push(product[field]);
           break;
         }
       }
     }
-
     return images;
-  };
+  }, [product]);
 
-  const getProductPrice = () => {
+  const productPrice = useMemo(() => {
     if (!product) return 0;
-    // Check pricingHistory first
     if (product.pricingHistory && product.pricingHistory.length > 0) {
       const latestPrice = product.pricingHistory[product.pricingHistory.length - 1]?.price;
       if (latestPrice !== undefined && latestPrice !== null) {
         return Number(latestPrice);
       }
     }
-    // Fallback to direct price field
     if (product.price !== undefined && product.price !== null) {
       return Number(product.price);
     }
     return 0;
-  };
+  }, [product]);
 
-  const getAvailableStock = () => {
+  const availableStock = useMemo(() => {
     if (!product || !product.stock) return 0;
     const stock = product.stock;
     if (stock.availableQuantity !== undefined && stock.availableQuantity !== null) {
@@ -220,7 +138,7 @@ export default function ProductDetailPage() {
       return (stock.quantity || 0) - (stock.reservedQuantity || 0);
     }
     return 0;
-  };
+  }, [product]);
 
   const incrementQuantity = () => {
     const availableStock = getAvailableStock();
@@ -530,11 +448,27 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#469165] mb-4"></div>
-            <p className="text-gray-600">Loading product...</p>
-          </div>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
+          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+              <div className="space-y-4">
+                <div className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="h-10 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                <div className="h-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </main>
+          <Footer />
         </div>
     );
   }
@@ -555,9 +489,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const productImages = getProductImages();
-  const productPrice = getProductPrice();
-  const availableStock = getAvailableStock();
+  // Use memoized values directly
   const totalPrice = productPrice * quantity;
 
   return (

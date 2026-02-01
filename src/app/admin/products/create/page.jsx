@@ -88,8 +88,8 @@ export default function CreateProductPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
     setError("");
+    setSubmitting(true); // Show loading immediately
 
     try {
       const payload = {
@@ -100,8 +100,9 @@ export default function CreateProductPage() {
         tags: Array.isArray(form.tags) ? form.tags.join(", ") : form.tags,
         files,
       };
-      await productAPI.create(payload);
-      router.push("/admin/products");
+      const result = await productAPI.create(payload);
+      // Immediate redirect to the new product page
+      router.push(`/admin/products/${result.data._id}?created=true`);
     } catch (err) {
       setError(err?.message || "Failed to create product");
     } finally {
@@ -133,10 +134,19 @@ export default function CreateProductPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50 active:scale-95"
+            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
           >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Save & Publish
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                Save & Publish
+              </>
+            )}
           </button>
         </div>
       </div>

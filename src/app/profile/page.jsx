@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Header from "@/components/header";
-import Footer from "@/components/footer";
-import { User, Camera, Save, Lock, Mail, AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import Footer from "@/components/footer";import PromoBadge from '@/components/PromoBadge';import { User, Camera, Save, Lock, Mail, AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -46,11 +45,8 @@ export default function ProfilePage() {
     });
     
     if (user.photo) {
-      // Handle photo URL - if it's a local upload, prepend backend URL
-      const photoUrl = user.photo.startsWith('http') 
-        ? user.photo 
-        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${user.photo}`;
-      setPhotoPreview(photoUrl);
+      // Cloudinary returns full URLs - use them directly
+      setPhotoPreview(user.photo);
     }
   }, [user, router]);
 

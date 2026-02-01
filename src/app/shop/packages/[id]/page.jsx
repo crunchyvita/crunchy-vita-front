@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -21,56 +21,10 @@ import {
 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import PromoBadge from "@/components/PromoBadge";
 import { useAuth } from "@/context/AuthContext";
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
-/* ================= PROMO BADGE ================= */
-function PromoBadge() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 80 }}
-      animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-      transition={{
-        opacity: { duration: 0.6 },
-        x: { duration: 0.6 },
-        y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-      }}
-      className="fixed top-24 right-6 z-50 hidden lg:block"
-    >
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-3xl shadow-2xl border border-emerald-300/30 max-w-xs">
-        <div className="flex items-start gap-3">
-          <motion.span
-            animate={{ rotate: [0, 12, -12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-2xl flex-shrink-0"
-          >
-            🚚
-          </motion.span>
-          
-          <div className="flex-1">
-            <h3 className="font-black text-base leading-tight mb-1">
-              Livraison offerte en France
-            </h3>
-            <p className="text-xs font-bold opacity-95">
-              Point relais Chronopost dès <span className="underline font-black">40€</span> d'achats
-            </p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
+// Optimize these functions outside component to prevent recreation
 const getProductImageUrl = (product) => {
   if (!product) return null;
   const url = product.imageUrl ||
@@ -79,7 +33,7 @@ const getProductImageUrl = (product) => {
     product.image;
 
   if (!url || url === "undefined") return null;
-  return url.startsWith("http") ? url : `${backendUrl}${url}`;
+  return url;
 };
 
 const getProductPrice = (product) => {
@@ -113,6 +67,7 @@ export default function PackageCustomizationPage() {
         const token = localStorage.getItem("token");
 
         const pkgResponse = await fetch(`/api/packages/${packageId}`, {
+          next: { revalidate: 30 },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
@@ -121,7 +76,9 @@ export default function PackageCustomizationPage() {
         const pkgResult = await pkgResponse.json();
         setPackageData(pkgResult.data);
 
-        let prodResponse = await fetch("/api/products");
+        let prodResponse = await fetch("/api/products", {
+          next: { revalidate: 30 }
+        });
         if (!prodResponse.ok) throw new Error("Failed to load products");
         
         const prodResult = await prodResponse.json();
@@ -162,7 +119,6 @@ export default function PackageCustomizationPage() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    // Don't allow quantity changes if allowMultipleQuantities is false
     if (packageData?.allowMultipleQuantities === false) {
       return;
     }
@@ -171,17 +127,23 @@ export default function PackageCustomizationPage() {
     }
   };
 
-  const getTotalPrice = () => {
+  // Memoize expensive calculations
+  const totalPrice = useMemo(() => {
     return selectedProducts.reduce((total, id) => {
       const product = products.find((p) => p._id === id);
       const quantity = packageData?.allowMultipleQuantities === false ? 1 : (quantities[id] || 0);
       return total + (getProductPrice(product) * quantity);
     }, 0);
-  };
+  }, [selectedProducts, products, packageData, quantities]);
 
-  const getDiscountPercentage = () => packageData?.discountPercentage || 0;
-  const getDiscountedPrice = () => getTotalPrice() * (1 - getDiscountPercentage() / 100);
-  const getTotalSavings = () => getTotalPrice() - getDiscountedPrice();
+  const discountPercentage = packageData?.discountPercentage || 0;
+  const discountedPrice = totalPrice * (1 - discountPercentage / 100);
+  const totalSavings = totalPrice - discountedPrice;
+
+  const getTotalPrice = () => totalPrice;
+  const getDiscountPercentage = () => discountPercentage;
+  const getDiscountedPrice = () => discountedPrice;
+  const getTotalSavings = () => totalSavings;
 
   const handleAddToCart = async () => {
     if (selectedProducts.length === 0) {
@@ -218,12 +180,23 @@ export default function PackageCustomizationPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-green-900 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm font-bold uppercase tracking-widest text-gray-400">Loading Pack</p>
+    <>
+      <Header />
+      <div className="min-h-screen bg-[#fafafa] pb-24">
+        <div className="max-w-400 mx-auto px-6 lg:px-8 pt-12">
+          <div className="space-y-8 animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-64 bg-gray-200 rounded-2xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-80 bg-gray-200 rounded-2xl"></div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 
   return (
@@ -234,7 +207,7 @@ export default function PackageCustomizationPage() {
       <PromoBadge />
       
       <div className="min-h-screen bg-[#fafafa] pb-24">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-8 pt-12">
+        <div className="max-w-400 mx-auto px-6 lg:px-8 pt-12">
           {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-8">
             <div>

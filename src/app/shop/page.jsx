@@ -14,61 +14,13 @@ import { useAuth } from '@/context/AuthContext';
 import ProductDetailModal from '@/components/detailProduct';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-import { motion } from 'framer-motion';
-
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-
-/* ================= PROMO BADGE ================= */
-function PromoBadge() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 80 }}
-      animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-      transition={{
-        opacity: { duration: 0.6 },
-        x: { duration: 0.6 },
-        y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-      }}
-      className="fixed top-24 right-6 z-50 hidden lg:block"
-    >
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-3xl shadow-2xl border border-emerald-300/30 max-w-xs">
-        <div className="flex items-start gap-3">
-          <motion.span
-            animate={{ rotate: [0, 12, -12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-2xl flex-shrink-0"
-          >
-            🚚
-          </motion.span>
-          
-          <div className="flex-1">
-            <h3 className="font-black text-base leading-tight mb-1">
-              Livraison offerte en France 
-            </h3>
-            <p className="text-xs font-bold opacity-95">
-              Point relais Chronopost dès <span className="underline font-black">40€</span> d'achats
-            </p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+import PromoBadge from '@/components/PromoBadge';
 
 const getProductImageUrl = (product) => {
   if (!product) return null;
   const url = product.imageUrl || (product.media?.[0]?.url || product.media?.[0]) || product.productImage || product.image;
   if (!url || url === 'undefined') return null;
-  return url.startsWith('http') ? url : `${backendUrl}${url}`;
+  return url;
 };
 
 const getProductPrice = (product) => {
@@ -92,6 +44,7 @@ function PremiumPackageCard({ pkg }) {
   return (
     <Link 
       href={`/shop/packages/${pkg._id}`}
+      prefetch={true}
       className="group relative bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col h-full"
     >
       {/* Decorative Background Element */}
@@ -102,7 +55,7 @@ function PremiumPackageCard({ pkg }) {
       {/* Visual Header */}
       <div className="relative h-64 bg-[#F8F9FA] flex items-center justify-center overflow-hidden">
         {/* Animated Background Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-linear-to-br from-emerald-50/50 via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
         {productPreviews.length > 0 ? (
           <div className="relative w-full h-full flex items-center justify-center">
@@ -184,7 +137,7 @@ function ProductCard({ product, onOpenDetail }) {
   
     return (
       <div className="group bg-white rounded-[1.5rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
+        <div className="relative aspect-4/5 overflow-hidden bg-gray-50">
           {imageUrl ? (
             <img src={imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
           ) : (
@@ -218,9 +171,13 @@ function ProductCard({ product, onOpenDetail }) {
           )}
           <h3 className="font-bold text-gray-800 line-clamp-1 mb-1">{product.name}</h3>
           <p className="text-lg font-black text-gray-900 mb-4">${price.toFixed(2)}</p>
-          <button onClick={() => router.push(`/shop/${product.id || product._id}`)} className="w-full py-3 rounded-xl bg-gray-50 text-gray-700 font-bold hover:bg-green-900 hover:text-white transition-all text-xs uppercase tracking-widest">
+          <Link 
+            href={`/shop/${product.id || product._id}`}
+            prefetch={true}
+            className="block w-full py-3 rounded-xl bg-gray-50 text-gray-700 font-bold hover:bg-green-900 hover:text-white transition-all text-xs uppercase tracking-widest text-center"
+          >
             View Detail
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -312,7 +269,10 @@ function ClientShop() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pRes, pkgRes] = await Promise.all([fetch('/api/products'), fetch('/api/packages')]);
+        const [pRes, pkgRes] = await Promise.all([
+          fetch('/api/products', { next: { revalidate: 30 } }), 
+          fetch('/api/packages', { next: { revalidate: 30 } })
+        ]);
         if (pRes.ok) {
           const d = await pRes.json();
           setProducts((Array.isArray(d) ? d : d.data || []).filter(p => p.status === 'ACTIVE'));
@@ -395,7 +355,7 @@ function ClientShop() {
         {/* Content */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 animate-pulse">
-            {[1,2,3].map(i => <div key={i} className="bg-gray-200 h-[500px] rounded-[2rem]" />)}
+            {[1,2,3].map(i => <div key={i} className="bg-gray-200 h-125 rounded-[2rem]" />)}
           </div>
         ) : (
           <>

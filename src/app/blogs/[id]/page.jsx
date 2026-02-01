@@ -61,7 +61,7 @@ export default function BlogDetailPage() {
         <div className="min-h-screen bg-white py-20">
           <div className="container mx-auto px-6">
             <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 max-w-2xl mx-auto">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-red-700 font-semibold">Article introuvable</p>
                 <p className="text-sm text-red-600 mt-1">{error || "Cet article n'existe pas ou a été supprimé."}</p>
@@ -102,7 +102,7 @@ export default function BlogDetailPage() {
             {blog.imageUrl && (
               <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden mb-12">
                 <Image
-                  src={`${backendUrl}${blog.imageUrl}`}
+                  src={blog.imageUrl}
                   alt={blog.title}
                   fill
                   className="object-cover"

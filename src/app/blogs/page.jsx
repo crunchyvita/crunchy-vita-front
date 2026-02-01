@@ -79,7 +79,7 @@ export default function BlogsPage() {
                             {blog.imageUrl && (
                               <div className="relative h-48 w-full bg-gray-200">
                                 <Image
-                                  src={`${backendUrl}${blog.imageUrl}`}
+                                  src={blog.imageUrl}
                                   alt={blog.title}
                                   fill
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -116,7 +116,7 @@ export default function BlogsPage() {
                         <Link href={`/blogs/${featuredBlog._id}`}>
                           <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer group">
                             <Image
-                              src={`${backendUrl}${featuredBlog.imageUrl}`}
+                              src={featuredBlog.imageUrl}
                               alt={featuredBlog.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -157,7 +157,7 @@ export default function BlogsPage() {
                           {blog.imageUrl && (
                             <div className="relative h-64 w-full bg-gray-200 rounded-lg overflow-hidden mb-6">
                               <Image
-                                src={`${backendUrl}${blog.imageUrl}`}
+                                src={blog.imageUrl}
                                 alt={blog.title}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"

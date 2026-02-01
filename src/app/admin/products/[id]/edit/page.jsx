@@ -134,6 +134,20 @@ export default function EditProductPage() {
     };
   }, []);
 
+  // Keyboard shortcut: Ctrl+S to save
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (!saving) {
+          handleSubmit(e);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [saving, formData, newFiles, removedMediaUrls]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -164,12 +178,21 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!formData.name.trim()) return setError("Product name is required");
-    if (!formData.price || Number(formData.price) <= 0) return setError("Valid price is required");
+    
+    // Quick validation
+    if (!formData.name.trim()) {
+      setError("Product name is required");
+      return;
+    }
+    if (!formData.price || Number(formData.price) <= 0) {
+      setError("Valid price is required");
+      return;
+    }
 
-    setSaving(true);
-    setMessage("");
+    // Immediate UI feedback
     setError("");
+    setMessage("");
+    setSaving(true);
 
     try {
       const formDataObj = new FormData();
@@ -196,8 +219,8 @@ export default function EditProductPage() {
         await stockAPI.update(productId, { alertThreshold: Number(formData.alertThreshold) });
       }
 
-      setMessage("Product updated successfully!");
-      setTimeout(() => router.push(`/admin/products/${productId}`), 1500);
+      // Immediate redirect with success feedback
+      router.push(`/admin/products/${productId}?updated=true`);
     } catch (err) {
       setError(err.message || "Failed to update product");
     } finally {
@@ -209,10 +232,8 @@ export default function EditProductPage() {
     ...(product?.media || [])
       .map((item) => {
         const url = typeof item === 'string' ? item : (item.url || item);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-        const baseUrl = apiUrl.replace(/\/api$/, '');
-        const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-        return { url: fullUrl, isNew: false, originalUrl: url };
+        // Cloudinary returns full URLs - use them directly
+        return { url: url, isNew: false, originalUrl: url };
       })
       .filter(item => !removedMediaUrls.includes(item.originalUrl)),
     ...newFiles.map((file, index) => {
@@ -252,10 +273,19 @@ export default function EditProductPage() {
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Update Product
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Update Product
+              </>
+            )}
           </button>
         </div>
       </div>

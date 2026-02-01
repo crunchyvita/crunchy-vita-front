@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { productAPI, reviewAPI } from "@/lib/api";
 import AdminHeader from "@/components/admin/header";
@@ -23,11 +23,13 @@ import  {
   RefreshCw,
   User,
   X,
-  Check
+  Check,
+  CheckCircle2
 } from "lucide-react";
 
 export default function ProductDetailPage() {
   const { id: productId } = useParams();
+  const searchParams = useSearchParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("reviews"); 
@@ -39,6 +41,21 @@ export default function ProductDetailPage() {
   const [moderateParams, setModerateParams] = useState({ review: null, moderateMode: false });
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Show success message from redirect
+  useEffect(() => {
+    const created = searchParams.get('created');
+    const updated = searchParams.get('updated');
+    
+    if (created === 'true') {
+      setSuccessMessage('Product created successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } else if (updated === 'true') {
+      setSuccessMessage('Product updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
+  }, [searchParams]);
 
   // Parse URL params on mount to set active tab
   useEffect(() => {
@@ -291,7 +308,7 @@ export default function ProductDetailPage() {
     <AdminHeader />
     <div className="min-h-screen bg-[#f8fafc]">
       <header className="bg-white border-b border-slate-200 px-8 py-4">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+        <div className="max-w-400 mx-auto flex items-center justify-between">
           <Link href="/admin/products" className="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center gap-2 text-slate-600 font-semibold">
             <ArrowLeft size={20} />
             <span>Back to Products</span>
@@ -303,7 +320,17 @@ export default function ProductDetailPage() {
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto p-8">
+      {/* Success Message Banner */}
+      {successMessage && (
+        <div className="max-w-400 mx-auto px-8 pt-4">
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top duration-300">
+            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+            <p className="text-green-800 font-semibold">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-400 mx-auto p-8">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
           
           <div className="xl:col-span-8 space-y-8">
@@ -311,7 +338,7 @@ export default function ProductDetailPage() {
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 <div className="lg:col-span-2 p-8 bg-white flex items-center justify-center relative border-r border-slate-100">
-                  <img src={images[imageIdx] || "/placeholder.png"} alt={product.name} className="max-h-[500px] w-full object-contain" />
+                  <img src={images[imageIdx] || "/placeholder.png"} alt={product.name} className="max-h-125 w-full object-contain" />
                   {images.length > 1 && (
                     <div className="absolute bottom-6 right-6 flex gap-2">
                       <button onClick={() => setImageIdx((prev) => (prev - 1 + images.length) % images.length)} className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all"><ChevronLeft size={20}/></button>
@@ -410,7 +437,7 @@ export default function ProductDetailPage() {
                               className="flex gap-4 pb-6 border-b border-slate-100 last:border-0 last:pb-0 transition-all hover:bg-slate-50/50 rounded-lg p-2 -mx-2"
                             >
                               {/* Avatar */}
-                              <div className="flex-shrink-0">
+                              <div className="shrink-0">
                                 {!comment.isAnonymous && comment.userId?.photo ? (
                                   <img
                                     src={comment.userId.photo}
@@ -423,7 +450,7 @@ export default function ProductDetailPage() {
                                   />
                                 ) : null}
                                 <div 
-                                  className="w-12 h-12 rounded-full bg-gradient-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white shadow-md"
+                                  className="w-12 h-12 rounded-full bg-linear-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white shadow-md"
                                   style={{ display: !comment.isAnonymous && comment.userId?.photo ? 'none' : 'flex' }}
                                 >
                                   <User size={24} />

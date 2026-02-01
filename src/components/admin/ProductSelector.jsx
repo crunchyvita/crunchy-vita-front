@@ -18,24 +18,15 @@ const getProductImageUrl = (product) => {
 	if (product.media?.length > 0) {
 		url = product.media[0].url;
 		
-		// If URL is already absolute, return it
-		if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-			return url;
-		}
-		
-		// Otherwise, construct full URL with backend domain
+		// Cloudinary returns full URLs - use them directly
 		if (url) {
-			return `http://localhost:5000${url}`;
+			return url;
 		}
 	}
 	
 	// Try productImage (for backward compatibility)
 	if (product.productImage) {
-		url = product.productImage;
-		if (url.startsWith('http://') || url.startsWith('https://')) {
-			return url;
-		}
-		return `http://localhost:5000${url}`;
+		return product.productImage;
 	}
 	
 	return null;

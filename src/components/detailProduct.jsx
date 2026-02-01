@@ -22,13 +22,13 @@ export default function ProductDetailModal({
   const productImages = useMemo(() => {
     if (!product) return [];
     const images = [];
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
     if (product.media && product.media.length > 0) {
       product.media.forEach((mediaItem) => {
         const url = mediaItem.url || mediaItem;
         if (url && url !== 'undefined') {
-          images.push(url.startsWith('http') ? url : `${backendUrl}${url}`);
+          // Cloudinary returns full URLs - use them directly
+          images.push(url);
         }
       });
     }

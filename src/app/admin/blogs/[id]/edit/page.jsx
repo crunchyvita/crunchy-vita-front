@@ -54,7 +54,8 @@ export default function EditBlogPage() {
       });
 
       if (blog.imageUrl) {
-        setImagePreview(`${backendUrl}${blog.imageUrl}`);
+        // Cloudinary returns full URLs - use them directly
+        setImagePreview(blog.imageUrl);
       }
     } catch (err) {
       setError(err.message || "Failed to fetch blog");
@@ -160,7 +161,7 @@ export default function EditBlogPage() {
       {/* Error Message */}
       {error && (
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 mb-6">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
           <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
@@ -168,7 +169,7 @@ export default function EditBlogPage() {
       {/* Success Message */}
       {success && (
         <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 flex items-start gap-3 mb-6">
-          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
           <p className="text-sm text-green-700">{success}</p>
         </div>
       )}

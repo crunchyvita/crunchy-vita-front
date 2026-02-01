@@ -20,7 +20,7 @@ export default function HeaderHome() {
   ];
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200 fixed top-0 z-50 shadow-sm w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
                 <Link href="/" className="flex items-center gap-3">

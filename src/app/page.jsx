@@ -47,7 +47,7 @@ const popIn = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
       <HeaderHome />
 
       {/* Hero Section */}
