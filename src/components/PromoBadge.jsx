@@ -22,26 +22,23 @@ export default function PromoBadge() {
         x: { duration: 0.6 },
         y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
       }}
-      className="fixed top-24 right-6 z-50 hidden lg:block"
+      className="fixed top-28 right-6 z-50 hidden lg:block"
     >
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-3xl shadow-2xl border border-emerald-300/30 max-w-xs">
-        <div className="flex items-start gap-3">
-          <motion.span
-            animate={{ rotate: [0, 12, -12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-2xl shrink-0"
-          >
-            🚚
-          </motion.span>
-          
+      {/* Utilisation du Magenta de la palette pour un impact maximal */}
+      <div className="bg-[#E10C69] text-white px-6 py-5 rounded-[2rem] shadow-2xl border-4 border-[#B3C800] max-w-[280px] font-[Maison Neue]">
+        <div className="flex items-center gap-4">
           <div className="flex-1">
-            <h3 className="font-black text-base leading-tight mb-1">
-              Livraison offerte en France 
+            <h3 className="font-black text-sm uppercase  mb-1 font-[Agrandir]">
+              Livraison Offerte !
             </h3>
-            <p className="text-xs font-bold opacity-95">
-              Point relais Chronopost dès <span className="underline font-black">40€</span> d'achats
+            <p className="text-[10px] font-bold leading-tight opacity-90 uppercase tracking-wide font-[Maison Neue Book]">
+              Dès <span className="text-base font-black underline font-[Agrandir]">40€</span> d'achats en point relais
             </p>
           </div>
+        </div>
+        {/* Petit badge décoratif Pistachio en bas */}
+        <div className="absolute -bottom-2 -right-2 bg-[#B3C800] text-[#556822] text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase tracking-widest font-[Maison Neue Mono]">
+          Profitez-en
         </div>
       </div>
     </motion.div>

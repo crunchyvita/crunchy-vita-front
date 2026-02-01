@@ -39,12 +39,14 @@ export default function ProductDetailPage() {
       const params = new URLSearchParams(window.location.search);
       setSearchParams({
         review: params.get('review'),
-        moderateMode: params.get('moderateMode') === 'true'
+        moderateMode: params.get('moderateMode') === 'true',
+        packageId: params.get('packageId')
       });
       // Debug logging
       console.log('URL Params:', {
         review: params.get('review'),
-        moderateMode: params.get('moderateMode')
+        moderateMode: params.get('moderateMode'),
+        packageId: params.get('packageId')
       });
     }
   }, []);
@@ -141,7 +143,6 @@ export default function ProductDetailPage() {
   }, [product]);
 
   const incrementQuantity = () => {
-    const availableStock = getAvailableStock();
     if (quantity < availableStock) {
       setQuantity(quantity + 1);
     }
@@ -154,8 +155,14 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    // If coming from package, redirect back to package page
+    if (searchParams.packageId) {
+      router.push(`/shop/packages/${searchParams.packageId}`);
+      return;
+    }
 
-
+    // Otherwise, add to cart normally
+    // TODO: Implement cart functionality
   };
 
   const handleAddToWishlist = () => {
@@ -251,7 +258,7 @@ export default function ProductDetailPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setReviewError('Please login to submit a review');
+        setReviewError('Veuillez vous connecter pour soumettre un avis');
         return;
       }
 
@@ -261,13 +268,13 @@ export default function ProductDetailPage() {
    
       // Validate that at least one field is provided
       if (!rating && (!comment || !comment.trim())) {
-        setReviewError('Please provide a rating or comment (or both)');
+        setReviewError('Veuillez fournir une note ou un commentaire (ou les deux)');
         return;
       }
 
       // Validate rating if provided
       if (rating && (rating < 1 || rating > 5)) {
-        setReviewError('Rating must be between 1 and 5');
+        setReviewError('La note doit être entre 1 et 5');
         return;
       }
 
@@ -279,7 +286,7 @@ export default function ProductDetailPage() {
       });
 
       if (!data || data.error) {
-        throw new Error(data?.message || 'Failed to submit review');
+        throw new Error(data?.message || 'Échec de la soumission de l\'avis');
       }
 
       const result = data.data || data;
@@ -342,7 +349,7 @@ export default function ProductDetailPage() {
       // Show success message briefly then clear it
       setTimeout(() => setReviewSuccess(''), 5000);
     } catch (err) {
-      setReviewError(err.message || 'Failed to submit review');
+      setReviewError(err.message || 'Échec de la soumission de l\'avis');
       console.error('Error submitting review:', err);
     } finally {
       setSubmittingReview(false);
@@ -477,12 +484,12 @@ export default function ProductDetailPage() {
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-600 text-xl mb-4">{error || 'Product not found'}</p>
+            <p className="text-red-600 text-xl mb-4">{error || 'Produit non trouvé'}</p>
             <button
               onClick={() => router.push('/shop')}
               className="px-6 py-3 bg-[#469165] text-white rounded-lg hover:bg-[#3a7a4a] transition-colors"
             >
-              Back to Shop
+              Retour à la boutique
             </button>
           </div>
         </div>
@@ -496,22 +503,22 @@ export default function ProductDetailPage() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         
-        {/* 🎁 PROMO BADGE */}
+        {/*  PROMO BADGE */}
         <PromoBadge />
 
         {/* Main Content */}
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb */}
-          <div className="mb-6 flex items-center gap-2 text-sm text-gray-600">
-            <button onClick={() => router.push('/shop')} className="hover:text-[#469165]">
-              Shop
+          <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 font-maison-neue-book">
+            <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
+              Boutique
             </button>
             <span>/</span>
-            <button onClick={() => router.push('/shop')} className="hover:text-[#469165]">
-              All Products
+            <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
+              Tous les produits
             </button>
             <span>/</span>
-            <span className="text-gray-900 font-medium">{product.name}</span>
+            <span className="text-gray-900 font-maison-neue-bold">{product.name}</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -566,8 +573,9 @@ export default function ProductDetailPage() {
             <div className="space-y-6">
               {/* Product Name */}
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-3">
-                  {product.name}
+                <h1 className="text-5xl font-[Agrandir]  text-[#556822] mb-3">
+                  {product.name} 
+               
                 </h1>
                 
                 {/* Rating */}
@@ -575,8 +583,15 @@ export default function ProductDetailPage() {
                   const avgRating = getAverageRating();
                   const ratingCount = product.ratings?.length || 0;
                   
+                  if (ratingCount === 0) {
+                    return null;
+                  }
+                  
                   return (
                     <div className="flex items-center gap-2 mb-4">
+                       <span className="text-sm text-gray-600 font-maison-neue-book">
+                        {avgRating.toFixed(1)} 
+                      </span>
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -589,8 +604,8 @@ export default function ProductDetailPage() {
                           />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">
-                        {avgRating > 0 ? `${avgRating.toFixed(1)}` : 'No ratings yet'} ({ratingCount} {ratingCount === 1 ? 'Rating' : 'Ratings'})
+                      <span className="text-sm text-gray-600 font-maison-nouvelle-book">
+                        ({ratingCount})
                       </span>
                     </div>
                   );
@@ -598,29 +613,25 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Price */}
-              <div className="border-t border-b border-gray-200 py-4">
+              <div>
                 <div className="flex items-baseline gap-3 mb-2">
-                  <span className="text-4xl font-bold text-gray-900">
+                  <span className="text-4xl font-[Agrandir] font-bold text-[#E10c69]">
                     ${productPrice.toFixed(2)}
                   </span>
                   {product.originalPrice && Number(product.originalPrice) > productPrice && (
                     <>
-                      <span className="text-sm text-gray-400 line-through">
+                      <span className="text-sm text-gray-400 line-through ">
                         ${Number(product.originalPrice).toFixed(2)}
                       </span>
-                     
                     </>
                   )}
                 </div>
-           
               </div>
-
-           
 
               {/* Description */}
               <div>
-                <p className="text-gray-600 leading-relaxed">
-                  {product.description || 'No description available.'}
+                <p className="text-gray-600 leading-relaxed font-[maison-neue-book]">
+                  {product.description || 'Aucune description disponible.'}
                 </p>
               </div>
 
@@ -628,7 +639,7 @@ export default function ProductDetailPage() {
 
               {/* Quantity Selector */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Quantity</h3>
+                <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">Quantité</h3>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border-2 border-gray-300 rounded-lg">
                     <button
@@ -638,7 +649,7 @@ export default function ProductDetailPage() {
                     >
                       <Minus className="h-5 w-5" />
                     </button>
-                    <span className="px-6 py-3 font-semibold text-lg border-x-2 border-gray-300 min-w-15 text-center">
+                    <span className="px-6 py-3 font-maison-neue-bold text-lg border-x-2 border-gray-300 min-w-15 text-center">
                       {quantity}
                     </span>
                     <button
@@ -650,8 +661,8 @@ export default function ProductDetailPage() {
                     </button>
                   </div>
                   <div className="text-lg">
-                    <span className="text-gray-600">Total: </span>
-                    <span className="font-bold text-gray-900 text-2xl">
+                    <span className="text-gray-600 font-[maison-neue-book]">Total: </span>
+                    <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
                       ${totalPrice.toFixed(2)}
                     </span>
                   </div>
@@ -663,22 +674,33 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToCart}
                   disabled={availableStock === 0}
-                  className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-semibold text-white transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold text-[#556822]  hover:text-white transition-colors ${
                     availableStock === 0
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-[#064E3B] hover:bg-[#3a7a4a]'
+                      : 'bg-[#F2F8EE] hover:bg-[#556822]'
                   }`}
                 >
-                  <ShoppingCart className="h-5 w-5" />
-                  {availableStock === 0 ? 'Out of Stock' : 'Add to cart'}
+                  {searchParams.packageId ? (
+                    <>
+                      <Package className="h-5 w-5" />
+                      {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au pack'}
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5" />
+                      {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                    </>
+                  )}
                 </button>
-                <button
-                  onClick={handleAddToWishlist}
-                  className="px-6 py-4 border-2 border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition-colors"
-                  title="Add to wishlist"
-                >
-                  <Heart className="h-6 w-6" />
-                </button>
+                {!searchParams.packageId && (
+                  <button
+                    onClick={handleAddToWishlist}
+                    className="px-6 py-4 border-2 border-red-500 text-red-500 rounded-lg font-agrandir font-semibold hover:bg-red-50 transition-colors"
+                    title="Ajouter aux favoris"
+                  >
+                    <Heart className="h-6 w-6" />
+                  </button>
+                )}
               </div>
 
             
@@ -688,8 +710,8 @@ export default function ProductDetailPage() {
           {/* Reviews Section */}
           <div className="mt-16 border-t border-gray-200 pt-8">
             <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
-              <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+              <h2 className="text-2xl font-agrandir font-bold text-gray-900">Avis clients</h2>
+              <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-maison-neue-bold">
                 {product.comments?.length || 0}
               </span>
             </div>
@@ -700,7 +722,7 @@ export default function ProductDetailPage() {
               {/* Left Column: Review Form */}
               {user && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-20">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Write a Review</h3>
+                  <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">Écrire un avis</h3>
                   <form onSubmit={handleSubmitReview} className="space-y-4">
                     {/* Rating Selection */}
                     <div>
@@ -729,7 +751,7 @@ export default function ProductDetailPage() {
                       <textarea
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                        placeholder="What did you think about the quality?"
+                        placeholder="Qu'avez-vous pensé de la qualité ?"
                         rows="5"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#064E3B] focus:outline-none resize-none"
                       />
@@ -740,11 +762,11 @@ export default function ProductDetailPage() {
                       <div className="flex items-center gap-3">
                         <User className={`h-5 w-5 transition-colors ${reviewForm.isAnonymous ? 'text-gray-400' : 'text-[#064E3B]'}`} />
                         <div>
-                          <label htmlFor="anonymous-toggle" className="text-sm font-semibold text-gray-900 cursor-pointer block">
-                            Post as Anonymous
+                          <label htmlFor="anonymous-toggle" className="text-sm font-maison-neue-bold text-gray-900 cursor-pointer block">
+                            Publier en anonyme
                           </label>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {reviewForm.isAnonymous ? 'Your name will be hidden' : 'Your name will be visible'}
+                          <p className="text-xs text-gray-500 mt-0.5 font-maison-neue-book">
+                            {reviewForm.isAnonymous ? 'Votre nom sera masqué' : 'Votre nom sera visible'}
                           </p>
                         </div>
                       </div>
@@ -757,7 +779,7 @@ export default function ProductDetailPage() {
                         aria-checked={reviewForm.isAnonymous}
                         onClick={() => setReviewForm({ ...reviewForm, isAnonymous: !reviewForm.isAnonymous })}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:ring-offset-2 ${
-                          reviewForm.isAnonymous ? 'bg-[#064E3B]' : 'bg-gray-300'
+                          reviewForm.isAnonymous ? 'bg-[#556822]' : 'bg-gray-300'
                         }`}
                       >
                         <span
@@ -786,21 +808,21 @@ export default function ProductDetailPage() {
                     <button
                       type="submit"
                       disabled={submittingReview || (!reviewForm.rating && !reviewForm.comment.trim())}
-                      className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-colors ${
+                      className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-agrandir font-bold text-[#556822] hover:text-white transition-colors ${
                         submittingReview || (!reviewForm.rating && !reviewForm.comment.trim())
-                          ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-[#064E3B] hover:bg-[#3a7a4a]'
+                          ? 'bg-gray-400 cursor-not-allowed text-white'
+                          : 'bg-[#F2F8EE] hover:bg-[#556822]'
                       }`}
                     >
                       {submittingReview ? (
                         <>
                           <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          <span>Submitting...</span>
+                          <span>Envoi en cours...</span>
                         </>
                       ) : (
                         <>
                           <Send className="h-4 w-4" />
-                          <span>Post Review</span>
+                          <span>Publier l'avis</span>
                         </>
                       )}
                     </button>
@@ -850,9 +872,9 @@ export default function ProductDetailPage() {
                 return (
                   <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                     <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 font-medium">No reviews yet</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      {user ? 'Be the first to review this product!' : 'Login to leave a review'}
+                    <p className="text-gray-600 font-maison-neue-bold">Aucun avis pour le moment</p>
+                    <p className="text-sm text-gray-500 mt-2 font-maison-neue-book">
+                      {user ? 'Soyez le premier à donner votre avis !' : 'Connectez-vous pour laisser un avis'}
                     </p>
                   </div>
                 );
@@ -878,7 +900,7 @@ export default function ProductDetailPage() {
                       >
                         <div className="flex gap-4 p-6 group">
                           {/* User Avatar */}
-                          <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#064E3B]">
+                          <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#558822] ">
                             {review.userId?.photo && !review.isAnonymous ? (
                               <img
                                 src={review.userId.photo}
@@ -898,14 +920,32 @@ export default function ProductDetailPage() {
                           
                           <div className="min-w-0 flex-1">
                             {/* Name and actions */}
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <p className="text-base font-bold text-slate-900">{userName}</p>
+
+                            <div className="flex items-start justify-between gap-2 ">
+                              <div className="flex items-center gap-2">
+                                {/* Name then stars */}
+                                <p className="text-base font-[Agrandir] text-slate-900">{userName}</p>
+                                {review.rating && (
+                                  <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-4 w-4 ${
+                                          i < review.rating
+                                            ? 'fill-yellow-400 text-yellow-400'
+                                            : 'fill-gray-300 text-gray-300'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                               {isOwnComment && (
                                 <button
                                   onClick={() => handleDeleteComment(review.id)}
                                   disabled={deletingCommentId === review.id}
                                   className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
-                                  title={isPending ? "Delete your pending review" : "Delete your review"}
+                                  title={isPending ? "Supprimer votre avis en attente" : "Supprimer votre avis"}
                                 >
                                   {deletingCommentId === review.id ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -917,25 +957,15 @@ export default function ProductDetailPage() {
                             </div>
                             
                             {/* Comment text */}
-                            <p className="text-base text-slate-700 mb-3 leading-relaxed">
+                            <p className="text-base text-slate-700 mb-3 leading-relaxed font-[maison-neue-book]">
                               {review.content}
                             </p>
                             
-                            {/* Rating badge */}
-                            {review.rating && (
-                              <div className="flex items-center gap-1 w-fit mb-2">
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-4 w-4 ${
-                                        i < review.rating
-                                          ? 'fill-yellow-400 text-yellow-400'
-                                          : 'fill-gray-300 text-gray-300'
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
+                            {/* Date and Time */}
+                            {review.createdAt && (
+                              <div className="flex items-center gap-2 text-xs text-gray-500 font-maison-neue-book">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span>{formatDate(review.createdAt)}</span>
                               </div>
                             )}
                             
@@ -950,10 +980,10 @@ export default function ProductDetailPage() {
                     <div className="pt-4">
                       <button
                         onClick={() => setCommentsToShow(prev => prev + 3)}
-                        className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-bold text-sm transition-colors group"
+                        className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-maison-neue-bold text-sm transition-colors group"
                       >
                         <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
-                        Load More Reviews
+                        Voir plus d'avis
                       </button>
                     </div>
                   )}
@@ -975,9 +1005,9 @@ export default function ProductDetailPage() {
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Delete your review?</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  This action is permanent. Your review will be permanently deleted.
+                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-1">Supprimer votre avis ?</h3>
+                <p className="text-sm text-gray-500 leading-relaxed font-maison-neue-book">
+                  Cette action est permanente. Votre avis sera définitivement supprimé.
                 </p>
               </div>
               <div className="flex border-t border-gray-100">
@@ -986,16 +1016,16 @@ export default function ProductDetailPage() {
                     setDeleteAlertOpen(false);
                     setCommentToDelete(null);
                   }}
-                  className="flex-1 px-4 py-4 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                  className="flex-1 px-4 py-4 text-sm font-maison-neue-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button 
                   onClick={confirmDeleteComment}
                   disabled={deletingCommentId === commentToDelete}
-                  className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
+                  className="flex-1 px-4 py-4 text-sm font-agrandir font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
                 >
-                  {deletingCommentId === commentToDelete ? 'Deleting...' : 'Delete'}
+                  {deletingCommentId === commentToDelete ? 'Suppression...' : 'Supprimer'}
                 </button>
               </div>
             </div>

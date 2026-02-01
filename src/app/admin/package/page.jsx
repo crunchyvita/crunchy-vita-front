@@ -266,14 +266,14 @@ export default function PackagesPage() {
 												{openDropdown === pkg._id && (
 													<div className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-slate-200 bg-white shadow-lg">
 														<Link
-															href={`/admin/package/${pkg._id}/detail`}
+															href={`/admin/package/${pkg._id}`}
 															className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
 														>
 															<Eye className="h-4 w-4" />
 															View Details
 														</Link>
 														<Link
-															href={`/admin/package/${pkg._id}`}
+															href={`/admin/package/${pkg._id}/edit`}
 															className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
 														>
 															<Edit2 className="h-4 w-4" />
@@ -302,7 +302,7 @@ export default function PackagesPage() {
 			</div>
 
 			{deleteConfirm && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
 					<div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
 						<h3 className="text-lg font-semibold text-slate-900">Delete Package?</h3>
 						<p className="mt-2 text-sm text-slate-600">
