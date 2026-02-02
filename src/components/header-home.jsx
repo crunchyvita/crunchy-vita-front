@@ -60,7 +60,7 @@ export default function HeaderHome() {
             ) : (
               <Link
                 href="/shop"
-                className="px-6 py-2 bg-[#469165] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm"
+                className="px-6 py-2 bg-[#556822]  text-white font-bold rounded-lg transition-colors text-sm"
               >
                 Commander
               </Link>

@@ -28,7 +28,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <button 
-          onClick={() => router.push('/shop')}
+          onClick={() => router.push('/')}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <img 

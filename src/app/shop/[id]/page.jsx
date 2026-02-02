@@ -941,26 +941,18 @@ export default function ProductDetailPage() {
 
                 {(() => {
               const allReviews = getAllReviews();
-              // Filter based on user role
+              // Filter to show approved comments + own pending comments
               const reviews = allReviews.filter(review => {
                 if (!review.content || !review.content.trim()) return false;
                 
-                // Admin sees only approved
-                if (user?.role === 'ADMIN') {
-                  return review.status === 'approved' || !review.status;
-                }
+                // Check if this is the user's own comment
+                const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
                 
-                // Client sees approved + their own pending
-                if (user) {
-                  const isOwnComment = review.userId?._id?.toString() === user.id?.toString();
-                  const isApproved = review.status === 'approved' || !review.status;
-                  const isPending = review.status === 'pending';
-                  
-                  return isApproved || (isPending && isOwnComment);
-                }
+                // Show approved comments for everyone
+                const isApproved = review.status === 'approved' || !review.status;
                 
-                // Non-logged in users see only approved
-                return review.status === 'approved' || !review.status;
+                // Show own comments regardless of status, or show approved comments
+                return isOwnComment || isApproved;
               });
               const displayedReviews = reviews.slice(0, commentsToShow);
               const hasMoreReviews = reviews.length > commentsToShow;

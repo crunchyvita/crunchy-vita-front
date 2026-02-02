@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -70,24 +70,41 @@ export default function PackageCustomizationPage() {
       setError("");
       try {
         const token = localStorage.getItem("token");
-        const pkgResponse = await fetch(`/api/packages/${packageId}`, {
-          next: { revalidate: 30 },
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        
+        // Parallel API calls for faster loading
+        const [pkgResponse, prodResponse] = await Promise.all([
+          fetch(`${API_URL}/packages/${packageId}`, {
+            next: { revalidate: 30 },
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }),
+          fetch(`${API_URL}/packages/${packageId}/available-products`, {
+            next: { revalidate: 30 },
+          })
+        ]);
 
         if (!pkgResponse.ok) throw new Error("Échec du chargement du pack");
-        const pkgResult = await pkgResponse.json();
-        setPackageData(pkgResult.data);
-
-        let prodResponse = await fetch("/api/products", { next: { revalidate: 30 } });
         if (!prodResponse.ok) throw new Error("Échec du chargement des produits");
         
-        const prodResult = await prodResponse.json();
-        const productsData = Array.isArray(prodResult) ? prodResult : (prodResult?.data || []);
-        setProducts(productsData);
+        const [pkgResult, prodResult] = await Promise.all([
+          pkgResponse.json(),
+          prodResponse.json()
+        ]);
+        
+        setPackageData(pkgResult.data);
+        
+        // Filter products: only active products with available stock
+        const productsData = Array.isArray(prodResult.data) ? prodResult.data : (prodResult?.data || []);
+        const filteredProducts = productsData.filter(product => {
+          const isActive = product.status === 'ACTIVE' || !product.status;
+          const hasStock = product.stock?.quantity > 0 || product.availableQuantity > 0;
+          return isActive && hasStock;
+        });
+        
+        setProducts(filteredProducts);
 
         const initialQuantities = {};
-        productsData.forEach((product) => { initialQuantities[product._id] = 1; });
+        filteredProducts.forEach((product) => { initialQuantities[product._id] = 1; });
         setQuantities(initialQuantities);
       } catch (err) {
         setError(err.message || "Échec du chargement");
@@ -98,7 +115,7 @@ export default function PackageCustomizationPage() {
     if (packageId) fetchPackageData();
   }, [packageId]);
 
-  const handleProductSelect = (productId) => {
+  const handleProductSelect = useCallback((productId) => {
     setSelectedProducts((prev) => {
       const isSelected = prev.includes(productId);
       if (isSelected) return prev.filter((id) => id !== productId);
@@ -111,14 +128,14 @@ export default function PackageCustomizationPage() {
       }
       return [...prev, productId];
     });
-  };
+  }, [packageData?.maxProducts]);
 
-  const handleQuantityChange = (productId, newQuantity) => {
+  const handleQuantityChange = useCallback((productId, newQuantity) => {
     if (packageData?.allowMultipleQuantities === false) return;
     if (newQuantity >= 1) {
       setQuantities((prev) => ({ ...prev, [productId]: newQuantity }));
     }
-  };
+  }, [packageData?.allowMultipleQuantities]);
 
   const totalPrice = useMemo(() => {
     return selectedProducts.reduce((total, id) => {
@@ -129,8 +146,14 @@ export default function PackageCustomizationPage() {
   }, [selectedProducts, products, packageData, quantities]);
 
   const discountPercentage = packageData?.discountPercentage || 0;
-  const discountedPrice = totalPrice * (1 - discountPercentage / 100);
-  const totalSavings = totalPrice - discountedPrice;
+  
+  const { discountedPrice, totalSavings } = useMemo(() => {
+    const discounted = totalPrice * (1 - discountPercentage / 100);
+    return {
+      discountedPrice: discounted,
+      totalSavings: totalPrice - discounted
+    };
+  }, [totalPrice, discountPercentage]);
 
   const handleAddToCart = async () => {
     if (selectedProducts.length === 0) {
@@ -200,8 +223,9 @@ export default function PackageCustomizationPage() {
                 return (
                   <motion.div 
                     key={product._id}
-                    layout
+                    initial={false}
                     whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2 }}
                     style={{ borderColor: isSelected ? COLORS.pistachio : "transparent" }}
                     className={`bg-white rounded-[24px] border-2 shadow-sm overflow-hidden flex flex-col transition-all`}
                   >
@@ -209,6 +233,7 @@ export default function PackageCustomizationPage() {
                       <img 
                         src={getProductImageUrl(product)} 
                         alt={product.name} 
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                       {isSelected && (
@@ -305,8 +330,10 @@ export default function PackageCustomizationPage() {
                
                 <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                   <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(selectedProducts.length / (packageData?.maxProducts || 5)) * 100}%` }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: (selectedProducts.length / (packageData?.maxProducts || 5)) }}
+                    transition={{ duration: 0.3 }}
+                    style={{ transformOrigin: "left" }}
                     className="h-full bg-[#E10C69]" 
                   />
                 </div>
