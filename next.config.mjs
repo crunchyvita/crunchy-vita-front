@@ -4,6 +4,7 @@ const nextConfig = {
   reactCompiler: true,
   images: {
     remotePatterns: [
+      // Localhost pour développement
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -20,6 +21,18 @@ const nextConfig = {
         hostname: '127.0.0.1',
         port: '5000',
         pathname: '/uploads/**',
+      },
+      // Backend Render pour production
+      {
+        protocol: 'https',
+        hostname: 'crunchy-vita-back.onrender.com',
+        pathname: '/uploads/**',
+      },
+      // Cloudinary pour les images
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
       },
     ],
     dangerouslyAllowSVG: true,
