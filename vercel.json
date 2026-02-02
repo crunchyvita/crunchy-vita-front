@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://crunchy-vita-back.onrender.com/api/$1"
+    }
+  ]
+}
