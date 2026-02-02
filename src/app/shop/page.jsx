@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ImageIcon, ShoppingCart, Heart, Star, Package,
   ShoppingBag, CheckCircle2, Search, X,
-  ArrowRight
+  ArrowRight, Loader2
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -366,4 +366,14 @@ function ClientShop() {
   );
 }
 
-export default ClientShop;
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F5F3ED] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#556822]" />
+      </div>
+    }>
+      <ClientShop />
+    </Suspense>
+  );
+}
