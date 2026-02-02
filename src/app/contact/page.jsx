@@ -62,16 +62,16 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-10">
       <HeaderHome />
       
       <main className="grow bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl">
-            <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
-              Une question ? <span className="text-green-700">Contactez-nous</span>
+            <h1 className="mb-4 text-center text-4xl font-bold text-gray-900 font-[agrandir]">
+              Une question ? <span className="text-[#556822]">Contactez-nous</span>
             </h1>
-            <p className="mb-8 text-center text-gray-600">
+            <p className="mb-8 text-center text-gray-600 font-[Maison_Neue]">
               Notre équipe est à votre écoute pour répondre à toutes vos questions sur nos produits et notre démarche.
             </p>
             
@@ -82,7 +82,7 @@ export default function ContactPage() {
                 onClick={() => setContactType('particulier')}
                 className={`px-8 py-3 rounded-full font-semibold transition-all ${
                   contactType === 'particulier'
-                    ? 'bg-[#469165] text-white shadow-md'
+                    ? 'bg-[#556822] text-white shadow-md'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -93,7 +93,7 @@ export default function ContactPage() {
                 onClick={() => setContactType('professionnel')}
                 className={`px-8 py-3 rounded-full font-semibold transition-all ${
                   contactType === 'professionnel'
-                    ? 'bg-[#469165] text-white shadow-md'
+                    ? 'bg-[#556822] text-white shadow-md'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -117,14 +117,14 @@ export default function ContactPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <User className="h-4 w-4 text-[#469165]" strokeWidth={2} />
-                    <label className="text-sm font-medium text-gray-700">Votre nom *</label>
+                    <label className="text-sm font-medium text-gray-700 font-[Maison_Neue]">Votre nom *</label>
                   </div>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                    className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all font-[Maison_Neue]"
                     placeholder="Votre nom complet"
                     required
                   />
@@ -134,15 +134,16 @@ export default function ContactPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <User className="h-4 w-4 text-[#469165]" strokeWidth={2} />
-                      <label className="text-sm font-medium text-gray-700">Société</label>
+                      <label className="text-sm font-medium text-gray-700 font-[Maison_Neue]">Société *</label>
                     </div>
                     <input
                       type="text"
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                      className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all font-[Maison_Neue]"
                       placeholder="Nom de votre entreprise"
+                      required
                     />
                   </div>
                 )}
@@ -199,7 +200,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-full bg-[#469165] py-3 font-bold text-white hover:bg-[#3a7a4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase"
+                className="w-full rounded-full bg-[#556822] py-3 font-bold text-white hover:bg-[#45591a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase"
               >
                 {loading ? 'Envoi en cours...' : 'Envoyer ma demande'}
               </button>
