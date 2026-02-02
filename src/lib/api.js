@@ -140,7 +140,12 @@ export const authAPI = {
 
   // Google OAuth URL
   getGoogleAuthUrl: () => {
-    return `${API_URL}/auth/google`;
+    // ✅ Set callback URL based on environment
+    const callbackUrl = process.env.NODE_ENV === 'production'
+      ? 'https://www.crunchyvita.com/auth/callback'
+      : 'http://localhost:3000/auth/callback';
+    
+    return `${API_URL}/auth/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
   },
 };
 
