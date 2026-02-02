@@ -25,8 +25,16 @@ export default function RegisterPage() {
   }, [isAuthenticated, user, router]);
 
   const redirectBasedOnRole = (role) => {
-    if (role === 'ADMIN') router.push('/admin/dashboard');
-    else if (role === 'CLIENT') router.push('/shop');
+    if (role === 'ADMIN') {
+      router.push('/admin/dashboard');
+    } else if (role === 'CLIENT') {
+      // ✅ Redirect to production URL in production, localhost in dev
+      if (process.env.NODE_ENV === 'production') {
+        window.location.href = 'https://www.crunchyvita.com/shop';
+      } else {
+        router.push('/shop');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
