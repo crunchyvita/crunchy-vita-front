@@ -51,7 +51,12 @@ function AuthCallbackContent() {
         if (user.role === 'ADMIN') {
           router.push('/admin/dashboard');
         } else if (user.role === 'CLIENT') {
-          router.push('/shop');
+          // ✅ Redirect to production URL in production, localhost in dev
+          if (process.env.NODE_ENV === 'production') {
+            window.location.href = 'https://www.crunchyvita.com/shop';
+          } else {
+            router.push('/shop');
+          }
         } else {
           router.push('/');
         }
