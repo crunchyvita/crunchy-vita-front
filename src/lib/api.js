@@ -449,3 +449,75 @@ export const notificationAPI = {
   deleteAll: async () =>
     apiRequest("/notifications/all", { method: "DELETE" }),
 };
+
+// Blog API functions
+export const blogAPI = {
+  // Get all published blogs (public)
+  list: async () => apiRequest("/blogs", { method: "GET" }),
+
+  // Get all blogs (admin - includes unpublished)
+  listAdmin: async () => apiRequest("/blogs/admin/all", { method: "GET" }),
+
+  // Get single blog by ID (public)
+  getById: async (id) => apiRequest(`/blogs/${id}`, { method: "GET" }),
+
+  // Get single blog by ID (admin)
+  getByIdAdmin: async (id) => apiRequest(`/blogs/admin/${id}`, { method: "GET" }),
+
+  // Create blog (admin only)
+  create: async (payload) => {
+    const formData = new FormData();
+    
+    formData.append("title", payload.title);
+    formData.append("content", payload.content);
+    
+    if (payload.publicationDate) {
+      formData.append("publicationDate", payload.publicationDate);
+    }
+    
+    if (payload.creationDate) {
+      formData.append("creationDate", payload.creationDate);
+    }
+    
+    if (payload.isPublished !== undefined) {
+      formData.append("isPublished", payload.isPublished);
+    }
+    
+    if (payload.image) {
+      formData.append("image", payload.image);
+    }
+
+    return apiRequest("/blogs", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  // Update blog (admin only)
+  update: async (id, payload) => {
+    const formData = new FormData();
+    
+    if (payload.title) formData.append("title", payload.title);
+    if (payload.content) formData.append("content", payload.content);
+    if (payload.publicationDate) formData.append("publicationDate", payload.publicationDate);
+    if (payload.creationDate) formData.append("creationDate", payload.creationDate);
+    if (payload.isPublished !== undefined) formData.append("isPublished", payload.isPublished);
+    if (payload.isArchived !== undefined) formData.append("isArchived", payload.isArchived);
+    if (payload.image) formData.append("image", payload.image);
+
+    return apiRequest(`/blogs/${id}`, {
+      method: "PUT",
+      body: formData,
+    });
+  },
+
+  // Archive/unarchive blog (admin only)
+  archive: async (id, archived = true) =>
+    apiRequest(`/blogs/${id}/archive`, {
+      method: "PATCH",
+      body: JSON.stringify({ archived }),
+    }),
+
+  // Delete blog (admin only)
+  delete: async (id) => apiRequest(`/blogs/${id}`, { method: "DELETE" }),
+};

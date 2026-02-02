@@ -25,7 +25,7 @@ export default function BlogsPage() {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${backendUrl}/api/blogs/admin/all`, {
+      const response = await fetch(`${backendUrl}/blogs/admin/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -48,7 +48,7 @@ export default function BlogsPage() {
     setDeleting(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${backendUrl}/api/blogs/${id}`, {
+      const response = await fetch(`${backendUrl}/blogs/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

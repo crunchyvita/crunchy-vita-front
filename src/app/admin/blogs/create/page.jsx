@@ -63,7 +63,7 @@ export default function CreateBlogPage() {
         formDataToSend.append("image", imageFile);
       }
 
-      const response = await fetch(`${backendUrl}/api/blogs`, {
+      const response = await fetch(`${backendUrl}/blogs`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

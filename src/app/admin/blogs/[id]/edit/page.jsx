@@ -33,7 +33,7 @@ export default function EditBlogPage() {
   const fetchBlog = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${backendUrl}/api/blogs/admin/${blogId}`, {
+      const response = await fetch(`${backendUrl}/blogs/admin/${blogId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -108,7 +108,7 @@ export default function EditBlogPage() {
         formDataToSend.append("image", imageFile);
       }
 
-      const response = await fetch(`${backendUrl}/api/blogs/${blogId}`, {
+      const response = await fetch(`${backendUrl}/blogs/${blogId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

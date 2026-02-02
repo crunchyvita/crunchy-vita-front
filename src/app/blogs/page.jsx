@@ -19,7 +19,7 @@ export default function BlogsPage() {
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch(`${backendUrl}/api/blogs`);
+      const response = await fetch(`${backendUrl}/blogs`);
       if (response.ok) {
         const result = await response.json();
         console.log("Blogs fetched:", result.data);
