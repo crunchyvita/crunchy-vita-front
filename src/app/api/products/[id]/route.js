@@ -46,8 +46,44 @@ export async function GET(request, { params }) {
 
     const result = await response.json();
 
+    console.log('[API] Backend response type:', typeof result);
+    console.log('[API] Backend response keys:', Object.keys(result || {}));
+    console.log('[API] Backend response structure:', JSON.stringify(result, null, 2));
+    
+    // Normalize response - handle different backend response formats
+    let productData = null;
+    
+    if (result?.data) {
+      // Format: { success: true, data: {...} }
+      productData = result.data;
+      console.log('[API] Extracted from result.data');
+    } else if (result?.product) {
+      // Format: { product: {...} }
+      productData = result.product;
+      console.log('[API] Extracted from result.product');
+    } else if (result?._id) {
+      // Format: direct product object
+      productData = result;
+      console.log('[API] Using result directly (has _id)');
+    } else if (result?.success === false) {
+      // Error response
+      console.error('[API] Backend returned error:', result.message);
+      return Response.json(
+        { error: result.message || 'Product not found' },
+        { status: 404 }
+      );
+    } else {
+      // Fallback to result
+      productData = result;
+      console.log('[API] Using result as fallback');
+    }
+
+    console.log('[API] Final product name:', productData?.name);
+    console.log('[API] Final product price:', productData?.price);
+    console.log('[API] Final product pricingHistory:', productData?.pricingHistory);
+
     // Backend returns { success: true, data: productWithStock }
-    return Response.json(result?.data ?? result);
+    return Response.json(productData);
   } catch (error) {
     console.error("Error fetching product:", error);
     return Response.json(
