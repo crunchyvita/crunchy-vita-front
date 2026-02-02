@@ -1,6 +1,6 @@
 export async function GET(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const token = request.headers.get('authorization');
@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
 		console.log(`[API] GET /api/packages/${id} - Backend: ${backendUrl}`);
 		console.log(`[API] Token present: ${!!token}`);
 
-		const response = await fetch(`${backendUrl}/api/packages/${id}`, {
+		const response = await fetch(`${backendUrl}/packages/${id}`, {
 			headers: {
 				'Authorization': token || '',
 			},
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const body = await request.json();
@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
 		console.log(`[API] PUT /api/packages/${id}`);
 		console.log('[API] Body:', JSON.stringify(body, null, 2));
 
-		const response = await fetch(`${backendUrl}/api/packages/${id}`, {
+		const response = await fetch(`${backendUrl}/packages/${id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const token = request.headers.get('authorization');
@@ -80,7 +80,7 @@ export async function DELETE(request, { params }) {
 		console.log(`[API] DELETE /api/packages/${id}`);
 		console.log(`[API] Token present: ${!!token}`);
 
-		const response = await fetch(`${backendUrl}/api/packages/${id}`, {
+		const response = await fetch(`${backendUrl}/packages/${id}`, {
 			method: 'DELETE',
 			headers: {
 				'Authorization': token || '',

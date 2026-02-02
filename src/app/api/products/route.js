@@ -1,9 +1,9 @@
 export async function GET() {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		
 		// Fetch all products without pagination limit
-		const response = await fetch(`${backendUrl}/api/products?limit=999`, {
+		const response = await fetch(`${backendUrl}/products?limit=999`, {
 			cache: 'no-store',
 			headers: {
 				'Content-Type': 'application/json',

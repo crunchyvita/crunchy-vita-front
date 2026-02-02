@@ -2,15 +2,6 @@
 const nextConfig = {
   reactCompiler: true,
 
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "https://crunchy-vita-back.onrender.com/api/:path*",
-      },
-    ];
-  },
-
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", port: "5000", pathname: "/uploads/**" },

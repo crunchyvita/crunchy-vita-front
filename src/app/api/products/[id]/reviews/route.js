@@ -7,9 +7,9 @@ export async function POST(request, { params }) {
 
 		console.log('[Review API] Sending to backend:', body);
 
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-		const response = await fetch(`${backendUrl}/api/reviews/products/${id}`, {
+		const response = await fetch(`${backendUrl}/reviews/products/${id}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -64,11 +64,11 @@ export async function DELETE(request, { params }) {
 			);
 		}
 
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 		// Correct endpoint based on backend structure: /api/reviews/products/:id/comments/:commentId
-		console.log('[DELETE Review] Trying:', `${backendUrl}/api/reviews/products/${id}/comments/${commentId}`);
-		const response = await fetch(`${backendUrl}/api/reviews/products/${id}/comments/${commentId}`, {
+		console.log('[DELETE Review] Trying:', `${backendUrl}/reviews/products/${id}/comments/${commentId}`);
+		const response = await fetch(`${backendUrl}/reviews/products/${id}/comments/${commentId}`, {
 			method: 'DELETE',
 			headers: {
 				'Authorization': token,

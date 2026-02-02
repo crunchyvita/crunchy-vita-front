@@ -1,8 +1,8 @@
 export async function GET() {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		
-		const response = await fetch(`${backendUrl}/api/packages/available-products`, {
+		const response = await fetch(`${backendUrl}/packages/available-products`, {
 			cache: 'no-store',
 			headers: {
 				'Content-Type': 'application/json',

@@ -4,13 +4,13 @@ export async function GET(request, { params }) {
 		const resolvedParams = await params;
 		const { id } = resolvedParams;
 		
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		const authHeader = request.headers.get('authorization');
 		
-		console.log(`[API] Fetching product ID: ${id} from ${backendUrl}/api/products/${id}`);
+		console.log(`[API] Fetching product ID: ${id} from ${backendUrl}/products/${id}`);
 		
 		// Fetch single product by ID
-		const response = await fetch(`${backendUrl}/api/products/${id}`, {
+		const response = await fetch(`${backendUrl}/products/${id}`, {
 			cache: 'no-store',
 			headers: {
 				'Content-Type': 'application/json',

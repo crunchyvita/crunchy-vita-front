@@ -2,7 +2,7 @@ export async function GET() {
 	try {
 		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		
-		const response = await fetch(`${backendUrl}/api/packages`, {
+		const response = await fetch(`${backendUrl}/packages`, {
 			cache: 'no-store',
 		});
 
@@ -27,11 +27,11 @@ export async function GET() {
 
 export async function POST(request) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 		const body = await request.json();
 		const token = request.headers.get('authorization');
 
-		const response = await fetch(`${backendUrl}/api/packages`, {
+		const response = await fetch(`${backendUrl}/packages`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
