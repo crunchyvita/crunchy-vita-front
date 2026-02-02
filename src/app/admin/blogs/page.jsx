@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import { Trash2, Edit, Plus, AlertCircle } from "lucide-react";
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function BlogsPage() {
   const router = useRouter();

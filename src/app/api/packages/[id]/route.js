@@ -1,6 +1,6 @@
 export async function GET(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const token = request.headers.get('authorization');
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const body = await request.json();
@@ -72,7 +72,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
 	try {
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 		// Await params for Next.js 15 compatibility
 		const { id } = await params;
 		const token = request.headers.get('authorization');

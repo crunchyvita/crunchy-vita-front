@@ -7,7 +7,7 @@ export async function POST(request, { params }) {
 
 		console.log('[Review API] Sending to backend:', body);
 
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 		const response = await fetch(`${backendUrl}/api/reviews/products/${id}`, {
 			method: 'POST',
@@ -64,7 +64,7 @@ export async function DELETE(request, { params }) {
 			);
 		}
 
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+		const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 		// Correct endpoint based on backend structure: /api/reviews/products/:id/comments/:commentId
 		console.log('[DELETE Review] Trying:', `${backendUrl}/api/reviews/products/${id}/comments/${commentId}`);

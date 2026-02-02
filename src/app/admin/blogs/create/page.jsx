@@ -6,7 +6,7 @@ import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function CreateBlogPage() {
   const router = useRouter();
