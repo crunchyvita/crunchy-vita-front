@@ -75,19 +75,29 @@ export default function ProductDetailPage() {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch(`/api/products/${params.id}`, {
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
       
+      console.log('[Product Detail] API Response Status:', response.status);
+      
       if (!response.ok) {
+        console.error('[Product Detail] API returned error:', response.status);
         throw new Error('Product not found');
       }
 
       const data = await response.json();
+      console.log('[Product Detail] Received data:', data);
+      console.log('[Product Detail] Product name:', data?.name);
+      console.log('[Product Detail] Product price:', data?.price);
+      console.log('[Product Detail] Product pricingHistory:', data?.pricingHistory);
+      console.log('[Product Detail] Product description:', data?.description);
       setProduct(data);
     } catch (err) {
+      console.error('[Product Detail] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
