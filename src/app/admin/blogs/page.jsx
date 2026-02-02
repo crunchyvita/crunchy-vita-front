@@ -169,21 +169,23 @@ export default function BlogsPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Blog Post?</h3>
-            <p className="text-gray-600 mb-6">This action cannot be undone.</p>
-            <div className="flex gap-3 justify-end">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
+          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900">Delete Blog Post?</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Are you sure you want to delete this blog post? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-900 hover:bg-gray-50 transition"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 disabled={deleting}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50"
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm disabled:opacity-50"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>

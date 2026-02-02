@@ -50,11 +50,11 @@ export default function BlogsPage() {
       <HeaderHome />
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="bg-white py-16 border-b border-gray-200">
+        <section className="bg-white py-16 mt-10 border-b border-gray-200">
           <div className="container mx-auto px-6">
-            <h1 className="text-5xl font-bold text-center text-gray-900 uppercase">
+            <h1 className="text-5xl font-bold text-center text-gray-900 uppercase font-[agrandir]">
               Le blog du bien-être :<br />
-              <span className="text-gray-700">Astuces, alimentation & santé</span>
+              <span className="text-[#556822]">Astuces, alimentation & santé </span>
             </h1>
           </div>
         </section>
@@ -71,7 +71,7 @@ export default function BlogsPage() {
                 {/* Recent Blog Posts Section */}
                 {recentBlogs.length > 0 && (
                   <div className="mb-20">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8">Articles récents</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">Articles récents</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       {recentBlogs.map((blog) => (
                         <Link key={`recent-${blog._id}`} href={`/blogs/${blog._id}`}>
@@ -88,13 +88,13 @@ export default function BlogsPage() {
                               </div>
                             )}
                             <div className="p-6">
-                              <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-green-600 transition-colors line-clamp-2">
+                              <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-[#558822] transition-colors line-clamp-2 font-[agrandir]">
                                 {blog.title}
                               </h3>
-                              <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                              <p className="text-gray-600 text-sm mb-4 line-clamp-3 font-[Maison_Neue]">
                                 {getShortSummary(blog.content)}
                               </p>
-                              <div className="flex items-center gap-2 text-green-600 font-semibold text-sm hover:gap-3 transition-all">
+                              <div className="flex items-center gap-2 text-[#558822] font-semibold text-sm hover:gap-3 transition-all">
                                 Lire plus...
                                 <ArrowRight className="h-4 w-4" />
                               </div>
@@ -107,7 +107,7 @@ export default function BlogsPage() {
                 )}
 
                 {/* Featured Blog Post */}
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Tous les articles </h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">Tous les articles </h2>
                 {featuredBlog && (
                   <div className={`grid grid-cols-1 gap-12 mb-16 ${hasFeaturedImage ? "lg:grid-cols-3" : ""}`}>
                     {/* Featured Image */}
@@ -132,13 +132,13 @@ export default function BlogsPage() {
                     <div className="flex flex-col justify-center">
                       <Link href={`/blogs/${featuredBlog._id}`}>
                         <div className="cursor-pointer">
-                          <h2 className="text-2xl font-bold text-gray-900 mb-4 hover:text-green-600 transition-colors uppercase leading-tight">
+                          <h2 className="text-2xl font-bold text-gray-900 mb-4 hover:text-[#558822] transition-colors uppercase leading-tight font-[agrandir]">
                             {featuredBlog.title}
                           </h2>
-                          <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                          <p className="text-gray-600 text-sm mb-6 leading-relaxed font-[Maison_Neue]">
                             {getShortSummary(featuredBlog.content)}
                           </p>
-                          <div className="flex items-center gap-2 text-green-600 font-semibold hover:gap-3 transition-all">
+                          <div className="flex items-center gap-2 text-[#558822] font-semibold hover:gap-3 transition-all">
                             Lire plus...
                             <ArrowRight className="h-4 w-4" />
                           </div>
@@ -166,13 +166,13 @@ export default function BlogsPage() {
                             </div>
                           )}
                           <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-green-600 transition-colors uppercase">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-[#558822] transition-colors uppercase font-[agrandir]">
                               {blog.title}
                             </h3>
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-2 font-[Maison_Neue]">
                               {getShortSummary(blog.content)}
                             </p>
-                            <div className="flex items-center gap-2 text-green-600 font-semibold text-sm hover:gap-3 transition-all">
+                            <div className="flex items-center gap-2 text-[#558822] font-semibold text-sm hover:gap-3 transition-all">
                               Lire plus...
                               <ArrowRight className="h-4 w-4" />
                             </div>
