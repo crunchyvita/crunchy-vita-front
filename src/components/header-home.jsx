@@ -97,16 +97,16 @@ export default function HeaderHome() {
             <div className="px-4 pt-2">
               {isAuthenticated ? (
                 <Link
-                  href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/account'}
-                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#469165] text-white font-bold rounded-lg transition-colors text-sm text-center"
+                  href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/shop'}
+                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {user?.role === 'ADMIN' ? 'Tableau de bord' : 'Mon compte'}
+                  {user?.role === 'ADMIN' ? 'Tableau de bord' : 'Commander'}
                 </Link>
               ) : (
                 <Link
                   href="/shop"
-                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#469165] text-white font-bold rounded-lg transition-colors text-sm text-center"
+                  className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Commander

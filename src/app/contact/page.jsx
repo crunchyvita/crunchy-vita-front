@@ -124,7 +124,7 @@ export default function ContactPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all font-[Maison_Neue]"
+                    className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20 transition-all font-[Maison_Neue]"
                     placeholder="Votre nom complet"
                     required
                   />
@@ -141,7 +141,7 @@ export default function ContactPage() {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all font-[Maison_Neue]"
+                      className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20 transition-all font-[Maison_Neue]"
                       placeholder="Nom de votre entreprise"
                       required
                     />
@@ -159,7 +159,7 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20 transition-all font-[Maison_Neue]"
                   placeholder="Ex: Renseignement produit, Partenariat, etc."
                   required
                 />
@@ -175,7 +175,7 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20 transition-all font-[Maison_Neue]"
                   placeholder="votre.email@example.com"
                   required
                 />
@@ -191,7 +191,7 @@ export default function ContactPage() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all"
+                  className="w-full rounded-lg border border-gray-200 bg-white p-3 text-gray-900 placeholder-gray-400 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20 transition-all font-[Maison_Neue]"
                   placeholder="Expliquez votre demande, votre commande ou votre projet..."
                   required
                 />

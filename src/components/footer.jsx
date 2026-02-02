@@ -74,6 +74,7 @@ export default function Footer() {
               <li><a href="/#produits" className="text-sm text-white hover:text-[#556822] transition">Nos produits</a></li>
               <li><a href="/#engagements" className="text-sm text-white hover:text-[#556822] transition">Nos engagements</a></li>
               <li><a href="/contact" className="text-sm text-white hover:text-[#556822] transition">Contact</a></li>
+              <li><a href="/blogs" className="text-sm text-white hover:text-[#556822] transition">Blog</a></li>
             </ul>
           </div>
 
