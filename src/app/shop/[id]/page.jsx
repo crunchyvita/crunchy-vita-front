@@ -75,7 +75,6 @@ export default function ProductDetailPage() {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch(`/api/products/${params.id}`, {
-        next: { revalidate: 30 },
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
