@@ -111,8 +111,40 @@ export default function ProductDetailPage() {
       }
 
       const data = await response.json();
-      console.log('[Product Detail] Received data:', data);
+      console.log('[Product Detail] RAW Received data:', data);
+      console.log('[Product Detail] Data type:', typeof data);
+      console.log('[Product Detail] Data is null?', data === null);
+      console.log('[Product Detail] Data is undefined?', data === undefined);
+      console.log('[Product Detail] Data keys:', data ? Object.keys(data) : 'no keys');
+      console.log('[Product Detail] Has _id?', !!data?._id);
+      console.log('[Product Detail] Product name:', data?.name);
+      console.log('[Product Detail] Product description:', data?.description);
+      console.log('[Product Detail] Product pricingHistory:', data?.pricingHistory);
+      console.log('[Product Detail] Product stock:', data?.stock);
+      
+      if (!data || !data._id) {
+        console.error('[Product Detail] ❌ Invalid data structure - missing _id!');
+        throw new Error('Invalid product data received');
+      }
 
+      console.log('[Product Detail] ✅ Setting product with valid data');
+      
+      // Log nested structures
+      if (data.pricingHistory && data.pricingHistory.length > 0) {
+        console.log('[Product Detail] pricingHistory array length:', data.pricingHistory.length);
+        console.log('[Product Detail] pricingHistory[0]:', data.pricingHistory[0]);
+        console.log('[Product Detail] pricingHistory[last]:', data.pricingHistory[data.pricingHistory.length - 1]);
+        console.log('[Product Detail] Latest price value:', data.pricingHistory[data.pricingHistory.length - 1]?.price);
+      }
+      if (data.stock) {
+        console.log('[Product Detail] stock.availableQuantity:', data.stock.availableQuantity);
+        console.log('[Product Detail] stock.quantity:', data.stock.quantity);
+      }
+      if (data.media) {
+        console.log('[Product Detail] media array length:', data.media?.length);
+        console.log('[Product Detail] media[0]:', data.media?.[0]);
+      }
+      
       setProduct(data);
     } catch (err) {
       console.error('[Product Detail] Error:', err);
@@ -151,17 +183,34 @@ export default function ProductDetailPage() {
     if (!product) return 0;
     if (product.pricingHistory && product.pricingHistory.length > 0) {
       const latestPrice = product.pricingHistory[product.pricingHistory.length - 1]?.price;
+      console.log('[useMemo productPrice] pricingHistory exists, latest price:', latestPrice);
       if (latestPrice !== undefined && latestPrice !== null) return Number(latestPrice);
     }
-    if (product.price !== undefined && product.price !== null) return Number(product.price);
+    if (product.price !== undefined && product.price !== null) {
+      console.log('[useMemo productPrice] Using direct price:', product.price);
+      return Number(product.price);
+    }
+    console.log('[useMemo productPrice] No price found, returning 0');
     return 0;
   }, [product]);
 
   const availableStock = useMemo(() => {
-    if (!product || !product.stock) return 0;
+    if (!product || !product.stock) {
+      console.log('[useMemo availableStock] No product or stock, returning 0');
+      return 0;
+    }
     const stock = product.stock;
-    if (stock.availableQuantity !== undefined && stock.availableQuantity !== null) return stock.availableQuantity;
-    if (stock.quantity !== undefined) return (stock.quantity || 0) - (stock.reservedQuantity || 0);
+    console.log('[useMemo availableStock] stock object:', stock);
+    if (stock.availableQuantity !== undefined && stock.availableQuantity !== null) {
+      console.log('[useMemo availableStock] Using availableQuantity:', stock.availableQuantity);
+      return stock.availableQuantity;
+    }
+    if (stock.quantity !== undefined) {
+      const calculated = (stock.quantity || 0) - (stock.reservedQuantity || 0);
+      console.log('[useMemo availableStock] Calculated:', calculated);
+      return calculated;
+    }
+    console.log('[useMemo availableStock] No valid stock data, returning 0');
     return 0;
   }, [product]);
 
