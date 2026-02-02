@@ -110,11 +110,19 @@ export default function ProductDetailPage() {
         throw new Error(`Product not found (${response.status})`);
       }
 
-      const data = await response.json();
-      console.log('[Product Detail] RAW Received data:', data);
+      let rawData = await response.json();
+      console.log('[Product Detail] RAW Response:', rawData);
+      console.log('[Product Detail] Response keys:', rawData ? Object.keys(rawData) : 'no keys');
+      
+      // ✅ FIX: Unwrap {success: true, data: {...}} format from backend
+      let data = rawData;
+      if (rawData?.success && rawData?.data) {
+        console.log('[Product Detail] Unwrapping {success, data} wrapper');
+        data = rawData.data;
+      }
+      
+      console.log('[Product Detail] Product data after unwrap:', data);
       console.log('[Product Detail] Data type:', typeof data);
-      console.log('[Product Detail] Data is null?', data === null);
-      console.log('[Product Detail] Data is undefined?', data === undefined);
       console.log('[Product Detail] Data keys:', data ? Object.keys(data) : 'no keys');
       console.log('[Product Detail] Has _id?', !!data?._id);
       console.log('[Product Detail] Product name:', data?.name);
