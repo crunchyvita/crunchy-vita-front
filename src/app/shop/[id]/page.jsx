@@ -497,8 +497,8 @@ export default function ProductDetailPage() {
   const totalPrice = productPrice * quantity;
 
   // ✅ FIX: éviter crash si pas assez d’images
-  const freshImg = productImages?.[2] || productImages?.[0] || '/placeholder.svg?height=500&width=1200';
-  const lyoImg = productImages?.[3] || productImages?.[1] || freshImg || '/placeholder.svg?height=500&width=1200';
+  const freshImg = productImages?.[2] ;
+  const lyoImg = productImages?.[3] ;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -685,69 +685,71 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Image Comparison Section */}
-        <div className="mt-16 border-t border-gray-200 pt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
-              Du fruit frais au fruit lyophilisé
-            </h2>
-            <p className="text-gray-600 font-maison-neue-book">
-              Découvrez la transformation de nos fruits
-            </p>
-          </div>
-
-          <div
-            className="relative w-full max-w-5xl mx-auto h-[500px] rounded-2xl overflow-hidden shadow-2xl cursor-ew-resize select-none"
-            onMouseMove={handleSliderMove}
-            onMouseDown={handleSliderStart}
-            onMouseUp={handleSliderEnd}
-            onMouseLeave={handleSliderEnd}
-            onTouchMove={handleSliderMove}
-            onTouchStart={handleSliderStart}
-            onTouchEnd={handleSliderEnd}
-          >
-            {/* Fresh Fruit Image */}
-            <div className="absolute inset-0">
-              <img src={freshImg} alt="Fruit frais" className="w-full h-full object-cover" draggable="false" />
-              <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Frais</span>
-              </div>
+        {freshImg && lyoImg && (
+          <div className="mt-16 border-t border-gray-200 pt-16">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
+                Du fruit frais au fruit lyophilisé
+              </h2>
+              <p className="text-gray-600 font-maison-neue-book">
+                Découvrez la transformation de nos fruits
+              </p>
             </div>
 
-            {/* Lyophilized Image clipped */}
             <div
-              className={`absolute inset-0 ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
-              style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+              className="relative w-full max-w-5xl mx-auto h-125 rounded-2xl overflow-hidden shadow-2xl cursor-ew-resize select-none"
+              onMouseMove={handleSliderMove}
+              onMouseDown={handleSliderStart}
+              onMouseUp={handleSliderEnd}
+              onMouseLeave={handleSliderEnd}
+              onTouchMove={handleSliderMove}
+              onTouchStart={handleSliderStart}
+              onTouchEnd={handleSliderEnd}
             >
-              <img src={lyoImg} alt="Fruit lyophilisé" className="w-full h-full object-cover" draggable="false" />
-              <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Lyophilisé</span>
+              {/* Fresh Fruit Image */}
+              <div className="absolute inset-0">
+                <img src={freshImg} alt="Fruit frais" className="w-full h-full object-cover" draggable="false" />
+                <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Frais</span>
+                </div>
               </div>
-            </div>
 
-            {/* Slider handle */}
-            <div
-              className={`absolute top-0 bottom-0 w-0.5 bg-white shadow-2xl ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
-              style={{ left: `${sliderPosition}%` }}
-            >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[#556822]">
-                <svg className="w-6 h-6 text-[#556822]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
-                </svg>
+              {/* Lyophilized Image clipped */}
+              <div
+                className={`absolute inset-0 ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
+                style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+              >
+                <img src={lyoImg} alt="Fruit lyophilisé" className="w-full h-full object-cover" draggable="false" />
+                <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Lyophilisé</span>
+                </div>
               </div>
-            </div>
 
-            {sliderPosition === 50 && !isDragging && (
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg animate-pulse">
-                <span className="font-maison-neue-bold text-white text-sm flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+              {/* Slider handle */}
+              <div
+                className={`absolute top-0 bottom-0 w-0.5 bg-white shadow-2xl ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
+                style={{ left: `${sliderPosition}%` }}
+              >
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[#556822]">
+                  <svg className="w-6 h-6 text-[#556822]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
                   </svg>
-                  Glissez pour comparer
-                </span>
+                </div>
               </div>
-            )}
+
+              {sliderPosition === 50 && !isDragging && (
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg animate-pulse">
+                  <span className="font-maison-neue-bold text-white text-sm flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                    </svg>
+                    Glissez pour comparer
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Reviews Section (inchangé à part les fonctions déjà présentes) */}
         <div className="mt-16 border-t border-gray-200 pt-8">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import HeaderHome from "@/components/header-home";
+import HeaderHome from "@/components/header";
 import Footer from "@/components/footer";
 import { ArrowRight } from "lucide-react";
 
@@ -50,7 +50,7 @@ export default function BlogsPage() {
       <HeaderHome />
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="bg-white py-16 mt-10 border-b border-gray-200">
+        <section className="bg-white py-16 border-b border-gray-200">
           <div className="container mx-auto px-6">
             <h1 className="text-5xl font-bold text-center text-gray-900 uppercase font-[agrandir]">
               Le blog du bien-être :<br />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import HeaderHome from '@/components/header-home';
+import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { 
   User,
@@ -62,8 +62,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col mt-10">
-      <HeaderHome />
+    <div className="min-h-screen flex flex-col ">
+      <Header />
       
       <main className="grow bg-white py-20">
         <div className="container mx-auto px-6">

@@ -237,6 +237,7 @@ export default function EditStockPage() {
                 type="number"
                 value={alertThreshold}
                 onChange={(e) => setAlertThreshold(Math.max(0, Number(e.target.value)))}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-xl font-bold text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                 min="0"
               />
@@ -278,6 +279,7 @@ export default function EditStockPage() {
                   value={quantityToAdd}
                   onChange={(e) => setQuantityToAdd(Math.max(1, Number(e.target.value)))}
                   onFocus={(e) => e.target.select()}
+                  onWheel={(e) => e.currentTarget.blur()}
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-xl font-bold text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                   min="1"
                   placeholder="Enter quantity"

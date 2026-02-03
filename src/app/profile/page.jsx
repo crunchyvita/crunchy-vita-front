@@ -201,14 +201,14 @@ export default function ProfilePage() {
           {/* Messages */}
           {message && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
-              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
               <p className="text-sm font-medium text-green-800">{message}</p>
             </div>
           )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
               <p className="text-sm font-medium text-red-800">{error}</p>
             </div>
           )}
@@ -220,16 +220,16 @@ export default function ProfilePage() {
             <div className="p-8 border-b border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 mb-6">Profile Photo</h2>
               <div className="flex items-center gap-6">
-                <div className="relative">
+                <div className="relative shrink-0">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
                       alt="Profile"
-                      className="h-32 w-32 rounded-full object-cover border-4 border-slate-100"
+                      className="h-32 w-32 min-h-32 min-w-32 rounded-full object-cover border-4 border-slate-100"
                       style={{ imageRendering: '-webkit-optimize-contrast', backfaceVisibility: 'hidden' }}
                     />
                   ) : (
-                    <div className="h-32 w-32 rounded-full bg-gradient-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white text-3xl font-bold border-4 border-slate-100">
+                    <div className="h-32 w-32 min-h-32 min-w-32 rounded-full bg-linear-to-br from-[#064E3B] to-[#065f46] flex items-center justify-center text-white text-3xl font-bold border-4 border-slate-100">
                       {formData.name?.[0]?.toUpperCase() || <User className="h-10 w-10" />}
                     </div>
                   )}

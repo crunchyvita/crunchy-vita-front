@@ -1,7 +1,8 @@
 'use client';
 
-import HeaderHome from '@/components/header-home';
+import HeaderHome from '@/components/header';
 import Footer from '@/components/footer';
+import '../fonts.css'; // Ensure the font styles are applied globally
 
 export default function AboutUs() {
   return (
@@ -10,40 +11,40 @@ export default function AboutUs() {
       
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
-        <h1 className="text-5xl font-bold text-slate-900 mb-16">À Propos de Nous</h1>
+        <h1 className="text-5xl font-bold text-slate-900 mb-16 font-[agrandir]">À Propos de Nous </h1>
 
         {/* La lyophilisation */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">La lyophilisation</h2>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">La lyophilisation</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             La lyophilisation est une technique de conservation qui consiste à retirer l'eau d'un produit par sublimation. Cette technique permet de préserver au maximum les qualités nutritionnelles, le goût et la texture des fruits frais.
           </p>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             Contrairement aux techniques traditionnelles comme le séchage par la chaleur ou la lyophilisation s'effectue à basse température, ce qui permet de conserver jusqu'à 97% des vitamines et minéraux présents dans le fruit frais.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Le résultat ? Des fruits ultra-croquants, naturellement sucrés, légers et faciles à conserver, tout en gardant leur saveur intense et leurs bienfaits nutritionnels.
           </p>
         </section>
 
         {/* Notre mission */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Notre mission</h2>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Notre mission</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             Chez CrunchyVita, nous croyons que le snacking peut être à la fois délicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutés ni conservateurs, au comportement à base de fruits frais de qualité.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Nous sélectionnons nos fruits avec soin, issue de cultures biologiques certifiées, pour vous offrir le meilleur de la nature dans chaque sachet.
           </p>
         </section>
 
         {/* Collaboration & Sponsoring */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Collaboration & Sponsoring</h2>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Collaboration & Sponsoring</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             Vous êtes un influenceur, youtubeur ou professionnel du bien-être ? Nous serions ravis de collaborer avec vous !
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Pour toute demande de partenariat ou de sponsoring, contactez-nous à:{' '}
             <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700 font-semibold">
               contact@crunchyvita.com

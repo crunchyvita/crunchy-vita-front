@@ -1,7 +1,8 @@
 'use client';
 
-import HeaderHome from '@/components/header-home';
+import HeaderHome from '@/components/header';
 import Footer from '@/components/footer';
+import '../fonts.css';
 
 export default function CGV() {
   return (
@@ -10,21 +11,21 @@ export default function CGV() {
       
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
-        <h1 className="text-5xl font-bold text-slate-900 mb-4">Conditions Générales de Vente (CGV)</h1>
+        <h1 className="text-5xl font-bold text-slate-900 mb-4 font-[agrandir]">Conditions Générales de Vente (CGV)</h1>
         <p className="text-sm text-slate-600 mb-12">Alterora – www.crunchyvita.fr | Mise à jour le 2026</p>
-
+ 
         {/* Préambule */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Préambule</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Préambule</h2>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Le présent Préambule fait partie intégrante des Conditions générales de Vente.
           </p>
         </section>
 
         {/* Article 1 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 1. Parties au présent acte</h2>
-          <ul className="space-y-3 text-slate-700">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 1. Parties au présent acte</h2>
+          <ul className="space-y-3 text-slate-700 font-[maison-neue-book]">
             <li>
               <span className="font-semibold">1° La Société Alterora</span> : Société par actions simplifiée au capital de 10 000 euros, immatriculée au Registre du commerce et des sociétés d'Antibes sous le numéro 903112952, dont le siège social est situé à 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes et ayant comme numéro de l'IVA FR0793931952, ci-après dénommée la « Vendeur ».
             </li>
@@ -36,24 +37,24 @@ export default function CGV() {
 
         {/* Article 2 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 2. Objet</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 2. Objet</h2>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Le Vendeur a pour activité la vente en ligne des produits sous la marque CrunchyVita (Fruits lyophilisés) via le site www.crunchyvita.fr.
           </p>
         </section>
 
         {/* Article 2.1 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 2.1. Précautions d'usage</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 2.1. Précautions d'usage</h2>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Les paquets CrunchyVita doivent être conservés dans leur sachet bien refermé afin de préserver leur texture croquante. Même remplies, ils restent consommables, avis d'une texture puis le sac.
           </p>
         </section>
 
         {/* Article 3 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 3. Définitions</h2>
-          <ul className="space-y-3 text-slate-700">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 3. Définitions</h2>
+          <ul className="space-y-3 text-slate-700 font-[maison-neue-book]">
             <li>
               <span className="font-semibold">Vendeur :</span> Alterora, société par actions simplifiée immatriculée au RCS d'Antibes sous le n°903112952.
             </li>
@@ -74,22 +75,22 @@ export default function CGV() {
 
         {/* Article 4 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 4. Prix</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 4. Prix</h2>
+          <p className="text-slate-700 leading-relaxed mb-3 font-[maison-neue-book]">
             Les prix sont indiqués en euros TTC (toutes taxes comprises), hors frais de traitement et d'expédition.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Le Vendeur peut modifier ses prix à tout moment, mais le tarif appliqué est celui en vigueur lors de la validation de la commande.
           </p>
         </section>
 
         {/* Article 5 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 5. Commande</h2>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 5. Commande</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             Pour passer commande, l'Acheteur doit fournir :
           </p>
-          <ul className="list-disc list-inside space-y-2 text-slate-700">
+          <ul className="list-disc list-inside space-y-2 text-slate-700 font-[maison-neue-book]">
             <li>Adresse e-mail</li>
             <li>Prénom et nom</li>
             <li>Adresse postale</li>
@@ -100,19 +101,19 @@ export default function CGV() {
 
         {/* Article 6 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 6. Paiement</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 6. Paiement</h2>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
             Le paiement s'effectue au moment de la commande, par carte bancaire (Carte Bleue, Visa, Mastercard, etc.) via Stripe.
           </p>
         </section>
 
         {/* Article 7 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 7. Livraison</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 7. Livraison</h2>
+          <p className="text-slate-700 leading-relaxed mb-3 font-[maison-neue-book]">
             La livraison est effectuée à l'adresse indiquée par l'Acheteur.
           </p>
-          <p className="text-slate-700 leading-relaxed font-semibold mb-2">
+          <p className="text-slate-700 leading-relaxed font-semibold mb-2 ">
             Livraison offerte en France en point relais Chronopost dès 40€ d'achats.
           </p>
           <p className="text-slate-700 leading-relaxed">
@@ -122,8 +123,8 @@ export default function CGV() {
 
         {/* Article 8 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 8. Rétractation</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 8. Rétractation</h2>
+          <p className="text-slate-700 leading-relaxed mb-3 font-[maison-neue-book]">
             Conformément à l'article L221-18 du Code de la consommation, l'Acheteur dispose de 14 jours à compter de la réception pour se rétracter. Les frais de retour sont à la charge de l'Acheteur.
           </p>
           <p className="text-slate-700 leading-relaxed font-semibold mb-2">
@@ -139,11 +140,11 @@ export default function CGV() {
 
         {/* Article 9 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 9. Garanties</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 9. Garanties</h2>
+          <p className="text-slate-700 leading-relaxed mb-3 font-[maison-neue-book]">
             Les Produits bénéficient de :
           </p>
-          <ul className="list-disc list-inside space-y-2 text-slate-700 mb-3">
+          <ul className="list-disc list-inside space-y-2 text-slate-700 mb-3 font-[maison-neue-book]">
             <li>La garantie légale de conformité (articles L217-4 et suivants du Code de la consommation)</li>
             <li>De la garantie contre les vices cachés (articles 1641 et suivants du Code civil)</li>
           </ul>
@@ -151,11 +152,11 @@ export default function CGV() {
 
         {/* Article 10 */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Article 10. Litiges</h2>
-          <p className="text-slate-700 leading-relaxed mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 10. Litiges</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             En cas de litige :
           </p>
-          <ul className="list-disc list-inside space-y-2 text-slate-700">
+          <ul className="list-disc list-inside space-y-2 text-slate-700 font-[maison-neue-book]">
             <li>L'Acheteur contacte le service client (contact@crunchyvita.com)</li>
             <li>À défaut de réponse, il peut saisir le Médiateur de l'e-commerce de la FEVAD (www.mediateur-fevad.fr)</li>
             <li>À défaut d'accord, compétence est attribuée aux tribunaux français</li>

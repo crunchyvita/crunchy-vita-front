@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import HeaderHome from "@/components/header-home";
+import HeaderHome from "@/components/header";
 import Footer from "@/components/footer";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 
@@ -78,7 +78,7 @@ export default function BlogDetailPage() {
   return (
     <>
       <HeaderHome />
-      <div className="min-h-screen bg-white mt-15">
+      <div className="min-h-screen bg-white ">
         <div className="container mx-auto px-6 py-12">
          
 

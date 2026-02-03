@@ -28,18 +28,19 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
 	{ label: "Overview", href: "/admin/dashboard", icon: Home },
-	{ label: "Orders", href: "/admin/orders", icon: CreditCard },
-	{ label: "Promotions", href: "/admin/promotions", icon: ArrowUpDown },
-	{ label: "Customers", href: "/admin/customers", icon: Users },
-	{ label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
+	{ label: "Shop", href: "/shop", icon: ShoppingCart },
 	{ label: "Products", href: "/admin/products", icon: Boxes },
 	{ label: "Packages", href: "/admin/package", icon: Package },
 	{ label: "Stock", href: "/admin/stock", icon: ShoppingCart },
 	{ label: "Blog", href: "/admin/blogs", icon: FileText },
-	
 	{ label: "Contact", href: "/admin/contact", icon: MessageSquare },
-	{ label: "Reports", href: "/admin/reports", icon: BarChart3 },
+	{ label: "Promotions", href: "/admin/promotions", icon: ArrowUpDown },
+	{ label: "Orders", href: "/admin/orders", icon: CreditCard },
 	{ label: "Checkout", href: "/admin/checkout", icon: CreditCard },
+	{ label: "Customers", href: "/admin/customers", icon: Users },
+	{ label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
+	{ label: "Reports", href: "/admin/reports", icon: BarChart3 }
+	
 ];
 
 export default function AdminSideBarMenu() {

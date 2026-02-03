@@ -346,6 +346,7 @@ export default function EditProductPage() {
                     step="0.01"
                     value={formData.price}
                     onChange={handleInputChange}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-12 pr-6 py-4 text-2xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
                   />
                </div>
@@ -356,11 +357,12 @@ export default function EditProductPage() {
                   <div className="p-2 bg-amber-100 text-amber-700 rounded-xl"><ShieldCheck size={20}/></div>
                   <h3 className="font-black text-lg text-slate-900">Stock Alert</h3>
                </div>
-               <input
+              <input
                   type="number"
                   name="alertThreshold"
                   value={formData.alertThreshold}
                   onChange={handleInputChange}
+                onWheel={(e) => e.currentTarget.blur()}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-2xl font-black text-black focus:border-amber-500 focus:bg-white outline-none transition-all"
                 />
             </div>

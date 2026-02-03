@@ -302,6 +302,7 @@ export default function EditPackagePage() {
 											name="minProducts"
 											value={formData.minProducts}
 											onChange={handleInputChange}
+											onWheel={(e) => e.currentTarget.blur()}
 											min="1"
 											className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 										/>
@@ -315,6 +316,7 @@ export default function EditPackagePage() {
 											name="maxProducts"
 											value={formData.maxProducts}
 											onChange={handleInputChange}
+											onWheel={(e) => e.currentTarget.blur()}
 											min="1"
 											className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 										/>
@@ -387,7 +389,9 @@ export default function EditPackagePage() {
 										type="number"
 										name="discountPercentage"
 										value={formData.discountPercentage}
-										onChange={handleInputChange}									onWheel={(e) => e.target.blur()}										min="0"
+											onChange={handleInputChange}
+											onWheel={(e) => e.currentTarget.blur()}
+											min="0"
 										max="100"
 										className="block w-full rounded-lg border border-slate-200 py-2.5 pr-8 pl-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 									/>

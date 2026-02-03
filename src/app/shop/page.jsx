@@ -182,6 +182,14 @@ function ClientShop() {
   // --- SEARCH FUNCTIONALITIES ---
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'packages') {
+      setActiveTab('packages');
+    }
+  }, [searchParams]);
+
   // Product search filtering function
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;

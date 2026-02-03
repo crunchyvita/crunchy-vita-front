@@ -28,6 +28,7 @@ export default function CreateProductPage() {
   const [previews, setPreviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   
   // Autocomplete state
   const [categoryInput, setCategoryInput] = useState("");
@@ -79,7 +80,34 @@ export default function CreateProductPage() {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
     setFiles(prev => [...prev, ...selectedFiles]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith("image/"));
+    if (droppedFiles.length === 0) return;
+    setFiles((prev) => [...prev, ...droppedFiles]);
   };
 
   const removeFile = (index) => {
@@ -212,6 +240,7 @@ export default function CreateProductPage() {
                     required
                     value={form.price}
                     onChange={handleChange("price")}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-12 pr-6 py-4 text-xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
                   />
                 </div>
@@ -226,6 +255,7 @@ export default function CreateProductPage() {
                     required
                     value={form.stock}
                     onChange={handleChange("stock")}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-14 pr-6 py-4 text-xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
                   />
                 </div>
@@ -244,7 +274,17 @@ export default function CreateProductPage() {
             </div>
 
             <div className="space-y-6">
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-4 border-dashed border-slate-100 bg-slate-50 px-10 py-16 text-center hover:border-emerald-300 hover:bg-emerald-50/30 transition-all group">
+              <label
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-3xl border-4 border-dashed px-10 py-16 text-center transition-all group ${
+                  isDragging
+                    ? 'border-emerald-400 bg-emerald-50/60'
+                    : 'border-slate-100 bg-slate-50 hover:border-emerald-300 hover:bg-emerald-50/30'
+                }`}
+              >
                 <div className="h-16 w-16 rounded-2xl bg-white text-emerald-600 flex items-center justify-center mb-4 shadow-md group-hover:rotate-12 transition-transform">
                   <Upload size={28} />
                 </div>
@@ -269,7 +309,17 @@ export default function CreateProductPage() {
                       </div>
                     </div>
                   ))}
-                  <label className="flex cursor-pointer items-center justify-center aspect-square rounded-3xl border-4 border-dashed border-slate-100 text-slate-300 hover:text-emerald-500 hover:border-emerald-200 transition-all">
+                  <label
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`flex cursor-pointer items-center justify-center aspect-square rounded-3xl border-4 border-dashed transition-all ${
+                      isDragging
+                        ? 'border-emerald-400 text-emerald-500 bg-emerald-50/60'
+                        : 'border-slate-100 text-slate-300 hover:text-emerald-500 hover:border-emerald-200'
+                    }`}
+                  >
                     <Plus size={40} />
                     <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                   </label>
