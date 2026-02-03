@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://www.crunchyvita.com/about-us</loc><lastmod>2026-02-03T16:22:03.671Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/blogs/create</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/blogs</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/contact</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/dashboard</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/package/create</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/package</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/products/create</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/products</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/admin/stock</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/auth/callback</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/auth/forgot-password</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/auth/login</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/auth/register</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/auth/reset-password</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/blogs</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/cgu</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/cgv</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/contact</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/mentions-legales</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/politique-confidentialite</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/politique-livraison</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/politique-retour</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/profile</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.crunchyvita.com/shop</loc><lastmod>2026-02-03T16:22:03.672Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+</urlset>
