@@ -52,7 +52,7 @@ export default function PolitiqueRetour() {
             <div>
               <h3 className="font-bold text-slate-900 mb-2 font-[agrandir]">3. Retourner le colis à l'adresse suivante :</h3>
               <p className="text-slate-700 leading-relaxed ml-4 font-semibold">
-                Alterora, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes.
+                ALTEORA, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes.
               </p>
               <p className="text-slate-700 leading-relaxed ml-4 mt-2 font-[maison-neue-book]">
                 Le colis doit être déposé dans un bureau de poste dans un délai de 14 jours à compter de la date d'autorisation de retour.

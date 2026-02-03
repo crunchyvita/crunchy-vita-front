@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Star, Heart, ShoppingCart, Plus, Minus, Package, Send, MessageSquare,
-  Trash2, Loader2, AlertTriangle, RefreshCw, User, Clock
+  Trash2, Loader2, AlertTriangle, RefreshCw, User, Clock, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { reviewAPI } from '@/lib/api';
@@ -28,6 +28,7 @@ export default function ProductDetailPage() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showStockAlert, setShowStockAlert] = useState(false);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -600,11 +601,11 @@ export default function ProductDetailPage() {
             <div>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-[Agrandir] font-bold text-[#E10c69]">
-                  ${productPrice.toFixed(2)}
+                  €{productPrice.toFixed(2)}
                 </span>
                 {product.originalPrice && Number(product.originalPrice) > productPrice && (
                   <span className="text-sm text-gray-400 line-through">
-                    ${Number(product.originalPrice).toFixed(2)}
+                    €{Number(product.originalPrice).toFixed(2)}
                   </span>
                 )}
               </div>
@@ -618,6 +619,12 @@ export default function ProductDetailPage() {
 
             <div>
               <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">Quantité</h3>
+              {showStockAlert && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
+                  <AlertCircle size={18} />
+                  <span>Stock maximum atteint ({availableStock} disponible{availableStock > 1 ? 's' : ''})</span>
+                </div>
+              )}
               <div className="flex items-center gap-4">
                 <div className="flex items-center border-2 border-gray-300 rounded-lg">
                   <button
@@ -631,9 +638,15 @@ export default function ProductDetailPage() {
                     {quantity}
                   </span>
                   <button
-                    onClick={incrementQuantity}
-                    disabled={quantity >= availableStock}
-                    className="p-3 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    onClick={() => {
+                      if (quantity >= availableStock) {
+                        setShowStockAlert(true);
+                        setTimeout(() => setShowStockAlert(false), 3000);
+                      } else {
+                        setQuantity(quantity + 1);
+                      }
+                    }}
+                    className="p-3 hover:bg-gray-100 transition-colors"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
@@ -642,7 +655,7 @@ export default function ProductDetailPage() {
                 <div className="text-lg">
                   <span className="text-gray-600 font-[maison-neue-book]">Total: </span>
                   <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
-                    ${totalPrice.toFixed(2)}
+                    €{totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -652,10 +665,10 @@ export default function ProductDetailPage() {
               <button
                 onClick={handleAddToCart}
                 disabled={availableStock === 0}
-                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold text-[#556822] hover:text-white transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold transition-colors ${
                   availableStock === 0
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-[#F2F8EE] hover:bg-[#556822]'
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-[#F2F8EE] text-[#556822] hover:text-white hover:bg-[#556822]'
                 }`}
               >
                 {searchParams.packageId ? (

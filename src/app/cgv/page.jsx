@@ -12,7 +12,7 @@ export default function CGV() {
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
         <h1 className="text-5xl font-bold text-slate-900 mb-4 font-[agrandir]">Conditions Générales de Vente (CGV)</h1>
-        <p className="text-sm text-slate-600 mb-12">Alterora – www.crunchyvita.fr | Mise à jour le 2026</p>
+        <p className="text-sm text-slate-600 mb-12">ALTEORA – www.crunchyvita.fr | Mise à jour le 2026</p>
  
         {/* Préambule */}
         <section className="mb-12">
@@ -27,7 +27,7 @@ export default function CGV() {
           <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 1. Parties au présent acte</h2>
           <ul className="space-y-3 text-slate-700 font-[maison-neue-book]">
             <li>
-              <span className="font-semibold">1° La Société Alterora</span> : Société par actions simplifiée au capital de 10 000 euros, immatriculée au Registre du commerce et des sociétés d'Antibes sous le numéro 903112952, dont le siège social est situé à 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes et ayant comme numéro de l'IVA FR0793931952, ci-après dénommée la « Vendeur ».
+              <span className="font-semibold">1° La Société ALTEORA</span> : Société par actions simplifiée au capital de 10 000 euros, immatriculée au Registre du commerce et des sociétés d'Antibes sous le numéro 903112952, dont le siège social est situé à 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes et ayant comme numéro de l'IVA FR0793931952, ci-après dénommée la « Vendeur ».
             </li>
             <li>
               <span className="font-semibold">2° Toute personne physique</span> souhaitant réaliser un achat sur le site internet du Vendeur, ci-après dénommée « Acheteur ».
@@ -56,7 +56,7 @@ export default function CGV() {
           <h2 className="text-2xl font-bold text-slate-900 mb-3 font-[agrandir]">Article 3. Définitions</h2>
           <ul className="space-y-3 text-slate-700 font-[maison-neue-book]">
             <li>
-              <span className="font-semibold">Vendeur :</span> Alterora, société par actions simplifiée immatriculée au RCS d'Antibes sous le n°903112952.
+              <span className="font-semibold">Vendeur :</span> ALTEORA, société par actions simplifiée immatriculée au RCS d'Antibes sous le n°903112952.
             </li>
             <li>
               <span className="font-semibold">Acheteur :</span> toute personne physique souhaitant réaliser un achat sur le Site.
@@ -131,7 +131,7 @@ export default function CGV() {
             Adresse de retour :
           </p>
           <p className="text-slate-700 leading-relaxed mb-3">
-            Alterora, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes.
+            ALTEORA, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes.
           </p>
           <p className="text-slate-700 leading-relaxed">
             Le remboursement est effectué sous 14 jours, via le même moyen de paiement.

@@ -24,7 +24,7 @@ export default function MentionsLegales() {
         {/* Éditeur du site */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Éditeur du site</h2>
-          <p className="text-slate-700 font-semibold mb-4">ALTERORA</p>
+          <p className="text-slate-700 font-semibold mb-4">ALTEORA</p>
           <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
             <p className="text-slate-700 mb-2 font-[maison-neue-book]">
               Société par actions simplifiée au capital de 25 000 euros

@@ -22,7 +22,7 @@ export default function PromoBadge() {
         x: { duration: 0.6 },
         y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
       }}
-      className="fixed top-28 right-6 z-50 hidden lg:block"
+      className="absolute top-28 right-6 z-[999] hidden lg:block"
     >
       {/* Utilisation du Magenta de la palette pour un impact maximal */}
       <div className="bg-[#E10C69] text-white px-6 py-5 rounded-[2rem] shadow-2xl border-4 border-[#B3C800] max-w-[280px] font-[Maison Neue]">

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   X, ChevronLeft, ChevronRight, Plus, Minus,
   ShoppingCart, Heart, ShieldCheck, Truck,
-  Info, Star
+  Info, Star, AlertCircle
 } from 'lucide-react';
 
 export default function ProductDetailModal({
@@ -17,6 +17,7 @@ export default function ProductDetailModal({
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showStockAlert, setShowStockAlert] = useState(false);
 
   // Memoize images to avoid recalculation on every render
   const productImages = useMemo(() => {
@@ -71,6 +72,15 @@ export default function ProductDetailModal({
   // Handlers
   const handleAddToCart = () => {
     console.log('Cart:', product.name, quantity);
+  };
+
+  const handleIncrement = () => {
+    if (quantity >= availableStock) {
+      setShowStockAlert(true);
+      setTimeout(() => setShowStockAlert(false), 3000);
+    } else {
+      setQuantity(quantity + 1);
+    }
   };
 
   return (
@@ -183,59 +193,60 @@ export default function ProductDetailModal({
             </h1>
 
             <p className="text-3xl font-black text-[#E10c69] mb-6 font-[Erica One]">
-              ${productPrice.toFixed(2)}
+              €{productPrice.toFixed(2)}
               <span className="text-sm text-gray-400 font-medium ml-2 uppercase font-[Maison Neue Book]">par unité</span>
             </p>
 
             <div className="space-y-4 mb-8">
               <p className="text-gray-600 leading-relaxed italic border-l-4 border-gray-100 pl-4 font-[Maison Neue Book]">
-                {product.description || "Savourez notre sélection premium. Ce produit est élaboré avec soin pour garantir la meilleure qualité à nos clients."}
+                {product.description}
               </p>
 
+              {showStockAlert && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
+                  <AlertCircle size={18} />
+                  <span>Stock maximum atteint ({availableStock} disponible{availableStock > 1 ? 's' : ''})</span>
+                </div>
+              )}
 
-            </div>
-          </div>
-
-          {/* Footer Actions */}
-          <div className="mt-auto pt-8 border-t border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-[Maison Neue Mono]">Quantité</span>
-                <div className="flex items-center bg-gray-100 rounded-2xl p-1">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="w-12 text-center font-bold text-lg font-[Agrandir]">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
-                    className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
-                    disabled={quantity >= availableStock}
-                  >
-                    <Plus size={18} />
-                  </button>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-[Maison Neue Mono]">Quantité</span>
+                  <div className="flex items-center bg-gray-100 rounded-2xl p-1">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
+                      disabled={quantity <= 1}
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <span className="w-12 text-center font-bold text-lg font-[Agrandir]">{quantity}</span>
+                    <button
+                      onClick={handleIncrement}
+                      className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all font-[Maison Neue Mono]"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">Prix total</span>
+                  <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">€ {totalPrice.toFixed(2)}</span>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">Prix total</span>
-                <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">$ {totalPrice.toFixed(2)}</span>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={availableStock === 0}
+                  className="flex-[3] flex items-center justify-center gap-3 py-4 bg-[#F2F8EE] text-[#556822] hover:text-white rounded-2xl font-bold text-lg hover:bg-[#556822] hover:shadow-xl hover:shadow-[#556822]/30 transition-all duration-300 disabled:bg-gray-200 disabled:text-white disabled:cursor-not-allowed group font-[Agrandir]"
+                >
+                  <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
+                  {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                </button>
+                <button className="flex-1 flex items-center justify-center border-2 border-gray-100 rounded-2xl hover:border-red-100 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all duration-300 ">
+                  <Heart size={24} />
+                </button>
               </div>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleAddToCart}
-                disabled={availableStock === 0}
-                className="flex-[3] flex items-center justify-center gap-3 py-4 bg-[#F2F8EE] text-[#556822] hover:text-white rounded-2xl font-bold text-lg hover:bg-[#556822] hover:shadow-xl hover:shadow-[#556822]/30 transition-all duration-300 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed group font-[Agrandir]"
-              >
-                <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
-                {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
-              </button>
-              <button className="flex-1 flex items-center justify-center border-2 border-gray-100 rounded-2xl hover:border-red-100 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all duration-300 ">
-                <Heart size={24} />
-              </button>
             </div>
           </div>
         </div>

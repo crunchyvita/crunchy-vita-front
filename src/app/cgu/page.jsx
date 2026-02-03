@@ -17,7 +17,7 @@ export default function CGU() {
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Conditions d'utilisation</h2>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            Les présentes conditions générales d'utilisation (ci-après les « CGU ») ont pour objet de définir les modalités et conditions d'accès et d'utilisation du site internet et du Compte – tels que définis ci-après – mis à disposition par la société Alterora, société par actions simplifiée au capital de 10 000 euros, immatriculée au Registre du commerce et des sociétés d'Antibes sous le numéro 903112952, dont le siège social est situé à 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes (ci-après la « Vendeur »), ainsi que les droits et obligations de toute personne physique ou juridique susceptible d'exploiter commercialement ou professionnellement, ou d'en droit franchisé, accédant, visitant et/ou utilisant le site, quel que soit le réseau ou le moyen utilisé (ci-après l'« Utilisateur »).
+            Les présentes conditions générales d'utilisation (ci-après les « CGU ») ont pour objet de définir les modalités et conditions d'accès et d'utilisation du site internet et du Compte – tels que définis ci-après – mis à disposition par la société Alteora, société par actions simplifiée au capital de 10 000 euros, immatriculée au Registre du commerce et des sociétés d'Antibes sous le numéro 903112952, dont le siège social est situé à 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes (ci-après la « Vendeur »), ainsi que les droits et obligations de toute personne physique ou juridique susceptible d'exploiter commercialement ou professionnellement, ou d'en droit franchisé, accédant, visitant et/ou utilisant le site, quel que soit le réseau ou le moyen utilisé (ci-après l'« Utilisateur »).
           </p>
         </section>
 
@@ -115,7 +115,7 @@ export default function CGU() {
             </a>
           </p>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            📬 par courrier : Alterora, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes
+            📬 par courrier : Alteora, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes
           </p>
         </section>
       </main>

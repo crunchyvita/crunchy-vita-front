@@ -15,11 +15,13 @@ import {
   ShoppingBag,
   Info,
   Star,
+  RotateCcw,
 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import PromoBadge from "@/components/PromoBadge";
 import { useAuth } from "@/context/AuthContext";
+import { usePackStorage } from "@/hooks/usePackStorage";
 
 // --- BRAND COLOR PALETTE ---
 const COLORS = {
@@ -63,6 +65,16 @@ export default function PackageCustomizationPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [quantities, setQuantities] = useState({});
+  const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
+
+  // Initialize pack storage hook
+  const { 
+    savePackConfig, 
+    loadPackConfig, 
+    clearPackConfig, 
+    hasStoredConfig,
+    isStorageReady 
+  } = usePackStorage(packageId);
 
   useEffect(() => {
     const fetchPackageData = async () => {
@@ -93,19 +105,43 @@ export default function PackageCustomizationPage() {
         
         setPackageData(pkgResult.data);
         
-        // Filter products: only active products with available stock
+        // Get all products without filtering by stock
         const productsData = Array.isArray(prodResult.data) ? prodResult.data : (prodResult?.data || []);
-        const filteredProducts = productsData.filter(product => {
-          const isActive = product.status === 'ACTIVE' || !product.status;
-          const hasStock = product.stock?.quantity > 0 || product.availableQuantity > 0;
-          return isActive && hasStock;
-        });
         
-        setProducts(filteredProducts);
+        setProducts(productsData);
 
         const initialQuantities = {};
-        filteredProducts.forEach((product) => { initialQuantities[product._id] = 1; });
+        productsData.forEach((product) => { initialQuantities[product._id] = 1; });
         setQuantities(initialQuantities);
+
+        // Restore pack configuration from storage if available
+        if (isStorageReady) {
+          const storedConfig = loadPackConfig();
+          if (storedConfig) {
+            setIsRestoringFromStorage(true);
+            
+            // Validate that stored products still exist and are available
+            const validProductIds = productsData.map(p => p._id);
+            const validSelectedProducts = storedConfig.selectedProducts?.filter(
+              id => validProductIds.includes(id)
+            ) || [];
+            
+            // Restore quantities only for valid products
+            const validQuantities = {};
+            Object.keys(storedConfig.quantities || {}).forEach(productId => {
+              if (validProductIds.includes(productId)) {
+                validQuantities[productId] = storedConfig.quantities[productId];
+              }
+            });
+            
+            if (validSelectedProducts.length > 0) {
+              setSelectedProducts(validSelectedProducts);
+              setQuantities(prev => ({ ...prev, ...validQuantities }));
+            }
+            
+            setIsRestoringFromStorage(false);
+          }
+        }
       } catch (err) {
         setError(err.message || "Échec du chargement");
       } finally {
@@ -113,7 +149,25 @@ export default function PackageCustomizationPage() {
       }
     };
     if (packageId) fetchPackageData();
-  }, [packageId]);
+  }, [packageId, isStorageReady, loadPackConfig]);
+
+  // Auto-save pack configuration to localStorage when it changes
+  useEffect(() => {
+    if (!isRestoringFromStorage && isStorageReady && packageData && selectedProducts.length > 0) {
+      const configToSave = {
+        selectedProducts,
+        quantities,
+        packageData: {
+          id: packageData._id,
+          name: packageData.name,
+          maxProducts: packageData.maxProducts,
+          allowMultipleQuantities: packageData.allowMultipleQuantities,
+          discountPercentage: packageData.discountPercentage,
+        },
+      };
+      savePackConfig(configToSave);
+    }
+  }, [selectedProducts, quantities, packageData, isStorageReady, savePackConfig, isRestoringFromStorage]);
 
   const handleProductSelect = useCallback((productId) => {
     setSelectedProducts((prev) => {
@@ -155,6 +209,14 @@ export default function PackageCustomizationPage() {
     };
   }, [totalPrice, discountPercentage]);
 
+  const handleClearPack = useCallback(() => {
+    setSelectedProducts([]);
+    const resetQuantities = {};
+    products.forEach((product) => { resetQuantities[product._id] = 1; });
+    setQuantities(resetQuantities);
+    clearPackConfig();
+  }, [products, clearPackConfig]);
+
   const handleAddToCart = async () => {
     if (selectedProducts.length === 0) {
       setError("Sélectionnez au moins un produit.");
@@ -178,6 +240,10 @@ export default function PackageCustomizationPage() {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       cart.push(cartData);
       localStorage.setItem("cart", JSON.stringify(cart));
+      
+      // Clear the pack configuration from storage after adding to cart
+      clearPackConfig();
+      
       setSuccess("Ajouté au panier !");
       setTimeout(() => router.push("/cart"), 1200);
     } catch (err) { setError("Erreur lors de l'ajout."); }
@@ -193,13 +259,15 @@ export default function PackageCustomizationPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Top Navigation & Title */}
         <div className="mb-10">
-          <button 
-            onClick={() => router.back()} 
-            style={{ color: COLORS.grass }}
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all mb-4"
-          >
-            <ArrowLeft size={16} /> Retour à la boutique
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button 
+              onClick={() => router.back()} 
+              style={{ color: COLORS.grass }}
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
+            >
+              <ArrowLeft size={16} /> Retour à la boutique
+            </button>
+          </div>
           <h1 className="text-4xl font-black font-[agrandir] text-gray-900 uppercase">
             Votre <span style={{ color: COLORS.grass }}>{packageData?.name}</span>
           </h1>
@@ -270,7 +338,7 @@ export default function PackageCustomizationPage() {
 
                       <div className="mt-auto">
                         <p className="text-2xl font-black mb-4 text-[#E10c69]" >
-                          ${(getProductPrice(product) * (packageData?.allowMultipleQuantities === false ? 1 : qty)).toFixed(2)}
+                          €{(getProductPrice(product) * (packageData?.allowMultipleQuantities === false ? 1 : qty)).toFixed(2)}
                         </p>
 
                         <div className="flex flex-col gap-2">
@@ -316,9 +384,20 @@ export default function PackageCustomizationPage() {
                   <ShoppingBag style={{ color: COLORS.grass }} />
                   <h2 className="text-xl font-black uppercase tracking-tight ">Aperçu</h2>
                 </div>
-                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-[#E10C69] text-white" >
-                  {selectedProducts.length} Produits
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-[#E10C69] text-white" >
+                    {selectedProducts.length} Produits
+                  </span>
+                  {selectedProducts.length > 0 && (
+                    <button
+                      onClick={handleClearPack}
+                      title="Réinitialiser"
+                      className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-gray-300 transition-all duration-200 group"
+                    >
+                      <RotateCcw size={16} className="text-gray-500 group-hover:text-gray-600" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Progress Bar */}
@@ -334,7 +413,7 @@ export default function PackageCustomizationPage() {
                     animate={{ scaleX: (selectedProducts.length / (packageData?.maxProducts || 5)) }}
                     transition={{ duration: 0.3 }}
                     style={{ transformOrigin: "left" }}
-                    className="h-full bg-[#E10C69]" 
+                    className="h-full bg-[#556822]" 
                   />
                 </div>
               </div>
@@ -343,18 +422,18 @@ export default function PackageCustomizationPage() {
               <div className="space-y-4 border-t border-dashed pt-6 mb-8">
                 <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
                   <span>Total Brut</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>€{totalPrice.toFixed(2)}</span>
                 </div>
                 {discountPercentage > 0 && (
                   <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                     <span>Remise Pack ({discountPercentage}%)</span>
-                    <span>-${totalSavings.toFixed(2)}</span>
+                    <span>-€{totalSavings.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-lg font-black uppercase">À Payer</span>
                   <span className="text-3xl font-black text-[#E10C69]" >
-                    ${discountedPrice.toFixed(2)}
+                    €{discountedPrice.toFixed(2)}
                   </span>
                 </div>
               </div>

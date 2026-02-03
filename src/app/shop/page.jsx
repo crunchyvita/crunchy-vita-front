@@ -152,7 +152,7 @@ function ProductCard({ product, onOpenDetail }) {
     <div className="mb-3">
   <h3 className="font-black text-[#556822] text-lg mb-2">{product.name}</h3>
   <div className="flex items-center justify-between">
-    <h4 className="font-black text-[#E10C69] text-xl">${price.toFixed(2)}</h4>
+    <h4 className="font-black text-[#E10C69] text-xl">€{price.toFixed(2)}</h4>
   </div>
 </div>
 
