@@ -48,22 +48,26 @@ const popIn = {
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "Crunchy Vita",
-            url: "https://www.crunchyvita.com",
-            logo: "https://www.crunchyvita.com/logo.png",
-            sameAs: [
-              "https://www.instagram.com/crunchyvita",
-              "https://www.facebook.com/"
-            ]
-          }),
-        }}
-      />
+   <script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Crunchy Vita",
+      url: "https://www.crunchyvita.com",
+      logo: "https://www.crunchyvita.com/logo.png",
+      brand: {
+        "@type": "Brand",
+        name: "Crunchy Vita"
+      },
+      sameAs: [
+        "https://www.instagram.com/crunchyvita", 
+      ]
+    }),
+  }}
+/>
+
       <HeaderHome />
 
       {/* Hero Section */}
