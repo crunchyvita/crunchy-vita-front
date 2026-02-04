@@ -6,6 +6,7 @@ import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
 import { motion } from 'framer-motion';
 import './fonts.css';
+import { useAuth } from '@/context/AuthContext';
 import { 
   Leaf,
   Ban,         
@@ -46,6 +47,8 @@ const popIn = {
 };
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
       <HeaderHome />
@@ -89,14 +92,16 @@ export default function Home() {
                     Découvrir nos produits
                   </Link>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link
-                    href="/auth/register"
-                    className="block rounded-full border-2 bg-white/10 border-white px-8 lg:px-10 py-4 text-center font-black uppercase tracking-widest text-white hover:bg-white hover:text-[#E10C69] transition-all text-sm lg:text-base"
-                  >
-                    Rejoindre la communauté
-                  </Link>
-                </motion.div>
+                {!user && (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      href="/auth/register"
+                      className="block rounded-full border-2 bg-white/10 border-white px-8 lg:px-10 py-4 text-center font-black uppercase tracking-widest text-white hover:bg-white hover:text-[#E10C69] transition-all text-sm lg:text-base"
+                    >
+                      Rejoindre la communauté
+                    </Link>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.div>
 
