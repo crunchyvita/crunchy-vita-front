@@ -1,78 +1,216 @@
-export function AdminNotificationEmail({ name, email, message }) {
-  const currentDate = new Date().toLocaleString('fr-FR');
+export function AdminNotificationEmail({ name, email, type, companyName, object, message, dashboardUrl }) {
+  const currentDate = new Date().toLocaleString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
-  return `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #334155;">
-      <!-- Header -->
-      <div style="background-color: #dc2626; padding: 40px 20px; text-align: center;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 28px; letter-spacing: -0.5px;">
-          🔔 Nouveau Message
+  // Color Palette
+  const colors = {
+    primary: '#556822',       // The requested Green
+    primaryLight: '#f4f6f0',  // Very light green for backgrounds
+    primaryBorder: '#dce5c8', // Soft green for borders
+    textDark: '#1e293b',      // Dark slate for main text
+    textLight: '#64748b',     // Lighter gray for labels
+    white: '#ffffff',
+    bgGray: '#f8fafc',
+  };
+
+  const containerStyle = {
+    fontFamily: "'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    maxWidth: '600px',
+    margin: '20px auto',
+    backgroundColor: colors.white,
+    border: `1px solid ${colors.bgGray}`,
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+    color: colors.textDark,
+  };
+
+  const headerStyle = {
+    backgroundColor: colors.primary,
+    padding: '35px 20px',
+    textAlign: 'center',
+    backgroundImage: 'linear-gradient(to bottom right, #556822, #43521b)', // Subtle gradient for depth
+  };
+
+  const bodyStyle = {
+    padding: '40px 30px',
+    lineHeight: 1.6,
+  };
+
+  const alertBoxStyle = {
+    backgroundColor: colors.primaryLight,
+    borderLeft: `4px solid ${colors.primary}`,
+    borderRadius: '6px',
+    padding: '16px',
+    marginBottom: '30px',
+  };
+
+  const tableStyle = {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '14px',
+  };
+
+  const tableLabelStyle = {
+    padding: '10px 0',
+    color: colors.textLight,
+    width: '30%',
+    verticalAlign: 'top',
+    borderBottom: `1px solid ${colors.bgGray}`,
+  };
+
+  const tableValueStyle = {
+    padding: '10px 0',
+    fontWeight: '500',
+    color: colors.textDark,
+    borderBottom: `1px solid ${colors.bgGray}`,
+  };
+
+  const messageBoxStyle = {
+    backgroundColor: '#fafafa',
+    border: `1px solid ${colors.primaryBorder}`,
+    borderRadius: '8px',
+    padding: '20px',
+    marginTop: '25px',
+    marginBottom: '30px',
+    position: 'relative',
+  };
+
+  const buttonStyle = {
+    display: 'inline-block',
+    backgroundColor: colors.primary,
+    color: colors.white,
+    padding: '14px 32px',
+    borderRadius: '6px',
+    textDecoration: 'none',
+    fontWeight: '600',
+    fontSize: '14px',
+    letterSpacing: '0.5px',
+    boxShadow: '0 2px 4px rgba(85, 104, 34, 0.2)',
+  };
+
+  const footerStyle = {
+    padding: '25px 30px',
+    textAlign: 'center',
+    fontSize: '12px',
+    color: '#94a3b8',
+    backgroundColor: '#f1f5f9',
+    borderTop: '1px solid #e2e8f0',
+  };
+
+  return (
+    <div style={containerStyle}>
+      {/* Header */}
+      <div style={headerStyle}>
+        <h1 style={{ color: colors.white, margin: 0, fontSize: '24px', fontWeight: '700', letterSpacing: '-0.5px' }}>
+          Nouveau Contact Client
         </h1>
-        <p style="color: #fecaca; margin: 8px 0 0 0; font-size: 14px;">Crunchy Vita Admin</p>
+        <p style={{ color: 'rgba(255,255,255,0.8)', margin: '5px 0 0 0', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          Crunchy Vita Admin
+        </p>
       </div>
 
-      <!-- Contenu Principal -->
-      <div style="padding: 40px 30px; line-height: 1.6;">
-        <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; border-radius: 8px; padding: 15px; margin-bottom: 25px;">
-          <p style="margin: 0; font-size: 14px;">
-            <strong>${name}</strong> vient de vous contacter via le formulaire de contact.
+      <div style={bodyStyle}>
+        
+        {/* Intro Alert */}
+        <div style={alertBoxStyle}>
+          <p style={{ margin: 0, fontSize: '15px', color: '#2f3820' }}>
+            <strong>Bonjour Admin,</strong><br />
+            <span style={{ display: 'block', marginTop: '4px' }}>
+              Vous avez reçu une nouvelle demande de <strong>{name}</strong>.
+            </span>
           </p>
         </div>
 
-        <!-- Info Box -->
-        <div style="background-color: #f5f5f5; border: 1px solid #e5e7eb; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #e5e7eb;">
-              <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>De :</strong></td>
-              <td style="padding: 8px 0; font-size: 13px;">${name}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #e5e7eb;">
-              <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>Email :</strong></td>
-              <td style="padding: 8px 0; font-size: 13px;">
-                <a href="mailto:${email}" style="color: #dc2626; text-decoration: none; font-weight: bold;">
-                  ${email}
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>Date :</strong></td>
-              <td style="padding: 8px 0; font-size: 13px;">${currentDate}</td>
-            </tr>
+        {/* Details Table */}
+        <div style={{ marginBottom: '20px' }}>
+          <table style={tableStyle}>
+            <tbody>
+              <tr>
+                <td style={tableLabelStyle}> Nom</td>
+                <td style={tableValueStyle}>{name}</td>
+              </tr>
+              <tr>
+                <td style={tableLabelStyle}> Email</td>
+                <td style={tableValueStyle}>
+                  <a href={`mailto:${email}`} style={{ color: colors.primary, textDecoration: 'none', fontWeight: 'bold' }}>
+                    {email}
+                  </a>
+                </td>
+              </tr>
+              {type && (
+                <tr>
+                  <td style={tableLabelStyle}> Type</td>
+                  <td style={tableValueStyle}>{type}</td>
+                </tr>
+              )}
+              {companyName && (
+                <tr>
+                  <td style={tableLabelStyle}> Entreprise</td>
+                  <td style={tableValueStyle}>{companyName}</td>
+                </tr>
+              )}
+              {object && (
+                <tr>
+                  <td style={tableLabelStyle}> Objet</td>
+                  <td style={tableValueStyle}>{object}</td>
+                </tr>
+              )}
+              <tr>
+                <td style={{ ...tableLabelStyle, borderBottom: 'none' }}> Date</td>
+                <td style={{ ...tableValueStyle, borderBottom: 'none' }}>{currentDate}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
 
-        <!-- Message Box -->
-        <div style="background-color: #f9fafb; border-left: 4px solid #dc2626; border-radius: 8px; padding: 18px; margin-bottom: 25px;">
-          <p style="margin: 0 0 12px 0; color: #111827; font-weight: bold; font-size: 14px; text-transform: uppercase;">
-            💬 Message
-          </p>
-          <p style="margin: 0; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #374151;">
-            ${message}
+        {/* Message Content */}
+        <div style={messageBoxStyle}>
+          <div style={{ 
+            position: 'absolute', 
+            top: '-12px', 
+            left: '20px', 
+            backgroundColor: colors.white, 
+            padding: '0 10px', 
+            color: colors.primary, 
+            fontWeight: 'bold', 
+            fontSize: '12px',
+            border: `1px solid ${colors.primaryBorder}`,
+            borderRadius: '12px'
+          }}>
+            MESSAGE REÇU
+          </div>
+          <p style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '15px', lineHeight: 1.7, color: '#334155' }}>
+            {message}
           </p>
         </div>
 
-        <!-- CTA Button -->
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="http://localhost:3000/admin/dashboard" style="display: inline-block; background-color: #dc2626; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
-            📧 Voir dans le Dashboard
+        {/* CTA Button */}
+        <div style={{ textAlign: 'center', margin: '35px 0' }}>
+          <a href={dashboardUrl} style={buttonStyle}>
+            Accéder au Dashboard &rarr;
           </a>
         </div>
 
-        <!-- Quick Reply Info -->
-        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; font-size: 13px; color: #7f1d1d;">
-          ⚡ Connectez-vous au dashboard pour répondre à ce message
+        {/* Helper Tip */}
+        <div style={{ textAlign: 'center', fontSize: '13px', color: colors.textLight }}>
+          <p style={{ margin: 0 }}>
+            💡 Astuce : Vous pouvez répondre directement en cliquant sur l'email du client.
+          </p>
         </div>
       </div>
 
-      <!-- Footer -->
-      <div style="padding: 25px 30px; text-align: center; font-size: 12px; color: #94a3b8; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
-        <p style="margin: 5px 0;">
-          Crunchy Vita Admin Panel
-        </p>
-        <p style="margin: 5px 0;">
-          &copy; 2026 Crunchy Vita. Tous droits réservés.
-        </p>
+      {/* Footer */}
+      <div style={footerStyle}>
+        <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: colors.primary }}>Crunchy Vita</p>
+        <p style={{ margin: 0 }}>Cet email a été envoyé automatiquement depuis votre formulaire de contact.</p>
+        <p style={{ margin: '8px 0 0 0' }}>&copy; {new Date().getFullYear()} Crunchy Vita. Tous droits réservés.</p>
       </div>
     </div>
-  `;
+  );
 }
