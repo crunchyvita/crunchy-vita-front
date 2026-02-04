@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail } from "lucide-react";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
+import { useAdminLayout } from "@/context/AdminLayoutContext";
 
 export default function AdminHeader() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const { toggleSidebar } = useAdminLayout();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messages, setMessages] = useState([]);
   const [showMessagesDropdown, setShowMessagesDropdown] = useState(false);
@@ -562,11 +564,21 @@ export default function AdminHeader() {
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 w-full shadow-sm">
       <div className="w-full px-4 sm:px-8">
         <div className="flex h-16 justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/admin/dashboard')}>
+          <div className="flex items-center gap-2">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
+              aria-label="Ouvrir le menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/admin/dashboard')}>
             <div className="bg-green-600 p-1.5 rounded-lg">
               <LayoutDashboard className="text-white h-5 w-5" />
             </div>
             <h1 className="text-lg font-bold">Crunchy Vita <span className="text-green-600">Admin</span></h1>
+          </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -788,10 +800,10 @@ export default function AdminHeader() {
   
              
 
-            <div className="h-8 w-px bg-slate-200 mx-2" />
+            <div className="h-8 w-px bg-slate-200 mx-2 hidden md:block" />
 
             {/* Profile */}
-            <div className="relative">
+            <div className="relative hidden md:block">
               <button 
                 onClick={() => { 
                   setShowProfileDropdown(!showProfileDropdown); 
