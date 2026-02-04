@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { reviewAPI } from '@/lib/api';
+import { usePackStorage } from '@/hooks/usePackStorage';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
@@ -48,6 +49,8 @@ export default function ProductDetailPage() {
 
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+
+  const { savePackConfig, loadPackConfig, isStorageReady } = usePackStorage(searchParams.packageId);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -225,6 +228,29 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (searchParams.packageId) {
+      if (!isStorageReady || !product?._id) {
+        router.push(`/shop/packages/${searchParams.packageId}`);
+        return;
+      }
+
+      const existingConfig = loadPackConfig() || {};
+      const existingSelected = Array.isArray(existingConfig.selectedProducts)
+        ? existingConfig.selectedProducts
+        : [];
+      const selectedSet = new Set(existingSelected);
+      selectedSet.add(product._id);
+
+      const nextQuantities = {
+        ...(existingConfig.quantities || {}),
+        [product._id]: quantity,
+      };
+
+      savePackConfig({
+        selectedProducts: Array.from(selectedSet),
+        quantities: nextQuantities,
+        packageData: existingConfig.packageData,
+      });
+
       router.push(`/shop/packages/${searchParams.packageId}`);
       return;
     }
