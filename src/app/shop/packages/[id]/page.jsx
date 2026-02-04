@@ -52,6 +52,36 @@ const getProductPrice = (product) => {
   return Number(price) || 0;
 };
 
+// Vérification de stock inspirée de la logique du détail produit
+const getAvailableStock = (product) => {
+  if (!product) return 0;
+
+  if (product.availableQuantity !== undefined && product.availableQuantity !== null) {
+    return Number(product.availableQuantity) || 0;
+  }
+
+  if (product.stock?.availableQuantity !== undefined && product.stock?.availableQuantity !== null) {
+    return Number(product.stock.availableQuantity) || 0;
+  }
+
+  if (product.stock?.quantity !== undefined && product.stock?.quantity !== null) {
+    const reserved = Number(product.stock?.reservedQuantity || 0);
+    return Math.max(0, Number(product.stock.quantity || 0) - reserved);
+  }
+
+  if (product.stockQuantity !== undefined && product.stockQuantity !== null) {
+    return Number(product.stockQuantity) || 0;
+  }
+
+  if (product.stock !== undefined && product.stock !== null) {
+    return Number(product.stock) || 0;
+  }
+
+  return 0;
+};
+
+const isProductOutOfStock = (product) => getAvailableStock(product) <= 0;
+
 export default function PackageCustomizationPage() {
   const router = useRouter();
   const params = useParams();
@@ -66,14 +96,15 @@ export default function PackageCustomizationPage() {
   const [success, setSuccess] = useState("");
   const [quantities, setQuantities] = useState({});
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
+  const [showStockAlerts, setShowStockAlerts] = useState({});
 
   // Initialize pack storage hook
-  const { 
-    savePackConfig, 
-    loadPackConfig, 
-    clearPackConfig, 
+  const {
+    savePackConfig,
+    loadPackConfig,
+    clearPackConfig,
     hasStoredConfig,
-    isStorageReady 
+    isStorageReady
   } = usePackStorage(packageId);
 
   useEffect(() => {
@@ -83,7 +114,7 @@ export default function PackageCustomizationPage() {
       try {
         const token = localStorage.getItem("token");
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        
+
         // Parallel API calls for faster loading
         const [pkgResponse, prodResponse] = await Promise.all([
           fetch(`${API_URL}/packages/${packageId}`, {
@@ -97,17 +128,17 @@ export default function PackageCustomizationPage() {
 
         if (!pkgResponse.ok) throw new Error("Échec du chargement du pack");
         if (!prodResponse.ok) throw new Error("Échec du chargement des produits");
-        
+
         const [pkgResult, prodResult] = await Promise.all([
           pkgResponse.json(),
           prodResponse.json()
         ]);
-        
+
         setPackageData(pkgResult.data);
-        
+
         // Get all products without filtering by stock
         const productsData = Array.isArray(prodResult.data) ? prodResult.data : (prodResult?.data || []);
-        
+
         setProducts(productsData);
 
         const initialQuantities = {};
@@ -119,13 +150,13 @@ export default function PackageCustomizationPage() {
           const storedConfig = loadPackConfig();
           if (storedConfig) {
             setIsRestoringFromStorage(true);
-            
+
             // Validate that stored products still exist and are available
             const validProductIds = productsData.map(p => p._id);
             const validSelectedProducts = storedConfig.selectedProducts?.filter(
               id => validProductIds.includes(id)
             ) || [];
-            
+
             // Restore quantities only for valid products
             const validQuantities = {};
             Object.keys(storedConfig.quantities || {}).forEach(productId => {
@@ -133,12 +164,12 @@ export default function PackageCustomizationPage() {
                 validQuantities[productId] = storedConfig.quantities[productId];
               }
             });
-            
+
             if (validSelectedProducts.length > 0) {
               setSelectedProducts(validSelectedProducts);
               setQuantities(prev => ({ ...prev, ...validQuantities }));
             }
-            
+
             setIsRestoringFromStorage(false);
           }
         }
@@ -170,10 +201,20 @@ export default function PackageCustomizationPage() {
   }, [selectedProducts, quantities, packageData, isStorageReady, savePackConfig, isRestoringFromStorage]);
 
   const handleProductSelect = useCallback((productId) => {
+    // Trouver le produit
+    const product = products.find(p => p._id === productId);
+
+    // Vérifier si le produit est en rupture de stock
+    if (product && isProductOutOfStock(product)) {
+      setError("Ce produit est en rupture de stock et ne peut pas être ajouté.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
     setSelectedProducts((prev) => {
       const isSelected = prev.includes(productId);
       if (isSelected) return prev.filter((id) => id !== productId);
-      
+
       const maxProducts = packageData?.maxProducts || 5;
       if (prev.length >= maxProducts) {
         setError(`Limite atteinte : Maximum ${maxProducts} produits.`);
@@ -182,7 +223,7 @@ export default function PackageCustomizationPage() {
       }
       return [...prev, productId];
     });
-  }, [packageData?.maxProducts]);
+  }, [packageData?.maxProducts, products]);
 
   const handleQuantityChange = useCallback((productId, newQuantity) => {
     if (packageData?.allowMultipleQuantities === false) return;
@@ -190,6 +231,13 @@ export default function PackageCustomizationPage() {
       setQuantities((prev) => ({ ...prev, [productId]: newQuantity }));
     }
   }, [packageData?.allowMultipleQuantities]);
+
+  const triggerStockAlert = useCallback((productId) => {
+    setShowStockAlerts((prev) => ({ ...prev, [productId]: true }));
+    setTimeout(() => {
+      setShowStockAlerts((prev) => ({ ...prev, [productId]: false }));
+    }, 3000);
+  }, []);
 
   const totalPrice = useMemo(() => {
     return selectedProducts.reduce((total, id) => {
@@ -200,7 +248,7 @@ export default function PackageCustomizationPage() {
   }, [selectedProducts, products, packageData, quantities]);
 
   const discountPercentage = packageData?.discountPercentage || 0;
-  
+
   const { discountedPrice, totalSavings } = useMemo(() => {
     const discounted = totalPrice * (1 - discountPercentage / 100);
     return {
@@ -222,6 +270,18 @@ export default function PackageCustomizationPage() {
       setError("Sélectionnez au moins un produit.");
       return;
     }
+
+    // Vérifier si des produits sont en rupture de stock
+    const outOfStockProducts = selectedProducts.filter(productId => {
+      const product = products.find(p => p._id === productId);
+      return product && isProductOutOfStock(product);
+    });
+
+    if (outOfStockProducts.length > 0) {
+      setError("Certains produits de votre sélection sont en rupture de stock.");
+      return;
+    }
+
     if (!user) { router.push("/auth/login"); return; }
 
     try {
@@ -240,10 +300,10 @@ export default function PackageCustomizationPage() {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       cart.push(cartData);
       localStorage.setItem("cart", JSON.stringify(cart));
-      
+
       // Clear the pack configuration from storage after adding to cart
       clearPackConfig();
-      
+
       setSuccess("Ajouté au panier !");
       setTimeout(() => router.push("/cart"), 1200);
     } catch (err) { setError("Erreur lors de l'ajout."); }
@@ -255,13 +315,13 @@ export default function PackageCustomizationPage() {
     <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
       <Header />
       <PromoBadge />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Top Navigation & Title */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
-            <button 
-              onClick={() => router.back()} 
+            <button
+              onClick={() => router.back()}
               style={{ color: COLORS.grass }}
               className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
             >
@@ -283,13 +343,14 @@ export default function PackageCustomizationPage() {
               {products.map((product) => {
                 const isSelected = selectedProducts.includes(product._id);
                 const qty = quantities[product._id] || 1;
-                const avgRating = product.ratings?.length 
-                  ? product.ratings.reduce((acc, r) => acc + r.rating, 0) / product.ratings.length 
+                const avgRating = product.ratings?.length
+                  ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length
                   : null;
-                const ratingCount = product.ratings?.length || 0;
+                const availableStock = getAvailableStock(product);
+                const isOutOfStock = availableStock <= 0;
 
                 return (
-                  <motion.div 
+                  <motion.div
                     key={product._id}
                     initial={false}
                     whileHover={{ y: -4 }}
@@ -298,13 +359,13 @@ export default function PackageCustomizationPage() {
                     className={`bg-white rounded-[24px] border-2 shadow-sm overflow-hidden flex flex-col transition-all`}
                   >
                     <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
-                      <img 
-                        src={getProductImageUrl(product)} 
-                        alt={product.name} 
+                      <img
+                        src={getProductImageUrl(product)}
+                        alt={product.name}
                         loading="lazy"
                         className="w-full h-full object-cover"
                       />
-                      {isSelected && (
+                      {isSelected && !isOutOfStock && (
                         <div className="absolute top-3 right-3 shadow-lg">
                           <CheckCircle2 size={24} fill={COLORS.pistachio} color="white" />
                         </div>
@@ -313,27 +374,26 @@ export default function PackageCustomizationPage() {
 
                     <div className="p-5 flex-1 flex flex-col">
                       <div className="mb-2">
-                        <h3 className="font-bold font-[agrandir] text-[#556822] text-lg leading-tight truncate">{product.name}</h3>
-                        {avgRating && ratingCount > 0 && (
-                          <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs font-bold text-gray-500">
-                               {avgRating.toFixed(1)}
-                            </span>
+                        {avgRating && (
+                          <div className="flex items-center gap-1 mb-4">
                             <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  size={12} 
-                                  fill={star <= Math.round(avgRating) ? "#EAB308" : "none"}
-                                  color="#EAB308"
+                              <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter mr-2">
+                                {avgRating.toFixed(1)}
+                              </span>
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`}
                                 />
                               ))}
                             </div>
-                            <span className="text-xs font-bold text-gray-500">
-                               ({ratingCount})
+                            <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter ml-2">
+                              ({product.ratings.length})
                             </span>
                           </div>
                         )}
+                        <h3 className="font-bold font-[agrandir] text-[#556822] text-lg leading-tight truncate">{product.name}</h3>
+
                       </div>
 
                       <div className="mt-auto">
@@ -342,23 +402,49 @@ export default function PackageCustomizationPage() {
                         </p>
 
                         <div className="flex flex-col gap-2">
-                          {packageData?.allowMultipleQuantities !== false && (
+                          {showStockAlerts[product._id] && (
+                            <div className="p-2 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-[12px] font-black ">
+                              <AlertCircle size={14} />
+                              Quantité maximale atteinte pour ce produit</div>
+                          )}
+                          {packageData?.allowMultipleQuantities !== false && !isOutOfStock && (
                             <div className="flex items-center justify-between bg-gray-50 rounded-xl p-1 border">
-                              <button onClick={() => handleQuantityChange(product._id, qty - 1)} className="p-2 hover:bg-white rounded-lg transition-all"><Minus size={14}/></button>
+                              <button
+                                onClick={() => handleQuantityChange(product._id, qty - 1)}
+                                disabled={qty <= 1}
+                                className="p-2 hover:bg-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Minus size={14} />
+                              </button>
                               <span className="font-bold text-sm">{qty}</span>
-                              <button onClick={() => handleQuantityChange(product._id, qty + 1)} className="p-2 hover:bg-white rounded-lg transition-all"><Plus size={14}/></button>
+                              <button
+                                onClick={() => {
+                                  if (availableStock > 0 && qty >= availableStock) {
+                                    triggerStockAlert(product._id);
+                                  } else {
+                                    handleQuantityChange(product._id, qty + 1);
+                                  }
+                                }}
+                                className="p-2 hover:bg-white rounded-lg transition-all"
+                              >
+                                <Plus size={14} />
+                              </button>
                             </div>
                           )}
-                          
-                          <button 
-                            onClick={() => handleProductSelect(product._id)}
-                            style={{ 
-                              backgroundColor: isSelected ? "#FEF2F2" : COLORS.grass,
-                              color: isSelected ? "#EF4444" : COLORS.white 
-                            }}
-                            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-md`}
+
+                          <button
+                            onClick={() => !isOutOfStock && handleProductSelect(product._id)}
+                            disabled={isOutOfStock}
+                            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-md
+                                ${isOutOfStock
+                                ? "bg-[#9CA3AF] text-white cursor-not-allowed opacity-90"
+                                : isSelected
+                                  ? "bg-red-50 text-red-500 cursor-pointer"
+                                  : "bg-[#556822] text-white cursor-pointer"
+                              }`}
+
                           >
-                            {isSelected ? "Retirer" : "Ajouter au pack"}
+                            {isOutOfStock ? "Rupture de stock" : (isSelected ? "Retirer" : "Ajouter au pack")}
                           </button>
 
                           <Link
@@ -406,14 +492,14 @@ export default function PackageCustomizationPage() {
                   <span>Capacité du pack</span>
                   <span>{selectedProducts.length} / {packageData?.maxProducts || 5}</span>
                 </div>
-               
+
                 <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: (selectedProducts.length / (packageData?.maxProducts || 5)) }}
                     transition={{ duration: 0.3 }}
                     style={{ transformOrigin: "left" }}
-                    className="h-full bg-[#556822]" 
+                    className="h-full bg-[#556822]"
                   />
                 </div>
               </div>
@@ -457,22 +543,22 @@ export default function PackageCustomizationPage() {
 
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     className="mt-4 p-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase flex items-center gap-2"
                   >
-                    <AlertCircle size={14}/> {error}
+                    <AlertCircle size={14} /> {error}
                   </motion.div>
                 )}
                 {success && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-4 p-3 rounded-xl bg-green-50 text-green-600 text-[10px] font-black uppercase flex items-center gap-2"
                   >
-                    <CheckCircle2 size={14}/> {success}
+                    <CheckCircle2 size={14} /> {success}
                   </motion.div>
                 )}
               </AnimatePresence>

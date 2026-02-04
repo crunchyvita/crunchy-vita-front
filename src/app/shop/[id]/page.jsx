@@ -112,8 +112,7 @@ export default function ProductDetailPage() {
       }
 
       let rawData = await response.json();
-      console.log('[Product Detail] RAW Response:', rawData);
-      console.log('[Product Detail] Response keys:', rawData ? Object.keys(rawData) : 'no keys');
+
       
       // ✅ FIX: Unwrap {success: true, data: {...}} format from backend
       let data = rawData;
@@ -122,14 +121,7 @@ export default function ProductDetailPage() {
         data = rawData.data;
       }
       
-      console.log('[Product Detail] Product data after unwrap:', data);
-      console.log('[Product Detail] Data type:', typeof data);
-      console.log('[Product Detail] Data keys:', data ? Object.keys(data) : 'no keys');
-      console.log('[Product Detail] Has _id?', !!data?._id);
-      console.log('[Product Detail] Product name:', data?.name);
-      console.log('[Product Detail] Product description:', data?.description);
-      console.log('[Product Detail] Product pricingHistory:', data?.pricingHistory);
-      console.log('[Product Detail] Product stock:', data?.stock);
+
       
       if (!data || !data._id) {
         console.error('[Product Detail] ❌ Invalid data structure - missing _id!');
@@ -622,7 +614,7 @@ export default function ProductDetailPage() {
               {showStockAlert && (
                 <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
                   <AlertCircle size={18} />
-                  <span>Stock maximum atteint ({availableStock} disponible{availableStock > 1 ? 's' : ''})</span>
+                  <span>Quantité maximale atteinte pour ce produit</span>
                 </div>
               )}
               <div className="flex items-center gap-4">
