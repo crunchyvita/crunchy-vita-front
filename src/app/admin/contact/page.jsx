@@ -18,6 +18,214 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
+/**
+ * ✅ IMPORTANT FIX:
+ * MessageDetail is OUTSIDE the page component.
+ * Otherwise it gets recreated on every render -> textarea loses focus after 1 char.
+ */
+function MessageDetail({
+  isMobile = false,
+  selectedMessage,
+  user,
+  replyText,
+  setReplyText,
+  sending,
+  onBack,
+  onDelete,
+  onReply,
+}) {
+  if (!selectedMessage) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/30">
+        <MailOpen size={48} className="mb-4 opacity-20" />
+        <p className="font-medium text-sm">Sélectionnez un message pour le lire</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Toolbar Detail */}
+      <div className="border-b border-slate-200 px-4 md:px-8 flex items-center justify-between min-h-[73px]">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          {isMobile && (
+            <button
+              onClick={onBack}
+              className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+              aria-label="Retour"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          )}
+
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-bold text-slate-900 truncate">{selectedMessage.name}</span>
+            <a
+              href={`mailto:${selectedMessage.email}`}
+              className="text-xs text-blue-500 hover:underline cursor-pointer truncate"
+            >
+              {selectedMessage.email}
+            </a>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onDelete(selectedMessage._id)}
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Corps du Message */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <div className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0">
+              {selectedMessage.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900 break-words">
+                {selectedMessage.object || 'Demande de contact'}
+              </h2>
+              <p className="text-sm text-slate-500 flex items-center gap-2">
+                De: <span className="font-semibold text-slate-700">{selectedMessage.name}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="prose prose-slate max-w-none mb-10 md:mb-12">
+            <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {selectedMessage.message}
+            </div>
+          </div>
+
+          {/* Section Réponses précédentes */}
+          {selectedMessage.replies && selectedMessage.replies.length > 0 && (
+            <div className="border-t border-slate-200 pt-6 md:pt-8 mb-6 md:mb-8">
+              {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                      <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                      <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-purple-900 truncate">
+                      {selectedMessage.companyName}
+                    </p>
+                    <p className="text-xs text-purple-600">Contact professionnel</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {selectedMessage.replies.map((reply, index) => (
+                  <div key={index} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                    <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 md:p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-300 transition-all duration-300 pointer-events-none select-none">
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate">
+                              {user?.name || 'Admin'}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {new Date(reply.sentAt).toLocaleDateString('fr-FR', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric',
+                              })}{' '}
+                              à{' '}
+                              {new Date(reply.sentAt).toLocaleTimeString('fr-FR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="md:ml-11 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
+                          {reply.message}
+                        </p>
+                      </div>
+
+                      {/* Footer indicator */}
+                      <div className="mt-3 md:ml-11 flex items-center gap-2">
+                        <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                        <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Section Réponse - Disponible seulement si pas de réponse précédente */}
+          {(!selectedMessage.replies || selectedMessage.replies.length === 0) && (
+            <div className="border-t border-slate-200 pt-6 md:pt-8">
+              <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
+                <Reply size={18} className="text-blue-600" /> Répondre à ce message
+              </div>
+
+              {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                      <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                      <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-purple-900 truncate">
+                      {selectedMessage.companyName}
+                    </p>
+                    <p className="text-xs text-purple-600">Contact professionnel</p>
+                  </div>
+                </div>
+              )}
+
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
+                placeholder="Votre message..."
+              />
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={onReply}
+                  disabled={sending || !replyText.trim()}
+                  className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sending ? (
+                    <>
+                      <RefreshCw className="animate-spin" size={16} />
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    <>
+                      Envoyer la réponse <Send size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function ContactMessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,15 +249,14 @@ export default function ContactMessagesPage() {
   useEffect(() => {
     fetchMessages();
 
-    // Polling for real-time updates (every 2 seconds)
     const pollInterval = setInterval(() => {
       fetchMessages();
     }, 2000);
 
     return () => clearInterval(pollInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle opening a specific message from URL parameter
   useEffect(() => {
     const messageId = searchParams.get('message');
     if (messageId && messages.length > 0) {
@@ -59,6 +266,7 @@ export default function ContactMessagesPage() {
         window.history.replaceState({}, '', '/admin/contact');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, messages, loading]);
 
   const fetchMessages = async () => {
@@ -75,10 +283,11 @@ export default function ContactMessagesPage() {
 
   const handleSelectMessage = async (msg) => {
     setSelectedMessage(msg);
+
     if (msg.status === 'new') {
       try {
         await messageAPI.updateStatus(msg._id, 'read');
-        setMessages(messages.map((m) => (m._id === msg._id ? { ...m, status: 'read' } : m)));
+        setMessages((prev) => prev.map((m) => (m._id === msg._id ? { ...m, status: 'read' } : m)));
       } catch (err) {
         console.error(err);
       }
@@ -90,22 +299,20 @@ export default function ContactMessagesPage() {
 
     setSending(true);
     try {
-      // Send reply and get updated message with new reply in array
       const response = await messageAPI.reply(selectedMessage._id, replyText.trim());
       const updatedMessage = response.data || response;
 
-      // Update status
       await messageAPI.updateStatus(selectedMessage._id, 'replied');
 
-      // Send email
-      await messageAPI.sendClientReplyEmail(
-        selectedMessage.name,
-        selectedMessage.email,
-        selectedMessage.message,
-        replyText.trim()
-      );
+      // ⚠️ NOTE: Your backend replyToMessage already sends the email.
+      // If you keep this call, the client may receive 2 emails.
+      // await messageAPI.sendClientReplyEmail(
+      //   selectedMessage.name,
+      //   selectedMessage.email,
+      //   selectedMessage.message,
+      //   replyText.trim()
+      // );
 
-      // Update state with the new reply included
       const messageWithReply = {
         ...selectedMessage,
         status: 'replied',
@@ -119,12 +326,12 @@ export default function ContactMessagesPage() {
         ],
       };
 
-      setMessages(messages.map((m) => (m._id === selectedMessage._id ? messageWithReply : m)));
+      setMessages((prev) => prev.map((m) => (m._id === selectedMessage._id ? messageWithReply : m)));
       setSelectedMessage(messageWithReply);
       setReplyText('');
-      setSending(false);
     } catch (err) {
       console.error("Erreur lors de l'envoi de la réponse:", err);
+    } finally {
       setSending(false);
     }
   };
@@ -138,7 +345,7 @@ export default function ContactMessagesPage() {
     if (!messageToDelete) return;
     try {
       await messageAPI.delete(messageToDelete);
-      setMessages(messages.filter((m) => m._id !== messageToDelete));
+      setMessages((prev) => prev.filter((m) => m._id !== messageToDelete));
       if (selectedMessage?._id === messageToDelete) setSelectedMessage(null);
       setDeleteAlertOpen(false);
       setMessageToDelete(null);
@@ -157,199 +364,6 @@ export default function ContactMessagesPage() {
         msg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         msg.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-  function MessageDetail({ isMobile = false }) {
-    if (!selectedMessage) {
-      return (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/30">
-          <MailOpen size={48} className="mb-4 opacity-20" />
-          <p className="font-medium text-sm">Sélectionnez un message pour le lire</p>
-        </div>
-      );
-    }
-
-    return (
-      <>
-        {/* Toolbar Detail */}
-        <div className="border-b border-slate-200 px-4 md:px-8 flex items-center justify-between min-h-[73px]">
-          <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            {isMobile && (
-              <button
-                onClick={() => setSelectedMessage(null)}
-                className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-                aria-label="Retour"
-              >
-                <ArrowLeft size={18} />
-              </button>
-            )}
-
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-bold text-slate-900 truncate">{selectedMessage.name}</span>
-              <a
-                href={`mailto:${selectedMessage.email}`}
-                className="text-xs text-blue-500 hover:underline cursor-pointer truncate"
-              >
-                {selectedMessage.email}
-              </a>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleDelete(selectedMessage._id)}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-            >
-              <Trash2 size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Corps du Message */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center gap-3 mb-6 md:mb-8">
-              <div className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0">
-                {selectedMessage.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900 break-words">
-                  {selectedMessage.object || 'Demande de contact'}
-                </h2>
-                <p className="text-sm text-slate-500 flex items-center gap-2">
-                  De: <span className="font-semibold text-slate-700">{selectedMessage.name}</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="prose prose-slate max-w-none mb-10 md:mb-12">
-              <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
-                {selectedMessage.message}
-              </div>
-            </div>
-
-            {/* Section Réponses précédentes */}
-            {selectedMessage.replies && selectedMessage.replies.length > 0 && (
-              <div className="border-t border-slate-200 pt-6 md:pt-8 mb-6 md:mb-8">
-                {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                  <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
-                        <Building2 className="h-3 w-3 text-purple-600 mr-1" />
-                        <span className="text-[10px] font-bold text-purple-600">PRO</span>
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-purple-900 truncate">
-                        {selectedMessage.companyName}
-                      </p>
-                      <p className="text-xs text-purple-600">Contact professionnel</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {selectedMessage.replies.map((reply, index) => (
-                    <div key={index} className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                      <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 md:p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-300 transition-all duration-300 pointer-events-none select-none">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-900 truncate">
-                                {user?.name || 'Admin'}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {new Date(reply.sentAt).toLocaleDateString('fr-FR', {
-                                  day: '2-digit',
-                                  month: 'long',
-                                  year: 'numeric',
-                                })}{' '}
-                                à{' '}
-                                {new Date(reply.sentAt).toLocaleTimeString('fr-FR', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="md:ml-11 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
-                            {reply.message}
-                          </p>
-                        </div>
-
-                        {/* Footer indicator */}
-                        <div className="mt-3 md:ml-11 flex items-center gap-2">
-                          <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                          <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Section Réponse - Disponible seulement si pas de réponse précédente */}
-            {(!selectedMessage.replies || selectedMessage.replies.length === 0) && (
-              <div className="border-t border-slate-200 pt-6 md:pt-8">
-                <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
-                  <Reply size={18} className="text-blue-600" /> Répondre à ce message
-                </div>
-
-                {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                  <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
-                        <Building2 className="h-3 w-3 text-purple-600 mr-1" />
-                        <span className="text-[10px] font-bold text-purple-600">PRO</span>
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-purple-900 truncate">
-                        {selectedMessage.companyName}
-                      </p>
-                      <p className="text-xs text-purple-600">Contact professionnel</p>
-                    </div>
-                  </div>
-                )}
-
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
-                  placeholder="Votre message..."
-                />
-
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={handleReply}
-                    disabled={sending || !replyText.trim()}
-                    className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {sending ? (
-                      <>
-                        <RefreshCw className="animate-spin" size={16} />
-                        Envoi en cours...
-                      </>
-                    ) : (
-                      <>
-                        Envoyer la réponse <Send size={16} />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -377,10 +391,7 @@ export default function ContactMessagesPage() {
             </div>
 
             <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={16}
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 type="text"
                 placeholder="Rechercher..."
@@ -397,9 +408,7 @@ export default function ContactMessagesPage() {
                   key={f}
                   onClick={() => setFilter(f)}
                   className={`flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider ${
-                    filter === f
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                    filter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   {f === 'all' ? 'Tous' : f === 'new' ? 'Nouveaux' : 'Répondus'}
@@ -425,9 +434,7 @@ export default function ContactMessagesPage() {
 
                   <div className="flex justify-between items-start mb-1 gap-3">
                     <span
-                      className={`text-sm font-bold ${
-                        msg.status === 'new' ? 'text-slate-900' : 'text-slate-600'
-                      }`}
+                      className={`text-sm font-bold ${msg.status === 'new' ? 'text-slate-900' : 'text-slate-600'}`}
                     >
                       {msg.name}
                     </span>
@@ -454,8 +461,7 @@ export default function ContactMessagesPage() {
                   </div>
 
                   <p className="text-xs text-slate-500 line-clamp-1">
-                    {' '}
-                    Objet :
+                    Objet :{' '}
                     <span className="text-xs text-blue-600 font-semibold truncate mb-1">
                       {msg.object || 'Sans objet'}
                     </span>
@@ -477,13 +483,32 @@ export default function ContactMessagesPage() {
 
         {/* MAIN CONTENT (Desktop) */}
         <div className="hidden md:flex flex-1 flex-col bg-white">
-          <MessageDetail />
+          <MessageDetail
+            selectedMessage={selectedMessage}
+            user={user}
+            replyText={replyText}
+            setReplyText={setReplyText}
+            sending={sending}
+            onBack={() => setSelectedMessage(null)}
+            onDelete={handleDelete}
+            onReply={handleReply}
+          />
         </div>
 
         {/* MAIN CONTENT (Mobile overlay) */}
         {selectedMessage && (
           <div className="md:hidden absolute inset-0 z-40 flex flex-col bg-white">
-            <MessageDetail isMobile />
+            <MessageDetail
+              isMobile
+              selectedMessage={selectedMessage}
+              user={user}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              sending={sending}
+              onBack={() => setSelectedMessage(null)}
+              onDelete={handleDelete}
+              onReply={handleReply}
+            />
           </div>
         )}
 
