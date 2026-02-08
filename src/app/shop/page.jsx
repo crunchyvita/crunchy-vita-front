@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Link } from '@/navigation';
 import {
   ImageIcon, ShoppingCart, Heart, Star, Package,
   ShoppingBag, CheckCircle2, Search, X,
@@ -14,6 +14,8 @@ import ProductDetailModal from '@/components/detailProduct';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
+import { useLocale, useTranslations } from 'next-intl';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 // --- UTILS ---
 const getProductImageUrl = (product) => {
@@ -39,6 +41,7 @@ const getAvailableStock = (stock) => {
 /** * PREMIUM PACKAGE CARD - Style CrunchyVita
  */
 function PremiumPackageCard({ pkg }) {
+  const t = useTranslations('Shop');
   const productPreviews = pkg.products?.slice(0, 3) || [];
 
   return (
@@ -89,11 +92,11 @@ function PremiumPackageCard({ pkg }) {
           {pkg.name}
         </h3>
         <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6">
-          {pkg.description || "Une sélection gourmande et craquante pour vos moments de plaisir."}
+          {pkg.description || t('packages.descriptionFallback')}
         </p>
 
         <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-widest text-[#556822]">Découvrir le pack</span>
+          <span className="text-xs font-black uppercase tracking-widest text-[#556822]">{t('packages.discover')}</span>
           <button className="h-12 w-12 bg-[#556822] rounded-full flex items-center justify-center text-white group-hover:bg-[#E10C69] group-hover:scale-110 transition-all duration-300 shadow-lg">
             <ArrowRight size={20} />
           </button>
@@ -106,6 +109,9 @@ function PremiumPackageCard({ pkg }) {
 /** * PRODUCT CARD - Style CrunchyVita
  */
 function ProductCard({ product, onOpenDetail }) {
+  const t = useTranslations('Shop');
+  const locale = useLocale();
+  const productName = getTranslatedProduct(product, locale).name;
   const price = getProductPrice(product);
   const stock = getAvailableStock(product.stock);
   const imageUrl = getProductImageUrl(product);
@@ -115,7 +121,7 @@ function ProductCard({ product, onOpenDetail }) {
     <div className="group bg-white rounded-[2rem] shadow-sm border border-[#E1FBD9] overflow-hidden hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-square overflow-hidden bg-[#F2F8EE]">
         {imageUrl ? (
-          <img src={imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img src={imageUrl} alt={productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30"><ImageIcon size={40} /></div>
         )}
@@ -150,7 +156,7 @@ function ProductCard({ product, onOpenDetail }) {
           </div>
         )}
     <div className="mb-3">
-  <h3 className="font-black text-[#556822] text-lg mb-2">{product.name}</h3>
+  <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
   <div className="flex items-center justify-between">
     <h4 className="font-black text-[#E10C69] text-xl">€{price.toFixed(2)}</h4>
   </div>
@@ -161,7 +167,7 @@ function ProductCard({ product, onOpenDetail }) {
           href={`/shop/${product.id || product._id}`}
           className="block w-full py-3.5 rounded-xl bg-[#F2F8EE] text-[#556822] font-black text-[10px] uppercase tracking-[0.5] text-center hover:bg-[#556822] hover:text-white transition-all"
         >
-          Voir le produit
+          {t('products.viewProduct')}
         </Link>
       </div>
     </div>
@@ -171,7 +177,9 @@ function ProductCard({ product, onOpenDetail }) {
 // --- MAIN PAGE ---
 
 function ClientShop() {
+  const t = useTranslations('Shop');
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const [products, setProducts] = useState([]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,8 +204,9 @@ function ClientShop() {
 
     const query = searchQuery.toLowerCase();
     return products.filter(product => {
+      const translatedName = getTranslatedProduct(product, locale).name;
       // Search by product name
-      const nameMatch = product.name?.toLowerCase().includes(query);
+      const nameMatch = translatedName?.toLowerCase().includes(query);
 
       // Search by tags - handle both string and array formats
       let tagsMatch = false;
@@ -233,7 +242,7 @@ function ClientShop() {
 
       return nameMatch || tagsMatch || categoryMatch;
     });
-  }, [products, searchQuery]);
+  }, [products, searchQuery, locale]);
 
   // Package search filtering function
   const filteredPackages = useMemo(() => {
@@ -288,7 +297,7 @@ function ClientShop() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher par nom de produit, tag ou catégorie..."
+              placeholder={t('search.placeholder')}
               className="w-full pl-16 pr-12 py-7 rounded-[2.5rem] bg-white shadow-2xl shadow-[#556822]/5 border-0 focus:ring-4 focus:ring-[#B3C800]/20 transition-all text-[#556822] placeholder:text-gray-300 font-bold text-lg font-[Maison Neue Book]"
             />
             {searchQuery && (
@@ -303,8 +312,8 @@ function ClientShop() {
           {searchQuery && (
             <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
               {activeTab === 'products'
-                ? `Trouvé ${filteredProducts.length} produit(s) pour "${searchQuery}"`
-                : `Trouvé ${filteredPackages.length} coffret(s) pour "${searchQuery}"`}
+                ? t('search.resultsProducts', { count: filteredProducts.length, query: searchQuery })
+                : t('search.resultsPackages', { count: filteredPackages.length, query: searchQuery })}
             </p>
           )}
         </section>
@@ -316,25 +325,25 @@ function ClientShop() {
               onClick={() => setActiveTab('products')}
               className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'products' ? 'bg-[#E10c69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
             >
-              Tous nos produits
+              {t('tabs.products')}
             </button>
             <button
               onClick={() => setActiveTab('packages')}
               className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'packages' ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
             >
-              Crunchy Packs
+              {t('tabs.packages')}
             </button>
           </div>
 
           <div className="text-center max-w-2xl">
             <h2 className="text-6xl font-black text-[#556822] mb-6 tracking-tighter">
-              {activeTab === 'products' ? 'La Boutique.' : 'Les Coffrets.'}
+              {activeTab === 'products' ? t('heading.productsTitle') : t('heading.packagesTitle')}
             </h2>
             <div className="w-20 h-1.5 bg-[#EF8EB8] mx-auto rounded-full mb-6" />
             <p className="text-[#556822]/70 font-bold text-xl">
               {activeTab === 'products'
-                ? 'Le meilleur des fruits lyophilisés, sans aucun additif.'
-                : 'Composez votre mix parfait et profitez de réductions exclusives.'}
+                ? t('heading.productsSubtitle')
+                : t('heading.packagesSubtitle')}
             </p>
           </div>
         </div>

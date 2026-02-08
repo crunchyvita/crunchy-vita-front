@@ -1,12 +1,13 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
 import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslations } from 'next-intl';
 import { 
   Leaf,
   Ban,         
@@ -48,6 +49,7 @@ const popIn = {
 
 export default function Home() {
   const { user } = useAuth();
+  const t = useTranslations('Home');
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -71,8 +73,8 @@ export default function Home() {
                 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tighter uppercase drop-shadow-lg"
                 style={{ fontFamily: 'Agrandir, sans-serif' }}
               >
-                Croquez la nature<br />
-                avec <br/><span className="text-[#E10C69]" style={{ fontFamily: 'Agrandir, sans-serif' }}>Crunchy Vita</span>
+                {t('hero.titleLine1')}<br />
+                {t('hero.titleLine2')} <br/><span className="text-[#E10C69]" style={{ fontFamily: 'Agrandir, sans-serif' }}>{t('hero.brand')}</span>
               </motion.h1>
               
               <motion.p 
@@ -80,7 +82,7 @@ export default function Home() {
                 className="mb-8 lg:mb-10 text-lg lg:text-xl text-white/90 font-bold italic drop-shadow-md"
                 style={{ fontFamily: 'Maison Neue, sans-serif' }}
               >
-                Naturellement croquant, irrésistiblement bon
+                {t('hero.subtitle')}
               </motion.p>
 
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
@@ -89,7 +91,7 @@ export default function Home() {
                     href="/shop"
                     className="block rounded-full bg-[#E10C69] px-8 lg:px-10 py-4 text-center font-black uppercase tracking-widest text-white shadow-lg shadow-[#E10C69]/30 transition-all text-sm lg:text-base"
                   >
-                    Découvrir nos produits
+                    {t('hero.ctaDiscover')}
                   </Link>
                 </motion.div>
                 {!user && (
@@ -98,7 +100,7 @@ export default function Home() {
                       href="/auth/register"
                       className="block rounded-full border-2 bg-white/10 border-white px-8 lg:px-10 py-4 text-center font-black uppercase tracking-widest text-white hover:bg-white hover:text-[#E10C69] transition-all text-sm lg:text-base"
                     >
-                      Rejoindre la communauté
+                      {t('hero.ctaJoin')}
                     </Link>
                   </motion.div>
                 )}
@@ -121,7 +123,7 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="mb-4 text-4xl md:text-5xl font-black text-[#556822] uppercase tracking-tighter" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-              Pourquoi choisir CrunchyVita ?
+              {t('why.title')}
             </h2>
             <motion.div 
               initial={{ width: 0 }}
@@ -141,10 +143,10 @@ export default function Home() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
           >
             {[
-              { icon: <Leaf size={32} />, title: "100% fruits", desc: "Uniquement des fruits, rien d'autre." },
-              { icon: <Award size={32} />, title: "Certifié BIO", desc: "Des fruits sélectionnés avec soin." },
-              { icon: <Sparkle size={32} />, title: "Ultra-croquant", desc: "Une texture unique, naturellement sucrée." },
-              { icon: <MapPinHouse size={32} />, title: "Pratique", desc: "À emporter partout : travail, sport, école." }
+              { icon: <Leaf size={32} />, title: t('why.cards.card1.title'), desc: t('why.cards.card1.desc') },
+              { icon: <Award size={32} />, title: t('why.cards.card2.title'), desc: t('why.cards.card2.desc') },
+              { icon: <Sparkle size={32} />, title: t('why.cards.card3.title'), desc: t('why.cards.card3.desc') },
+              { icon: <MapPinHouse size={32} />, title: t('why.cards.card4.title'), desc: t('why.cards.card4.desc') }
             ].map((item, index) => (
               <motion.div 
                 key={index}
@@ -180,15 +182,15 @@ export default function Home() {
             className="text-3xl md:text-4xl lg:text-5xl text-center font-black text-[#556822] uppercase mb-12  tracking-tighter"
             style={{ fontFamily: 'Agrandir, sans-serif' }}
           >
-            Nos fruits lyophilisés
+            {t('products.title')}
           </motion.h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {[
-              { desc: "Dans un yaourt ou un bowl", image: "/assets/images/bowl.png" },
-              { desc: "En snack sain à tout moment", image: "/assets/images/snack.png" },
-              { desc: "En topping sur vos desserts", image: "/assets/images/dessert.png" },
-              { desc: "Idéal pour petits et grands", image: "/assets/images/kids.png" }
+              { desc: t('products.cards.card1'), image: "/assets/images/bowl.png" },
+              { desc: t('products.cards.card2'), image: "/assets/images/snack.png" },
+              { desc: t('products.cards.card3'), image: "/assets/images/dessert.png" },
+              { desc: t('products.cards.card4'), image: "/assets/images/kids.png" }
             ].map((item, index) => (
               <motion.div 
                 key={index}
@@ -225,12 +227,12 @@ export default function Home() {
             
 
               <h2 className="mb-6 text-5xl md:text-6xl lg:text-7xl font-black text-[#556822] uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-                Le préféré de <br/>
-                <span className="text-[#E10C69] inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ fontFamily: 'Agrandir, sans-serif' }}>nos clients</span>
+                {t('favorite.titleLine1')} <br/>
+                <span className="text-[#E10C69] inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ fontFamily: 'Agrandir, sans-serif' }}>{t('favorite.titleLine2')}</span>
               </h2>
 
               <p className="mb-10 text-gray-600 text-lg lg:text-xl font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
-                Découvrez notre coffret découverte, le mix parfait pour goûter à l'explosion de saveurs Crunchy Vita.
+                {t('favorite.description')}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start">
@@ -238,7 +240,7 @@ export default function Home() {
                   href="/shop?tab=packages"
                   className="group relative inline-flex items-center gap-3 rounded-full bg-[#E10C69] px-10 py-5 font-black uppercase tracking-widest text-white shadow-[0_15px_30px_rgba(225,12,105,0.3)] transition-all hover:bg-[#C40A5B] hover:-translate-y-1"
                 >
-                  Découvrir le coffret
+                  {t('favorite.cta')}
                   <motion.span
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
@@ -261,7 +263,7 @@ export default function Home() {
               
               <Image 
                 src="/assets/images/products.png" 
-                alt="Coffret Crunchy Vita avec fruits volants" 
+                alt={t('favorite.imageAlt')}
                 fill 
                 className="object-contain drop-shadow-[0_45px_45px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:scale-105" 
                 priority
@@ -286,7 +288,7 @@ export default function Home() {
               className="max-w-2xl"
             >
               <h2 className="text-4xl md:text-6xl font-black text-[#556822] uppercase tracking-tighter leading-none" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-                Nos engagements </h2>
+                {t('commitments.title')} </h2>
             </motion.div>
            
           </div>
@@ -295,20 +297,20 @@ export default function Home() {
             {[
               { 
                 icon: <Ban size={40} />, 
-                title: "Zéro Additifs", 
-                desc: "Ni conservateurs, ni colorants, ni arômes artificiels. Juste la pureté brute du fruit lyophilisé.",
+                title: t('commitments.cards.card1.title'), 
+                desc: t('commitments.cards.card1.desc'),
                 color: "bg-[#EF8EB8]" 
               },
               { 
                 icon: <CandyOff size={40} />, 
-                title: "Sucre Naturel", 
-                desc: "Zéro sucre ajouté. Seulement le sucre naturel des fruits BIO.",
+                title: t('commitments.cards.card2.title'), 
+                desc: t('commitments.cards.card2.desc'),
                 color: "bg-[#EF8EB8]" 
               },
               { 
                 icon: <Leaf size={40} />, 
-                title: "Excellence BIO", 
-                desc: "Tous nos fruits sont issus de l'agriculture biologique.",
+                title: t('commitments.cards.card3.title'), 
+                desc: t('commitments.cards.card3.desc'),
                 color: "bg-[#EF8EB8]" 
               }
             ].map((item, index) => (

@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { motion } from 'framer-motion';
 import {
   Star, Heart, ShoppingCart, Plus, Minus, Package, Send, MessageSquare,
@@ -14,15 +15,22 @@ import { usePackStorage } from '@/hooks/usePackStorage';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
+import { useTranslations, useLocale } from 'next-intl';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('ProductDetail');
+  const locale = useLocale();
 
   const [searchParams, setSearchParams] = useState({});
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const translatedProduct = getTranslatedProduct(product, locale);
+  const productName = translatedProduct.name;
+  const productDescription = translatedProduct.description;
 
   // ✅ IMPORTANT: error doit être remis à null avant chaque fetch
   const [error, setError] = useState(null);
@@ -111,7 +119,7 @@ export default function ProductDetailPage() {
       if (!response.ok) {
         const text = await response.text().catch(() => '');
         console.error('[Product Detail] API error body:', text?.substring?.(0, 300));
-        throw new Error(`Product not found (${response.status})`);
+        throw new Error(`${t('errors.productNotFound')} (${response.status})`);
       }
 
       let rawData = await response.json();
@@ -128,7 +136,7 @@ export default function ProductDetailPage() {
       
       if (!data || !data._id) {
         console.error('[Product Detail] ❌ Invalid data structure - missing _id!');
-        throw new Error('Invalid product data received');
+        throw new Error(t('errors.invalidProductData'));
       }
 
       console.log('[Product Detail] ✅ Setting product with valid data');
@@ -153,7 +161,7 @@ export default function ProductDetailPage() {
     } catch (err) {
       console.error('[Product Detail] Error:', err);
       setProduct(null); // ✅ propre
-      setError(err.message || 'Product not found');
+      setError(err.message || t('errors.productNotFound'));
     } finally {
       setLoading(false);
     }
@@ -316,11 +324,11 @@ export default function ProductDetailPage() {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const months = [
-      'January','February','March','April','May','June',
-      'July','August','September','October','November','December'
-    ];
-    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const handleSubmitReview = async (e) => {
@@ -332,19 +340,19 @@ export default function ProductDetailPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setReviewError('Veuillez vous connecter pour soumettre un avis');
+        setReviewError(t('errors.loginRequired'));
         return;
       }
 
       const { rating, comment, isAnonymous } = reviewForm;
 
       if (!rating && (!comment || !comment.trim())) {
-        setReviewError('Veuillez fournir une note ou un commentaire (ou les deux)');
+        setReviewError(t('errors.reviewRequired'));
         return;
       }
 
       if (rating && (rating < 1 || rating > 5)) {
-        setReviewError('La note doit être entre 1 et 5');
+        setReviewError(t('errors.ratingRange'));
         return;
       }
 
@@ -356,7 +364,7 @@ export default function ProductDetailPage() {
       });
 
       if (!data || data.error) {
-        throw new Error(data?.message || "Échec de la soumission de l'avis");
+        throw new Error(data?.message || t('errors.submitFailed'));
       }
 
       const result = data.data || data;
@@ -404,10 +412,10 @@ export default function ProductDetailPage() {
         return { ...prev, ratings: updatedRatings, comments: updatedComments };
       });
 
-      setReviewSuccess("Avis envoyé avec succès !");
+      setReviewSuccess(t('success.submitted'));
       setTimeout(() => setReviewSuccess(''), 5000);
     } catch (err) {
-      setReviewError(err.message || "Échec de la soumission de l'avis");
+      setReviewError(err.message || t('errors.submitFailed'));
       console.error('Error submitting review:', err);
     } finally {
       setSubmittingReview(false);
@@ -501,12 +509,12 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 text-xl mb-4">{error || 'Produit non trouvé'}</p>
+          <p className="text-red-600 text-xl mb-4">{error || t('errors.productNotFound')}</p>
           <button
             onClick={() => router.push('/shop')}
             className="px-6 py-3 bg-[#469165] text-white rounded-lg hover:bg-[#3a7a4a] transition-colors"
           >
-            Retour à la boutique
+            {t('buttons.backToShop')}
           </button>
         </div>
       </div>
@@ -529,14 +537,14 @@ export default function ProductDetailPage() {
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 font-maison-neue-book">
           <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            Boutique
+            {t('breadcrumb.shop')}
           </button>
           <span>/</span>
           <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            Tous les produits
+            {t('breadcrumb.allProducts')}
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-maison-neue-bold">{product.name}</span>
+          <span className="text-gray-900 font-maison-neue-bold">{productName}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -546,7 +554,7 @@ export default function ProductDetailPage() {
               {productImages.length > 0 ? (
                 <img
                   src={productImages[selectedImageIndex]}
-                  alt={product.name}
+                  alt={productName}
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.src = '/assets/images/placeholder.png';
@@ -571,7 +579,7 @@ export default function ProductDetailPage() {
                         : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <img src={img} alt={`${product.name} - Image ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`${productName} - Image ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -582,7 +590,7 @@ export default function ProductDetailPage() {
           <div className="space-y-6">
             <div>
               <h1 className="text-5xl font-[Agrandir] text-[#556822] mb-3">
-                {product.name}
+                {productName}
               </h1>
 
               {(() => {
@@ -631,16 +639,16 @@ export default function ProductDetailPage() {
 
             <div>
               <p className="text-gray-600 leading-relaxed font-[maison-neue-book]">
-                {product.description || 'Aucune description disponible.'}
+                {productDescription || t('descriptionFallback')}
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">Quantité</h3>
+              <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">{t('quantity.label')}</h3>
               {showStockAlert && (
                 <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
                   <AlertCircle size={18} />
-                  <span>Quantité maximale atteinte pour ce produit</span>
+                  <span>{t('quantity.maxReached')}</span>
                 </div>
               )}
               <div className="flex items-center gap-4">
@@ -671,7 +679,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="text-lg">
-                  <span className="text-gray-600 font-[maison-neue-book]">Total: </span>
+                  <span className="text-gray-600 font-[maison-neue-book]">{t('total.label')} </span>
                   <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
                     €{totalPrice.toFixed(2)}
                   </span>
@@ -692,12 +700,12 @@ export default function ProductDetailPage() {
                 {searchParams.packageId ? (
                   <>
                     <Package className="h-5 w-5" />
-                    {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au pack'}
+                    {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToPack')}
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="h-5 w-5" />
-                    {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                    {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToCart')}
                   </>
                 )}
               </button>
@@ -706,7 +714,7 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToWishlist}
                   className="px-6 py-4 border-2 border-red-500 text-red-500 rounded-lg font-agrandir font-semibold hover:bg-red-50 transition-colors"
-                  title="Ajouter aux favoris"
+                  title={t('buttons.addToWishlist')}
                 >
                   <Heart className="h-6 w-6" />
                 </button>
@@ -720,10 +728,10 @@ export default function ProductDetailPage() {
           <div className="mt-16 border-t border-gray-200 pt-16">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
-                Du fruit frais au fruit lyophilisé
+                {t('comparison.title')}
               </h2>
               <p className="text-gray-600 font-maison-neue-book">
-                Découvrez la transformation de nos fruits
+                {t('comparison.subtitle')}
               </p>
             </div>
 
@@ -739,9 +747,9 @@ export default function ProductDetailPage() {
             >
               {/* Fresh Fruit Image */}
               <div className="absolute inset-0">
-                <img src={freshImg} alt="Fruit frais" className="w-full h-full object-cover" draggable="false" />
+                <img src={freshImg} alt={t('comparison.freshAlt')} className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Frais</span>
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.freshLabel')}</span>
                 </div>
               </div>
 
@@ -750,9 +758,9 @@ export default function ProductDetailPage() {
                 className={`absolute inset-0 ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
                 style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
               >
-                <img src={lyoImg} alt="Fruit lyophilisé" className="w-full h-full object-cover" draggable="false" />
+                <img src={lyoImg} alt={t('comparison.lyoAlt')} className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Lyophilisé</span>
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.lyoLabel')}</span>
                 </div>
               </div>
 
@@ -774,7 +782,7 @@ export default function ProductDetailPage() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                     </svg>
-                    Glissez pour comparer
+                    {t('comparison.slide')}
                   </span>
                 </div>
               )}
@@ -785,7 +793,7 @@ export default function ProductDetailPage() {
         {/* Reviews Section (inchangé à part les fonctions déjà présentes) */}
         <div className="mt-16 border-t border-gray-200 pt-8">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-2xl font-agrandir font-bold text-gray-900">Avis clients</h2>
+            <h2 className="text-2xl font-agrandir font-bold text-gray-900">{t('reviews.title')}</h2>
             <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-maison-neue-bold">
               {product.comments?.length || 0}
             </span>
@@ -794,7 +802,7 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[450px_1fr] gap-8">
             {user && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-20">
-                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">Écrire un avis</h3>
+                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">{t('reviews.writeTitle')}</h3>
                 <form onSubmit={handleSubmitReview} className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2">
@@ -821,7 +829,7 @@ export default function ProductDetailPage() {
                     <textarea
                       value={reviewForm.comment}
                       onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                      placeholder="Qu'avez-vous pensé de la qualité ?"
+                      placeholder={t('reviews.placeholder')}
                       rows="5"
                       className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#064E3B] focus:outline-none resize-none"
                     />
@@ -832,10 +840,10 @@ export default function ProductDetailPage() {
                       <User className={`h-5 w-5 transition-colors ${reviewForm.isAnonymous ? 'text-gray-400' : 'text-[#064E3B]'}`} />
                       <div>
                         <label htmlFor="anonymous-toggle" className="text-sm font-maison-neue-bold text-gray-900 cursor-pointer block">
-                          Publier en anonyme
+                          {t('reviews.anonymous.label')}
                         </label>
                         <p className="text-xs text-gray-500 mt-0.5 font-maison-neue-book">
-                          {reviewForm.isAnonymous ? 'Votre nom sera masqué' : 'Votre nom sera visible'}
+                          {reviewForm.isAnonymous ? t('reviews.anonymous.hidden') : t('reviews.anonymous.visible')}
                         </p>
                       </div>
                     </div>
@@ -882,12 +890,12 @@ export default function ProductDetailPage() {
                     {submittingReview ? (
                       <>
                         <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Envoi en cours...</span>
+                        <span>{t('reviews.submitting')}</span>
                       </>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        <span>Publier l'avis</span>
+                        <span>{t('reviews.submit')}</span>
                       </>
                     )}
                   </button>
@@ -913,9 +921,9 @@ export default function ProductDetailPage() {
                   return (
                     <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                       <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 font-maison-neue-bold">Aucun avis pour le moment</p>
+                      <p className="text-gray-600 font-maison-neue-bold">{t('reviews.emptyTitle')}</p>
                       <p className="text-sm text-gray-500 mt-2 font-maison-neue-book">
-                        {user ? 'Soyez le premier à donner votre avis !' : 'Connectez-vous pour laisser un avis'}
+                        {user ? t('reviews.emptySubtitleLoggedIn') : t('reviews.emptySubtitleLoggedOut')}
                       </p>
                     </div>
                   );
@@ -924,7 +932,9 @@ export default function ProductDetailPage() {
                 return (
                   <div className="space-y-2">
                     {displayedReviews.map((review) => {
-                      const userName = review.isAnonymous ? 'Anonymous' : (review.userId?.name || 'Anonymous');
+                      const userName = review.isAnonymous
+                        ? t('reviews.anonymousName')
+                        : (review.userId?.name || t('reviews.anonymousName'));
                       const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
 
                       return (
@@ -1005,7 +1015,7 @@ export default function ProductDetailPage() {
                           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-maison-neue-bold text-sm transition-colors group"
                         >
                           <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
-                          Voir plus d'avis
+                          {t('reviews.loadMore')}
                         </button>
                       </div>
                     )}
@@ -1026,9 +1036,9 @@ export default function ProductDetailPage() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-1">Supprimer votre avis ?</h3>
+              <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-1">{t('delete.title')}</h3>
               <p className="text-sm text-gray-500 leading-relaxed font-maison-neue-book">
-                Cette action est permanente. Votre avis sera définitivement supprimé.
+                {t('delete.description')}
               </p>
             </div>
             <div className="flex border-t border-gray-100">
@@ -1039,14 +1049,14 @@ export default function ProductDetailPage() {
                 }}
                 className="flex-1 px-4 py-4 text-sm font-maison-neue-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
               >
-                Annuler
+                {t('delete.cancel')}
               </button>
               <button
                 onClick={confirmDeleteComment}
                 disabled={deletingCommentId === commentToDelete}
                 className="flex-1 px-4 py-4 text-sm font-agrandir font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
               >
-                {deletingCommentId === commentToDelete ? 'Suppression...' : 'Supprimer'}
+                {deletingCommentId === commentToDelete ? t('delete.deleting') : t('delete.confirm')}
               </button>
             </div>
           </div>

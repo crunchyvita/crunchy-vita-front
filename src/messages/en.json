@@ -1,0 +1,641 @@
+{
+  "Header": {
+    "nav": {
+      "home": "Home",
+      "products": "Our products",
+      "blog": "Blog",
+      "contact": "Contact"
+    },
+    "orders": "Orders",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "account": "Account",
+    "logout": "Log out",
+    "signIn": "Sign in"
+  },
+  "HeaderHome": {
+    "nav": {
+      "home": "Home",
+      "products": "Our products",
+      "commitments": "Our commitments",
+      "blog": "Blog",
+      "contact": "Contact"
+    },
+    "dashboard": "Dashboard",
+    "order": "Order"
+  },
+  "Footer": {
+    "about": "Organic freeze-dried fruits, crunchy and 100% natural. The healthy snack that goes with you every day.",
+    "email": "contact@crunchyvita.com",
+    "phone": "+33 7 45 15 07 88",
+    "address": {
+      "line1": "1460 Chemin des Terriers",
+      "line2": "Building B-04",
+      "line3": "06600 Antibes, France"
+    },
+    "nav": {
+      "title": "Navigation",
+      "home": "Home",
+      "products": "Our products",
+      "commitments": "Our commitments",
+      "contact": "Contact",
+      "blog": "Blog"
+    },
+    "help": {
+      "title": "Help",
+      "returns": "Returns",
+      "shipping": "Shipping information",
+      "payment": "Payment methods"
+    },
+    "brand": {
+      "title": "CrunchyVita",
+      "about": "About us",
+      "lyo": "Freeze-drying",
+      "b2b": "B2B professional clients",
+      "collab": "Collaboration & Sponsoring"
+    },
+    "legal": {
+      "title": "Legal information",
+      "mentions": "Legal notice",
+      "cgu": "Terms of use",
+      "cgv": "Terms of sale",
+      "privacy": "Privacy policy"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "description": "Sign up to receive exclusive offers and new arrivals.",
+      "placeholder": "Your email",
+      "loading": "Signing up...",
+      "submit": "Subscribe"
+    },
+    "copyright": " 2026 CrunchyVita - ALTEORA SAS. All rights reserved."
+  },
+  "Home": {
+    "hero": {
+      "titleLine1": "Taste Nature",
+      "titleLine2": "with",
+      "brand": "Crunchy Vita",
+      "subtitle": "Naturally crunchy, irresistibly good",
+      "ctaDiscover": "Discover our products",
+      "ctaJoin": "Join the community"
+    },
+    "why": {
+      "title": "Why choose CrunchyVita?",
+      "cards": {
+        "card1": { "title": "100% fruits", "desc": "Only fruit, nothing else." },
+        "card2": { "title": "Organic certified", "desc": "Carefully selected fruits." },
+        "card3": { "title": "Ultra-crunchy", "desc": "A unique texture, naturally sweet." },
+        "card4": { "title": "Convenient", "desc": "Take it anywhere: work, sport, school." }
+      }
+    },
+    "products": {
+      "title": "Our freeze-dried fruits",
+      "cards": {
+        "card1": "In yogurt or a bowl",
+        "card2": "As a healthy snack anytime",
+        "card3": "As a topping on desserts",
+        "card4": "Perfect for kids and adults"
+      }
+    },
+    "favorite": {
+      "titleLine1": "Our customers'",
+      "titleLine2": "favorite",
+      "description": "Discover our discovery box, the perfect mix to taste the Crunchy Vita flavor explosion.",
+      "cta": "Discover the box",
+      "imageAlt": "Crunchy Vita box with flying fruits"
+    },
+    "commitments": {
+      "title": "Our commitments",
+      "cards": {
+        "card1": {
+          "title": "Zero additives",
+          "desc": "No preservatives, no colorants, no artificial flavors. Just the pure essence of freeze-dried fruit."
+        },
+        "card2": {
+          "title": "Natural sugar",
+          "desc": "Zero added sugar. Only the natural sugar from organic fruits."
+        },
+        "card3": {
+          "title": "Organic excellence",
+          "desc": "All our fruits come from organic farming."
+        }
+      }
+    }
+  },
+  "AboutUs": {
+    "title": "About us",
+    "lyo": {
+      "title": "Freeze-drying",
+      "p1": "Freeze-drying is a preservation technique that removes water from a product by sublimation. It preserves the nutritional qualities, taste, and texture of fresh fruit.",
+      "p2": "Unlike traditional techniques such as heat drying, freeze-drying is done at low temperature, keeping up to 97% of the vitamins and minerals found in fresh fruit.",
+      "p3": "The result? Ultra-crunchy fruits, naturally sweet, light and easy to store, while keeping their intense flavor and nutritional benefits."
+    },
+    "mission": {
+      "title": "Our mission",
+      "p1": "At CrunchyVita, we believe snacking can be both delicious and healthy. Our mission is to offer 100% natural snacks, with no added sugar or preservatives, made from quality fresh fruit.",
+      "p2": "We select our fruits carefully from certified organic farms to bring you the best of nature in every pouch."
+    },
+    "collab": {
+      "title": "Collaboration & Sponsoring",
+      "p1": "Are you an influencer, YouTuber, or wellness professional? We would love to collaborate with you!",
+      "p2": "For any partnership or sponsorship request, contact us at:"
+    },
+    "b2b": {
+      "title": "B2B professional clients",
+      "p1": "Are you a professional (hotel, restaurant, gym, organic store...) and want to offer our products to your customers?",
+      "p2": "Contact our sales team to discover our offers for professionals:"
+    }
+  },
+  "Contact": {
+    "title": "A question?",
+    "titleAccent": "Contact us",
+    "subtitle": "Our team is here to answer all your questions about our products and our approach.",
+    "type": {
+      "individual": "Individual",
+      "business": "Business"
+    },
+    "success": "Message sent successfully! We will get back to you soon.",
+    "fields": {
+      "name": {
+        "label": "Your name *",
+        "placeholder": "Your full name"
+      },
+      "company": {
+        "label": "Company *",
+        "placeholder": "Your company name"
+      },
+      "subject": {
+        "label": "Subject *",
+        "placeholder": "e.g., Product question, Partnership, etc."
+      },
+      "email": {
+        "label": "Email address *",
+        "placeholder": "your.email@example.com"
+      },
+      "message": {
+        "label": "Message *",
+        "placeholder": "Tell us about your request, order, or project..."
+      }
+    },
+    "submit": {
+      "loading": "Sending...",
+      "default": "Send my request"
+    },
+    "errors": {
+      "generic": "Something went wrong",
+      "sendFailed": "Error while sending the message"
+    }
+  },
+  "Blogs": {
+    "hero": {
+      "title": "The blogs:",
+      "subtitle": "Tips, nutrition & health"
+    },
+    "recent": "Recent articles",
+    "readMore": "Read more...",
+    "allArticles": "All articles",
+    "empty": {
+      "title": "No articles available right now.",
+      "subtitle": "Come back soon to discover new posts!"
+    }
+  },
+  "BlogDetail": {
+    "errors": {
+      "fetchFailed": "Failed to fetch the article",
+      "loadFailed": "Failed to load the article",
+      "notFoundTitle": "Article not found",
+      "notFoundDescription": "This article does not exist or has been removed."
+    }
+  },
+  "Shop": {
+    "search": {
+      "placeholder": "Search by product name, tag, or category...",
+      "resultsProducts": "Found {count} product(s) for \"{query}\"",
+      "resultsPackages": "Found {count} package(s) for \"{query}\""
+    },
+    "tabs": {
+      "products": "All products",
+      "packages": "Crunchy Packs"
+    },
+    "heading": {
+      "productsTitle": "The Shop.",
+      "packagesTitle": "The Boxes.",
+      "productsSubtitle": "The best freeze-dried fruits, with no additives.",
+      "packagesSubtitle": "Build your perfect mix and enjoy exclusive discounts."
+    },
+    "packages": {
+      "descriptionFallback": "A crunchy, gourmet selection for your moments of pleasure.",
+      "discover": "Discover the pack"
+    },
+    "products": {
+      "viewProduct": "View product"
+    }
+  },
+  "ProductModal": {
+    "noImages": "No images available",
+    "noReviews": "No reviews yet",
+    "perUnit": "per unit",
+    "stockMax": "Stock maximum reached ({count} available)",
+    "quantity": "Quantity",
+    "totalPrice": "Total price",
+    "outOfStock": "Out of stock",
+    "addToCart": "Add to cart"
+  },
+  "ProductDetail": {
+    "errors": {
+      "loginRequired": "Please sign in to submit a review",
+      "reviewRequired": "Please provide a rating or a comment (or both)",
+      "ratingRange": "Rating must be between 1 and 5",
+      "submitFailed": "Failed to submit the review",
+      "productNotFound": "Product not found",
+      "invalidProductData": "Invalid product data"
+    },
+    "success": {
+      "submitted": "Review sent successfully!"
+    },
+    "breadcrumb": {
+      "shop": "Shop",
+      "allProducts": "All products"
+    },
+    "descriptionFallback": "No description available.",
+    "quantity": {
+      "label": "Quantity",
+      "maxReached": "Maximum quantity reached for this product"
+    },
+    "total": {
+      "label": "Total:"
+    },
+    "buttons": {
+      "backToShop": "Back to shop",
+      "addToPack": "Add to pack",
+      "addToCart": "Add to cart",
+      "outOfStock": "Out of stock",
+      "addToWishlist": "Add to wishlist"
+    },
+    "comparison": {
+      "title": "From fresh fruit to freeze-dried fruit",
+      "subtitle": "Discover the transformation of our fruits",
+      "freshAlt": "Fresh fruit",
+      "freshLabel": "Fresh fruit",
+      "lyoAlt": "Freeze-dried fruit",
+      "lyoLabel": "Freeze-dried fruit",
+      "slide": "Slide to compare"
+    },
+    "reviews": {
+      "title": "Customer reviews",
+      "writeTitle": "Write a review",
+      "placeholder": "What did you think about the quality?",
+      "anonymous": {
+        "label": "Post anonymously",
+        "hidden": "Your name will be hidden",
+        "visible": "Your name will be visible"
+      },
+      "submitting": "Submitting...",
+      "submit": "Post review",
+      "emptyTitle": "No reviews yet",
+      "emptySubtitleLoggedIn": "Be the first to leave a review!",
+      "emptySubtitleLoggedOut": "Sign in to leave a review",
+      "anonymousName": "Anonymous",
+      "loadMore": "Load more reviews"
+    },
+    "delete": {
+      "title": "Delete your review?",
+      "description": "This action is permanent. Your review will be deleted.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "PackageDetail": {
+    "errors": {
+      "loadPack": "Failed to load the pack",
+      "loadProducts": "Failed to load products",
+      "loadFailed": "Failed to load",
+      "outOfStock": "This product is out of stock and cannot be added.",
+      "maxProducts": "Limit reached: Maximum {max} products.",
+      "selectAtLeastOne": "Select at least one product.",
+      "selectionOutOfStock": "Some products in your selection are out of stock.",
+      "addToCart": "Error while adding."
+    },
+    "success": {
+      "addedToCart": "Added to cart!"
+    },
+    "loading": "Loading...",
+    "backToShop": "Back to shop",
+    "title": "Your",
+    "descriptionFallback": "Select your favorite products and enjoy your exclusive discount.",
+    "quantity": {
+      "maxReached": "Maximum quantity reached for this product"
+    },
+    "buttons": {
+      "outOfStock": "Out of stock",
+      "remove": "Remove",
+      "addToPack": "Add to pack",
+      "viewDetails": "View details",
+      "validate": "Validate my selection"
+    },
+    "summary": {
+      "title": "Summary",
+      "productsCount": "{count} products",
+      "reset": "Reset",
+      "capacity": "Pack capacity",
+      "total": "Gross total",
+      "discount": "Pack discount ({percent}%)",
+      "toPay": "To pay"
+    }
+  },
+  "LegalMentions": {
+    "title": "Legal notice",
+    "siteUse": {
+      "title": "Use of the site",
+      "body": "Access to and use of the site www.crunchyvita.fr are subject to the Terms of Sale, these Legal Notices, and the Privacy Policy."
+    },
+    "publisher": {
+      "title": "Site publisher",
+      "company": "ALTEORA",
+      "line1": "Simplified joint-stock company with share capital of 25,000 euros",
+      "line2": "Registered with the Trade and Companies Register of Antibes under number 903 112 952",
+      "line3": "Registered office: 1460 Chemin des Terriers Building B-04 06600 Antibes, France",
+      "line4": "EU VAT number: FR0793531952",
+      "line5": "Phone: +33 7 45 15 07 88",
+      "emailLabel": "Email:"
+    },
+    "director": {
+      "title": "Publication director",
+      "body": "The publication director is Mr. HOUSSEM BEN MESSAOUD."
+    },
+    "host": {
+      "title": "Site host",
+      "intro": "The site www.crunchyvita.fr is hosted by:",
+      "name": "OVHcloud",
+      "address1": "2 rue Kellermann",
+      "address2": "59100 Roubaix - France",
+      "phone": "Phone: 1007",
+      "websiteLabel": "Website:"
+    }
+  },
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "intro": "This Privacy Policy explains how your personal information is collected, used, and shared when you visit the site crunchyvita.fr or make a purchase there.",
+    "collected": {
+      "title": "Personal information collected",
+      "p1": "When you visit the site, we automatically collect certain information about your device, including your web browser, your IP address, your time zone, and some of the cookies installed on your device.",
+      "p2": "In addition, as you browse, we collect information about:",
+      "items": {
+        "item1": "The pages you view (products consulted)",
+        "item2": "The websites or search terms that led you to the site",
+        "item3": "How you interact with the site"
+      }
+    },
+    "cookies": {
+      "title": "Cookies used",
+      "required": {
+        "title": "1. Strictly necessary cookies",
+        "body": "These cookies are essential for the site and checkout process to function. They do not require prior consent."
+      },
+      "technical": {
+        "title": "2. Technical cookies",
+        "body": "These cookies ensure the general functioning of the site (navigation, security, access to secure areas)."
+      },
+      "analytics": {
+        "title": "3. Audience measurement cookies",
+        "body": "These cookies allow us to analyze site traffic to improve performance. They are set only after user consent."
+      },
+      "marketing": {
+        "title": "4. Marketing cookies",
+        "body": "These cookies may be used for advertising or remarketing purposes. They are set only with explicit user consent."
+      }
+    },
+    "cookieManagement": {
+      "title": "Cookie management and settings",
+      "p1": "On your first visit, a cookie banner informs you about their use and lets you accept all cookies, refuse non-essential ones, or customize your preferences.",
+      "p2": "You can change your choices at any time via the \"Manage my cookies\" link available on the site.",
+      "p3": "Retention period: cookies are kept for a maximum of 13 months, in line with CNIL recommendations."
+    },
+    "use": {
+      "title": "Use of personal information",
+      "intro": "We use your personal information to:",
+      "items": {
+        "item1": "Process your orders (payment, shipping, invoicing, confirmation)",
+        "item2": "Communicate with you",
+        "item3": "Assess potential fraud or risks",
+        "item4": "Send you information about our offers, if you have opted in"
+      }
+    },
+    "sharing": {
+      "title": "Sharing personal information",
+      "intro": "We share your personal information with third parties who help us process it:",
+      "items": {
+        "item1": "OVH (online store hosting)",
+        "item2": "Google Analytics (site usage analysis)"
+      }
+    },
+    "rights": {
+      "title": "Your rights",
+      "intro": "If you are a resident of the European Economic Area, you have the following rights:",
+      "items": {
+        "item1": "Access to your personal information",
+        "item2": "Correction, update, or deletion of your data"
+      },
+      "outro": "To exercise these rights, contact us using the details below."
+    },
+    "contact": {
+      "title": "Contact us",
+      "body": "For any question, complaint, claim, or request related to your personal data, you can write to:"
+    }
+  },
+  "ShippingPolicy": {
+    "title": "Shipping Policy",
+    "preparation": {
+      "title": "Preparation and dispatch",
+      "p1": "Packages are prepared and shipped within 48 hours of the order (excluding Saturdays, Sundays, and public holidays). Once the package is handed to the carrier, you receive a confirmation email with the tracking number.",
+      "p2": "During high-activity periods, the preparation time may be extended to 72 hours. Delivery is handled by Mondial Relay, delivering orders to the customer's home, workplace, or a pickup point."
+    },
+    "absence": {
+      "title": "In case of absence",
+      "p1": "If the customer is absent at the time of delivery, a delivery notice will be left and the carrier will contact them.",
+      "p2": "The customer can also leave specific instructions for the courier. If the parcel is not collected within the allotted time, it will be returned to our warehouse."
+    },
+    "missingInfo": {
+      "title": "Missing information or incomplete details",
+      "p1": "The customer must provide all information necessary for proper delivery (exact address, phone number, access code, etc.).",
+      "p2": "If this information is missing, our company will not be liable for delivery failure. Products will be returned to our warehouse and the customer must contact customer service to arrange a new delivery, which will be billed to the customer."
+    },
+    "issues": {
+      "title": "Delivery issues",
+      "p1": "Products travel at our company's risk, except in special cases.",
+      "p2": "The customer must check the package condition and the number of products upon receipt. Any reservation (damage, missing product, damaged packaging) must be noted on the delivery slip, which the customer must keep a copy of.",
+      "p3": "Any complaint regarding delivery must be made within 3 working days after receipt of the products, by email to:"
+    },
+    "promo": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases!"
+  },
+  "ReturnPolicy": {
+    "title": "Return Policy",
+    "returnSection": {
+      "title": "Returns",
+      "p1": "With our company, the customer may return the product(s) concerned (in their original condition and accompanied by all commercial documents included with the delivery).",
+      "p2": "Return shipping costs are borne by the customer, except when a product has a manufacturing defect or does not match the original order. Only the price of the returned product(s) will be refunded. The refund will be made as soon as possible and no later than 14 days after receipt of the products by our company, using the payment method chosen at purchase.",
+      "p3": "The right of withdrawal may be exercised from the time the order is placed, after the customer has received delivery of the products. The criteria are based on the original condition and a state that allows resale. The company reserves the right to refuse products that do not meet these return conditions and to send them back to the customer."
+    },
+    "procedure": {
+      "title": "Return procedure",
+      "intro": "To ensure optimal processing of your return, please follow the procedure below:",
+      "steps": {
+        "step1": {
+          "title": "1. Contact customer service by email at contact@crunchyvita.com",
+          "body": "specifying the invoice number and the products concerned."
+        },
+        "step2": {
+          "title": "2. Prepare the products concerned",
+          "body": "in their original packaging, accompanied by the invoice."
+        },
+        "step3": {
+          "title": "3. Return the parcel to the following address:",
+          "address": "ALTEORA, 1460 Chemin des Terriers Building B-04 06600 Antibes.",
+          "note": "The parcel must be dropped off at a post office within 14 days from the date of return authorization."
+        }
+      },
+      "outro": "Upon receipt of your parcel, our quality service will verify the integrity of the return and the acceptance conditions. If the conditions are met, we will proceed with a refund or replacement and send the products within 3 to 5 working days from the time your return is taken in charge by our warehouse."
+    },
+    "refund": {
+      "title": "Refund",
+      "p1": "Refunds are issued according to the payment method and currency used at purchase.",
+      "p2": "We will refund your returned item as soon as possible after its receipt. The credit to your bank account will be effective within 7 to 10 working days."
+    }
+  },
+  "CGU": {
+    "title": "Terms of Use (CGU)",
+    "intro": {
+      "title": "Conditions of use",
+      "body": "These general terms of use (\"CGU\") define the terms and conditions of access to and use of the website and the Account - as defined below - made available by the company Alteora, a simplified joint-stock company with share capital of 10,000 euros, registered with the Trade and Companies Register of Antibes under number 903112952, with registered office at 1460 Chemin des Terriers Building B-04 06600 Antibes (hereafter the \"Seller\"), as well as the rights and obligations of any individual or legal entity likely to commercially or professionally operate, or as a franchisee, accessing, visiting and/or using the site, regardless of the network or means used (hereafter the \"User\")."
+    },
+    "article1": {
+      "title": "Article 1 - Purpose of the site",
+      "body": "The website www.crunchyvita.fr ( the \"Site\") is an e-commerce site that offers online sales of freeze-dried fruit packs (hereafter the \"Products\"). The Site allows the User, notably through an Account whose operating conditions they will set. The Site is accessible free of charge to any person with Internet access. All costs related to this access (hardware, software, Internet connection) are borne exclusively by the User, who is solely responsible for the proper functioning of their equipment and access or network."
+    },
+    "article2": {
+      "title": "Article 2 - Acceptance of the CGU",
+      "p1": "Access to and use of the Site and/or the Account imply full and unconditional acceptance of these CGU by the User.",
+      "p2": "By accepting these conditions, the User agrees to them; otherwise, the User must stop using the Site immediately.",
+      "p3": "The Seller reserves the right to modify the CGU at any time, with the current version available on the Site."
+    },
+    "article3": {
+      "title": "Article 3 - Creation and use of the Account",
+      "p1": "To access the Account, the User must create one, which will allow them to provide delivery information, make payments, track orders, and manage potential returns.",
+      "p2": "Login credentials (email address and password) are strictly personal and confidential. The User agrees to keep them secret and not communicate them to third parties."
+    },
+    "article4": {
+      "title": "Article 4 - Site availability",
+      "body": "The site is accessible 24/7, except in case of force majeure, events beyond the Seller's control, or interruptions required for maintenance, updates, or any other technical reason."
+    },
+    "article5": {
+      "title": "Article 5 - Warranties and liabilities",
+      "p1": "The Seller strives to keep the Site up to date and provide reliable information; however, it does not guarantee the accuracy, completeness, or timeliness of the content.",
+      "p2": "The site is provided \"as is\" - without any implied or express warranty."
+    },
+    "article6": {
+      "title": "Article 6 - Hyperlinks",
+      "body": "The Site may contain links to third-party sites. The Seller has no control over these sites and disclaims any responsibility for their content, products, services, or data."
+    },
+    "article7": {
+      "title": "Article 7 - Intellectual property",
+      "body": "The Site, its structure, content, trademarks, logos, databases, and any other protected elements are the exclusive property of the Seller or third parties who have authorized its use."
+    },
+    "article8": {
+      "title": "Article 8 - Duration",
+      "body": "These CGU apply from the time they are accepted by the User and for the entire duration of use of the Site and/or the Account."
+    },
+    "article9": {
+      "title": "Article 9 - Applicable law",
+      "body": "These CGU are governed by French law. In the event of a dispute, the parties will endeavor to find an amicable solution. Failing that, French courts will have jurisdiction."
+    },
+    "article10": {
+      "title": "Article 10 - Contact",
+      "p1": "by email:",
+      "p2": "by mail: Alteora, 1460 Chemin des Terriers Building B-04 06600 Antibes"
+    }
+  },
+  "CGV": {
+    "title": "Terms of Sale (CGV)",
+    "updated": "ALTEORA - www.crunchyvita.fr | Updated in 2026",
+    "preamble": {
+      "title": "Preamble",
+      "body": "This Preamble is an integral part of the Terms of Sale."
+    },
+    "article1": {
+      "title": "Article 1. Parties to this agreement",
+      "items": {
+        "item1": "1) The company ALTEORA: Simplified joint-stock company with share capital of 10,000 euros, registered with the Trade and Companies Register of Antibes under number 903112952, with registered office at 1460 Chemin des Terriers Building B-04 06600 Antibes and VAT number FR0793931952, hereafter referred to as the \"Seller\".",
+        "item2": "2) Any individual wishing to make a purchase on the Seller's website, hereafter referred to as the \"Buyer\"."
+      }
+    },
+    "article2": {
+      "title": "Article 2. Purpose",
+      "body": "The Seller's activity is the online sale of products under the CrunchyVita brand (freeze-dried fruits) via the site www.crunchyvita.fr."
+    },
+    "article2_1": {
+      "title": "Article 2.1. Precautions for use",
+      "body": "CrunchyVita packs must be kept in their tightly sealed pouch to preserve their crunchy texture. Even when filled, they remain edible, according to texture and bag condition."
+    },
+    "article3": {
+      "title": "Article 3. Definitions",
+      "items": {
+        "item1": "Seller: ALTEORA, simplified joint-stock company registered with the Antibes Trade and Companies Register under number 903112952.",
+        "item2": "Buyer: any individual wishing to make a purchase on the Site.",
+        "item3": "Product: any product offered for sale, subject to available stock.",
+        "item4": "Delivery: transfer to the Buyer of the physical possession or control of the Product.",
+        "item5": "Site: www.crunchyvita.fr."
+      }
+    },
+    "article4": {
+      "title": "Article 4. Price",
+      "p1": "Prices are indicated in euros, including taxes, excluding processing and shipping fees.",
+      "p2": "The Seller may modify prices at any time, but the applicable rate is the one in effect at the time the order is validated."
+    },
+    "article5": {
+      "title": "Article 5. Order",
+      "intro": "To place an order, the Buyer must provide:",
+      "items": {
+        "item1": "Email address",
+        "item2": "First and last name",
+        "item3": "Postal address",
+        "item4": "Phone number",
+        "item5": "Payment information"
+      }
+    },
+    "article6": {
+      "title": "Article 6. Payment",
+      "body": "Payment is made at the time of order, by bank card (Carte Bleue, Visa, Mastercard, etc.) via Stripe."
+    },
+    "article7": {
+      "title": "Article 7. Delivery",
+      "p1": "Delivery is made to the address provided by the Buyer.",
+      "p2": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases.",
+      "p3": "Parcel tracking is communicated by email."
+    },
+    "article8": {
+      "title": "Article 8. Withdrawal",
+      "p1": "In accordance with Article L221-18 of the French Consumer Code, the Buyer has 14 days from receipt to withdraw. Return shipping costs are borne by the Buyer.",
+      "returnAddressLabel": "Return address:",
+      "returnAddress": "ALTEORA, 1460 Chemin des Terriers Building B-04 06600 Antibes.",
+      "p2": "The refund is issued within 14 days using the same payment method."
+    },
+    "article9": {
+      "title": "Article 9. Warranties",
+      "intro": "The Products benefit from:",
+      "items": {
+        "item1": "The legal warranty of conformity (articles L217-4 and following of the French Consumer Code)",
+        "item2": "The warranty against hidden defects (articles 1641 and following of the French Civil Code)"
+      }
+    },
+    "article10": {
+      "title": "Article 10. Disputes",
+      "intro": "In case of a dispute:",
+      "items": {
+        "item1": "The Buyer contacts customer service (contact@crunchyvita.com)",
+        "item2": "If no response, they may contact the FEVAD e-commerce mediator (www.mediateur-fevad.fr)",
+        "item3": "If no agreement, jurisdiction is assigned to French courts"
+      }
+    }
+  }
+}

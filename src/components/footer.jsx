@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from '@/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('Footer');
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -42,25 +45,25 @@ export default function Footer() {
               />
             </div>
             <p className="text-sm text-gray-900 leading-relaxed mb-6">
-              Fruits lyophilisés bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.
+              {t('about')}
             </p>
             
             {/* Contact Info */}
             <div className="space-y-3">
               <a href="mailto:contact@crunchyvita.com" className="flex items-center gap-2 text-sm text-gray-900 hover:text-[#556822] transition">
                 <Mail size={16} />
-                contact@crunchyvita.com
+                {t('email')}
               </a>
               <a href="tel:+33745150788" className="flex items-center gap-2 text-sm text-gray-900 hover:text-[#556822] transition">
                 <Phone size={16} />
-                +33 7 45 15 07 88
+                {t('phone')}
               </a>
               <div className="flex items-start gap-2 text-sm text-gray-900">
                 <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
-                  <p>1460 Chemin des Terriers</p>
-                  <p>Bâtiment B-04</p>
-                  <p>06600 Antibes, France</p>
+                  <p>{t('address.line1')}</p>
+                  <p>{t('address.line2')}</p>
+                  <p>{t('address.line3')}</p>
                 </div>
               </div>
             </div>
@@ -68,45 +71,45 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Navigation</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">{t('nav.title')}</h3>
             <ul className="space-y-3">
-              <li><a href="/" className="text-sm text-gray-900 hover:text-[#556822] transition">Accueil</a></li>
-              <li><a href="/#produits" className="text-sm text-gray-900 hover:text-[#556822] transition">Nos produits</a></li>
-              <li><a href="/#engagements" className="text-sm text-gray-900 hover:text-[#556822] transition">Nos engagements</a></li>
-              <li><a href="/contact" className="text-sm text-gray-900 hover:text-[#556822] transition">Contact</a></li>
-              <li><a href="/blogs" className="text-sm text-gray-900 hover:text-[#556822] transition">Blog</a></li>
+              <li><Link href="/" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.home')}</Link></li>
+              <li><Link href="/shop" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.products')}</Link></li>
+              <li><Link href="/#engagements" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.commitments')}</Link></li>
+              <li><Link href="/contact" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.contact')}</Link></li>
+              <li><Link href="/blogs" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.blog')}</Link></li>
             </ul>
           </div>
 
           {/* Aide */}
           <div>
-            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Aide</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">{t('help.title')}</h3>
             <ul className="space-y-3">
-              <li><a href="/politique-retour" className="text-sm text-gray-900 hover:text-[#556822] transition">Retours</a></li>
-              <li><a href="/politique-livraison" className="text-sm text-gray-900 hover:text-[#556822] transition">Informations sur les livraisons</a></li>
-              <li><a href="/cgv/#paiement" className="text-sm text-gray-900 hover:text-[#556822] transition">Moyens de paiement</a></li>
+              <li><Link href="/politique-retour" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.returns')}</Link></li>
+              <li><Link href="/politique-livraison" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.shipping')}</Link></li>
+              <li><Link href="/cgv/#paiement" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.payment')}</Link></li>
             </ul>
           </div>
 
           {/* CrunchyVita */}
           <div>
-            <h3 className="text-lg font-bold text-[#E10C69] mb-6">CrunchyVita</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">{t('brand.title')}</h3>
             <ul className="space-y-3">
-              <li><a href="/about-us" className="text-sm text-gray-900 hover:text-[#556822] transition">À propos de nous</a></li>
-              <li><a href="/about-us/#lyophilisation" className="text-sm text-gray-900 hover:text-[#556822] transition">La lyophilisation</a></li>
-              <li><a href="/about-us/#clients-b2b" className="text-sm text-gray-900 hover:text-[#556822] transition">Clients Professionnels B2B</a></li>
-              <li><a href="/about-us/#collaboration-sponsoring" className="text-sm text-gray-900 hover:text-[#556822] transition">Collaboration & Sponsoring</a></li>
+              <li><Link href="/about-us" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('brand.about')}</Link></li>
+              <li><Link href="/about-us/#lyophilisation" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('brand.lyo')}</Link></li>
+              <li><Link href="/about-us/#clients-b2b" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('brand.b2b')}</Link></li>
+              <li><Link href="/about-us/#collaboration-sponsoring" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('brand.collab')}</Link></li>
             </ul>
           </div>
 
           {/* Informations légales */}
           <div>
-            <h3 className="text-lg font-bold text-[#E10C69] mb-6">Informations légales</h3>
+            <h3 className="text-lg font-bold text-[#E10C69] mb-6">{t('legal.title')}</h3>
             <ul className="space-y-3">
-              <li><a href="/mentions-legales" className="text-sm text-gray-900 hover:text-[#556822] transition">Mentions légales</a></li>
-              <li><a href="/cgu" className="text-sm text-gray-900 hover:text-[#556822] transition">CGU</a></li>
-              <li><a href="/cgv" className="text-sm text-gray-900 hover:text-[#556822] transition">CGV</a></li>
-              <li><a href="/politique-confidentialite" className="text-sm text-gray-900 hover:text-[#556822] transition">Politique de confidentialité</a></li>
+              <li><Link href="/mentions-legales" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.mentions')}</Link></li>
+              <li><Link href="/cgu" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.cgu')}</Link></li>
+              <li><Link href="/cgv" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.cgv')}</Link></li>
+              <li><Link href="/politique-confidentialite" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.privacy')}</Link></li>
             </ul>
           </div>
         </div>
@@ -116,15 +119,13 @@ export default function Footer() {
 
         {/* Newsletter Section */}
         <div className="mb-12">
-          <h3 className="text-2xl font-bold text-[#E10C69] mb-2">Newsletter</h3>
-          <p className="text-gray-900 text-sm mb-6">
-            Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.
-          </p>
+          <h3 className="text-2xl font-bold text-[#E10C69] mb-2">{t('newsletter.title')}</h3>
+          <p className="text-gray-900 text-sm mb-6">{t('newsletter.description')}</p>
           
           <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md">
             <input
               type="email"
-              placeholder="Votre email"
+              placeholder={t('newsletter.placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 px-4 py-3 rounded-full bg-[#fcfaf8] text-slate-900 placeholder-slate-500 border border-slate-700 focus:border-green-500 focus:outline-none transition text-sm"
@@ -135,7 +136,7 @@ export default function Footer() {
               disabled={loading}
               className="px-6 py-3 bg-[#E10C69] hover:bg-[#EF8EB8] text-white font-bold rounded-full transition-colors text-sm whitespace-nowrap disabled:opacity-50"
             >
-              {loading ? 'Inscription...' : "S'inscrire"}
+              {loading ? t('newsletter.loading') : t('newsletter.submit')}
             </button>
           </form>
         </div>
@@ -145,9 +146,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="pt-8 text-center">
-          <p className="text-[#E10C69] text-xs">
-            © 2026 CrunchyVita - ALTEORA SAS. Tous droits réservés.
-          </p>
+          <p className="text-[#E10C69] text-xs">© {t('copyright')}</p>
         </div>
       </div>
     </footer>

@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import HeaderHome from "@/components/header";
 import Footer from "@/components/footer";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { useTranslations, useLocale } from 'next-intl';
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function BlogDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const blogId = params?.id;
+  const t = useTranslations('BlogDetail');
+  const locale = useLocale();
 
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,13 +31,13 @@ export default function BlogDetailPage() {
       const response = await fetch(`${backendUrl}/blogs/${blogId}`);
       
       if (!response.ok) {
-        throw new Error("Failed to fetch blog");
+        throw new Error(t('errors.fetchFailed'));
       }
 
       const result = await response.json();
       setBlog(result.data);
     } catch (err) {
-      setError(err.message || "Failed to load blog post");
+      setError(err.message || t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -63,8 +64,8 @@ export default function BlogDetailPage() {
             <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 max-w-2xl mx-auto">
               <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-red-700 font-semibold">Article introuvable</p>
-                <p className="text-sm text-red-600 mt-1">{error || "Cet article n'existe pas ou a été supprimé."}</p>
+                <p className="text-sm text-red-700 font-semibold">{t('errors.notFoundTitle')}</p>
+                <p className="text-sm text-red-600 mt-1">{error || t('errors.notFoundDescription')}</p>
               </div>
             </div>
             
@@ -91,7 +92,7 @@ export default function BlogDetailPage() {
 
             {/* Publication Date */}
             <div className="text-center text-gray-600 text-sm mb-12">
-              {new Date(blog.publicationDate).toLocaleDateString('fr-FR', {
+              {new Date(blog.publicationDate).toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'

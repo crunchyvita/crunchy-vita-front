@@ -2,42 +2,45 @@
 
 import HeaderHome from '@/components/header';
 import Footer from '@/components/footer';
+import { useTranslations } from 'next-intl';
 import '../fonts.css';
 
 export default function MentionsLegales() {
+  const t = useTranslations('LegalMentions');
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <HeaderHome />
       
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
-        <h1 className="text-4xl font-bold text-slate-900 mb-12 font-[agrandir]">Mentions Légales</h1>
+        <h1 className="text-4xl font-bold text-slate-900 mb-12 font-[agrandir]">{t('title')}</h1>
 
         {/* Utilisation du site */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Utilisation du site</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('siteUse.title')}</h2>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            L'accès et l'utilisation du site www.crunchyvita.fr sont soumis au respect des Conditions Générales de Vente, des présentes Mentions légales et de la Politique de Confidentialité.
+            {t('siteUse.body')}
           </p>
         </section>
 
         {/* Éditeur du site */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Éditeur du site</h2>
-          <p className="text-slate-700 font-semibold mb-4">ALTEORA</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('publisher.title')}</h2>
+          <p className="text-slate-700 font-semibold mb-4">{t('publisher.company')}</p>
           <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
             <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              Société par actions simplifiée au capital de 25 000 euros
-            <br/>
-              Immatriculée au Registre du Commerce et des Sociétés d'Antibes sous le numéro 903 112 952
-            <br/>
-              Siège social: 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes, France
-            <br/>
-              Numéro de l'IVA intracommunautaire : FR0793531952
-            <br/>
-              Téléphone : +33 7 45 15 07 88
-            <br/>
-              <span className="font-semibold">E-mail :</span>{' '}
+              {t('publisher.line1')}
+              <br />
+              {t('publisher.line2')}
+              <br />
+              {t('publisher.line3')}
+              <br />
+              {t('publisher.line4')}
+              <br />
+              {t('publisher.line5')}
+              <br />
+              <span className="font-semibold">{t('publisher.emailLabel')}</span>{' '}
               <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700">
                 contact@crunchyvita.com
               </a>
@@ -47,30 +50,31 @@ export default function MentionsLegales() {
 
         {/* Directeur de la publication */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Directeur de la publication</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('director.title')}</h2>
           <p className="text-slate-700 font-[maison-neue-book]">
-            Le directeur de la publication est Monsieur HOUSSEM BEN MESSAOUD.
+            {t('director.body')}
           </p>
         </section>
 
         {/* Hébergeur du site */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Hébergeur du site</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('host.title')}</h2>
           <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
             <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              Le site www.crunchyvita.fr est hébergé par : <span className="text-slate-700 mb-2 font-semibold">OVHcloud</span>
+              {t('host.intro')}{' '}
+              <span className="text-slate-700 mb-2 font-semibold">{t('host.name')}</span>
             </p>
             <p className="text-slate-700 mb-2 font-[maison-neue-book] ">
-              2 rue Kellermann
+              {t('host.address1')}
             </p>
             <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              59100 Roubaix – France
+              {t('host.address2')}
             </p>
             <p className="text-slate-700 mb-4 font-[maison-neue-book]">
-              Téléphone : 1007
+              {t('host.phone')}
             </p>
             <p className="text-slate-700">
-              <span className="font-semibold">Site web :</span> 
+              <span className="font-semibold">{t('host.websiteLabel')}</span>{' '}
               <a href="https://www.ovhcloud.com" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700">
                 www.ovhcloud.com
               </a>

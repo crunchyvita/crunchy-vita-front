@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import Image from "next/image";
 import HeaderHome from "@/components/header";
 import Footer from "@/components/footer";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const t = useTranslations('Blogs');
 
   useEffect(() => {
     fetchBlogs();
@@ -53,8 +55,8 @@ export default function BlogsPage() {
         <section className="bg-white py-16 border-b border-gray-200">
           <div className="container mx-auto px-6">
             <h1 className="text-5xl font-bold text-center text-gray-900 uppercase font-[agrandir]">
-              Le blog du bien-être :<br />
-              <span className="text-[#556822]">Astuces, alimentation & santé </span>
+              {t('hero.title')}<br />
+              <span className="text-[#556822]">{t('hero.subtitle')}</span>
             </h1>
           </div>
         </section>
@@ -71,7 +73,7 @@ export default function BlogsPage() {
                 {/* Recent Blog Posts Section */}
                 {recentBlogs.length > 0 && (
                   <div className="mb-20">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">Articles récents</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">{t('recent')}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       {recentBlogs.map((blog) => (
                         <Link key={`recent-${blog._id}`} href={`/blogs/${blog._id}`}>
@@ -95,7 +97,7 @@ export default function BlogsPage() {
                                 {getShortSummary(blog.content)}
                               </p>
                               <div className="flex items-center gap-2 text-[#558822] font-semibold text-sm hover:gap-3 transition-all">
-                                Lire plus...
+                                {t('readMore')}
                                 <ArrowRight className="h-4 w-4" />
                               </div>
                             </div>
@@ -107,7 +109,7 @@ export default function BlogsPage() {
                 )}
 
                 {/* Featured Blog Post */}
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">Tous les articles </h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-8 font-[agrandir]">{t('allArticles')}</h2>
                 {featuredBlog && (
                   <div className={`grid grid-cols-1 gap-12 mb-16 ${hasFeaturedImage ? "lg:grid-cols-3" : ""}`}>
                     {/* Featured Image */}
@@ -139,7 +141,7 @@ export default function BlogsPage() {
                             {getShortSummary(featuredBlog.content)}
                           </p>
                           <div className="flex items-center gap-2 text-[#558822] font-semibold hover:gap-3 transition-all">
-                            Lire plus...
+                            {t('readMore')}
                             <ArrowRight className="h-4 w-4" />
                           </div>
                         </div>
@@ -173,7 +175,7 @@ export default function BlogsPage() {
                               {getShortSummary(blog.content)}
                             </p>
                             <div className="flex items-center gap-2 text-[#558822] font-semibold text-sm hover:gap-3 transition-all">
-                              Lire plus...
+                              {t('readMore')}
                               <ArrowRight className="h-4 w-4" />
                             </div>
                           </div>
@@ -186,10 +188,10 @@ export default function BlogsPage() {
             ) : (
               <div className="text-center py-20">
                 <p className="text-gray-600 text-lg mb-4">
-                  Aucun article disponible pour le moment.
+                  {t('empty.title')}
                 </p>
                 <p className="text-gray-500">
-                  Revenez bientôt pour découvrir nos nouveaux articles !
+                  {t('empty.subtitle')}
                 </p>
               </div>
             )}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 import {
   X, ChevronLeft, ChevronRight, Plus, Minus,
   ShoppingCart, Heart, ShieldCheck, Truck,
@@ -15,6 +17,11 @@ export default function ProductDetailModal({
   getProductPrice,
   getAvailableStock
 }) {
+  const t = useTranslations('ProductModal');
+  const locale = useLocale();
+  const translatedProduct = getTranslatedProduct(product, locale);
+  const productName = translatedProduct.name;
+  const productDescription = translatedProduct.description;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
@@ -104,7 +111,7 @@ export default function ProductDetailModal({
               <>
                 <img
                   src={productImages[currentImageIndex]}
-                  alt={product.name}
+                  alt={productName}
                   className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                 />
 
@@ -128,7 +135,7 @@ export default function ProductDetailModal({
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <ShoppingCart size={64} strokeWidth={1} />
-                <p className="mt-2 text-sm font-medium">No images available</p>
+                <p className="mt-2 text-sm font-medium">{t('noImages')}</p>
               </div>
             )}
           </div>
@@ -181,7 +188,7 @@ export default function ProductDetailModal({
               ) : (
                 <div className="flex items-center gap-1 text-gray-400 bg-gray-50 px-3 py-1 rounded-full text-xs">
                   <Star size={14} />
-                  <span>Aucun avis pour le moment</span>
+                  <span>{t('noReviews')}</span>
                 </div>
               )}
 
@@ -189,29 +196,29 @@ export default function ProductDetailModal({
             </div>
 
             <h1 className="text-3xl font-extrabold text-[#556822] mb-2 leading-tight font-[Agrandir]">
-              {product.name}
+              {productName}
             </h1>
 
             <p className="text-3xl font-black text-[#E10c69] mb-6 font-[Erica One]">
               €{productPrice.toFixed(2)}
-              <span className="text-sm text-gray-400 font-medium ml-2 uppercase font-[Maison Neue Book]">par unité</span>
+              <span className="text-sm text-gray-400 font-medium ml-2 uppercase font-[Maison Neue Book]">{t('perUnit')}</span>
             </p>
 
             <div className="space-y-4 mb-8">
               <p className="text-gray-600 leading-relaxed italic border-l-4 border-gray-100 pl-4 font-[Maison Neue Book]">
-                {product.description}
+                {productDescription}
               </p>
 
               {showStockAlert && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
                   <AlertCircle size={18} />
-                  <span>Stock maximum atteint ({availableStock} disponible{availableStock > 1 ? 's' : ''})</span>
+                  <span>{t('stockMax', { count: availableStock })}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between mb-6">
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-[Maison Neue Mono]">Quantité</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-[Maison Neue Mono]">{t('quantity')}</span>
                   <div className="flex items-center bg-gray-100 rounded-2xl p-1">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -230,7 +237,7 @@ export default function ProductDetailModal({
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">Prix total</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">{t('totalPrice')}</span>
                   <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">€ {totalPrice.toFixed(2)}</span>
                 </div>
               </div>
@@ -241,7 +248,7 @@ export default function ProductDetailModal({
                   className="flex-[3] flex items-center justify-center gap-3 py-4 bg-[#F2F8EE] text-[#556822] hover:text-white rounded-2xl font-bold text-lg hover:bg-[#556822] hover:shadow-xl hover:shadow-[#556822]/30 transition-all duration-300 disabled:bg-gray-200 disabled:text-white disabled:cursor-not-allowed group font-[Agrandir]"
                 >
                   <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
-                  {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                  {availableStock === 0 ? t('outOfStock') : t('addToCart')}
                 </button>
                 <button className="flex-1 flex items-center justify-center border-2 border-gray-100 rounded-2xl hover:border-red-100 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all duration-300 ">
                   <Heart size={24} />
