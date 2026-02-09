@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Plus, Check, Image as ImageIcon } from "lucide-react";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 
 // Helper function to get image URL from product
 const getProductImageUrl = (product) => {
@@ -95,11 +96,12 @@ export default function ProductSelector({
 	}, []);
 
 	const handleAddProduct = (product) => {
+		const translated = getTranslatedProduct(product, "fr");
 		if (!selected.find((p) => p.productId === product._id)) {
 			// Store complete product info including imageUrl if available
 			const selectedProduct = {
 				productId: product._id,
-				productName: product.name,
+				productName: translated.name,
 				productPrice: product.price,
 				imageUrl: product.imageUrl, // Store direct imageUrl if available
 				media: product.media || [], // Store the entire media array
@@ -107,7 +109,7 @@ export default function ProductSelector({
 			
 			console.log('Adding product to selection:', {
 				productId: product._id,
-				name: product.name,
+				name: translated.name,
 				imageUrl: product.imageUrl,
 				mediaLength: product.media?.length,
 				firstImageUrl: product.media?.[0]?.url,
@@ -132,13 +134,16 @@ export default function ProductSelector({
 			onSelectionChange([]);
 		} else {
 			// Select all
-			const allSelected = availableProducts.map((product) => ({
+			const allSelected = availableProducts.map((product) => {
+				const translated = getTranslatedProduct(product, "fr");
+				return {
 				productId: product._id,
-				productName: product.name,
+				productName: translated.name,
 				productPrice: product.price,
 				imageUrl: product.imageUrl, // Store direct imageUrl if available
 				media: product.media || [], // Store the entire media array
-			}));
+			};
+		});
 			onSelectionChange(allSelected);
 		}
 	};
@@ -263,6 +268,7 @@ export default function ProductSelector({
 										<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
 											{unselectedProducts.map((product) => {
 												const isInStock = !product.availableQuantity || product.availableQuantity > 0;
+												const translated = getTranslatedProduct(product, "fr");
 												return (
 													<button
 														key={product._id}
@@ -282,7 +288,7 @@ export default function ProductSelector({
 															{product.media?.[0]?.url ? (
 																<img
 																	src={product.media[0].url}
-																	alt={product.name}
+																	alt={translated.name}
 																	className="w-full h-full object-cover group-hover:scale-110 transition"
 																/>
 															) : (
@@ -293,7 +299,7 @@ export default function ProductSelector({
 														</div>
 														<div className="p-2 space-y-1">
 															<p className="text-xs font-medium text-slate-900 line-clamp-2">
-																{product.name}
+																{translated.name}
 															</p>
 															<p className="text-xs font-semibold text-emerald-700">
 															€{Number(product.price).toFixed(2)}

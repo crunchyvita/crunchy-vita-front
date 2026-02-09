@@ -78,7 +78,7 @@ export default function ProductDetailModal({
 
   // Handlers
   const handleAddToCart = () => {
-    console.log('Cart:', product.name, quantity);
+    console.log('Cart:', productName, quantity);
   };
 
   const handleIncrement = () => {

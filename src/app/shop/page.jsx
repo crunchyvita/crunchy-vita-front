@@ -15,7 +15,7 @@ import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
 import { useLocale, useTranslations } from 'next-intl';
-import { getTranslatedProduct } from '@/lib/productTranslations';
+import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
 
 // --- UTILS ---
 const getProductImageUrl = (product) => {
@@ -42,6 +42,8 @@ const getAvailableStock = (stock) => {
  */
 function PremiumPackageCard({ pkg }) {
   const t = useTranslations('Shop');
+  const locale = useLocale();
+  const translatedPackage = getTranslatedPackage(pkg, locale);
   const productPreviews = pkg.products?.slice(0, 3) || [];
 
   return (
@@ -89,10 +91,10 @@ function PremiumPackageCard({ pkg }) {
 
       <div className="p-8 flex flex-col flex-1 relative">
         <h3 className="text-2xl font-black font-[Agrandir] text-[#556822] mb-2 leading-tight group-hover:text-[#E10C69] transition-colors">
-          {pkg.name}
+          {translatedPackage.name}
         </h3>
         <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6">
-          {pkg.description || t('packages.descriptionFallback')}
+          {translatedPackage.description || t('packages.descriptionFallback')}
         </p>
 
         <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">

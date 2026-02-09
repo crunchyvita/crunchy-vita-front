@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { productAPI } from "@/lib/api";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
 import {
 	Download,
@@ -63,9 +64,10 @@ export default function ProductsPage() {
 
 	const filteredProducts = useMemo(() => {
 		if (!search.trim()) return products;
-		return products.filter((p) =>
-			(p.name || "").toLowerCase().includes(search.trim().toLowerCase())
-		);
+		return products.filter((p) => {
+			const translated = getTranslatedProduct(p, "fr");
+			return (translated.name || "").toLowerCase().includes(search.trim().toLowerCase());
+		});
 	}, [products, search]);
 
 	const handleSelectAll = (e) => {
@@ -178,6 +180,7 @@ export default function ProductsPage() {
 									const reservedQty = product.stock?.reservedQuantity ?? 0;
 									const latestPrice = product.pricingHistory?.[product.pricingHistory.length - 1]?.price;
 								const productId = product._id || product.id;
+								const translated = getTranslatedProduct(product, "fr");
 								
 								return (
 									<tr key={productId} className="text-slate-700">
@@ -190,7 +193,7 @@ export default function ProductsPage() {
 										/>
 									</td>
 									<td className="px-3 py-3 align-middle">
-										<p className="font-medium text-slate-900">{product.name}</p>
+										<p className="font-medium text-slate-900">{translated.name}</p>
 									</td>
 									<td className="px-3 py-3 align-middle">
 										<span className="font-medium text-slate-900">{stockQty}</span>

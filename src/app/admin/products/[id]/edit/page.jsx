@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 import { productAPI, stockAPI, categoryAPI } from "@/lib/api";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 import { 
   ArrowLeft, 
   Upload, 
@@ -263,7 +264,9 @@ export default function EditProductPage() {
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to Details
           </Link>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Edit <span className="text-green-800">{product?.name}</span></h1>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+            Edit <span className="text-green-800">{getTranslatedProduct(product, "fr").name}</span>
+          </h1>
         </div>
         
         <div className="flex items-center gap-4">

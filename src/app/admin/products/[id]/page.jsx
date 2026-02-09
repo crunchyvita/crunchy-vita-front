@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { productAPI, reviewAPI } from "@/lib/api";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
 import  {
   ArrowLeft,
@@ -303,6 +304,8 @@ export default function ProductDetailPage() {
       .slice(0, 2);
   };
 
+  const translatedProduct = product ? getTranslatedProduct(product, "fr") : { name: "", description: "" };
+
   return (
     <>
     <AdminHeader />
@@ -338,7 +341,7 @@ export default function ProductDetailPage() {
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 <div className="lg:col-span-2 p-8 bg-white flex items-center justify-center relative border-r border-slate-100">
-                  <img src={images[imageIdx] || "/placeholder.png"} alt={product.name} className="max-h-125 w-full object-contain" />
+                  <img src={images[imageIdx] || "/placeholder.png"} alt={translatedProduct.name} className="max-h-125 w-full object-contain" />
                   {images.length > 1 && (
                     <div className="absolute bottom-6 right-6 flex gap-2">
                       <button onClick={() => setImageIdx((prev) => (prev - 1 + images.length) % images.length)} className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all"><ChevronLeft size={20}/></button>
@@ -605,8 +608,8 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-black  leading-tight">{product.name}</h2>
-                  <p className="text-slate-500 text-sm leading-relaxed">{product.description}</p>
+                  <h2 className="text-3xl font-black  leading-tight">{translatedProduct.name}</h2>
+                  <p className="text-slate-500 text-sm leading-relaxed">{translatedProduct.description}</p>
                 </div>
                 
                 <div className="pt-2">
