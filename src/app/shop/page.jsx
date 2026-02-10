@@ -38,8 +38,9 @@ const getAvailableStock = (stock) => {
 
 /** * PREMIUM PACKAGE CARD - Style CrunchyVita
  */
-function PremiumPackageCard({ pkg }) {
+function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoading }) {
   const productPreviews = pkg.products?.slice(0, 3) || [];
+  const resolvedType = pkg.packageType || "CUSTOM";
 
   return (
     <Link
@@ -47,6 +48,18 @@ function PremiumPackageCard({ pkg }) {
       prefetch={true}
       className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-[#E1FBD9] shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col h-full"
     >
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onToggleFavorite?.(pkg);
+        }}
+        disabled={favoritesLoading}
+        className={`absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+        title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      >
+        <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
+      </button>
       <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity text-[#556822]">
         <Package size={120} />
       </div>
@@ -82,6 +95,12 @@ function PremiumPackageCard({ pkg }) {
             </span>
           </div>
         )}
+
+        <div className="absolute top-6 right-20">
+          <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full tracking-widest shadow-lg ${resolvedType === "FIXED" ? "bg-[#556822]" : "bg-[#005085]"}`}>
+            {resolvedType === "FIXED" ? "FIXED" : "CUSTOM"}
+          </span>
+        </div>
       </div>
 
       <div className="p-8 flex flex-col flex-1 relative">
@@ -105,7 +124,7 @@ function PremiumPackageCard({ pkg }) {
 
 /** * PRODUCT CARD - Style CrunchyVita
  */
-function ProductCard({ product, onOpenDetail }) {
+function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favoritesLoading }) {
   const price = getProductPrice(product);
   const stock = getAvailableStock(product.stock);
   const imageUrl = getProductImageUrl(product);
@@ -121,7 +140,14 @@ function ProductCard({ product, onOpenDetail }) {
         )}
 
         <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-          <button className="p-3 bg-white rounded-full shadow-md text-[#E10C69] hover:bg-[#E10C69] hover:text-white transition-colors"><Heart size={18} /></button>
+          <button
+            onClick={() => onToggleFavorite(product)}
+            disabled={favoritesLoading}
+            className={`p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
+          </button>
           {stock > 0 && (
             <button onClick={() => onOpenDetail(product)} className="p-3 bg-white rounded-full shadow-md text-[#556822] hover:bg-[#556822] hover:text-white transition-colors">
               <ShoppingCart size={18} />
@@ -172,12 +198,22 @@ function ProductCard({ product, onOpenDetail }) {
 
 function ClientShop() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
+    ? rawApiBaseUrl.replace(/\/$/, '')
+    : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
   const [products, setProducts] = useState([]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [favoritesIds, setFavoritesIds] = useState(new Set());
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [packageFavoritesIds, setPackageFavoritesIds] = useState(new Set());
+  const [packageFavoritesLoading, setPackageFavoritesLoading] = useState(false);
 
   // --- SEARCH FUNCTIONALITIES ---
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,6 +310,208 @@ function ClientShop() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      setFavoritesIds(new Set());
+      setPackageFavoritesIds(new Set());
+      return;
+    }
+
+    const loadFavorites = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        const [productRes, packageRes] = await Promise.all([
+          fetch(`${apiBaseUrl}/users/favorites`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`${apiBaseUrl}/users/favorites/packages`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        ]);
+
+        const productResult = await productRes.json();
+        const packageResult = await packageRes.json();
+
+        if (productRes.ok) {
+          const ids = new Set((productResult.data || []).map((item) => item._id));
+          const pendingRaw = localStorage.getItem('pendingFavorites');
+          const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+
+          if (pending.length > 0) {
+            for (const productId of pending) {
+              if (ids.has(productId)) continue;
+              try {
+                const res = await fetch(`${apiBaseUrl}/users/favorites`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ productId }),
+                });
+                if (res.ok) ids.add(productId);
+              } catch (err) {
+                console.error('Failed to sync pending favorite', err);
+              }
+            }
+            localStorage.removeItem('pendingFavorites');
+          }
+
+          setFavoritesIds(ids);
+        }
+
+        if (packageRes.ok) {
+          const ids = new Set((packageResult.data || []).map((item) => item._id));
+          const pendingRaw = localStorage.getItem('pendingFavoritesPackages');
+          const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+
+          if (pending.length > 0) {
+            for (const packageId of pending) {
+              if (ids.has(packageId)) continue;
+              try {
+                const res = await fetch(`${apiBaseUrl}/users/favorites/packages`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ packageId }),
+                });
+                if (res.ok) ids.add(packageId);
+              } catch (err) {
+                console.error('Failed to sync pending package favorite', err);
+              }
+            }
+            localStorage.removeItem('pendingFavoritesPackages');
+          }
+
+          setPackageFavoritesIds(ids);
+        }
+      } catch (error) {
+        console.error('Failed to load favorites', error);
+      }
+    };
+
+    loadFavorites();
+  }, [user]);
+
+  const handleToggleFavorite = async (product) => {
+    if (!product?._id) return;
+
+    if (!user) {
+      const pendingRaw = localStorage.getItem('pendingFavorites');
+      const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+      if (!pending.includes(product._id)) {
+        pending.push(product._id);
+        localStorage.setItem('pendingFavorites', JSON.stringify(pending));
+      }
+      setFavoritesIds((prev) => new Set(prev).add(product._id));
+      router.push('/auth/login');
+      return;
+    }
+
+    try {
+      setFavoritesLoading(true);
+      const token = localStorage.getItem('token');
+      const isFavorite = favoritesIds.has(product._id);
+
+      if (isFavorite) {
+        const response = await fetch(`${apiBaseUrl}/users/favorites/${product._id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to remove favorite');
+
+        setFavoritesIds((prev) => {
+          const next = new Set(prev);
+          next.delete(product._id);
+          return next;
+        });
+      } else {
+        const response = await fetch(`${apiBaseUrl}/users/favorites`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId: product._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to add favorite');
+
+        setFavoritesIds((prev) => new Set(prev).add(product._id));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
+  const handleTogglePackageFavorite = async (pkg) => {
+    if (!pkg?._id) return;
+
+    if (!user) {
+      const pendingRaw = localStorage.getItem('pendingFavoritesPackages');
+      const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+      if (!pending.includes(pkg._id)) {
+        pending.push(pkg._id);
+        localStorage.setItem('pendingFavoritesPackages', JSON.stringify(pending));
+      }
+      setPackageFavoritesIds((prev) => new Set(prev).add(pkg._id));
+      router.push('/auth/login');
+      return;
+    }
+
+    try {
+      setPackageFavoritesLoading(true);
+      const token = localStorage.getItem('token');
+      const isFavorite = packageFavoritesIds.has(pkg._id);
+
+      if (isFavorite) {
+        const response = await fetch(`${apiBaseUrl}/users/favorites/packages/${pkg._id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to remove package favorite');
+
+        setPackageFavoritesIds((prev) => {
+          const next = new Set(prev);
+          next.delete(pkg._id);
+          return next;
+        });
+      } else {
+        const response = await fetch(`${apiBaseUrl}/users/favorites/packages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ packageId: pkg._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to add package favorite');
+
+        setPackageFavoritesIds((prev) => new Set(prev).add(pkg._id));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setPackageFavoritesLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F3ED] font-[Maison Neue]">
       <Header />
@@ -348,12 +586,25 @@ function ClientShop() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {activeTab === 'products' ? (
               filteredProducts.map(p => (
-                <ProductCard key={p._id} product={p} onOpenDetail={(prod) => { setSelectedProduct(prod); setIsDetailModalOpen(true); }} />
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                  onOpenDetail={(prod) => { setSelectedProduct(prod); setIsDetailModalOpen(true); }}
+                  onToggleFavorite={handleToggleFavorite}
+                  isFavorite={favoritesIds.has(p._id)}
+                  favoritesLoading={favoritesLoading}
+                />
               ))
             ) : (
               <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {filteredPackages.map((pkg) => (
-                  <PremiumPackageCard key={pkg._id} pkg={pkg} />
+                  <PremiumPackageCard
+                    key={pkg._id}
+                    pkg={pkg}
+                    onToggleFavorite={handleTogglePackageFavorite}
+                    isFavorite={packageFavoritesIds.has(pkg._id)}
+                    favoritesLoading={packageFavoritesLoading}
+                  />
                 ))}
               </div>
             )}
@@ -368,6 +619,9 @@ function ClientShop() {
         getProductImageUrl={getProductImageUrl}
         getProductPrice={getProductPrice}
         getAvailableStock={getAvailableStock}
+        onToggleFavorite={handleToggleFavorite}
+        isFavorite={selectedProduct ? favoritesIds.has(selectedProduct._id) : false}
+        favoritesLoading={favoritesLoading}
       />
       <Footer />
     </div>

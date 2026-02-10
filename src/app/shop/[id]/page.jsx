@@ -19,6 +19,10 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
+    ? rawApiBaseUrl.replace(/\/$/, '')
+    : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
 
   const [searchParams, setSearchParams] = useState({});
   const [product, setProduct] = useState(null);
@@ -30,6 +34,8 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -76,6 +82,37 @@ export default function ProductDetailPage() {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.id]);
+
+  useEffect(() => {
+    if (!user || !product?._id) {
+      setIsFavorite(false);
+      return;
+    }
+
+    const loadFavorites = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${apiBaseUrl}/users/favorites`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (!response.ok) return;
+
+        const favorites = result.data || [];
+        const isFav = favorites.some((fav) => fav._id === product._id);
+        setIsFavorite(isFav);
+      } catch (err) {
+        console.error('Failed to load favorites:', err);
+      }
+    };
+
+    loadFavorites();
+  }, [user, product?._id]);
 
   // Auto-scroll to moderated comment when in moderation mode
   useEffect(() => {
@@ -257,8 +294,46 @@ export default function ProductDetailPage() {
     // TODO: cart
   };
 
-  const handleAddToWishlist = () => {
-    // TODO
+  const handleAddToWishlist = async () => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!product?._id) return;
+
+    try {
+      setFavoritesLoading(true);
+      const token = localStorage.getItem('token');
+
+      if (isFavorite) {
+        const response = await fetch(`${apiBaseUrl}/users/favorites/${product._id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to remove favorite');
+        setIsFavorite(false);
+      } else {
+        const response = await fetch(`${apiBaseUrl}/users/favorites`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId: product._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to add favorite');
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFavoritesLoading(false);
+    }
   };
 
   const getAllReviews = () => {
@@ -705,10 +780,15 @@ export default function ProductDetailPage() {
               {!searchParams.packageId && (
                 <button
                   onClick={handleAddToWishlist}
-                  className="px-6 py-4 border-2 border-red-500 text-red-500 rounded-lg font-agrandir font-semibold hover:bg-red-50 transition-colors"
-                  title="Ajouter aux favoris"
+                  disabled={favoritesLoading}
+                  className={`px-6 py-4 border-2 rounded-lg font-agrandir font-semibold transition-colors ${
+                    isFavorite
+                      ? 'border-red-500 bg-red-500 text-white hover:bg-red-600'
+                      : 'border-red-500 text-red-500 hover:bg-red-50'
+                  } ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                 >
-                  <Heart className="h-6 w-6" />
+                  <Heart className={`h-6 w-6 ${isFavorite ? 'fill-white' : ''}`} />
                 </button>
               )}
             </div>

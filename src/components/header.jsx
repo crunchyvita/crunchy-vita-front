@@ -62,7 +62,11 @@ export default function Header() {
             <ShoppingCart size={20} className="text-gray-700" />
           </button>
 
-          <button className="hidden sm:flex p-2 hover:bg-gray-100 rounded-full transition-colors relative" title="Wishlist">
+          <button
+            onClick={() => router.push('/favorites')}
+            className="hidden sm:flex p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+            title="Wishlist"
+          >
             <Heart size={20} className="text-gray-700" />
           </button>
 

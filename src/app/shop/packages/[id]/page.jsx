@@ -95,6 +95,7 @@ export default function PackageCustomizationPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [quantities, setQuantities] = useState({});
+  const [fixedItems, setFixedItems] = useState([]);
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
   const [showStockAlerts, setShowStockAlerts] = useState({});
 
@@ -115,26 +116,32 @@ export default function PackageCustomizationPage() {
         const token = localStorage.getItem("token");
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-        // Parallel API calls for faster loading
-        const [pkgResponse, prodResponse] = await Promise.all([
-          fetch(`${API_URL}/packages/${packageId}`, {
-            next: { revalidate: 30 },
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }),
-          fetch(`${API_URL}/packages/${packageId}/available-products`, {
-            next: { revalidate: 30 },
-          })
-        ]);
+        const pkgResponse = await fetch(`${API_URL}/packages/${packageId}`, {
+          next: { revalidate: 30 },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
         if (!pkgResponse.ok) throw new Error("Échec du chargement du pack");
+
+        const pkgResult = await pkgResponse.json();
+        const pkgData = pkgResult.data;
+        setPackageData(pkgData);
+
+        if (pkgData?.packageType === "FIXED") {
+          setFixedItems(pkgData.products || []);
+          setProducts([]);
+          setSelectedProducts([]);
+          setQuantities({});
+          return;
+        }
+
+        const prodResponse = await fetch(`${API_URL}/packages/${packageId}/available-products`, {
+          next: { revalidate: 30 },
+        });
+
         if (!prodResponse.ok) throw new Error("Échec du chargement des produits");
 
-        const [pkgResult, prodResult] = await Promise.all([
-          pkgResponse.json(),
-          prodResponse.json()
-        ]);
-
-        setPackageData(pkgResult.data);
+        const prodResult = await prodResponse.json();
 
         // Get all products without filtering by stock
         const productsData = Array.isArray(prodResult.data) ? prodResult.data : (prodResult?.data || []);
@@ -184,7 +191,13 @@ export default function PackageCustomizationPage() {
 
   // Auto-save pack configuration to localStorage when it changes
   useEffect(() => {
-    if (!isRestoringFromStorage && isStorageReady && packageData && selectedProducts.length > 0) {
+    if (
+      !isRestoringFromStorage &&
+      isStorageReady &&
+      packageData &&
+      packageData.packageType !== "FIXED" &&
+      selectedProducts.length > 0
+    ) {
       const configToSave = {
         selectedProducts,
         quantities,
@@ -247,6 +260,14 @@ export default function PackageCustomizationPage() {
     }, 0);
   }, [selectedProducts, products, packageData, quantities]);
 
+  const fixedTotalPrice = useMemo(() => {
+    return fixedItems.reduce((total, item) => {
+      const product = item.productId || {};
+      const qty = item.quantity || 1;
+      return total + (getProductPrice(product) * qty);
+    }, 0);
+  }, [fixedItems]);
+
   const discountPercentage = packageData?.discountPercentage || 0;
 
   const { discountedPrice, totalSavings } = useMemo(() => {
@@ -256,6 +277,14 @@ export default function PackageCustomizationPage() {
       totalSavings: totalPrice - discounted
     };
   }, [totalPrice, discountPercentage]);
+
+  const { discountedFixedPrice, totalFixedSavings } = useMemo(() => {
+    const discounted = fixedTotalPrice * (1 - discountPercentage / 100);
+    return {
+      discountedFixedPrice: discounted,
+      totalFixedSavings: fixedTotalPrice - discounted
+    };
+  }, [fixedTotalPrice, discountPercentage]);
 
   const handleClearPack = useCallback(() => {
     setSelectedProducts([]);
@@ -309,7 +338,161 @@ export default function PackageCustomizationPage() {
     } catch (err) { setError("Erreur lors de l'ajout."); }
   };
 
+  const handleAddFixedToCart = async () => {
+    if (!user) { router.push("/auth/login"); return; }
+    try {
+      const selected = fixedItems.map((item) => ({
+        productId: item.productId?._id || item.productId,
+        quantity: item.quantity || 1,
+      }));
+
+      const cartData = {
+        packageId: packageData._id,
+        packageName: packageData.name,
+        selectedProducts: selected,
+        discountPercentage,
+        totalPrice: fixedTotalPrice,
+        discountedPrice: discountedFixedPrice,
+      };
+
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.push(cartData);
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      setSuccess("Ajouté au panier !");
+      setTimeout(() => router.push("/cart"), 1200);
+    } catch (err) {
+      setError("Erreur lors de l'ajout.");
+    }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+
+  if (packageData?.packageType === "FIXED") {
+    return (
+      <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
+        <Header />
+        <PromoBadge />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => router.back()}
+                style={{ color: COLORS.grass }}
+                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
+              >
+                <ArrowLeft size={16} /> Retour à la boutique
+              </button>
+            </div>
+            <h1 className="text-4xl font-black font-[agrandir] text-gray-900 uppercase">
+              Votre <span style={{ color: COLORS.grass }}>{packageData?.name}</span>
+            </h1>
+            <p className="text-gray-500 mt-2 max-w-xl font-[Maison Neue]">
+              {packageData?.description || "Un coffret fixe, prêt à être ajouté au panier."}
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {fixedItems.map((item) => {
+                  const product = item.productId || {};
+                  return (
+                    <div
+                      key={item._id || item.productId?._id || item.productId}
+                      className="bg-white rounded-[24px] border shadow-sm overflow-hidden flex flex-col"
+                    >
+                      <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
+                        {getProductImageUrl(product) ? (
+                          <img
+                            src={getProductImageUrl(product)}
+                            alt={product.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            <ShoppingBag size={32} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="font-bold font-[agrandir] text-[#556822] text-lg leading-tight truncate">{product.name || "Produit"}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Quantité : {item.quantity || 1}</p>
+                        <p className="text-2xl font-black mt-auto text-[#E10c69]">
+                          €{(getProductPrice(product) * (item.quantity || 1)).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="lg:col-span-4">
+              <div className="bg-white rounded-[32px] p-8 sticky top-24 shadow-xl border border-gray-100">
+                <div className="flex items-center gap-2 mb-8">
+                  <ShoppingBag style={{ color: COLORS.grass }} />
+                  <h2 className="text-xl font-black uppercase tracking-tight">Aperçu</h2>
+                </div>
+
+                <div className="space-y-4 border-t border-dashed pt-6 mb-8">
+                  <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Total Brut</span>
+                    <span>€{fixedTotalPrice.toFixed(2)}</span>
+                  </div>
+                  {discountPercentage > 0 && (
+                    <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
+                      <span>Remise Pack ({discountPercentage}%)</span>
+                      <span>-€{totalFixedSavings.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-lg font-black uppercase">À Payer</span>
+                    <span className="text-3xl font-black text-[#E10C69]">
+                      €{discountedFixedPrice.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleAddFixedToCart}
+                  style={{ backgroundColor: "#556822" }}
+                  className="text-white w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  Ajouter au panier <ShoppingCart size={18} />
+                </button>
+
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-4 p-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase flex items-center gap-2"
+                    >
+                      <AlertCircle size={14} /> {error}
+                    </motion.div>
+                  )}
+                  {success && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 p-3 rounded-xl bg-green-50 text-green-600 text-[10px] font-black uppercase flex items-center gap-2"
+                    >
+                      <CheckCircle2 size={14} /> {success}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
