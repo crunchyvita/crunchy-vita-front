@@ -15,8 +15,7 @@ export default function ProductDetailModal({
   getProductPrice,
   getAvailableStock,
   onToggleFavorite,
-  isFavorite,
-  favoritesLoading
+  isFavorite
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -248,12 +247,11 @@ export default function ProductDetailModal({
                 </button>
                 <button
                   onClick={() => onToggleFavorite?.(product)}
-                  disabled={favoritesLoading}
                   className={`flex-1 flex items-center justify-center border-2 rounded-2xl transition-all duration-300 ${
                     isFavorite
                       ? 'border-red-500 bg-red-500 text-white'
                       : 'border-gray-100 text-gray-400 hover:border-red-100 hover:bg-red-50 hover:text-red-500'
-                  } ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  }`}
                 >
                   <Heart size={24} className={isFavorite ? 'fill-white' : ''} />
                 </button>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
+import PreferredItemDisplay from '@/components/PreferredItemDisplay';
 import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
@@ -211,66 +212,7 @@ export default function Home() {
       </section>
 
       {/* Customer Preference */}
-      <section className="py-10 lg:py-20 relative overflow-hidden">
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            
-            <motion.div 
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-center lg:text-left order-2 lg:order-1"
-            >
-            
-
-              <h2 className="mb-6 text-5xl md:text-6xl lg:text-7xl font-black text-[#556822] uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-                Le préféré de <br/>
-                <span className="text-[#E10C69] inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ fontFamily: 'Agrandir, sans-serif' }}>nos clients</span>
-              </h2>
-
-              <p className="mb-10 text-gray-600 text-lg lg:text-xl font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
-                Découvrez notre coffret découverte, le mix parfait pour goûter à l'explosion de saveurs Crunchy Vita.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start">
-                <Link
-                  href="/shop?tab=packages"
-                  className="group relative inline-flex items-center gap-3 rounded-full bg-[#E10C69] px-10 py-5 font-black uppercase tracking-widest text-white shadow-[0_15px_30px_rgba(225,12,105,0.3)] transition-all hover:bg-[#C40A5B] hover:-translate-y-1"
-                >
-                  Découvrir le coffret
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                  >
-                    →
-                  </motion.span>
-                </Link>
-
-               
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", stiffness: 60 }}
-              className="relative h-100 lg:h-162.5 order-1 lg:order-2 group"
-            >
-              
-              <Image 
-                src="/assets/images/products.png" 
-                alt="Coffret Crunchy Vita avec fruits volants" 
-                fill 
-                className="object-contain drop-shadow-[0_45px_45px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:scale-105" 
-                priority
-              />
-            </motion.div>
-
-          </div>  
-        </div>
-      </section>
+      <PreferredItemDisplay />
 
       {/* Commitments */}
       <section id="engagements" className="py-4 lg:py-32 bg-[#F5F3ED] relative overflow-hidden scroll-mt-24">

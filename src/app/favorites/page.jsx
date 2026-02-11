@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Search, X } from 'lucide-react';
+import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight } from 'lucide-react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
@@ -47,9 +47,6 @@ export default function FavoritesPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('products');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [removingId, setRemovingId] = useState(null);
-    const [removingPackageId, setRemovingPackageId] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -101,7 +98,6 @@ export default function FavoritesPage() {
     const handleRemoveFavorite = async (productId) => {
         if (!productId) return;
         try {
-            setRemovingId(productId);
             const token = localStorage.getItem('token');
             const response = await fetch(`${apiBaseUrl}/users/favorites/${productId}`, {
                 method: 'DELETE',
@@ -114,15 +110,12 @@ export default function FavoritesPage() {
             setFavorites((prev) => prev.filter((item) => item._id !== productId));
         } catch (err) {
             setError(err.message || 'Une erreur est survenue.');
-        } finally {
-            setRemovingId(null);
         }
     };
 
     const handleRemovePackageFavorite = async (packageId) => {
         if (!packageId) return;
         try {
-            setRemovingPackageId(packageId);
             const token = localStorage.getItem('token');
             const response = await fetch(`${apiBaseUrl}/users/favorites/packages/${packageId}`, {
                 method: 'DELETE',
@@ -135,39 +128,8 @@ export default function FavoritesPage() {
             setFavoritePackages((prev) => prev.filter((item) => item._id !== packageId));
         } catch (err) {
             setError(err.message || 'Une erreur est survenue.');
-        } finally {
-            setRemovingPackageId(null);
         }
     };
-
-    const filteredFavorites = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
-        if (!query) return favorites;
-
-        return favorites.filter((product) => {
-            const nameMatch = product.name?.toLowerCase().includes(query);
-            const tagMatch = Array.isArray(product.tags) && product.tags.some((tag) => tag?.toLowerCase().includes(query));
-            const categoryName = (product.category?.name || product.category || '').toString();
-            const categoryMatch = categoryName.toLowerCase().includes(query);
-            return nameMatch || tagMatch || categoryMatch;
-        });
-    }, [favorites, searchQuery]);
-
-    const filteredPackageFavorites = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
-        if (!query) return favoritePackages;
-
-        return favoritePackages.filter((pkg) => {
-            const nameMatch = pkg.name?.toLowerCase().includes(query);
-            const descMatch = pkg.description?.toLowerCase().includes(query);
-            const typeMatch = pkg.packageType?.toLowerCase().includes(query);
-            const productMatch = pkg.products?.some((item) => {
-                const product = item.productId || item;
-                return product?.name?.toLowerCase().includes(query);
-            });
-            return nameMatch || descMatch || typeMatch || productMatch;
-        });
-    }, [favoritePackages, searchQuery]);
 
     const hasFavorites = favorites.length > 0;
     const hasPackageFavorites = favoritePackages.length > 0;
@@ -184,34 +146,6 @@ export default function FavoritesPage() {
                     </h1>
                     <p className="text-gray-500 mt-2">Retrouvez vos produits préférés en un clic.</p>
                 </div>
-
-                <section className="mb-12 font-[Maison Neue]">
-                    <div className="relative max-w-2xl mx-auto">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#556822]" size={22} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Rechercher par nom de produit, tag ou catégorie..."
-                            className="w-full pl-16 pr-12 py-6 rounded-[2.5rem] bg-white shadow-2xl shadow-[#556822]/5 border-0 focus:ring-4 focus:ring-[#B3C800]/20 transition-all text-[#556822] placeholder:text-gray-300 font-bold text-lg font-[Maison Neue Book]"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-6 top-1/2 -translate-y-1/2 text-[#556822]/50 hover:text-[#E10C69] transition-colors font-[Maison Neue Mono]"
-                            >
-                                <X size={20} />
-                            </button>
-                        )}
-                    </div>
-                    {searchQuery && (
-                        <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
-                            {activeTab === 'products'
-                                ? `Trouvé ${filteredFavorites.length} produit(s) pour "${searchQuery}"`
-                                : `Trouvé ${filteredPackageFavorites.length} coffret(s) pour "${searchQuery}"`}
-                        </p>
-                    )}
-                </section>
 
                 <div className="flex flex-col items-center mb-12">
                     <div className="flex bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] border border-white">
@@ -252,7 +186,7 @@ export default function FavoritesPage() {
                         {activeTab === 'products' && hasFavorites && (
                             <div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {filteredFavorites.map((product) => {
+                                    {favorites.map((product) => {
                                         const price = getProductPrice(product);
                                         const stock = getAvailableStock(product.stock);
                                         const imageUrl = getProductImageUrl(product);
@@ -273,8 +207,7 @@ export default function FavoritesPage() {
                                                     <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                                                         <button
                                                             onClick={() => handleRemoveFavorite(product._id)}
-                                                            disabled={removingId === product._id}
-                                                            className={`p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${removingId === product._id ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                            className="p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
                                                             title="Retirer des favoris"
                                                         >
                                                             <Heart size={18} className="fill-[#E10C69] text-[#E10C69]" />
@@ -316,7 +249,7 @@ export default function FavoritesPage() {
                         {activeTab === 'packages' && hasPackageFavorites && (
                             <div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {filteredPackageFavorites.map((pkg) => {
+                                    {favoritePackages.map((pkg) => {
                                         const resolvedType = pkg.packageType || 'CUSTOM';
                                         const imageUrl = getPackageImageUrl(pkg);
                                         return (
@@ -332,8 +265,7 @@ export default function FavoritesPage() {
                                                         e.stopPropagation();
                                                         handleRemovePackageFavorite(pkg._id);
                                                     }}
-                                                    disabled={removingPackageId === pkg._id}
-                                                    className={`absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${removingPackageId === pkg._id ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                    className="absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
                                                     title="Retirer des favoris"
                                                 >
                                                     <Heart size={18} className="fill-[#E10C69] text-[#E10C69]" />
