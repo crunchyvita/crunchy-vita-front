@@ -760,5 +760,37 @@
     "alt": {
       "profilePhoto": "Photo de profil"
     }
+  },
+  "Favorites": {
+    "title": "Mes favoris",
+    "subtitle": "Retrouvez vos produits preferes en un clic.",
+    "search": {
+      "placeholder": "Rechercher par nom de produit, tag ou categorie...",
+      "resultsProducts": "Trouve {count} produit(s) pour \"{query}\"",
+      "resultsPackages": "Trouve {count} coffret(s) pour \"{query}\""
+    },
+    "tabs": {
+      "products": "Produits favoris",
+      "packages": "Packs favoris"
+    },
+    "empty": {
+      "title": "Votre liste de favoris est vide.",
+      "cta": "Decouvrir la boutique"
+    },
+    "package": {
+      "descriptionFallback": "Une selection gourmande et craquante pour vos moments de plaisir."
+    },
+    "actions": {
+      "removeFavorite": "Retirer des favoris",
+      "viewProduct": "Voir le produit",
+      "viewPack": "Decouvrir le pack"
+    },
+    "errors": {
+      "loadFavorites": "Erreur lors du chargement des favoris.",
+      "loadPackageFavorites": "Erreur lors du chargement des packs favoris.",
+      "removeFavorite": "Impossible de retirer le favori.",
+      "removePackageFavorite": "Impossible de retirer le pack favori.",
+      "generic": "Une erreur est survenue."
+    }
   }
 }

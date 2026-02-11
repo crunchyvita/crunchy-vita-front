@@ -760,5 +760,37 @@
     "alt": {
       "profilePhoto": "Profile photo"
     }
+  },
+  "Favorites": {
+    "title": "My favorites",
+    "subtitle": "Find your favorite products in one click.",
+    "search": {
+      "placeholder": "Search by product name, tag, or category...",
+      "resultsProducts": "Found {count} product(s) for \"{query}\"",
+      "resultsPackages": "Found {count} pack(s) for \"{query}\""
+    },
+    "tabs": {
+      "products": "Favorite products",
+      "packages": "Favorite packs"
+    },
+    "empty": {
+      "title": "Your favorites list is empty.",
+      "cta": "Discover the shop"
+    },
+    "package": {
+      "descriptionFallback": "A crunchy selection for your favorite moments."
+    },
+    "actions": {
+      "removeFavorite": "Remove from favorites",
+      "viewProduct": "View product",
+      "viewPack": "Discover the pack"
+    },
+    "errors": {
+      "loadFavorites": "Failed to load favorites.",
+      "loadPackageFavorites": "Failed to load favorite packs.",
+      "removeFavorite": "Failed to remove favorite.",
+      "removePackageFavorite": "Failed to remove favorite pack.",
+      "generic": "An error occurred."
+    }
   }
 }

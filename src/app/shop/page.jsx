@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Link } from '@/navigation';
 import {
   ImageIcon, ShoppingCart, Heart, Star, Package,

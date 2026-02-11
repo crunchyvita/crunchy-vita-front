@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link, useRouter } from '@/navigation';
 import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Search, X } from 'lucide-react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale, useTranslations } from 'next-intl';
+import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
 
 const getProductImageUrl = (product) => {
     if (!product) return null;
@@ -36,7 +37,9 @@ const getPackageImageUrl = (pkg) => {
 
 export default function FavoritesPage() {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const locale = useLocale();
+    const t = useTranslations('Favorites');
     const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
         ? rawApiBaseUrl.replace(/\/$/, '')
@@ -52,6 +55,7 @@ export default function FavoritesPage() {
     const [removingPackageId, setRemovingPackageId] = useState(null);
 
     useEffect(() => {
+        if (authLoading) return;
         if (!user) {
             router.push('/auth/login');
             return;
@@ -80,23 +84,23 @@ export default function FavoritesPage() {
                 const packageResult = await packageRes.json();
 
                 if (!productRes.ok) {
-                    throw new Error(productResult.message || 'Erreur lors du chargement des favoris.');
+                    throw new Error(productResult.message || t('errors.loadFavorites'));
                 }
                 if (!packageRes.ok) {
-                    throw new Error(packageResult.message || 'Erreur lors du chargement des packs favoris.');
+                    throw new Error(packageResult.message || t('errors.loadPackageFavorites'));
                 }
 
                 setFavorites(productResult.data || []);
                 setFavoritePackages(packageResult.data || []);
             } catch (err) {
-                setError(err.message || 'Une erreur est survenue.');
+                setError(err.message || t('errors.generic'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadFavorites();
-    }, [user, apiBaseUrl, router]);
+    }, [user, authLoading, apiBaseUrl, router]);
 
     const handleRemoveFavorite = async (productId) => {
         if (!productId) return;
@@ -113,7 +117,7 @@ export default function FavoritesPage() {
             if (!response.ok) throw new Error(result.message || 'Impossible de retirer le favori.');
             setFavorites((prev) => prev.filter((item) => item._id !== productId));
         } catch (err) {
-            setError(err.message || 'Une erreur est survenue.');
+            setError(err.message || t('errors.removeFavorite'));
         } finally {
             setRemovingId(null);
         }
@@ -134,7 +138,7 @@ export default function FavoritesPage() {
             if (!response.ok) throw new Error(result.message || 'Impossible de retirer le pack favori.');
             setFavoritePackages((prev) => prev.filter((item) => item._id !== packageId));
         } catch (err) {
-            setError(err.message || 'Une erreur est survenue.');
+            setError(err.message || t('errors.removePackageFavorite'));
         } finally {
             setRemovingPackageId(null);
         }
@@ -145,21 +149,23 @@ export default function FavoritesPage() {
         if (!query) return favorites;
 
         return favorites.filter((product) => {
-            const nameMatch = product.name?.toLowerCase().includes(query);
+            const translatedProduct = getTranslatedProduct(product, locale);
+            const nameMatch = translatedProduct.name?.toLowerCase().includes(query);
             const tagMatch = Array.isArray(product.tags) && product.tags.some((tag) => tag?.toLowerCase().includes(query));
             const categoryName = (product.category?.name || product.category || '').toString();
             const categoryMatch = categoryName.toLowerCase().includes(query);
             return nameMatch || tagMatch || categoryMatch;
         });
-    }, [favorites, searchQuery]);
+    }, [favorites, searchQuery, locale]);
 
     const filteredPackageFavorites = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
         if (!query) return favoritePackages;
 
         return favoritePackages.filter((pkg) => {
-            const nameMatch = pkg.name?.toLowerCase().includes(query);
-            const descMatch = pkg.description?.toLowerCase().includes(query);
+            const translatedPackage = getTranslatedPackage(pkg, locale);
+            const nameMatch = translatedPackage.name?.toLowerCase().includes(query);
+            const descMatch = translatedPackage.description?.toLowerCase().includes(query);
             const typeMatch = pkg.packageType?.toLowerCase().includes(query);
             const productMatch = pkg.products?.some((item) => {
                 const product = item.productId || item;
@@ -167,7 +173,7 @@ export default function FavoritesPage() {
             });
             return nameMatch || descMatch || typeMatch || productMatch;
         });
-    }, [favoritePackages, searchQuery]);
+    }, [favoritePackages, searchQuery, locale]);
 
     const hasFavorites = favorites.length > 0;
     const hasPackageFavorites = favoritePackages.length > 0;
@@ -180,9 +186,9 @@ export default function FavoritesPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-10">
                     <h1 className="text-4xl font-black font-[agrandir] text-[#556822] uppercase">
-                        Mes Favoris
+                        {t('title')}
                     </h1>
-                    <p className="text-gray-500 mt-2">Retrouvez vos produits préférés en un clic.</p>
+                    <p className="text-gray-500 mt-2">{t('subtitle')}</p>
                 </div>
 
                 <section className="mb-12 font-[Maison Neue]">
@@ -192,7 +198,7 @@ export default function FavoritesPage() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Rechercher par nom de produit, tag ou catégorie..."
+                            placeholder={t('search.placeholder')}
                             className="w-full pl-16 pr-12 py-6 rounded-[2.5rem] bg-white shadow-2xl shadow-[#556822]/5 border-0 focus:ring-4 focus:ring-[#B3C800]/20 transition-all text-[#556822] placeholder:text-gray-300 font-bold text-lg font-[Maison Neue Book]"
                         />
                         {searchQuery && (
@@ -207,8 +213,8 @@ export default function FavoritesPage() {
                     {searchQuery && (
                         <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
                             {activeTab === 'products'
-                                ? `Trouvé ${filteredFavorites.length} produit(s) pour "${searchQuery}"`
-                                : `Trouvé ${filteredPackageFavorites.length} coffret(s) pour "${searchQuery}"`}
+                                ? t('search.resultsProducts', { count: filteredFavorites.length, query: searchQuery })
+                                : t('search.resultsPackages', { count: filteredPackageFavorites.length, query: searchQuery })}
                         </p>
                     )}
                 </section>
@@ -219,13 +225,13 @@ export default function FavoritesPage() {
                             onClick={() => setActiveTab('products')}
                             className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'products' ? 'bg-[#E10c69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
                         >
-                            Produits favoris
+                            {t('tabs.products')}
                         </button>
                         <button
                             onClick={() => setActiveTab('packages')}
                             className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'packages' ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
                         >
-                            Packs favoris
+                            {t('tabs.packages')}
                         </button>
                     </div>
                 </div>
@@ -242,9 +248,9 @@ export default function FavoritesPage() {
                 ) : !(hasFavorites || hasPackageFavorites) ? (
                     <div className="rounded-2xl bg-white border border-slate-200 p-8 text-center">
                         <Heart className="h-10 w-10 text-[#E10C69] mx-auto mb-3" />
-                        <p className="text-slate-700 font-semibold">Votre liste de favoris est vide.</p>
+                        <p className="text-slate-700 font-semibold">{t('empty.title')}</p>
                         <Link href="/shop" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-3 text-white font-bold">
-                            Découvrir la boutique
+                            {t('empty.cta')}
                         </Link>
                     </div>
                 ) : (
@@ -256,6 +262,8 @@ export default function FavoritesPage() {
                                         const price = getProductPrice(product);
                                         const stock = getAvailableStock(product.stock);
                                         const imageUrl = getProductImageUrl(product);
+                                        const translatedProduct = getTranslatedProduct(product, locale);
+                                        const productName = translatedProduct.name || product.name;
                                         return (
                                             <div
                                                 key={product._id}
@@ -263,7 +271,7 @@ export default function FavoritesPage() {
                                             >
                                                 <div className="relative aspect-square overflow-hidden bg-[#F2F8EE]">
                                                     {imageUrl ? (
-                                                        <img src={imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                        <img src={imageUrl} alt={productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                                     ) : (
                                                         <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30">
                                                             <Heart size={40} />
@@ -275,7 +283,7 @@ export default function FavoritesPage() {
                                                             onClick={() => handleRemoveFavorite(product._id)}
                                                             disabled={removingId === product._id}
                                                             className={`p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${removingId === product._id ? 'opacity-60 cursor-not-allowed' : ''}`}
-                                                            title="Retirer des favoris"
+                                                            title={t('actions.removeFavorite')}
                                                         >
                                                             <Heart size={18} className="fill-[#E10C69] text-[#E10C69]" />
                                                         </button>
@@ -283,7 +291,7 @@ export default function FavoritesPage() {
                                                             <button
                                                                 onClick={() => router.push(`/shop/${product._id}`)}
                                                                 className="p-3 bg-white rounded-full shadow-md text-[#556822] hover:bg-[#556822] hover:text-white transition-colors"
-                                                                title="Voir le produit"
+                                                                title={t('actions.viewProduct')}
                                                             >
                                                                 <ShoppingCart size={18} />
                                                             </button>
@@ -293,7 +301,7 @@ export default function FavoritesPage() {
 
                                                 <div className="p-6">
                                                     <div className="mb-3">
-                                                        <h3 className="font-black text-[#556822] text-lg mb-2">{product.name}</h3>
+                                                        <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
                                                         <div className="flex items-center justify-between">
                                                             <h4 className="font-black text-[#E10C69] text-xl">€{price.toFixed(2)}</h4>
                                                         </div>
@@ -303,7 +311,7 @@ export default function FavoritesPage() {
                                                         href={`/shop/${product._id}`}
                                                         className="block w-full py-3.5 rounded-xl bg-[#F2F8EE] text-[#556822] font-black text-[10px] uppercase tracking-[0.5] text-center hover:bg-[#556822] hover:text-white transition-all"
                                                     >
-                                                        Voir le produit
+                                                        {t('actions.viewProduct')}
                                                     </Link>
                                                 </div>
                                             </div>
@@ -319,6 +327,9 @@ export default function FavoritesPage() {
                                     {filteredPackageFavorites.map((pkg) => {
                                         const resolvedType = pkg.packageType || 'CUSTOM';
                                         const imageUrl = getPackageImageUrl(pkg);
+                                        const translatedPackage = getTranslatedPackage(pkg, locale);
+                                        const packageName = translatedPackage.name || pkg.name;
+                                        const packageDescription = translatedPackage.description || pkg.description;
                                         return (
                                             <Link
                                                 key={pkg._id}
@@ -334,7 +345,7 @@ export default function FavoritesPage() {
                                                     }}
                                                     disabled={removingPackageId === pkg._id}
                                                     className={`absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${removingPackageId === pkg._id ? 'opacity-60 cursor-not-allowed' : ''}`}
-                                                    title="Retirer des favoris"
+                                                    title={t('actions.removeFavorite')}
                                                 >
                                                     <Heart size={18} className="fill-[#E10C69] text-[#E10C69]" />
                                                 </button>
@@ -370,14 +381,14 @@ export default function FavoritesPage() {
 
                                                 <div className="p-8 flex flex-col flex-1 relative">
                                                     <h3 className="text-2xl font-black font-[Agrandir] text-[#556822] mb-2 leading-tight group-hover:text-[#E10C69] transition-colors">
-                                                        {pkg.name}
+                                                        {packageName}
                                                     </h3>
                                                     <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6">
-                                                        {pkg.description || 'Une sélection gourmande et craquante pour vos moments de plaisir.'}
+                                                        {packageDescription || t('package.descriptionFallback')}
                                                     </p>
 
                                                     <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
-                                                        <span className="text-xs font-black uppercase tracking-widest text-[#556822]">Découvrir le pack</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-[#556822]">{t('actions.viewPack')}</span>
                                                         <span className="h-12 w-12 bg-[#556822] rounded-full flex items-center justify-center text-white group-hover:bg-[#E10C69] group-hover:scale-110 transition-all duration-300 shadow-lg">
                                                             <ArrowRight size={20} />
                                                         </span>
