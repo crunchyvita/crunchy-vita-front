@@ -4,6 +4,7 @@ import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
+import PreferredItemDisplay from '@/components/PreferredItemDisplay';
 import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
@@ -273,6 +274,7 @@ export default function Home() {
           </div>  
         </div>
       </section>
+      <PreferredItemDisplay />
 
       {/* Commitments */}
       <section id="engagements" className="py-4 lg:py-32 bg-[#F5F3ED] relative overflow-hidden scroll-mt-24">

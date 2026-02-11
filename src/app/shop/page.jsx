@@ -59,8 +59,7 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
           e.stopPropagation();
           onToggleFavorite?.(pkg);
         }}
-        disabled={favoritesLoading}
-        className={`absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+        className="absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
         title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
       >
         <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
@@ -100,12 +99,6 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
             </span>
           </div>
         )}
-
-        <div className="absolute top-6 right-20">
-          <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full tracking-widest shadow-lg ${resolvedType === "FIXED" ? "bg-[#556822]" : "bg-[#005085]"}`}>
-            {resolvedType === "FIXED" ? "FIXED" : "CUSTOM"}
-          </span>
-        </div>
       </div>
 
       <div className="p-8 flex flex-col flex-1 relative">
@@ -150,8 +143,7 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
         <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
           <button
             onClick={() => onToggleFavorite(product)}
-            disabled={favoritesLoading}
-            className={`p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2] ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className="p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
             title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
             <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
@@ -427,7 +419,6 @@ function ClientShop() {
     }
 
     try {
-      setFavoritesLoading(true);
       const token = localStorage.getItem('token');
       const isFavorite = favoritesIds.has(product._id);
 
@@ -462,8 +453,6 @@ function ClientShop() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setFavoritesLoading(false);
     }
   };
 
@@ -483,7 +472,6 @@ function ClientShop() {
     }
 
     try {
-      setPackageFavoritesLoading(true);
       const token = localStorage.getItem('token');
       const isFavorite = packageFavoritesIds.has(pkg._id);
 
@@ -518,8 +506,6 @@ function ClientShop() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setPackageFavoritesLoading(false);
     }
   };
 
@@ -603,7 +589,6 @@ function ClientShop() {
                   onOpenDetail={(prod) => { setSelectedProduct(prod); setIsDetailModalOpen(true); }}
                   onToggleFavorite={handleToggleFavorite}
                   isFavorite={favoritesIds.has(p._id)}
-                  favoritesLoading={favoritesLoading}
                 />
               ))
             ) : (
@@ -614,7 +599,6 @@ function ClientShop() {
                     pkg={pkg}
                     onToggleFavorite={handleTogglePackageFavorite}
                     isFavorite={packageFavoritesIds.has(pkg._id)}
-                    favoritesLoading={packageFavoritesLoading}
                   />
                 ))}
               </div>
@@ -632,7 +616,6 @@ function ClientShop() {
         getAvailableStock={getAvailableStock}
         onToggleFavorite={handleToggleFavorite}
         isFavorite={selectedProduct ? favoritesIds.has(selectedProduct._id) : false}
-        favoritesLoading={favoritesLoading}
       />
       <Footer />
     </div>

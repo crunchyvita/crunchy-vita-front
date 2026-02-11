@@ -105,7 +105,6 @@ export default function FavoritesPage() {
     const handleRemoveFavorite = async (productId) => {
         if (!productId) return;
         try {
-            setRemovingId(productId);
             const token = localStorage.getItem('token');
             const response = await fetch(`${apiBaseUrl}/users/favorites/${productId}`, {
                 method: 'DELETE',
@@ -120,13 +119,13 @@ export default function FavoritesPage() {
             setError(err.message || t('errors.removeFavorite'));
         } finally {
             setRemovingId(null);
+            setError(err.message || 'Une erreur est survenue.');
         }
     };
 
     const handleRemovePackageFavorite = async (packageId) => {
         if (!packageId) return;
         try {
-            setRemovingPackageId(packageId);
             const token = localStorage.getItem('token');
             const response = await fetch(`${apiBaseUrl}/users/favorites/packages/${packageId}`, {
                 method: 'DELETE',
@@ -258,7 +257,7 @@ export default function FavoritesPage() {
                         {activeTab === 'products' && hasFavorites && (
                             <div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {filteredFavorites.map((product) => {
+                                    {favorites.map((product) => {
                                         const price = getProductPrice(product);
                                         const stock = getAvailableStock(product.stock);
                                         const imageUrl = getProductImageUrl(product);
@@ -324,7 +323,7 @@ export default function FavoritesPage() {
                         {activeTab === 'packages' && hasPackageFavorites && (
                             <div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {filteredPackageFavorites.map((pkg) => {
+                                    {favoritePackages.map((pkg) => {
                                         const resolvedType = pkg.packageType || 'CUSTOM';
                                         const imageUrl = getPackageImageUrl(pkg);
                                         const translatedPackage = getTranslatedPackage(pkg, locale);

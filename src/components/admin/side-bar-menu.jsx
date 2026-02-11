@@ -26,6 +26,7 @@ import {
 	User,
 	LogOut,
 	X,
+	Heart,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
@@ -43,6 +44,7 @@ const NAV_ITEMS = [
 	{ label: "Checkout", href: "/admin/checkout", icon: CreditCard },
 	{ label: "Customers", href: "/admin/customers", icon: Users },
 	{ label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
+	{ label: "Preferred Item", href: "/admin/preferred-item", icon: Heart },
 	{ label: "Reports", href: "/admin/reports", icon: BarChart3 }
 	
 ];

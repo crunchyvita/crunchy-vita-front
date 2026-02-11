@@ -15,7 +15,7 @@ function ResetPasswordForm() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
 
-  const { loading, error, success, resetPassword } = usePasswordReset();
+  const { loading, error, success, isTokenExpired, resetPassword } = usePasswordReset();
 
   useEffect(() => {
     if (!resetToken) {
@@ -39,7 +39,7 @@ function ResetPasswordForm() {
   // État si le token est manquant
   if (!resetToken) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#FFFEF0] flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center border border-slate-100">
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="text-red-500 h-8 w-8" />
@@ -60,11 +60,36 @@ function ResetPasswordForm() {
     );
   }
 
+  // État si le token est expiré
+  if (isTokenExpired) {
+    return (
+      <div className="min-h-screen bg-[#FFFEF0] flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center border border-slate-100">
+          <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="text-amber-500 h-8 w-8" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Lien expiré</h2>
+          <p className="text-slate-500 mb-8 text-sm">
+            Ce lien de réinitialisation a expiré. Les liens sont valables pendant 15 minutes. 
+            Veuillez demander un nouveau lien de réinitialisation.
+          </p>
+          <Link
+            href="/auth/forgot-password"
+            className="inline-flex items-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-[#EF8EB8]/30"
+          >
+            <ArrowLeft size={18} />
+            Demander un nouveau lien
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#FFFEF0] flex flex-col items-center justify-center p-6">
       {/* Logo */}
       <div className="mb-10 flex flex-col items-center">
-        <div className="w-24 h-24 bg-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
+        <div className="w-24 h-24 bg-[#EF8EB8] rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#EF8EB8]/60">
           <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
         </div>
       </div>
@@ -101,7 +126,7 @@ function ResetPasswordForm() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 ml-1">Nouveau mot de passe</label>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                 <Lock size={18} />
               </div>
               <input
@@ -110,13 +135,13 @@ function ResetPasswordForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading || success}
-                className="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all shadow-sm"
+                className="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/20 focus:border-[#EF8EB8] focus:bg-white transition-all shadow-sm"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#EF8EB8]"
               >
                 {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -127,7 +152,7 @@ function ResetPasswordForm() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 ml-1">Confirmer le mot de passe</label>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                 <Lock size={18} />
               </div>
               <input
@@ -136,7 +161,7 @@ function ResetPasswordForm() {
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
                 disabled={loading || success}
-                className="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all shadow-sm"
+                className="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/20 focus:border-[#EF8EB8] focus:bg-white transition-all shadow-sm"
                 placeholder="••••••••"
               />
               <button
@@ -164,7 +189,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={loading || success}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-200 active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] disabled:bg-[#F5B9D1] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-[#EF8EB8]/30 active:scale-[0.98]"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Réinitialiser le mot de passe'}
           </button>
@@ -173,7 +198,7 @@ function ResetPasswordForm() {
         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
           <Link 
             href="/auth/login" 
-            className="text-sm font-semibold text-slate-500 hover:text-emerald-600 transition-colors inline-flex items-center gap-2"
+            className="text-sm font-semibold text-[#EF8EB8] hover:text-[#E10C69] transition-colors inline-flex items-center gap-2"
           >
             <ArrowLeft size={16} /> Retour à la connexion
           </Link>

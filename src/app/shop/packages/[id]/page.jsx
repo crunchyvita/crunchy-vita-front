@@ -102,6 +102,7 @@ export default function PackageCustomizationPage() {
   const [fixedItems, setFixedItems] = useState([]);
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
   const [showStockAlerts, setShowStockAlerts] = useState({});
+  const [packageQuantity, setPackageQuantity] = useState(1);
 
   // ✅ Package name NOT translated (handled by getTranslatedPackage)
   const translatedPackage = useMemo(() => getTranslatedPackage(packageData, locale), [packageData, locale]);
@@ -347,7 +348,7 @@ export default function PackageCustomizationPage() {
     try {
       const selected = fixedItems.map((item) => ({
         productId: item.productId?._id || item.productId,
-        quantity: item.quantity || 1,
+        quantity: (item.quantity || 1) * packageQuantity,
       }));
 
       const cartData = {
@@ -355,8 +356,8 @@ export default function PackageCustomizationPage() {
         packageName: packageData.name,
         selectedProducts: selected,
         discountPercentage,
-        totalPrice: fixedTotalPrice,
-        discountedPrice: discountedFixedPrice,
+        totalPrice: fixedTotalPrice * packageQuantity,
+        discountedPrice: discountedFixedPrice * packageQuantity,
       };
 
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -441,21 +442,42 @@ export default function PackageCustomizationPage() {
                   <h2 className="text-xl font-black uppercase tracking-tight">Aperçu</h2>
                 </div>
 
+                <div className="mb-8 flex items-center justify-between bg-gray-50 rounded-2xl p-4">
+                  <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">Quantité</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setPackageQuantity(Math.max(1, packageQuantity - 1))}
+                      className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                      style={{ color: COLORS.grass }}
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <span className="font-black text-lg w-8 text-center">{packageQuantity}</span>
+                    <button
+                      onClick={() => setPackageQuantity(packageQuantity + 1)}
+                      className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                      style={{ color: COLORS.grass }}
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-4 border-t border-dashed pt-6 mb-8">
                   <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
                     <span>Total Brut</span>
-                    <span>€{fixedTotalPrice.toFixed(2)}</span>
+                    <span>€{(fixedTotalPrice * packageQuantity).toFixed(2)}</span>
                   </div>
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                       <span>Remise Pack ({discountPercentage}%)</span>
-                      <span>-€{totalFixedSavings.toFixed(2)}</span>
+                      <span>-€{(totalFixedSavings * packageQuantity).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-lg font-black uppercase">À Payer</span>
                     <span className="text-3xl font-black text-[#E10C69]">
-                      €{discountedFixedPrice.toFixed(2)}
+                      €{(discountedFixedPrice * packageQuantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
