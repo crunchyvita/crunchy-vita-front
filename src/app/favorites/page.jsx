@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useRouter } from '@/navigation';
-import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Search, X } from 'lucide-react';
+import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight } from 'lucide-react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
@@ -50,7 +50,6 @@ export default function FavoritesPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('products');
-    const [searchQuery, setSearchQuery] = useState('');
     const [removingId, setRemovingId] = useState(null);
     const [removingPackageId, setRemovingPackageId] = useState(null);
 
@@ -143,36 +142,7 @@ export default function FavoritesPage() {
         }
     };
 
-    const filteredFavorites = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
-        if (!query) return favorites;
-
-        return favorites.filter((product) => {
-            const translatedProduct = getTranslatedProduct(product, locale);
-            const nameMatch = translatedProduct.name?.toLowerCase().includes(query);
-            const tagMatch = Array.isArray(product.tags) && product.tags.some((tag) => tag?.toLowerCase().includes(query));
-            const categoryName = (product.category?.name || product.category || '').toString();
-            const categoryMatch = categoryName.toLowerCase().includes(query);
-            return nameMatch || tagMatch || categoryMatch;
-        });
-    }, [favorites, searchQuery, locale]);
-
-    const filteredPackageFavorites = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
-        if (!query) return favoritePackages;
-
-        return favoritePackages.filter((pkg) => {
-            const translatedPackage = getTranslatedPackage(pkg, locale);
-            const nameMatch = translatedPackage.name?.toLowerCase().includes(query);
-            const descMatch = translatedPackage.description?.toLowerCase().includes(query);
-            const typeMatch = pkg.packageType?.toLowerCase().includes(query);
-            const productMatch = pkg.products?.some((item) => {
-                const product = item.productId || item;
-                return product?.name?.toLowerCase().includes(query);
-            });
-            return nameMatch || descMatch || typeMatch || productMatch;
-        });
-    }, [favoritePackages, searchQuery, locale]);
+    // No client-side search/filtering — show saved favorites directly
 
     const hasFavorites = favorites.length > 0;
     const hasPackageFavorites = favoritePackages.length > 0;
@@ -190,33 +160,7 @@ export default function FavoritesPage() {
                     <p className="text-gray-500 mt-2">{t('subtitle')}</p>
                 </div>
 
-                <section className="mb-12 font-[Maison Neue]">
-                    <div className="relative max-w-2xl mx-auto">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#556822]" size={22} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder={t('search.placeholder')}
-                            className="w-full pl-16 pr-12 py-6 rounded-[2.5rem] bg-white shadow-2xl shadow-[#556822]/5 border-0 focus:ring-4 focus:ring-[#B3C800]/20 transition-all text-[#556822] placeholder:text-gray-300 font-bold text-lg font-[Maison Neue Book]"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-6 top-1/2 -translate-y-1/2 text-[#556822]/50 hover:text-[#E10C69] transition-colors font-[Maison Neue Mono]"
-                            >
-                                <X size={20} />
-                            </button>
-                        )}
-                    </div>
-                    {searchQuery && (
-                        <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
-                            {activeTab === 'products'
-                                ? t('search.resultsProducts', { count: filteredFavorites.length, query: searchQuery })
-                                : t('search.resultsPackages', { count: filteredPackageFavorites.length, query: searchQuery })}
-                        </p>
-                    )}
-                </section>
+                {/* Search removed — display favorites directly */}
 
                 <div className="flex flex-col items-center mb-12">
                     <div className="flex bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] border border-white">
