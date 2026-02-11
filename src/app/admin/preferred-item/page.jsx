@@ -413,7 +413,12 @@ export default function PreferredItemAdminPage() {
               <button
                 onClick={handleSave}
                 disabled={loading || !selectedItem}
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-4 px-8 rounded-lg transition-colors disabled:cursor-not-allowed text-lg shadow-lg hover:shadow-xl"
+                className="flex-1 flex items-center justify-center gap-2 text-white font-bold py-4 px-8 rounded-lg transition-colors disabled:cursor-not-allowed text-lg shadow-lg"
+                style={{
+                  backgroundColor: loading || !selectedItem ? '#cccccc' : '#556622'
+                }}
+                onMouseEnter={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 10px 25px rgba(85, 102, 34, 0.3)')}
+                onMouseLeave={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)')}
                 title={!selectedItem ? 'Please select an item first' : ''}
               >
                 {loading ? (

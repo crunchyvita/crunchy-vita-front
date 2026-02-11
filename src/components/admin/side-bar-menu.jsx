@@ -39,7 +39,7 @@ const NAV_ITEMS = [
 	{ label: "Stock", href: "/admin/stock", icon: ShoppingCart },
 	{ label: "Blog", href: "/admin/blogs", icon: FileText },
 	{ label: "Contact", href: "/admin/contact", icon: MessageSquare },
-	{ label: "Promotions", href: "/admin/promotions", icon: ArrowUpDown },
+	{ label: "Promotions", href: "/admin/promo-codes", icon: ArrowUpDown },
 	{ label: "Orders", href: "/admin/orders", icon: CreditCard },
 	{ label: "Checkout", href: "/admin/checkout", icon: CreditCard },
 	{ label: "Customers", href: "/admin/customers", icon: Users },

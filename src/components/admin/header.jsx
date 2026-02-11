@@ -574,10 +574,8 @@ export default function AdminHeader() {
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/admin/dashboard')}>
-            <div className="bg-green-600 p-1.5 rounded-lg">
-              <LayoutDashboard className="text-white h-5 w-5" />
-            </div>
-            <h1 className="text-lg font-bold">Crunchy Vita <span className="text-green-600">Admin</span></h1>
+            <img src="/assets/images/logo.png" alt="Logo" className="h-12 w-12 object-contain" />
+            <h1 className="text-lg font-bold">Crunchy Vita <span style={{color: '#556622'}}>Admin</span></h1>
           </div>
           </div>
 

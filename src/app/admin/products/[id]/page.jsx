@@ -313,7 +313,10 @@ export default function ProductDetailPage() {
             <ArrowLeft size={20} />
             <span>Back to Products</span>
           </Link>
-          <Link href="/admin/promotions" className="bg-green-800 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+          <Link href="/admin/promotions" className="text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Calendar size={18} />
             Schedule Promotion
           </Link>

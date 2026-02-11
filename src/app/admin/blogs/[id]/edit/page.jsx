@@ -280,8 +280,11 @@ export default function EditBlogPage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={submitting}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+            className="px-6 py-2 text-white rounded-lg transition disabled:opacity-50"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617')}
+            onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622')}
+            disabled={saving}
           >
             {submitting ? "Updating..." : "Update Blog Post"}
           </button>

@@ -328,8 +328,11 @@ export default function ContactMessagesPage() {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={handleReply}
+                    className="text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.2)'}}
+                    onMouseEnter={(e) => !sending && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.3)')}
+                    onMouseLeave={(e) => !sending && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.2)')}
                     disabled={sending || !replyText.trim()}
-                    className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? (
                       <>
