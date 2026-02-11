@@ -24,6 +24,7 @@ export default function HeaderHome() {
   const navLinks = [
     { key: 'home', href: '/' },
     { key: 'products', href: '/shop' },
+    { key: 'espace professionnel', href: '/espace-professionnel' },
     { key: 'commitments', href: '/#engagements' },
     { key: 'blog', href: '/blogs' },
     { key: 'contact', href: '/contact' },

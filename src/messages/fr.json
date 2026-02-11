@@ -3,6 +3,7 @@
     "nav": {
       "home": "Accueil",
       "products": "Nos produits",
+      "espace professionnel": "Espace professionnel",
       "blog": "Blog",
       "contact": "Contact"
     },
@@ -17,6 +18,7 @@
     "nav": {
       "home": "Accueil",
       "products": "Nos produits",
+      "espace professionnel": "Espace professionnel",
       "commitments": "Nos engagements",
       "blog": "Blog",
       "contact": "Contact"
@@ -80,7 +82,7 @@
       "ctaJoin": "Rejoindre la communaute"
     },
     "why": {
-      "title": "Pourquoi choisir CrunchyVita ?",
+      "title": "Pourquoi choisir Crunchy Vita ?",
       "cards": {
         "card1": { "title": "100% fruits", "desc": "Uniquement des fruits, rien d'autre." },
         "card2": { "title": "Certifie BIO", "desc": "Des fruits selectionnes avec soin." },
@@ -122,6 +124,80 @@
       }
     }
   },
+  "ProfessionalSpace": {
+    "hero": {
+      "title": "Fruits lyophilisés en vrac pour professionnels",
+      "subtitle": "Bio & Conventionnel - Qualité maîtrisée - Approvisionnement fiable",
+      "cta": "Demander un devis"
+    },
+    "audience": {
+      "title": "À qui s'adresse Crunchy Vita?",
+      "items": {
+        "foodBrands": "Marques Alimentaires",
+        "agriIndustry": "Industrie Agroalimentaire",
+        "cafesRestaurants": "Cafés & Restaurants",
+        "sportsNutrition": "Nutrition Sportive",
+        "grocersWholesalers": "Épiceries & Grossistes"
+      }
+    },
+    "ranges": {
+      "organic": {
+        "title": "Gamme Bio",
+        "items": {
+          "certified": "Ingrédients certifiés",
+          "traceability": "Traçabilité complète",
+          "compliant": "Conforme produits BIO"
+        }
+      },
+      "conventional": {
+        "title": "Gamme Conventionnelle",
+        "items": {
+          "costAlternative": "Alternative économique",
+          "wideSelection": "Large choix disponible",
+          "consistentQuality": "Qualité constante"
+        }
+      }
+    },
+    "products": {
+      "title": "Nos Produits en Vrac",
+      "filters": {
+        "all": "Tous",
+        "organic": "BIO",
+        "conventional": "Conventionnel",
+        "slices": "Tranches",
+        "powder": "Poudre"
+      }
+    },
+    "recap": {
+      "title": "Tableau Récapitulatif",
+      "items": {
+        "strictControl": "Contrôle Rigoureux",
+        "batchTraceability": "Traçabilité des Lots",
+        "certifications": "Certifications & Analyses",
+        "separation": "Séparation Bio/Conv.",
+        "moqa": "MOQ Adaptés"
+      }
+    },
+    "form": {
+      "title": "Accès Pro & Devis Personnalisé",
+      "notice": "Ce formulaire est exclusivement réservé aux professionnels et aux entreprises enregistrées souhaitant recevoir un devis en gros. Si vous êtes un particulier ou ne représentez pas une société, merci d'utiliser notre",
+      "noticeLink": "formulaire de contact",
+      "companyTitle": "Société",
+      "fields": {
+        "company": "Société",
+        "activity": "Activité",
+        "siret": "Siret ",
+        "vat": "Numéro TVA"
+      },
+      "selects": {
+        "products": "Produits Recherchés",
+        "range": "Bio ou Conventionnel",
+        "volume": "Volumes Souhaités",
+        "country": "Pays de Livraison"
+      },
+      "submit": "Recevoir un Devis"
+    }
+  },
   "AboutUs": {
     "title": "A propos de nous",
     "lyo": {
@@ -132,7 +208,7 @@
     },
     "mission": {
       "title": "Notre mission",
-      "p1": "Chez CrunchyVita, nous croyons que le snacking peut etre a la fois delicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutes ni conservateurs, a base de fruits frais de qualite.",
+      "p1": "Chez Crunchy Vita, nous croyons que le snacking peut etre a la fois delicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutes ni conservateurs, a base de fruits frais de qualite.",
       "p2": "Nous selectionnons nos fruits avec soin, issus de cultures biologiques certifiees, pour vous offrir le meilleur de la nature dans chaque sachet."
     },
     "collab": {
@@ -636,6 +712,53 @@
         "item2": "A defaut de reponse, il peut saisir le Mediateur de l'e-commerce de la FEVAD (www.mediateur-fevad.fr)",
         "item3": "A defaut d'accord, competence est attribuee aux tribunaux francais"
       }
+    }
+  },
+  "Profile": {
+    "title": "Parametres du profil",
+    "subtitle": "Gerez les informations et preferences de votre compte",
+    "sections": {
+      "profilePhoto": "Photo de profil",
+      "basicInfo": "Informations de base",
+      "changePassword": "Changer le mot de passe"
+    },
+    "fields": {
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Entrez votre nom complet",
+      "email": "Adresse email",
+      "currentPassword": "Mot de passe actuel",
+      "currentPasswordPlaceholder": "Entrez le mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Entrez un nouveau mot de passe (min 6 caracteres)",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe"
+    },
+    "helpers": {
+      "passwordHint": "Laissez vide si vous ne souhaitez pas changer votre mot de passe"
+    },
+    "googleAccount": "Compte Google",
+    "googlePhotoManaged": "La photo de profil est geree par votre compte Google",
+    "uploadPhoto": "Telecharger une nouvelle photo",
+    "emailCannotChange": "L'email ne peut pas etre modifie",
+    "actions": {
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "changePhoto": "Changer la photo"
+    },
+    "alerts": {
+      "googlePhotoLocked": "Les utilisateurs Google ne peuvent pas changer leur photo de profil",
+      "imageTooLarge": "La taille de l'image doit etre inferieure a 5 Mo",
+      "invalidImage": "Veuillez telecharger une image valide",
+      "nameRequired": "Le nom est obligatoire",
+      "currentPasswordRequired": "Le mot de passe actuel est requis pour definir un nouveau mot de passe",
+      "newPasswordMin": "Le nouveau mot de passe doit contenir au moins 6 caracteres",
+      "passwordsMismatch": "Les nouveaux mots de passe ne correspondent pas",
+      "updateFailed": "Echec de la mise a jour du profil",
+      "updateSuccess": "Profil mis a jour avec succes !"
+    },
+    "alt": {
+      "profilePhoto": "Photo de profil"
     }
   }
 }

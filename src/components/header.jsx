@@ -10,6 +10,7 @@ import '../app/fonts.css';
 const NAV_LINKS = [
   { key: 'home', href: '/' },
   { key: 'products', href: '/shop' },
+  {key : 'espace professionnel', href: '/espace-professionnel'},
   { key: 'blog', href: '/blogs' },
   { key: 'contact', href: '/contact' },
 ];

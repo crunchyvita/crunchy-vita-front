@@ -3,6 +3,7 @@
     "nav": {
       "home": "Home",
       "products": "Our products",
+      "espace professionnel": "Professional space",
       "blog": "Blog",
       "contact": "Contact"
     },
@@ -17,6 +18,7 @@
     "nav": {
       "home": "Home",
       "products": "Our products",
+      "espace professionnel": "Professional space",
       "commitments": "Our commitments",
       "blog": "Blog",
       "contact": "Contact"
@@ -80,7 +82,7 @@
       "ctaJoin": "Join the community"
     },
     "why": {
-      "title": "Why choose CrunchyVita?",
+      "title": "Why choose Crunchy Vita?",
       "cards": {
         "card1": { "title": "100% fruits", "desc": "Only fruit, nothing else." },
         "card2": { "title": "Organic certified", "desc": "Carefully selected fruits." },
@@ -122,6 +124,80 @@
       }
     }
   },
+  "ProfessionalSpace": {
+    "hero": {
+      "title": "Bulk freeze-dried fruits for professionals",
+      "subtitle": "Organic & conventional - Controlled quality - Reliable supply",
+      "cta": "Request a quote"
+    },
+    "audience": {
+      "title": "Who is Crunchy Vita for?",
+      "items": {
+        "foodBrands": "Food brands",
+        "agriIndustry": "Food industry",
+        "cafesRestaurants": "Cafes & restaurants",
+        "sportsNutrition": "Sports nutrition",
+        "grocersWholesalers": "Grocery stores & wholesalers"
+      }
+    },
+    "ranges": {
+      "organic": {
+        "title": "Organic range",
+        "items": {
+          "certified": "Certified ingredients",
+          "traceability": "Full traceability",
+          "compliant": "Organic compliant"
+        }
+      },
+      "conventional": {
+        "title": "Conventional range",
+        "items": {
+          "costAlternative": "Cost-effective alternative",
+          "wideSelection": "Wide selection available",
+          "consistentQuality": "Consistent quality"
+        }
+      }
+    },
+    "products": {
+      "title": "Our bulk products",
+      "filters": {
+        "all": "All",
+        "organic": "Organic",
+        "conventional": "Conventional",
+        "slices": "Slices",
+        "powder": "Powder"
+      }
+    },
+    "recap": {
+      "title": "Summary table",
+      "items": {
+        "strictControl": "Strict control",
+        "batchTraceability": "Batch traceability",
+        "certifications": "Certifications & analyses",
+        "separation": "Organic/Conventional separation",
+        "moqa": "Adapted MOQs"
+      }
+    },
+    "form": {
+      "title": "Pro access & personalized quote",
+      "notice": "This form is exclusively reserved for professionals and registered companies wishing to receive a bulk quote. If you are an individual or do not represent a company, please use our",
+      "noticeLink": "contact form",
+      "companyTitle": "Company",
+      "fields": {
+        "company": "Company",
+        "activity": "Activity",
+        "siret": "SIRET",
+        "vat": "VAT number"
+      },
+      "selects": {
+        "products": "Requested products",
+        "range": "Organic or conventional",
+        "volume": "Desired volumes",
+        "country": "Delivery country"
+      },
+      "submit": "Receive a quote"
+    }
+  },
   "AboutUs": {
     "title": "About us",
     "lyo": {
@@ -132,7 +208,7 @@
     },
     "mission": {
       "title": "Our mission",
-      "p1": "At CrunchyVita, we believe snacking can be both delicious and healthy. Our mission is to offer 100% natural snacks, with no added sugar or preservatives, made from quality fresh fruit.",
+      "p1": "At Crunchy Vita, we believe snacking can be both delicious and healthy. Our mission is to offer 100% natural snacks, with no added sugar or preservatives, made from quality fresh fruit.",
       "p2": "We select our fruits carefully from certified organic farms to bring you the best of nature in every pouch."
     },
     "collab": {
@@ -636,6 +712,53 @@
         "item2": "If no response, they may contact the FEVAD e-commerce mediator (www.mediateur-fevad.fr)",
         "item3": "If no agreement, jurisdiction is assigned to French courts"
       }
+    }
+  },
+  "Profile": {
+    "title": "Profile Settings",
+    "subtitle": "Manage your account information and preferences",
+    "sections": {
+      "profilePhoto": "Profile Photo",
+      "basicInfo": "Basic Information",
+      "changePassword": "Change Password"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "email": "Email Address",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password (min 6 characters)",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password"
+    },
+    "helpers": {
+      "passwordHint": "Leave blank if you don't want to change your password"
+    },
+    "googleAccount": "Google Account",
+    "googlePhotoManaged": "Profile photo is managed by your Google account",
+    "uploadPhoto": "Upload a new photo",
+    "emailCannotChange": "Email cannot be changed",
+    "actions": {
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "changePhoto": "Change photo"
+    },
+    "alerts": {
+      "googlePhotoLocked": "Google users cannot change their profile photo",
+      "imageTooLarge": "Image size should be less than 5MB",
+      "invalidImage": "Please upload a valid image file",
+      "nameRequired": "Name is required",
+      "currentPasswordRequired": "Current password is required to set new password",
+      "newPasswordMin": "New password must be at least 6 characters",
+      "passwordsMismatch": "New passwords do not match",
+      "updateFailed": "Failed to update profile",
+      "updateSuccess": "Profile updated successfully!"
+    },
+    "alt": {
+      "profilePhoto": "Profile photo"
     }
   }
 }

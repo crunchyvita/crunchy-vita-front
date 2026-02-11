@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";import PromoBadge from '@/components/PromoBadge';import { User, Camera, Save, Lock, Mail, AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loading: authLoading } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef(null);
+  const t = useTranslations("Profile");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -31,6 +33,9 @@ export default function ProfilePage() {
   const isGoogleUser = user?.provider === 'google';
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     if (!user) {
       router.push('/auth/login');
       return;
@@ -48,12 +53,12 @@ export default function ProfilePage() {
       // Cloudinary returns full URLs - use them directly
       setPhotoPreview(user.photo);
     }
-  }, [user, router]);
+  }, [user, router, authLoading]);
 
   const handlePhotoChange = (e) => {
     // Prevent Google users from changing photo
     if (isGoogleUser) {
-      setError("Google users cannot change their profile photo");
+      setError(t("alerts.googlePhotoLocked"));
       return;
     }
 
@@ -61,12 +66,12 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("Image size should be less than 5MB");
+      setError(t("alerts.imageTooLarge"));
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      setError("Please upload a valid image file");
+      setError(t("alerts.invalidImage"));
       return;
     }
 
@@ -88,7 +93,7 @@ export default function ProfilePage() {
     try {
       // Validate name
       if (!formData.name.trim()) {
-        setError("Name is required");
+        setError(t("alerts.nameRequired"));
         setLoading(false);
         return;
       }
@@ -96,17 +101,17 @@ export default function ProfilePage() {
       // Validate password change if requested
       if (formData.newPassword && !isGoogleUser) {
         if (!formData.currentPassword) {
-          setError("Current password is required to set new password");
+          setError(t("alerts.currentPasswordRequired"));
           setLoading(false);
           return;
         }
         if (formData.newPassword.length < 6) {
-          setError("New password must be at least 6 characters");
+          setError(t("alerts.newPasswordMin"));
           setLoading(false);
           return;
         }
         if (formData.newPassword !== formData.confirmPassword) {
-          setError("New passwords do not match");
+          setError(t("alerts.passwordsMismatch"));
           setLoading(false);
           return;
         }
@@ -158,7 +163,7 @@ export default function ProfilePage() {
         updateUser(updatedUser);
       }
 
-      setMessage(data.message || "Profile updated successfully!");
+      setMessage(data.message || t("alerts.updateSuccess"));
       
       // Clear password fields
       setFormData(prev => ({
@@ -172,13 +177,13 @@ export default function ProfilePage() {
       setPhotoFile(null);
       
     } catch (err) {
-      setError(err.message || "Failed to update profile");
+      setError(err.message || t("alerts.updateFailed"));
     } finally {
       setLoading(false);
     }
   };
 
-  if (!user) {
+  if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#064E3B]" />
@@ -194,8 +199,8 @@ export default function ProfilePage() {
           
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Profile Settings</h1>
-            <p className="text-slate-600 mt-2">Manage your account information and preferences</p>
+            <h1 className="text-3xl font-bold text-slate-900">{t("title")}</h1>
+            <p className="text-slate-600 mt-2">{t("subtitle")}</p>
           </div>
 
           {/* Messages */}
@@ -218,13 +223,13 @@ export default function ProfilePage() {
             
             {/* Profile Photo Section */}
             <div className="p-8 border-b border-slate-200">
-              <h2 className="text-lg font-bold text-slate-900 mb-6">Profile Photo</h2>
+              <h2 className="text-lg font-bold text-slate-900 mb-6">{t("sections.profilePhoto")}</h2>
               <div className="flex items-center gap-6">
                 <div className="relative shrink-0">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
-                      alt="Profile"
+                      alt={t("alt.profilePhoto")}
                       className="h-32 w-32 min-h-32 min-w-32 rounded-full object-cover border-4 border-slate-100"
                       style={{ imageRendering: '-webkit-optimize-contrast', backfaceVisibility: 'hidden' }}
                     />
@@ -242,7 +247,7 @@ export default function ProfilePage() {
                         ? 'bg-slate-400 cursor-not-allowed' 
                         : 'bg-[#064E3B] hover:bg-[#065f46]'
                     }`}
-                    title={isGoogleUser ? 'Google users cannot change profile photo' : 'Change photo'}
+                    title={isGoogleUser ? t("alerts.googlePhotoLocked") : t("actions.changePhoto")}
                   >
                     {isGoogleUser ? <Lock className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
                   </button>
@@ -266,7 +271,7 @@ export default function ProfilePage() {
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
-                      Google Account
+                      {t("googleAccount")}
                     </span>
                   )}
                 </div>
@@ -275,34 +280,34 @@ export default function ProfilePage() {
                 {isGoogleUser ? (
                   <span className="flex items-center gap-1 text-slate-600">
                     <Lock className="h-3 w-3" />
-                    Profile photo is managed by your Google account
+                    {t("googlePhotoManaged")}
                   </span>
                 ) : (
-                  'Upload a new photo '
+                  t("uploadPhoto")
                 )}
               </p>
             </div>
 
             {/* Basic Information */}
             <div className="p-8 border-b border-slate-200 space-y-6">
-              <h2 className="text-lg font-bold text-slate-900 mb-6">Basic Information</h2>
+              <h2 className="text-lg font-bold text-slate-900 mb-6">{t("sections.basicInfo")}</h2>
               
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Full Name
+                  {t("fields.fullName")}
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] outline-none transition-all"
-                  placeholder="Enter your full name"
+                  placeholder={t("fields.fullNamePlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Email Address
+                  {t("fields.email")}
                 </label>
                 <input
                   type="email"
@@ -311,7 +316,7 @@ export default function ProfilePage() {
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
                 />
                 <p className="text-xs text-slate-500 mt-2">
-                  Email cannot be changed
+                  {t("emailCannotChange")}
                 </p>
               </div>
             </div>
@@ -320,13 +325,13 @@ export default function ProfilePage() {
             {!isGoogleUser && (
               <div className="p-8 space-y-6">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 mb-2">Change Password</h2>
-                  <p className="text-sm text-slate-600">Leave blank if you don't want to change your password</p>
+                  <h2 className="text-lg font-bold text-slate-900 mb-2">{t("sections.changePassword")}</h2>
+                  <p className="text-sm text-slate-600">{t("helpers.passwordHint")}</p>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Current Password
+                    {t("fields.currentPassword")}
                   </label>
                   <div className="relative">
                     <input
@@ -334,7 +339,7 @@ export default function ProfilePage() {
                       value={formData.currentPassword}
                       onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
                       className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] outline-none transition-all pr-12"
-                      placeholder="Enter current password"
+                      placeholder={t("fields.currentPasswordPlaceholder")}
                     />
                     <button
                       type="button"
@@ -348,7 +353,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    New Password
+                    {t("fields.newPassword")}
                   </label>
                   <div className="relative">
                     <input
@@ -356,7 +361,7 @@ export default function ProfilePage() {
                       value={formData.newPassword}
                       onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                       className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] outline-none transition-all pr-12"
-                      placeholder="Enter new password (min 6 characters)"
+                      placeholder={t("fields.newPasswordPlaceholder")}
                     />
                     <button
                       type="button"
@@ -370,7 +375,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Confirm New Password
+                    {t("fields.confirmPassword")}
                   </label>
                   <div className="relative">
                     <input
@@ -378,7 +383,7 @@ export default function ProfilePage() {
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] outline-none transition-all pr-12"
-                      placeholder="Confirm new password"
+                      placeholder={t("fields.confirmPasswordPlaceholder")}
                     />
                     <button
                       type="button"
@@ -399,7 +404,7 @@ export default function ProfilePage() {
                 onClick={() => router.back()}
                 className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-white transition-all"
               >
-                Cancel
+                {t("actions.cancel")}
               </button>
               <button
                 type="submit"
@@ -409,12 +414,12 @@ export default function ProfilePage() {
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Saving...
+                    {t("actions.saving")}
                   </>
                 ) : (
                   <>
                     <Save className="h-5 w-5" />
-                    Save Changes
+                    {t("actions.save")}
                   </>
                 )}
               </button>
