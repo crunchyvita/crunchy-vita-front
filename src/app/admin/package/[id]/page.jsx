@@ -182,6 +182,12 @@ export default function PackageDetailPage({ params }) {
 						<p className="font-mono text-sm text-slate-900 mt-1">{packageData._id}</p>
 					</div>
 					<div>
+						<p className="text-sm text-slate-600">Package Type</p>
+						<p className="text-sm text-slate-900 mt-1">
+							{(packageData.packageType || "CUSTOM") === "FIXED" ? "Fixed package" : "Custom package"}
+						</p>
+					</div>
+					<div>
 						<p className="text-sm text-slate-600">Status</p>
 						<p className="text-sm text-slate-900 mt-1">
 							{packageData.isActive ? "Active and visible to customers" : "Inactive and hidden from customers"}
@@ -190,18 +196,24 @@ export default function PackageDetailPage({ params }) {
 					<div>
 						<p className="text-sm text-slate-600">Product Selection</p>
 						<p className="text-sm text-slate-900 mt-1">
-							{packageData.allowAllProducts 
-								? "All active products available" 
-								: `Maximum ${packageData.maxProducts} product${packageData.maxProducts !== 1 ? 's' : ''}`
+							{(packageData.packageType || "CUSTOM") === "FIXED"
+								? `Fixed selection (${packageData.products?.length || 0} items)`
+								: (packageData.allowAllProducts 
+									? "All active products available" 
+									: `Maximum ${packageData.maxProducts} product${packageData.maxProducts !== 1 ? 's' : ''}`
+								)
 							}
 						</p>
 					</div>
 					<div>
 						<p className="text-sm text-slate-600">Quantity Policy</p>
 						<p className="text-sm text-slate-900 mt-1">
-							{packageData.allowMultipleQuantities 
-								? "Variable quantities allowed" 
-								: "Fixed quantity (1 per product)"
+							{(packageData.packageType || "CUSTOM") === "FIXED"
+								? "Fixed quantities per product"
+								: (packageData.allowMultipleQuantities 
+									? "Variable quantities allowed" 
+									: "Fixed quantity (1 per product)"
+								)
 							}
 						</p>
 					</div>
@@ -215,6 +227,29 @@ export default function PackageDetailPage({ params }) {
 					</div>
 				</div>
 			</div>
+
+			{(packageData.packageType || "CUSTOM") === "FIXED" && (
+				<div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+					<h2 className="text-lg font-semibold text-slate-900 mb-4">Fixed Products</h2>
+					{(packageData.products || []).length === 0 ? (
+						<p className="text-sm text-slate-500">No products configured.</p>
+					) : (
+						<div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+							{packageData.products.map((item) => {
+								const product = item.productId || {};
+								return (
+									<div key={item._id || item.productId?._id || item.productId} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+										<div>
+											<p className="text-sm font-semibold text-slate-900">{product.name || "Unknown product"}</p>
+											<p className="text-xs text-slate-500">Quantity: {item.quantity}</p>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					)}
+				</div>
+			)}
 
 		</div>
 	</>	);
