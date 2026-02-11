@@ -99,6 +99,16 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
             </span>
           </div>
         )}
+
+        {/* ✅ NEW: Out of Stock Badge for FIXED packages */}
+        {pkg.packageType === 'FIXED' && !pkg.inStock && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
+            <div className="text-center">
+              <p className="text-white font-black text-sm uppercase tracking-widest">Rupture de Stock</p>
+              <p className="text-white text-xs mt-2 font-medium">Certains produits ne sont pas disponibles</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-8 flex flex-col flex-1 relative">
@@ -111,7 +121,14 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
 
         <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
           <span className="text-xs font-black uppercase tracking-widest text-[#556822]">{t('packages.discover')}</span>
-          <button className="h-12 w-12 bg-[#556822] rounded-full flex items-center justify-center text-white group-hover:bg-[#E10C69] group-hover:scale-110 transition-all duration-300 shadow-lg">
+          <button 
+            className={`h-12 w-12 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-all duration-300 shadow-lg ${
+              resolvedType === 'FIXED' && !pkg.inStock 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-[#556822] group-hover:bg-[#E10C69]'
+            }`}
+            disabled={resolvedType === 'FIXED' && !pkg.inStock}
+          >
             <ArrowRight size={20} />
           </button>
         </div>

@@ -345,6 +345,14 @@ export default function PackageCustomizationPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">{t("loading")}</div>;
   const handleAddFixedToCart = async () => {
     if (!user) { router.push("/auth/login"); return; }
+
+    // ✅ NEW: Check if FIXED package is in stock
+    if (packageData?.packageType === "FIXED" && !packageData.inStock) {
+      setError("Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.");
+      setTimeout(() => setError(""), 4000);
+      return;
+    }
+
     try {
       const selected = fixedItems.map((item) => ({
         productId: item.productId?._id || item.productId,
@@ -484,10 +492,13 @@ export default function PackageCustomizationPage() {
 
                 <button
                   onClick={handleAddFixedToCart}
-                  style={{ backgroundColor: "#556822" }}
-                  className="text-white w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
+                  disabled={!packageData.inStock}
+                  style={{ 
+                    backgroundColor: packageData.inStock ? "#556822" : "#9CA3AF"
+                  }}
+                  className="text-white w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Ajouter au panier <ShoppingCart size={18} />
+                  {packageData.inStock ? "Ajouter au panier" : "Rupture de stock"} <ShoppingCart size={18} />
                 </button>
 
                 <AnimatePresence>
