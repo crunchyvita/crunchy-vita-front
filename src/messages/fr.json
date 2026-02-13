@@ -315,7 +315,8 @@
     "quantity": "Quantite",
     "totalPrice": "Prix total",
     "outOfStock": "Rupture de stock",
-    "addToCart": "Ajouter au panier"
+    "addToCart": "Ajouter au panier",
+    "addedToCart": "Ajouté au panier !"
   },
   "ProductDetail": {
     "errors": {
@@ -380,6 +381,9 @@
       "cancel": "Annuler",
       "confirm": "Supprimer",
       "deleting": "Suppression..."
+    },
+    "messages": {
+      "addedToCart": "Ajouté au panier !"
     }
   },
   "PackageDetail": {
@@ -791,6 +795,37 @@
       "removeFavorite": "Impossible de retirer le favori.",
       "removePackageFavorite": "Impossible de retirer le pack favori.",
       "generic": "Une erreur est survenue."
+    }
+  },
+  "Cart": {
+    "title": "Votre Panier",
+    "breadcrumb": "Boutique / Panier",
+    "emptyTitle": "Votre panier est vide",
+    "items": "articles dans le panier",
+    "item": "article dans le panier",
+    "products": {
+      "label": "Produits",
+      "price": "Prix",
+      "quantity": "Quantité",
+      "total": "Total"
+    },
+    "summary": {
+      "title": "Résumé de la commande",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "total": "Total",
+      "empty": "Votre panier est vide. Aucune commande à afficher."
+    },
+    "actions": {
+      "remove": "Retirer",
+      "continueShopping": "Continuer les achats",
+      "checkout": "Passer la commande",
+      "updateCart": "Mettre à jour le panier"
+    },
+    "messages": {
+      "itemRemoved": "Article retiré du panier",
+      "cartCleared": "Panier vidé",
+      "quantityUpdated": "Quantité mise à jour"
     }
   }
 }

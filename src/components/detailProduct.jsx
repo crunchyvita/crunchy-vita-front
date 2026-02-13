@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/navigation';
 import { getTranslatedProduct } from '@/lib/productTranslations';
+import { useCart } from '@/hooks/useCart';
 import {
   X, ChevronLeft, ChevronRight, Plus, Minus,
   ShoppingCart, Heart, ShieldCheck, Truck,
-  Info, Star, AlertCircle
+  Info, Star, AlertCircle, CheckCircle2
 } from 'lucide-react';
 
 export default function ProductDetailModal({
@@ -21,12 +23,15 @@ export default function ProductDetailModal({
 }) {
   const t = useTranslations('ProductModal');
   const locale = useLocale();
+  const router = useRouter();
+  const { addToCart } = useCart();
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   // Memoize images to avoid recalculation on every render
   const productImages = useMemo(() => {
@@ -80,7 +85,22 @@ export default function ProductDetailModal({
 
   // Handlers
   const handleAddToCart = () => {
-    console.log('Cart:', productName, quantity);
+    if (!product || !product._id) return;
+    
+    // Add to cart with proper price
+    const productPrice = getProductPrice(product);
+    addToCart({
+      ...product,
+      price: productPrice
+    }, quantity);
+
+    // Show success message
+    setAddedToCart(true);
+    
+    // Redirect to cart after 1.5 seconds
+    setTimeout(() => {
+      router.push('/cart');
+    }, 1500);
   };
 
   const handleIncrement = () => {
@@ -246,11 +266,28 @@ export default function ProductDetailModal({
               <div className="flex gap-4">
                 <button
                   onClick={handleAddToCart}
-                  disabled={availableStock === 0}
-                  className="flex-[3] flex items-center justify-center gap-3 py-4 bg-[#F2F8EE] text-[#556822] hover:text-white rounded-2xl font-bold text-lg hover:bg-[#556822] hover:shadow-xl hover:shadow-[#556822]/30 transition-all duration-300 disabled:bg-gray-200 disabled:text-white disabled:cursor-not-allowed group font-[Agrandir]"
+                  disabled={availableStock === 0 || addedToCart}
+                  className={`flex-[3] flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-lg transition-all duration-300 group font-[Agrandir] ${
+                    availableStock === 0
+                      ? 'bg-gray-200 text-white cursor-not-allowed'
+                      : addedToCart
+                      ? 'bg-[#556822] text-white'
+                      : 'bg-[#F2F8EE] text-[#556822] hover:text-white hover:bg-[#556822] hover:shadow-xl hover:shadow-[#556822]/30'
+                  }`}
                 >
-                  <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
-                  {availableStock === 0 ? t('outOfStock') : t('addToCart')}
+                  {addedToCart ? (
+                    <>
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      {t('addedToCart')}
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
+                      {availableStock === 0 ? t('outOfStock') : t('addToCart')}
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => onToggleFavorite?.(product)}
@@ -263,6 +300,8 @@ export default function ProductDetailModal({
                   <Heart size={24} className={isFavorite ? 'fill-white' : ''} />
                 </button>
               </div>
+
+
             </div>
           </div>
         </div>

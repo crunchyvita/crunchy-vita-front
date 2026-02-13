@@ -12,6 +12,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { reviewAPI } from '@/lib/api';
 import { usePackStorage } from '@/hooks/usePackStorage';
+import { useCart } from '@/hooks/useCart';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
@@ -24,6 +25,7 @@ export default function ProductDetailPage() {
   const { user } = useAuth();
   const t = useTranslations('ProductDetail');
   const locale = useLocale();
+  const { addToCart } = useCart();
   const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
     ? rawApiBaseUrl.replace(/\/$/, '')
@@ -44,6 +46,7 @@ export default function ProductDetailPage() {
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -299,7 +302,22 @@ export default function ProductDetailPage() {
       router.push(`/shop/packages/${searchParams.packageId}`);
       return;
     }
-    // TODO: cart
+    
+    // Add to real cart system
+    if (!product || !product._id) return;
+    
+    addToCart({
+      ...product,
+      price: productPrice
+    }, quantity);
+    
+    setAddedToCart(true);
+    
+    // Redirect to cart after 1.5 seconds
+    setTimeout(() => {
+      setQuantity(1);
+      router.push('/cart');
+    }, 1500);
   };
 
   const handleAddToWishlist = async () => {
@@ -765,14 +783,23 @@ export default function ProductDetailPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
-                disabled={availableStock === 0}
+                disabled={availableStock === 0 || addedToCart}
                 className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold transition-colors ${
                   availableStock === 0
                     ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : addedToCart
+                    ? 'bg-[#556822] text-white'
                     : 'bg-[#F2F8EE] text-[#556822] hover:text-white hover:bg-[#556822]'
                 }`}
               >
-                {searchParams.packageId ? (
+                {addedToCart ? (
+                  <>
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {t('messages.addedToCart')}
+                  </>
+                ) : searchParams.packageId ? (
                   <>
                     <Package className="h-5 w-5" />
                     {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToPack')}

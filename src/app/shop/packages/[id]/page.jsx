@@ -20,6 +20,7 @@ import Footer from "@/components/footer";
 import PromoBadge from "@/components/PromoBadge";
 import { useAuth } from "@/context/AuthContext";
 import { usePackStorage } from "@/hooks/usePackStorage";
+import { useCart } from "@/hooks/useCart";
 import { useLocale, useTranslations } from "next-intl";
 import { getTranslatedPackage, getTranslatedProduct } from "@/lib/productTranslations";
 
@@ -91,6 +92,7 @@ export default function PackageCustomizationPage() {
   const { user } = useAuth();
   const t = useTranslations("PackageDetail");
   const locale = useLocale();
+  const { addToCart } = useCart();
 
   const [packageData, setPackageData] = useState(null);
   const [products, setProducts] = useState([]);
@@ -311,32 +313,38 @@ export default function PackageCustomizationPage() {
       return;
     }
 
-    if (!user) {
-      router.push("/auth/login");
-      return;
-    }
-
     try {
-      const cartData = {
+      // Create package cart item as a single entity
+      const packageCartItem = {
+        _id: `package_${packageData._id}_${Date.now()}`,
+        type: 'package',
         packageId: packageData._id,
-        packageName: packageData.name, // ✅ do not translate in cart
-        selectedProducts: selectedProducts.map((productId) => ({
-          productId,
-          quantity: packageData.allowMultipleQuantities === false ? 1 : quantities[productId] || 1,
-        })),
+        name: packageData.name,
+        packageName: packageData.name,
+        description: packageData.description,
+        image: getProductImageUrl(products.find((p) => p._id === selectedProducts[0])),
+        selectedProducts: selectedProducts.map((productId) => {
+          const product = products.find((p) => p._id === productId);
+          return {
+            productId,
+            product: product,
+            name: product?.name,
+            price: getProductPrice(product),
+            quantity: packageData.allowMultipleQuantities === false ? 1 : quantities[productId] || 1,
+          };
+        }),
         discountPercentage,
+        price: discountedPrice,
+        originalPrice: totalPrice,
         totalPrice,
         discountedPrice,
       };
-
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      cart.push(cartData);
-      localStorage.setItem("cart", JSON.stringify(cart));
-
+      
+      addToCart(packageCartItem, 1);
       clearPackConfig();
 
       setSuccess(t("success.addedToCart"));
-      setTimeout(() => router.push("/cart"), 1200);
+      setTimeout(() => router.push("/cart"), 1500);
     } catch (err) {
       setError(t("errors.addToCart"));
     }
@@ -344,9 +352,7 @@ export default function PackageCustomizationPage() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">{t("loading")}</div>;
   const handleAddFixedToCart = async () => {
-    if (!user) { router.push("/auth/login"); return; }
-
-    // ✅ NEW: Check if FIXED package is in stock
+    // ✅ Check if FIXED package is in stock
     if (packageData?.packageType === "FIXED" && !packageData.inStock) {
       setError("Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.");
       setTimeout(() => setError(""), 4000);
@@ -354,26 +360,37 @@ export default function PackageCustomizationPage() {
     }
 
     try {
-      const selected = fixedItems.map((item) => ({
-        productId: item.productId?._id || item.productId,
-        quantity: (item.quantity || 1) * packageQuantity,
-      }));
-
-      const cartData = {
+      // Create fixed package cart item as a single entity
+      const packageCartItem = {
+        _id: `package_${packageData._id}_${Date.now()}`,
+        type: 'package',
         packageId: packageData._id,
+        name: packageData.name,
         packageName: packageData.name,
-        selectedProducts: selected,
+        description: packageData.description,
+        packageType: 'FIXED',
+        image: getProductImageUrl(fixedItems[0]?.productId),
+        selectedProducts: fixedItems.map((item) => {
+          const product = item.productId || {};
+          return {
+            productId: product._id || item.productId,
+            product: product,
+            name: product.name,
+            price: getProductPrice(product),
+            quantity: (item.quantity || 1) * packageQuantity,
+          };
+        }),
         discountPercentage,
+        price: discountedFixedPrice * packageQuantity,
+        originalPrice: fixedTotalPrice * packageQuantity,
         totalPrice: fixedTotalPrice * packageQuantity,
         discountedPrice: discountedFixedPrice * packageQuantity,
       };
-
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      cart.push(cartData);
-      localStorage.setItem("cart", JSON.stringify(cart));
+      
+      addToCart(packageCartItem, 1);
 
       setSuccess("Ajouté au panier !");
-      setTimeout(() => router.push("/cart"), 1200);
+      setTimeout(() => router.push("/cart"), 1500);
     } catch (err) {
       setError("Erreur lors de l'ajout.");
     }

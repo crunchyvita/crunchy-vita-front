@@ -76,7 +76,7 @@ export default function Header() {
             <Package size={20} className="text-gray-700" />
           </button>
 
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" title={t('cart')}>
+          <button onClick={() => router.push('/cart')} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" title={t('cart')}>
             <ShoppingCart size={20} className="text-gray-700" />
           </button>
 

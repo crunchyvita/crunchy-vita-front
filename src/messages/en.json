@@ -315,7 +315,8 @@
     "quantity": "Quantity",
     "totalPrice": "Total price",
     "outOfStock": "Out of stock",
-    "addToCart": "Add to cart"
+    "addToCart": "Add to cart",
+    "addedToCart": "Added to cart!"
   },
   "ProductDetail": {
     "errors": {
@@ -380,6 +381,9 @@
       "cancel": "Cancel",
       "confirm": "Delete",
       "deleting": "Deleting..."
+    },
+    "messages": {
+      "addedToCart": "Added to cart!"
     }
   },
   "PackageDetail": {
@@ -791,6 +795,37 @@
       "removeFavorite": "Failed to remove favorite.",
       "removePackageFavorite": "Failed to remove favorite pack.",
       "generic": "An error occurred."
+    }
+  },
+  "Cart": {
+    "title": "Your Cart",
+    "breadcrumb": "Shop / Cart",
+    "emptyTitle": "Your cart is empty",
+    "items": "items in cart",
+    "item": "item in cart",
+    "products": {
+      "label": "Products",
+      "price": "Price",
+      "quantity": "Quantity",
+      "total": "Total"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "total": "Total",
+      "empty": "Your cart is empty. No order to display."
+    },
+    "actions": {
+      "remove": "Remove",
+      "continueShopping": "Continue shopping",
+      "checkout": "Checkout",
+      "updateCart": "Update cart"
+    },
+    "messages": {
+      "itemRemoved": "Item removed from cart",
+      "cartCleared": "Cart cleared",
+      "quantityUpdated": "Quantity updated"
     }
   }
 }
