@@ -83,6 +83,10 @@ export default function EditPackagePage() {
 		setSelectedProductId("");
 	};
 
+	const availableProducts = allProducts.filter(
+		(product) => !fixedProducts.some((p) => p.productId === product._id)
+	);
+
 	const handleRemoveFixedProduct = (productId) => {
 		setFixedProducts((prev) => prev.filter((p) => p.productId !== productId));
 	};
@@ -119,7 +123,7 @@ export default function EditPackagePage() {
 		setSaving(true);
 		setError("");
 		setSuccess("");
-    
+
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) {
@@ -136,25 +140,32 @@ export default function EditPackagePage() {
 			formDataToSend.append("description", formData.description || "");
 			formDataToSend.append("packageType", formData.packageType);
 			formDataToSend.append("discountPercentage", formData.discountPercentage);
-			formDataToSend.append("allowAllProducts", false); // Always false as per requirements
+			formDataToSend.append("allowAllProducts", "false"); // Always false as per requirements
+
 			if (formData.packageType === "CUSTOM") {
 				formDataToSend.append("minProducts", formData.minProducts);
 				formDataToSend.append("maxProducts", formData.maxProducts);
 				formDataToSend.append("allowMultipleQuantities", formData.allowMultipleQuantities);
-			} else {
-				formDataToSend.append("products", JSON.stringify(fixedProducts));
+			} else if (formData.packageType === "FIXED") {
+				// Only send productId and quantity for each product
+				const productsToSend = fixedProducts.map((p) => ({
+					productId: p.productId,
+					quantity: p.quantity
+				}));
+				formDataToSend.append("products", JSON.stringify(productsToSend));
 			}
-		formDataToSend.append("isActive", formData.isActive);
 
-		// Add image only if user selected a new one
-		if (fileInputRef.current?.files?.[0]) {
-			formDataToSend.append("image", fileInputRef.current.files[0]);
-		}
+			formDataToSend.append("isActive", formData.isActive);
 
-		// Tell backend to delete image if user removed it
-		if (shouldDeleteImage && !fileInputRef.current?.files?.[0]) {
-			formDataToSend.append("deleteImage", "true");
-		}
+			// Add image only if user selected a new one
+			if (fileInputRef.current?.files?.[0]) {
+				formDataToSend.append("image", fileInputRef.current.files[0]);
+			}
+
+			// Tell backend to delete image if user removed it
+			if (shouldDeleteImage && !fileInputRef.current?.files?.[0]) {
+				formDataToSend.append("deleteImage", "true");
+			}
 
 			const response = await fetch(`http://localhost:5000/api/packages/${packageId}`, {
 				method: "PUT",
@@ -278,10 +289,9 @@ export default function EditPackagePage() {
 							form="package-edit-form"
 							disabled={saving}
 							className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-black text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-						style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
-						onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
-						onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
-						disabled={saving}
+							style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
+							onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
+							onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
 						>
 							{saving ? (
 								<>
@@ -464,7 +474,7 @@ export default function EditPackagePage() {
 												className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 											>
 												<option value="">Select a product...</option>
-												{allProducts.map((product) => (
+												{availableProducts.map((product) => (
 													<option key={product._id} value={product._id}>{product.name}</option>
 												))}
 											</select>
