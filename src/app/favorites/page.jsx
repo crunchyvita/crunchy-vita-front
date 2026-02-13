@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useRouter } from '@/navigation';
-import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight } from 'lucide-react';
+import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Star } from 'lucide-react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
@@ -88,7 +88,6 @@ export default function FavoritesPage() {
                 if (!packageRes.ok) {
                     throw new Error(packageResult.message || t('errors.loadPackageFavorites'));
                 }
-
                 setFavorites(productResult.data || []);
                 setFavoritePackages(packageResult.data || []);
             } catch (err) {
@@ -243,6 +242,27 @@ export default function FavoritesPage() {
                                                 </div>
 
                                                 <div className="p-6">
+                                                    {product.ratings && product.ratings.length > 0 && (
+                                                        <div className="flex items-center gap-1 mb-4">
+                                                            <div className="flex items-center gap-0.5">
+                                                                <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter mr-2">
+                                                                    {(product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length).toFixed(1)}
+                                                                </span>
+                                                                {[...Array(5)].map((_, i) => {
+                                                                    const avgRating = product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length;
+                                                                    return (
+                                                                        <Star
+                                                                            key={i}
+                                                                            className={`h-4 w-4 ${i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`}
+                                                                        />
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                            <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter ml-2">
+                                                                ({product.ratings.length})
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <div className="mb-3">
                                                         <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
                                                         <div className="flex items-center justify-between">
@@ -300,7 +320,7 @@ export default function FavoritesPage() {
                                                     <div className="absolute inset-0 bg-linear-to-br from-[#B3C800]/10 via-transparent to-[#EF8EB8]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                                                     {imageUrl ? (
-                                                        <img src={imageUrl} alt={pkg.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                        <img src={imageUrl} alt={packageName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                                     ) : (
                                                         <div className="relative w-full h-full flex items-center justify-center">
                                                             <Package size={48} className="text-[#B3C800] opacity-30" />
@@ -327,7 +347,7 @@ export default function FavoritesPage() {
                                                         {packageName}
                                                     </h3>
                                                     <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6">
-                                                        {packageDescription || t('package.descriptionFallback')}
+                                                        {packageDescription || t('packages.descriptionFallback')}
                                                     </p>
 
                                                     <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
