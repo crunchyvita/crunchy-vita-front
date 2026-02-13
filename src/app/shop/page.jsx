@@ -25,6 +25,13 @@ const getProductImageUrl = (product) => {
   return url;
 };
 
+const getPackageImageUrl = (pkg) => {
+  if (!pkg) return null;
+  const url = pkg.image;
+  if (!url || url === 'undefined') return null;
+  return url;
+};
+
 const getProductPrice = (product) => {
   if (!product) return 0;
   const history = product.pricingHistory;
@@ -44,8 +51,10 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
   const t = useTranslations('Shop');
   const locale = useLocale();
   const translatedPackage = getTranslatedPackage(pkg, locale);
-  const productPreviews = pkg.products?.slice(0, 3) || [];
+  // On récupère TOUS les produits du pack
+  const allProducts = pkg.products || [];
   const resolvedType = pkg.packageType || "CUSTOM";
+  const packageImageUrl = getPackageImageUrl(pkg);
 
   return (
     <Link
@@ -53,6 +62,7 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
       prefetch={true}
       className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-[#E1FBD9] shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col h-full"
     >
+      {/* ... Bouton Favoris inchangé ... */}
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -68,30 +78,45 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
         <Package size={120} />
       </div>
 
-      <div className="relative h-64 bg-[#F2F8EE] flex items-center justify-center overflow-hidden">
+
+      <div className="relative h-72 bg-[#F2F8EE] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-[#B3C800]/10 via-transparent to-[#EF8EB8]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-        {pkg.image ? (
-          <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        {packageImageUrl ? (
+          <img src={packageImageUrl} alt={pkg.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
         ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
-            {productPreviews.map((item, idx) => {
-              const prod = item.productId || item;
-              return (
-                <div key={idx} className="absolute transition-all duration-700 ease-out group-hover:scale-110"
-                  style={{
-                    transform: `translateX(${(idx - 1) * 50}px) translateY(${idx === 1 ? -15 : 0}px) rotate(${(idx - 1) * 12}deg)`,
-                    zIndex: idx === 1 ? 20 : 10,
-                  }}>
-                  <div className="p-1 bg-white rounded-2xl shadow-xl border border-[#E1FBD9]">
-                    <img src={getProductImageUrl(prod)} alt="" className="w-28 h-28 rounded-xl object-cover" />
+          <div className="relative w-full h-80 bg-[#F2F8EE] flex items-center justify-center p-6 overflow-hidden">
+            {/* Fond avec un léger motif ou dégradé pour donner de la profondeur */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.8)_0%,_transparent_100%)]" />
+
+            {/* Grille de produits : on ajuste les colonnes selon le nombre d'items */}
+            <div className={`relative z-10 grid gap-3 w-full max-w-70 transition-transform duration-500 group-hover:scale-105 ${
+              allProducts.length <= 4 ? 'grid-cols-2' : 'grid-cols-2'
+            }`}>
+              {allProducts.map((item, idx) => {
+                const prod = item.productId || item;
+                return (
+                  <div
+                    key={idx}
+                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-sm transition-all duration-500 delay-[${idx * 50}ms] group-hover:shadow-md ${
+                      idx % 2 === 0 ? 'translate-y-2 group-hover:translate-y-0' : '-translate-y-2 group-hover:translate-y-0'
+                    }`}
+                  >
+                    <img
+                      src={getProductImageUrl(prod)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Overlay discret au survol de la carte parente */}
+                    <div className="absolute inset-0 bg-[#556822]/0 group-hover:bg-[#556822]/5 transition-colors" />
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
+        {/* ... Badges de réduction et Stock ... */}
         {pkg.discountPercentage > 0 && (
           <div className="absolute top-6 left-6">
             <span className="bg-[#E10C69] text-white text-[12px] font-black px-4 py-1.5 rounded-full tracking-widest shadow-lg">
@@ -112,6 +137,7 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
       </div>
 
       <div className="p-8 flex flex-col flex-1 relative">
+        {/* ... Contenu texte et bouton "Discover" ... */}
         <h3 className="text-2xl font-black font-[Agrandir] text-[#556822] mb-2 leading-tight group-hover:text-[#E10C69] transition-colors">
           {translatedPackage.name}
         </h3>
@@ -121,10 +147,10 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
 
         <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
           <span className="text-xs font-black uppercase tracking-widest text-[#556822]">{t('packages.discover')}</span>
-          <button 
+          <button
             className={`h-12 w-12 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-all duration-300 shadow-lg ${
-              resolvedType === 'FIXED' && !pkg.inStock 
-                ? 'bg-gray-400 cursor-not-allowed' 
+              resolvedType === 'FIXED' && !pkg.inStock
+                ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-[#556822] group-hover:bg-[#E10C69]'
             }`}
             disabled={resolvedType === 'FIXED' && !pkg.inStock}

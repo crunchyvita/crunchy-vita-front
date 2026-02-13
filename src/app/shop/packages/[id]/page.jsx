@@ -404,10 +404,10 @@ export default function PackageCustomizationPage() {
     }
   };
 
-  // ✅ FIXED PACKAGE -> ADD TO CART (STORE MULTI-IMAGES)
+  //  ADD TO CART (STORE MULTI-IMAGES)
   const handleAddFixedToCart = async () => {
     if (packageData?.packageType === "FIXED" && !packageData.inStock) {
-      setError("Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.");
+      setError(t("fixed.notAvailable"));
       setTimeout(() => setError(""), 4000);
       return;
     }
@@ -455,10 +455,10 @@ export default function PackageCustomizationPage() {
 
       addToCart(packageCartItem, 1);
 
-      setSuccess("Ajouté au panier !");
+      setSuccess(t("success.addedToCart"));
       setTimeout(() => router.push("/cart"), 1500);
     } catch (err) {
-      setError("Erreur lors de l'ajout.");
+      setError(t("errors.addToCart"));
     }
   };
 
@@ -481,16 +481,16 @@ export default function PackageCustomizationPage() {
                 style={{ color: COLORS.grass }}
                 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
               >
-                <ArrowLeft size={16} /> Retour à la boutique
+                <ArrowLeft size={16} /> {t("backToShop")}
               </button>
             </div>
 
             <h1 className="text-4xl font-black font-[agrandir] text-gray-900 uppercase">
-              Votre <span style={{ color: COLORS.grass }}>{packageData?.name}</span>
+              {t("title")} <span style={{ color: COLORS.grass }}>{translatedPackage.name}</span>
             </h1>
 
             <p className="text-gray-500 mt-2 max-w-xl font-[Maison Neue]">
-              {packageData?.description || "Un coffret fixe, prêt à être ajouté au panier."}
+              {translatedPackage.description || t("descriptionFallback")}
             </p>
           </div>
 
@@ -499,6 +499,8 @@ export default function PackageCustomizationPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {fixedItems.map((item) => {
                   const product = item.productId || {};
+                  const translatedProduct = getTranslatedProduct(product, locale);
+                  const productName = translatedProduct.name || product.name || "Produit";
                   const img = getProductImageUrl(product);
                   return (
                     <div
@@ -507,7 +509,7 @@ export default function PackageCustomizationPage() {
                     >
                       <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
                         {img ? (
-                          <img src={img} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
+                          <img src={img} alt={productName} loading="lazy" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300">
                             <ShoppingBag size={32} />
@@ -517,9 +519,11 @@ export default function PackageCustomizationPage() {
 
                       <div className="p-5 flex-1 flex flex-col">
                         <h3 className="font-bold font-[agrandir] text-[#556822] text-lg leading-tight truncate">
-                          {product.name || "Produit"}
+                          {productName}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">Quantité : {item.quantity || 1}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {t("fixed.itemQuantity", { count: item.quantity || 1 })}
+                        </p>
                         <p className="text-2xl font-black mt-auto text-[#E10c69]">
                           €{(getProductPrice(product) * (item.quantity || 1)).toFixed(2)}
                         </p>
@@ -534,11 +538,13 @@ export default function PackageCustomizationPage() {
               <div className="bg-white rounded-[32px] p-8 sticky top-24 shadow-xl border border-gray-100">
                 <div className="flex items-center gap-2 mb-8">
                   <ShoppingBag style={{ color: COLORS.grass }} />
-                  <h2 className="text-xl font-black uppercase tracking-tight">Aperçu</h2>
+                  <h2 className="text-xl font-black uppercase tracking-tight">{t("summary.title")}</h2>
                 </div>
 
                 <div className="mb-8 flex items-center justify-between bg-gray-50 rounded-2xl p-4">
-                  <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">Quantité</span>
+                  <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">
+                    {t("fixed.quantity")}
+                  </span>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setPackageQuantity(Math.max(1, packageQuantity - 1))}
@@ -560,19 +566,19 @@ export default function PackageCustomizationPage() {
 
                 <div className="space-y-4 border-t border-dashed pt-6 mb-8">
                   <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
-                    <span>Total Brut</span>
+                    <span>{t("summary.total")}</span>
                     <span>€{(fixedTotalPrice * packageQuantity).toFixed(2)}</span>
                   </div>
 
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
-                      <span>Remise Pack ({discountPercentage}%)</span>
+                      <span>{t("summary.discount", { percent: discountPercentage })}</span>
                       <span>-€{(totalFixedSavings * packageQuantity).toFixed(2)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between items-center pt-2">
-                    <span className="text-lg font-black uppercase">À Payer</span>
+                    <span className="text-lg font-black uppercase">{t("summary.toPay")}</span>
                     <span className="text-3xl font-black text-[#E10C69]">
                       €{(discountedFixedPrice * packageQuantity).toFixed(2)}
                     </span>
@@ -585,7 +591,7 @@ export default function PackageCustomizationPage() {
                   style={{ backgroundColor: packageData.inStock ? "#556822" : "#9CA3AF" }}
                   className="text-white w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {packageData.inStock ? "Ajouter au panier" : "Rupture de stock"} <ShoppingCart size={18} />
+                  {packageData.inStock ? t("fixed.addToCart") : t("buttons.outOfStock")} <ShoppingCart size={18} />
                 </button>
 
                 <AnimatePresence>

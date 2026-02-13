@@ -422,6 +422,12 @@
       "total": "Gross total",
       "discount": "Pack discount ({percent}%)",
       "toPay": "To pay"
+    },
+    "fixed": {
+      "notAvailable": "This box is not available because one or more products are out of stock.",
+      "addToCart": "Add to cart",
+      "quantity": "Quantity",
+      "itemQuantity": "Quantity: {count}"
     }
   },
   "LegalMentions": {

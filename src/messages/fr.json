@@ -422,6 +422,12 @@
       "total": "Total Brut",
       "discount": "Remise Pack ({percent}%)",
       "toPay": "A Payer"
+    },
+    "fixed": {
+      "notAvailable": "Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.",
+      "addToCart": "Ajouter au panier",
+      "quantity": "Quantite",
+      "itemQuantity": "Quantite : {count}"
     }
   },
   "LegalMentions": {
