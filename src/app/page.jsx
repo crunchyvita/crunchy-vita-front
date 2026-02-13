@@ -9,9 +9,9 @@ import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from 'next-intl';
-import { 
+import {
   Leaf,
-  Ban,         
+  Ban,
   CandyOff,
   Award,
   Sparkle,
@@ -188,10 +188,10 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {[
-              { desc: t('products.cards.card1'), image: "/assets/images/bowl.png" },
-              { desc: t('products.cards.card2'), image: "/assets/images/snack.png" },
-              { desc: t('products.cards.card3'), image: "/assets/images/dessert.png" },
-              { desc: t('products.cards.card4'), image: "/assets/images/kids.png" }
+              { desc: t('products.cards.card1'), image: "/assets/images/bowl3.png" },
+              { desc: t('products.cards.card2'), image: "/assets/images/snack2.png" },
+              { desc: t('products.cards.card3'), image: "/assets/images/test.png" },
+              { desc: t('products.cards.card4'), image: "/assets/images/kids3.png" }
             ].map((item, index) => (
               <motion.div 
                 key={index}
