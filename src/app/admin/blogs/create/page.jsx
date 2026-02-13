@@ -214,27 +214,29 @@ export default function CreateBlogPage() {
             />
           </div>
 
-        
+        {/* Submit Button */}
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="px-6 py-2 text-white rounded-lg transition disabled:opacity-50"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#3d4617')}
+            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#556622')}
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Create Blog Post"}
+          </button>
 
-          {/* Submit Button */}
-          <div className="flex gap-4">
+          <Link href="/admin/blogs">
             <button
-              type="submit"
+              type="button"
               disabled={loading}
               className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Create Blog Post"}
+              Back to Blogs
             </button>
-
-            <Link href="/admin/blogs">
-              <button
-                type="button"
-                className="px-6 py-2 border border-gray-200 text-gray-900 rounded-lg hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-            </Link>
-          </div>
+          </Link>
+        </div>
         </form>
       </div>
     </>

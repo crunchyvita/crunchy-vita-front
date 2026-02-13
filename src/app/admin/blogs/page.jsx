@@ -87,7 +87,10 @@ export default function BlogsPage() {
           <p className="text-gray-600 mt-2">Manage your blog posts</p>
         </div>
         <Link href="/admin/blogs/create">
-          <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-2">
+          <button className="text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Plus className="h-4 w-4" />
             Create Blog Post
           </button>
@@ -108,7 +111,10 @@ export default function BlogsPage() {
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No blog posts yet</p>
             <Link href="/admin/blogs/create">
-              <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">
+              <button className="text-white px-4 py-2 rounded-lg transition"
+                style={{backgroundColor: '#556622'}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
                 Create your first blog post
               </button>
             </Link>

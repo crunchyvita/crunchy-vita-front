@@ -154,7 +154,10 @@ export default function EditStockPage() {
         <button
           onClick={() => setShowModal(true)}
           disabled={!stock}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-sm transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 text-white px-6 py-3 rounded-lg font-semibold text-sm transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{backgroundColor: '#556622'}}
+          onMouseEnter={(e) => !stock || (e.target.style.backgroundColor = '#3d4617')}
+          onMouseLeave={(e) => !stock || (e.target.style.backgroundColor = '#556622')}
         >
           <Plus size={20} />
           Add Stock
@@ -249,7 +252,10 @@ export default function EditStockPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 shadow-sm"
+              className="w-full text-white py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 shadow-sm"
+              style={{backgroundColor: '#556622'}}
+              onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617')}
+              onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622')}
             >
               {saving ? "Updating..." : "Save Alert Threshold"}
             </button>
@@ -301,7 +307,10 @@ export default function EditStockPage() {
               <button
                 onClick={handleAddQuantity}
                 disabled={saving || quantityToAdd <= 0}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 text-white py-3 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{backgroundColor: '#556622'}}
+                onMouseEnter={(e) => (saving || quantityToAdd <= 0) || (e.target.style.backgroundColor = '#3d4617')}
+                onMouseLeave={(e) => (saving || quantityToAdd <= 0) || (e.target.style.backgroundColor = '#556622')}
               >
                 {saving ? "Adding..." : "Add Stock"}
               </button>

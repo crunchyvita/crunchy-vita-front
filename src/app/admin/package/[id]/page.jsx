@@ -104,7 +104,10 @@ export default function PackageDetailPage({ params }) {
 				</button>
 				<Link
 					href={`/admin/package/${packageData._id}/edit`}
-					className="flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+					className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition"
+					style={{backgroundColor: '#556622'}}
+					onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+					onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
 				>
 					<Edit2 className="h-4 w-4" />
 					Edit Package

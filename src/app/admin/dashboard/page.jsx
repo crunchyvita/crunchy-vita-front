@@ -222,8 +222,11 @@ function AdminDashboard() {
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={() => handleReply(selectedMessage._id)}
+                        className="flex-1 text-white font-bold py-3 rounded-xl transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                        style={{backgroundColor: '#556622'}}
+                        onMouseEnter={(e) => !sendingReply && (e.target.style.backgroundColor = '#3d4617')}
+                        onMouseLeave={(e) => !sendingReply && (e.target.style.backgroundColor = '#556622')}
                         disabled={sendingReply || !replyText.trim()}
-                        className="flex-1 bg-green-900 text-white font-bold py-3 rounded-xl hover:bg-green-800 transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {sendingReply ? 'Envoi...' : 'Envoyer la réponse'}
                       </button>

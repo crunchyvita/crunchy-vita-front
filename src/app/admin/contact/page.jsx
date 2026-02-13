@@ -365,6 +365,202 @@ export default function ContactMessagesPage() {
         msg.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+  function MessageDetail({ isMobile = false }) {
+    if (!selectedMessage) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/30">
+          <MailOpen size={48} className="mb-4 opacity-20" />
+          <p className="font-medium text-sm">Sélectionnez un message pour le lire</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Toolbar Detail */}
+        <div className="border-b border-slate-200 px-4 md:px-8 flex items-center justify-between min-h-[73px]">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            {isMobile && (
+              <button
+                onClick={() => setSelectedMessage(null)}
+                className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+                aria-label="Retour"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            )}
+
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-slate-900 truncate">{selectedMessage.name}</span>
+              <a
+                href={`mailto:${selectedMessage.email}`}
+                className="text-xs text-blue-500 hover:underline cursor-pointer truncate"
+              >
+                {selectedMessage.email}
+              </a>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleDelete(selectedMessage._id)}
+              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Corps du Message */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center gap-3 mb-6 md:mb-8">
+              <div className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0">
+                {selectedMessage.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 break-words">
+                  {selectedMessage.object || 'Demande de contact'}
+                </h2>
+                <p className="text-sm text-slate-500 flex items-center gap-2">
+                  De: <span className="font-semibold text-slate-700">{selectedMessage.name}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="prose prose-slate max-w-none mb-10 md:mb-12">
+              <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
+                {selectedMessage.message}
+              </div>
+            </div>
+
+            {/* Section Réponses précédentes */}
+            {selectedMessage.replies && selectedMessage.replies.length > 0 && (
+              <div className="border-t border-slate-200 pt-6 md:pt-8 mb-6 md:mb-8">
+                {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                  <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                        <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                        <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-purple-900 truncate">
+                        {selectedMessage.companyName}
+                      </p>
+                      <p className="text-xs text-purple-600">Contact professionnel</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {selectedMessage.replies.map((reply, index) => (
+                    <div key={index} className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                      <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 md:p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-300 transition-all duration-300 pointer-events-none select-none">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-900 truncate">
+                                {user?.name || 'Admin'}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {new Date(reply.sentAt).toLocaleDateString('fr-FR', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                })}{' '}
+                                à{' '}
+                                {new Date(reply.sentAt).toLocaleTimeString('fr-FR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="md:ml-11 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
+                            {reply.message}
+                          </p>
+                        </div>
+
+                        {/* Footer indicator */}
+                        <div className="mt-3 md:ml-11 flex items-center gap-2">
+                          <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                          <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section Réponse - Disponible seulement si pas de réponse précédente */}
+            {(!selectedMessage.replies || selectedMessage.replies.length === 0) && (
+              <div className="border-t border-slate-200 pt-6 md:pt-8">
+                <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
+                  <Reply size={18} className="text-blue-600" /> Répondre à ce message
+                </div>
+
+                {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                  <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
+                        <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                        <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-purple-900 truncate">
+                        {selectedMessage.companyName}
+                      </p>
+                      <p className="text-xs text-purple-600">Contact professionnel</p>
+                    </div>
+                  </div>
+                )}
+
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
+                  placeholder="Votre message..."
+                />
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={handleReply}
+                    className="text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.2)'}}
+                    onMouseEnter={(e) => !sending && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.3)')}
+                    onMouseLeave={(e) => !sending && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.2)')}
+                    disabled={sending || !replyText.trim()}
+                  >
+                    {sending ? (
+                      <>
+                        <RefreshCw className="animate-spin" size={16} />
+                        Envoi en cours...
+                      </>
+                    ) : (
+                      <>
+                        Envoyer la réponse <Send size={16} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <AdminHeader />
