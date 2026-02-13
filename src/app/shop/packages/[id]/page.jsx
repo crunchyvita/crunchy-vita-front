@@ -35,15 +35,38 @@ const COLORS = {
 };
 
 // --- UTILS ---
+const pickUrl = (v) => {
+  if (!v || v === "undefined") return null;
+  if (typeof v === "string") return v;
+  if (typeof v === "object") return v.url || v.secure_url || null;
+  return null;
+};
+
 const getProductImageUrl = (product) => {
   if (!product) return null;
-  const url =
-    product.imageUrl ||
-    product.media?.[0]?.url ||
-    product.media?.[0] ||
-    product.productImage ||
-    product.image;
-  return !url || url === "undefined" ? null : url;
+
+  // direct
+  const direct =
+    pickUrl(product.imageUrl) ||
+    pickUrl(product.image) ||
+    pickUrl(product.productImage);
+
+  if (direct) return direct;
+
+  // media
+  const media = product.media;
+  if (Array.isArray(media) && media.length > 0) {
+    const first = media[0];
+    return pickUrl(first?.url) || pickUrl(first) || pickUrl(first?.secure_url) || null;
+  }
+
+  // images array (optional)
+  const images = product.images;
+  if (Array.isArray(images) && images.length > 0) {
+    return pickUrl(images[0]?.url) || pickUrl(images[0]) || null;
+  }
+
+  return null;
 };
 
 const getProductPrice = (product) => {
@@ -173,8 +196,7 @@ export default function PackageCustomizationPage() {
 
             const validProductIds = productsData.map((p) => p._id);
             const validSelectedProducts =
-              storedConfig.selectedProducts?.filter((id) => validProductIds.includes(id)) ||
-              [];
+              storedConfig.selectedProducts?.filter((id) => validProductIds.includes(id)) || [];
 
             const validQuantities = {};
             Object.keys(storedConfig.quantities || {}).forEach((productId) => {
@@ -314,7 +336,7 @@ export default function PackageCustomizationPage() {
     clearPackConfig();
   }, [products, clearPackConfig]);
 
-  // ✅ CUSTOM PACKAGE -> ADD TO CART
+  // ✅ CUSTOM PACKAGE -> ADD TO CART (STORE MULTI-IMAGES)
   const handleAddToCart = async () => {
     if (selectedProducts.length === 0) {
       setError(t("errors.selectAtLeastOne"));
@@ -332,6 +354,24 @@ export default function PackageCustomizationPage() {
     }
 
     try {
+      const selectedProductsPayload = selectedProducts.map((productId) => {
+        const product = products.find((p) => p._id === productId);
+        const img = getProductImageUrl(product);
+        return {
+          productId,
+          product,
+          name: product?.name,
+          image: img, // ✅ always a string url or null
+          price: getProductPrice(product),
+          quantity: packageData.allowMultipleQuantities === false ? 1 : quantities[productId] || 1,
+        };
+      });
+
+      // ✅ Multi-image list for cart (unique + clean)
+      const packageImages = [
+        ...new Set(selectedProductsPayload.map((sp) => sp.image).filter(Boolean)),
+      ];
+
       const packageCartItem = {
         _id: `package_${packageData._id}_${Date.now()}`,
         type: "package",
@@ -340,20 +380,13 @@ export default function PackageCustomizationPage() {
         packageName: packageData.name,
         description: packageData.description,
 
-        // ✅ FIX: save PACKAGE image (not first product image)
-        image: packageData?.image || getProductImageUrl(products.find((p) => p._id === selectedProducts[0])),
+        // ✅ DO NOT store package image (so cart won’t show it)
+        // image: packageData?.image,
 
-        selectedProducts: selectedProducts.map((productId) => {
-          const product = products.find((p) => p._id === productId);
-          return {
-            productId,
-            product,
-            name: product?.name,
-            image: getProductImageUrl(product),
-            price: getProductPrice(product),
-            quantity: packageData.allowMultipleQuantities === false ? 1 : quantities[productId] || 1,
-          };
-        }),
+        // ✅ store multi images (cart should use this)
+        packageImages,
+
+        selectedProducts: selectedProductsPayload,
         discountPercentage,
         price: discountedPrice,
         originalPrice: totalPrice,
@@ -371,7 +404,7 @@ export default function PackageCustomizationPage() {
     }
   };
 
-  // ✅ FIXED PACKAGE -> ADD TO CART
+  // ✅ FIXED PACKAGE -> ADD TO CART (STORE MULTI-IMAGES)
   const handleAddFixedToCart = async () => {
     if (packageData?.packageType === "FIXED" && !packageData.inStock) {
       setError("Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.");
@@ -380,6 +413,24 @@ export default function PackageCustomizationPage() {
     }
 
     try {
+      const selectedProductsPayload = fixedItems.map((item) => {
+        const product = item.productId || {};
+        const img = getProductImageUrl(product);
+
+        return {
+          productId: product._id || item.productId,
+          product,
+          name: product.name,
+          image: img, // ✅ always string url or null
+          price: getProductPrice(product),
+          quantity: (item.quantity || 1) * packageQuantity,
+        };
+      });
+
+      const packageImages = [
+        ...new Set(selectedProductsPayload.map((sp) => sp.image).filter(Boolean)),
+      ];
+
       const packageCartItem = {
         _id: `package_${packageData._id}_${Date.now()}`,
         type: "package",
@@ -389,20 +440,12 @@ export default function PackageCustomizationPage() {
         description: packageData.description,
         packageType: "FIXED",
 
-        // ✅ FIX: save PACKAGE image (not first product image)
-        image: packageData?.image || getProductImageUrl(fixedItems[0]?.productId),
+        // ✅ DO NOT store package image
+        // image: packageData?.image,
 
-        selectedProducts: fixedItems.map((item) => {
-          const product = item.productId || {};
-          return {
-            productId: product._id || item.productId,
-            product,
-            name: product.name,
-            image: getProductImageUrl(product),
-            price: getProductPrice(product),
-            quantity: (item.quantity || 1) * packageQuantity,
-          };
-        }),
+        packageImages,
+
+        selectedProducts: selectedProductsPayload,
         discountPercentage,
         price: discountedFixedPrice * packageQuantity,
         originalPrice: fixedTotalPrice * packageQuantity,
@@ -456,19 +499,15 @@ export default function PackageCustomizationPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {fixedItems.map((item) => {
                   const product = item.productId || {};
+                  const img = getProductImageUrl(product);
                   return (
                     <div
                       key={item._id || item.productId?._id || item.productId}
                       className="bg-white rounded-[24px] border shadow-sm overflow-hidden flex flex-col"
                     >
                       <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
-                        {getProductImageUrl(product) ? (
-                          <img
-                            src={getProductImageUrl(product)}
-                            alt={product.name}
-                            loading="lazy"
-                            className="w-full h-full object-cover"
-                          />
+                        {img ? (
+                          <img src={img} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300">
                             <ShoppingBag size={32} />
@@ -526,10 +565,7 @@ export default function PackageCustomizationPage() {
                   </div>
 
                   {discountPercentage > 0 && (
-                    <div
-                      className="flex justify-between text-sm font-bold uppercase tracking-widest"
-                      style={{ color: COLORS.grass }}
-                    >
+                    <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                       <span>Remise Pack ({discountPercentage}%)</span>
                       <span>-€{(totalFixedSavings * packageQuantity).toFixed(2)}</span>
                     </div>
@@ -546,13 +582,10 @@ export default function PackageCustomizationPage() {
                 <button
                   onClick={handleAddFixedToCart}
                   disabled={!packageData.inStock}
-                  style={{
-                    backgroundColor: packageData.inStock ? "#556822" : "#9CA3AF",
-                  }}
+                  style={{ backgroundColor: packageData.inStock ? "#556822" : "#9CA3AF" }}
                   className="text-white w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {packageData.inStock ? "Ajouter au panier" : "Rupture de stock"}{" "}
-                  <ShoppingCart size={18} />
+                  {packageData.inStock ? "Ajouter au panier" : "Rupture de stock"} <ShoppingCart size={18} />
                 </button>
 
                 <AnimatePresence>
@@ -614,6 +647,7 @@ export default function PackageCustomizationPage() {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
+          {/* PRODUCT LIST */}
           <div className="lg:col-span-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {products.map((product) => {
@@ -623,8 +657,7 @@ export default function PackageCustomizationPage() {
                 const qty = quantities[product._id] || 1;
 
                 const avgRating = product.ratings?.length
-                  ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) /
-                    product.ratings.length
+                  ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length
                   : null;
 
                 const availableStock = getAvailableStock(product);
@@ -768,6 +801,7 @@ export default function PackageCustomizationPage() {
             </div>
           </div>
 
+          {/* SIDEBAR SUMMARY */}
           <div className="lg:col-span-4">
             <div className="bg-white rounded-[32px] p-8 sticky top-24 shadow-xl border border-gray-100">
               <div className="flex items-center justify-between mb-8">
@@ -819,10 +853,7 @@ export default function PackageCustomizationPage() {
                 </div>
 
                 {discountPercentage > 0 && (
-                  <div
-                    className="flex justify-between text-sm font-bold uppercase tracking-widest"
-                    style={{ color: COLORS.grass }}
-                  >
+                  <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                     <span>{t("summary.discount", { percent: discountPercentage })}</span>
                     <span>-€{totalSavings.toFixed(2)}</span>
                   </div>
