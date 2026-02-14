@@ -5,8 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Link } from '@/navigation';
 import {
   ImageIcon, ShoppingCart, Heart, Star, Package,
-  ShoppingBag, CheckCircle2, Search, X,
-  ArrowRight, Loader2
+  Search, X, ArrowRight, Loader2
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -20,7 +19,11 @@ import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTransla
 // --- UTILS ---
 const getProductImageUrl = (product) => {
   if (!product) return null;
-  const url = product.image || product.imageUrl || (product.media?.[0]?.url || product.media?.[0]) || product.productImage;
+  const url =
+    product.image ||
+    product.imageUrl ||
+    (product.media?.[0]?.url || product.media?.[0]) ||
+    product.productImage;
   if (!url || url === 'undefined') return null;
   return url;
 };
@@ -35,7 +38,9 @@ const getPackageImageUrl = (pkg) => {
 const getProductPrice = (product) => {
   if (!product) return 0;
   const history = product.pricingHistory;
-  return (history && history.length > 0) ? history[history.length - 1]?.price : product.price || 0;
+  return (history && history.length > 0)
+    ? history[history.length - 1]?.price
+    : product.price || 0;
 };
 
 const getAvailableStock = (stock) => {
@@ -45,16 +50,56 @@ const getAvailableStock = (stock) => {
 
 // --- COMPONENTS ---
 
-/** * PREMIUM PACKAGE CARD - Style CrunchyVita
- */
-function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoading }) {
+function PremiumPackageCard({
+  pkg,
+  onToggleFavorite,
+  isFavorite,
+  favoritesLoading,
+  fallbackProducts
+}) {
   const t = useTranslations('Shop');
   const locale = useLocale();
   const translatedPackage = getTranslatedPackage(pkg, locale);
-  // On récupère TOUS les produits du pack
+
   const allProducts = pkg.products || [];
-  const resolvedType = pkg.packageType || "CUSTOM";
+  const resolvedType = pkg.packageType || 'CUSTOM';
   const packageImageUrl = getPackageImageUrl(pkg);
+  const customBadgeLabel = locale === 'fr' ? 'Personnalise' : 'Custom';
+
+  // Placeholder images
+  const placeholderSource = resolvedType === 'FIXED' ? allProducts : (fallbackProducts || []);
+  const placeholderItems = placeholderSource
+    .map((item) => {
+      const prod = item?.productId || item;
+      const imageUrl = getProductImageUrl(prod);
+      return imageUrl ? { imageUrl } : null;
+    })
+    .filter(Boolean);
+
+  // ✅ Robust out-of-stock detection for FIXED packs
+  const isOutOfStockFixed = useMemo(() => {
+    if (resolvedType !== 'FIXED') return false;
+
+    // Backend boolean fields (if exist)
+    if (typeof pkg.inStock === 'boolean') return !pkg.inStock;
+    if (typeof pkg.isInStock === 'boolean') return !pkg.isInStock;
+
+    // Package stock object (if exist)
+    if (pkg.stock) {
+      const avail = getAvailableStock(pkg.stock);
+      if (Number.isFinite(avail)) return avail <= 0;
+    }
+
+    // Fallback: check products inside fixed pack
+    const items = pkg.products || [];
+    if (!items.length) return false;
+
+    return items.some((it) => {
+      const prod = it?.productId || it;
+      const avail = getAvailableStock(prod?.stock);
+      return avail <= 0;
+    });
+  }, [pkg, resolvedType]);
 
   return (
     <Link
@@ -62,98 +107,116 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
       prefetch={true}
       className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-[#E1FBD9] shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col h-full"
     >
-      {/* ... Bouton Favoris inchangé ... */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onToggleFavorite?.(pkg);
-        }}
-        className="absolute top-6 right-6 z-20 p-3 rounded-full bg-white shadow-lg transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
-        title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-      >
-        <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
-      </button>
+      {/* Favorites + Custom badge */}
+      <div className="absolute top-6 right-6 z-40 flex items-center gap-2">
+        {resolvedType === 'CUSTOM' && (
+          <span className="bg-[#556822] text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest shadow-xl backdrop-blur">
+            {customBadgeLabel}
+          </span>
+        )}
+
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleFavorite?.(pkg);
+          }}
+          className="p-3 rounded-full bg-white/95 shadow-xl transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"
+          title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        >
+          <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
+        </button>
+      </div>
+
       <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity text-[#556822]">
         <Package size={120} />
       </div>
-
 
       <div className="relative h-72 bg-[#F2F8EE] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-[#B3C800]/10 via-transparent to-[#EF8EB8]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
         {packageImageUrl ? (
-          <img src={packageImageUrl} alt={pkg.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-        ) : (
+          <img
+            src={packageImageUrl}
+            alt={pkg.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : placeholderItems.length > 0 ? (
           <div className="relative w-full h-80 bg-[#F2F8EE] flex items-center justify-center p-6 overflow-hidden">
-            {/* Fond avec un léger motif ou dégradé pour donner de la profondeur */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.8)_0%,_transparent_100%)]" />
 
-            {/* Grille de produits : on ajuste les colonnes selon le nombre d'items */}
-            <div className={`relative z-10 grid gap-3 w-full max-w-70 transition-transform duration-500 group-hover:scale-105 ${
-              allProducts.length <= 4 ? 'grid-cols-2' : 'grid-cols-2'
-            }`}>
-              {allProducts.map((item, idx) => {
-                const prod = item.productId || item;
-                return (
-                  <div
-                    key={idx}
-                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-sm transition-all duration-500 delay-[${idx * 50}ms] group-hover:shadow-md ${
-                      idx % 2 === 0 ? 'translate-y-2 group-hover:translate-y-0' : '-translate-y-2 group-hover:translate-y-0'
-                    }`}
-                  >
-                    <img
-                      src={getProductImageUrl(prod)}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Overlay discret au survol de la carte parente */}
-                    <div className="absolute inset-0 bg-[#556822]/0 group-hover:bg-[#556822]/5 transition-colors" />
-                  </div>
-                );
-              })}
+            <div
+              className={`relative z-10 grid gap-3 w-full max-w-70 transition-transform duration-500 group-hover:scale-105 ${
+                placeholderItems.length <= 4 ? 'grid-cols-2' : 'grid-cols-2'
+              }`}
+            >
+              {placeholderItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`relative aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-sm transition-all duration-500 ${
+                    idx % 2 === 0 ? 'translate-y-2 group-hover:translate-y-0' : '-translate-y-2 group-hover:translate-y-0'
+                  }`}
+                >
+                  <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-[#556822]/0 group-hover:bg-[#556822]/5 transition-colors" />
+                </div>
+              ))}
             </div>
+          </div>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30">
+            <ImageIcon size={40} />
           </div>
         )}
 
-        {/* ... Badges de réduction et Stock ... */}
+        {/* Discount badge */}
         {pkg.discountPercentage > 0 && (
-          <div className="absolute top-6 left-6">
-            <span className="bg-[#E10C69] text-white text-[12px] font-black px-4 py-1.5 rounded-full tracking-widest shadow-lg">
+          <div className="absolute top-6 left-6 z-40">
+            <span className="bg-[#E10C69] text-white text-[12px] font-black px-4 py-1.5 rounded-full tracking-widest shadow-xl">
               -{pkg.discountPercentage}%
             </span>
           </div>
         )}
 
-        {/* ✅ NEW: Out of Stock Badge for FIXED packages */}
-        {pkg.packageType === 'FIXED' && !pkg.inStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
-            <div className="text-center">
-              <p className="text-white font-black text-sm uppercase tracking-widest">Rupture de Stock</p>
-              <p className="text-white text-xs mt-2 font-medium">Certains produits ne sont pas disponibles</p>
+        {/* ✅ Out of stock overlay always visible and doesn't block clicks */}
+        {resolvedType === 'FIXED' && isOutOfStockFixed && (
+          <div className="absolute inset-0 z-30 pointer-events-none">
+            <div className="absolute inset-0 bg-black/55" />
+            <div className="absolute inset-0 flex items-center justify-center p-6">
+              <div className="text-center">
+                <p className="text-white font-black text-sm uppercase tracking-widest">
+                  RUPTURE DE STOCK
+                </p>
+                <p className="text-white text-xs mt-2 font-medium">
+                  Certains produits ne sont pas disponibles
+                </p>
+              </div>
             </div>
           </div>
         )}
       </div>
 
       <div className="p-8 flex flex-col flex-1 relative">
-        {/* ... Contenu texte et bouton "Discover" ... */}
         <h3 className="text-2xl font-black font-[Agrandir] text-[#556822] mb-2 leading-tight group-hover:text-[#E10C69] transition-colors">
           {translatedPackage.name}
         </h3>
+
         <p className="text-sm text-gray-500 font-medium line-clamp-2 mb-6">
           {translatedPackage.description || t('packages.descriptionFallback')}
         </p>
 
         <div className="mt-auto pt-6 border-t border-[#F2F8EE] flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-widest text-[#556822]">{t('packages.discover')}</span>
+          <span className="text-xs font-black uppercase tracking-widest text-[#556822]">
+            {t('packages.discover')}
+          </span>
+
           <button
             className={`h-12 w-12 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-all duration-300 shadow-lg ${
-              resolvedType === 'FIXED' && !pkg.inStock
+              resolvedType === 'FIXED' && isOutOfStockFixed
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-[#556822] group-hover:bg-[#E10C69]'
             }`}
-            disabled={resolvedType === 'FIXED' && !pkg.inStock}
+            disabled={resolvedType === 'FIXED' && isOutOfStockFixed}
           >
             <ArrowRight size={20} />
           </button>
@@ -163,8 +226,6 @@ function PremiumPackageCard({ pkg, onToggleFavorite, isFavorite, favoritesLoadin
   );
 }
 
-/** * PRODUCT CARD - Style CrunchyVita
- */
 function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favoritesLoading }) {
   const t = useTranslations('Shop');
   const locale = useLocale();
@@ -172,15 +233,24 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
   const price = getProductPrice(product);
   const stock = getAvailableStock(product.stock);
   const imageUrl = getProductImageUrl(product);
-  const avgRating = product.ratings?.length ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length : null;
+
+  const avgRating = product.ratings?.length
+    ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length
+    : null;
 
   return (
     <div className="group bg-white rounded-[2rem] shadow-sm border border-[#E1FBD9] overflow-hidden hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-square overflow-hidden bg-[#F2F8EE]">
         {imageUrl ? (
-          <img src={imageUrl} alt={productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img
+            src={imageUrl}
+            alt={productName}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30"><ImageIcon size={40} /></div>
+          <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30">
+            <ImageIcon size={40} />
+          </div>
         )}
 
         <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
@@ -191,8 +261,12 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
           >
             <Heart size={18} className={isFavorite ? 'fill-[#E10C69] text-[#E10C69]' : 'text-[#E10C69]'} />
           </button>
+
           {stock > 0 && (
-            <button onClick={() => onOpenDetail(product)} className="p-3 bg-white rounded-full shadow-md text-[#556822] hover:bg-[#556822] hover:text-white transition-colors">
+            <button
+              onClick={() => onOpenDetail(product)}
+              className="p-3 bg-white rounded-full shadow-md text-[#556822] hover:bg-[#556822] hover:text-white transition-colors"
+            >
               <ShoppingCart size={18} />
             </button>
           )}
@@ -203,28 +277,30 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
         {avgRating && (
           <div className="flex items-center gap-1 mb-4">
             <div className="flex items-center gap-0.5">
-                <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter mr-2">
-              {avgRating.toFixed(1)} 
-            </span>
+              <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter mr-2">
+                {avgRating.toFixed(1)}
+              </span>
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-4 w-4 ${i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`}
+                  className={`h-4 w-4 ${
+                    i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'
+                  }`}
                 />
               ))}
             </div>
             <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter ml-2">
-            ({product.ratings.length})
+              ({product.ratings.length})
             </span>
           </div>
         )}
-    <div className="mb-3">
-  <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
-  <div className="flex items-center justify-between">
-    <h4 className="font-black text-[#E10C69] text-xl">€{price.toFixed(2)}</h4>
-  </div>
-</div>
 
+        <div className="mb-3">
+          <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
+          <div className="flex items-center justify-between">
+            <h4 className="font-black text-[#E10C69] text-xl">€{price.toFixed(2)}</h4>
+          </div>
+        </div>
 
         <Link
           href={`/shop/${product.id || product._id}`}
@@ -238,103 +314,89 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
 }
 
 // --- MAIN PAGE ---
-
 function ClientShop() {
   const t = useTranslations('Shop');
   const searchParams = useSearchParams();
   const locale = useLocale();
   const router = useRouter();
   const { user } = useAuth();
+
   const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
     ? rawApiBaseUrl.replace(/\/$/, '')
     : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
+
   const [products, setProducts] = useState([]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
   const [favoritesIds, setFavoritesIds] = useState(new Set());
   const [favoritesLoading, setFavoritesLoading] = useState(false);
+
   const [packageFavoritesIds, setPackageFavoritesIds] = useState(new Set());
   const [packageFavoritesLoading, setPackageFavoritesLoading] = useState(false);
 
-  // --- SEARCH FUNCTIONALITIES ---
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Handle tab parameter from URL
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab === 'packages') {
-      setActiveTab('packages');
-    }
+    if (tab === 'packages') setActiveTab('packages');
   }, [searchParams]);
 
-  // Product search filtering function
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;
-
     const query = searchQuery.toLowerCase();
-    return products.filter(product => {
+
+    return products.filter((product) => {
       const translatedName = getTranslatedProduct(product, locale).name;
-      // Search by product name
       const nameMatch = translatedName?.toLowerCase().includes(query);
 
-      // Search by tags - handle both string and array formats
       let tagsMatch = false;
       if (product.tags) {
         if (Array.isArray(product.tags)) {
-          // Tags is an array
-          tagsMatch = product.tags.some(tag =>
-            tag?.toLowerCase().includes(query)
-          );
+          tagsMatch = product.tags.some((tag) => tag?.toLowerCase().includes(query));
         } else if (typeof product.tags === 'string') {
-          // Tags is a comma-separated string
-          tagsMatch = product.tags.split(',').map(t => t.trim()).some(tag =>
-            tag.toLowerCase().includes(query)
-          );
-        }
-      }
-      // Also check product.tag (singular) if it exists
-      if (!tagsMatch && product.tag) {
-        if (Array.isArray(product.tag)) {
-          tagsMatch = product.tag.some(tag =>
-            tag?.toLowerCase().includes(query)
-          );
-        } else if (typeof product.tag === 'string') {
-          const tagsArray = product.tag.split(',').map(t => t.trim());
-          tagsMatch = tagsArray.some(tag =>
-            tag.toLowerCase().includes(query)
-          );
+          tagsMatch = product.tags.split(',').map((t) => t.trim()).some((tag) => tag.toLowerCase().includes(query));
         }
       }
 
-      // Search by category
+      if (!tagsMatch && product.tag) {
+        if (Array.isArray(product.tag)) {
+          tagsMatch = product.tag.some((tag) => tag?.toLowerCase().includes(query));
+        } else if (typeof product.tag === 'string') {
+          const tagsArray = product.tag.split(',').map((t) => t.trim());
+          tagsMatch = tagsArray.some((tag) => tag.toLowerCase().includes(query));
+        }
+      }
+
       const categoryMatch = product.categoryId?.name?.toLowerCase().includes(query);
 
       return nameMatch || tagsMatch || categoryMatch;
     });
   }, [products, searchQuery, locale]);
 
-  // Package search filtering function
   const filteredPackages = useMemo(() => {
     if (!searchQuery.trim()) return packages;
-
     const query = searchQuery.toLowerCase();
-    return packages.filter(pkg => {
-      const nameMatch = pkg.name?.toLowerCase().includes(query);
-      const descMatch = pkg.description?.toLowerCase().includes(query);
 
-      // Search by product names included in the package
-      const productMatch = pkg.products?.some(item => {
+    return packages.filter((pkg) => {
+      const translated = getTranslatedPackage(pkg, locale);
+      const nameMatch = translated.name?.toLowerCase().includes(query);
+      const descMatch = translated.description?.toLowerCase().includes(query);
+
+      const productMatch = pkg.products?.some((item) => {
         const product = item.productId || item;
-        return product?.name?.toLowerCase().includes(query);
+        const productName = getTranslatedProduct(product, locale).name;
+        return productName?.toLowerCase().includes(query);
       });
 
       return nameMatch || descMatch || productMatch;
     });
-  }, [packages, searchQuery]);
+  }, [packages, searchQuery, locale]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -343,16 +405,21 @@ function ClientShop() {
           fetch('/api/products'),
           fetch('/api/packages')
         ]);
+
         if (pRes.ok) {
           const d = await pRes.json();
-          setProducts((d.data || d).filter(p => p.status === 'ACTIVE'));
+          setProducts((d.data || d).filter((p) => p.status === 'ACTIVE'));
         }
+
         if (pkgRes.ok) {
           const d = await pkgRes.json();
-          setPackages((d.data || d).filter(p => p.isActive));
+          setPackages((d.data || d).filter((p) => p.isActive));
         }
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchData();
   }, []);
 
@@ -369,14 +436,10 @@ function ClientShop() {
 
         const [productRes, packageRes] = await Promise.all([
           fetch(`${apiBaseUrl}/users/favorites`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${apiBaseUrl}/users/favorites/packages`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           })
         ]);
 
@@ -444,7 +507,7 @@ function ClientShop() {
     };
 
     loadFavorites();
-  }, [user]);
+  }, [user, apiBaseUrl]);
 
   const handleToggleFavorite = async (product) => {
     if (!product?._id) return;
@@ -463,14 +526,12 @@ function ClientShop() {
 
     try {
       const token = localStorage.getItem('token');
-      const isFavorite = favoritesIds.has(product._id);
+      const isFav = favoritesIds.has(product._id);
 
-      if (isFavorite) {
+      if (isFav) {
         const response = await fetch(`${apiBaseUrl}/users/favorites/${product._id}`, {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Failed to remove favorite');
@@ -516,14 +577,12 @@ function ClientShop() {
 
     try {
       const token = localStorage.getItem('token');
-      const isFavorite = packageFavoritesIds.has(pkg._id);
+      const isFav = packageFavoritesIds.has(pkg._id);
 
-      if (isFavorite) {
+      if (isFav) {
         const response = await fetch(`${apiBaseUrl}/users/favorites/packages/${pkg._id}`, {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Failed to remove package favorite');
@@ -558,7 +617,7 @@ function ClientShop() {
       <PromoBadge />
 
       <main className="max-w-7xl mx-auto px-6 py-16 font-[Agrandir]">
-        {/* Search Bar Premium - With extracted functionalities */}
+        {/* Search Bar */}
         <section className="mb-20 font-[Maison Neue]">
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#556822]" size={22} />
@@ -578,6 +637,7 @@ function ClientShop() {
               </button>
             )}
           </div>
+
           {searchQuery && (
             <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
               {activeTab === 'products'
@@ -587,18 +647,22 @@ function ClientShop() {
           )}
         </section>
 
-        {/* Tab Navigation */}
+        {/* Tabs */}
         <div className="flex flex-col items-center mb-16">
           <div className="flex bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] mb-12 border border-white">
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'products' ? 'bg-[#E10c69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
+              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
+                activeTab === 'products' ? 'bg-[#E10c69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'
+              }`}
             >
               {t('tabs.products')}
             </button>
             <button
               onClick={() => setActiveTab('packages')}
-              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'packages' ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'}`}
+              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
+                activeTab === 'packages' ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'
+              }`}
             >
               {t('tabs.packages')}
             </button>
@@ -610,26 +674,29 @@ function ClientShop() {
             </h2>
             <div className="w-20 h-1.5 bg-[#EF8EB8] mx-auto rounded-full mb-6" />
             <p className="text-[#556822]/70 font-bold text-xl">
-              {activeTab === 'products'
-                ? t('heading.productsSubtitle')
-                : t('heading.packagesSubtitle')}
+              {activeTab === 'products' ? t('heading.productsSubtitle') : t('heading.packagesSubtitle')}
             </p>
           </div>
         </div>
 
-        {/* Grid Content - Using filtered data */}
+        {/* Content */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[1, 2, 3].map(i => <div key={i} className="bg-white/50 animate-pulse h-96 rounded-[2.5rem]" />)}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white/50 animate-pulse h-96 rounded-[2.5rem]" />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {activeTab === 'products' ? (
-              filteredProducts.map(p => (
+              filteredProducts.map((p) => (
                 <ProductCard
                   key={p._id}
                   product={p}
-                  onOpenDetail={(prod) => { setSelectedProduct(prod); setIsDetailModalOpen(true); }}
+                  onOpenDetail={(prod) => {
+                    setSelectedProduct(prod);
+                    setIsDetailModalOpen(true);
+                  }}
                   onToggleFavorite={handleToggleFavorite}
                   isFavorite={favoritesIds.has(p._id)}
                 />
@@ -642,6 +709,7 @@ function ClientShop() {
                     pkg={pkg}
                     onToggleFavorite={handleTogglePackageFavorite}
                     isFavorite={packageFavoritesIds.has(pkg._id)}
+                    fallbackProducts={products}
                   />
                 ))}
               </div>
@@ -660,6 +728,7 @@ function ClientShop() {
         onToggleFavorite={handleToggleFavorite}
         isFavorite={selectedProduct ? favoritesIds.has(selectedProduct._id) : false}
       />
+
       <Footer />
     </div>
   );
@@ -667,11 +736,13 @@ function ClientShop() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#F5F3ED] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#556822]" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F5F3ED] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#556822]" />
+        </div>
+      }
+    >
       <ClientShop />
     </Suspense>
   );
