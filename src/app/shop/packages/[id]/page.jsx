@@ -394,7 +394,11 @@ export default function PackageCustomizationPage() {
         discountedPrice,
       };
 
-      addToCart(packageCartItem, 1);
+      const ok = await addToCart(packageCartItem, 1);
+      if (!ok) {
+        setError(t("errors.selectionOutOfStock"));
+        return;
+      }
       clearPackConfig();
 
       setSuccess(t("success.addedToCart"));
@@ -423,7 +427,7 @@ export default function PackageCustomizationPage() {
           name: product.name,
           image: img, // ✅ always string url or null
           price: getProductPrice(product),
-          quantity: (item.quantity || 1) * packageQuantity,
+          quantity: item.quantity || 1,
         };
       });
 
@@ -432,7 +436,7 @@ export default function PackageCustomizationPage() {
       ];
 
       const packageCartItem = {
-        _id: `package_${packageData._id}_${Date.now()}`,
+        _id: `package_${packageData._id}_fixed`,
         type: "package",
         packageId: packageData._id,
         name: packageData.name,
@@ -447,13 +451,18 @@ export default function PackageCustomizationPage() {
 
         selectedProducts: selectedProductsPayload,
         discountPercentage,
-        price: discountedFixedPrice * packageQuantity,
-        originalPrice: fixedTotalPrice * packageQuantity,
-        totalPrice: fixedTotalPrice * packageQuantity,
-        discountedPrice: discountedFixedPrice * packageQuantity,
+        quantity: packageQuantity,
+        price: discountedFixedPrice,
+        originalPrice: fixedTotalPrice,
+        totalPrice: fixedTotalPrice,
+        discountedPrice: discountedFixedPrice,
       };
 
-      addToCart(packageCartItem, 1);
+      const ok = await addToCart(packageCartItem, packageQuantity);
+      if (!ok) {
+        setError(t("fixed.notAvailable"));
+        return;
+      }
 
       setSuccess(t("success.addedToCart"));
       setTimeout(() => router.push("/cart"), 1500);

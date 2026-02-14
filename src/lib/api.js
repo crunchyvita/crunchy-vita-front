@@ -340,6 +340,27 @@ export const stockAPI = {
       method: "PUT",
       body: JSON.stringify({ quantity, type }),
     }),
+
+  // Reserve stock for cart
+  reserve: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/reserve`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
+
+  // Release reserved stock (cart removal)
+  release: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/release`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
+
+  // Finalize reserved stock (checkout)
+  finalize: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/finalize`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
 };
 
 // Contact/Message API functions

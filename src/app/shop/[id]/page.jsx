@@ -274,7 +274,7 @@ export default function ProductDetailPage() {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (searchParams.packageId) {
       if (!isStorageReady || !product?._id) {
         router.push(`/shop/packages/${searchParams.packageId}`);
@@ -306,10 +306,16 @@ export default function ProductDetailPage() {
     // Add to real cart system
     if (!product || !product._id) return;
     
-    addToCart({
+    const ok = await addToCart({
       ...product,
       price: productPrice
     }, quantity);
+
+    if (!ok) {
+      setShowStockAlert(true);
+      setTimeout(() => setShowStockAlert(false), 3000);
+      return;
+    }
     
     setAddedToCart(true);
     

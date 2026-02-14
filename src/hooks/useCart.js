@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { stockAPI } from '@/lib/api';
 
 const CART_STORAGE_KEY = 'crunchyVitaCart';
 
@@ -68,6 +69,38 @@ const getPackageImagesFromItem = (item) => {
   return unique;
 };
 
+const normalizeProductId = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') return value._id || value.id || null;
+  return null;
+};
+
+const buildReservationLines = (item, packageMultiplier = 1) => {
+  if (!item) return [];
+
+  if (!isPackagePayload(item)) {
+    const productId = normalizeProductId(item._id);
+    return productId ? [{ productId, quantity: packageMultiplier }] : [];
+  }
+
+  const linesByProduct = new Map();
+  const selected = Array.isArray(item.selectedProducts) ? item.selectedProducts : [];
+
+  for (const sp of selected) {
+    const productId = normalizeProductId(sp?.productId || sp?.product || sp?._id);
+    if (!productId) continue;
+
+    const baseQty = Number(sp?.quantity || 1);
+    const lineQty = Math.max(0, baseQty) * packageMultiplier;
+    if (!lineQty) continue;
+
+    linesByProduct.set(productId, (linesByProduct.get(productId) || 0) + lineQty);
+  }
+
+  return Array.from(linesByProduct, ([productId, quantity]) => ({ productId, quantity }));
+};
+
 export function useCart() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,18 +153,54 @@ export function useCart() {
     }
   }, [cartItems, isLoading]);
 
+  const reserveLines = useCallback(async (lines) => {
+    const reserved = [];
+
+    for (const line of lines) {
+      try {
+        await stockAPI.reserve(line.productId, line.quantity);
+        reserved.push(line);
+      } catch (err) {
+        if (reserved.length > 0) {
+          await Promise.all(
+            reserved.map((r) => stockAPI.release(r.productId, r.quantity).catch(() => null))
+          );
+        }
+        throw err;
+      }
+    }
+  }, []);
+
+  const releaseLines = useCallback(async (lines) => {
+    await Promise.all(
+      lines.map((line) => stockAPI.release(line.productId, line.quantity).catch(() => null))
+    );
+  }, []);
+
   // Add item to cart
-  const addToCart = useCallback((product, quantity = 1) => {
-    if (!product || !product._id) return;
+  const addToCart = useCallback(async (product, quantity = 1) => {
+    if (!product || !product._id) return false;
+
+    const existingItem = cartItems.find((item) => item._id === product._id);
+    const deltaQty = Number(quantity) || 1;
+    const reservationItem = existingItem || product;
+    const lines = buildReservationLines(reservationItem, deltaQty);
+
+    try {
+      await reserveLines(lines);
+    } catch (err) {
+      console.error('Failed to reserve stock:', err);
+      return false;
+    }
 
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item._id === product._id);
+      const prevExisting = prevItems.find((item) => item._id === product._id);
 
       if (isPackagePayload(product)) {
-        if (existingItem) {
+        if (prevExisting) {
           return prevItems.map((item) =>
             item._id === product._id
-              ? { ...item, quantity: (item.quantity || 1) + quantity }
+              ? { ...item, quantity: (item.quantity || 1) + deltaQty }
               : item
           );
         }
@@ -140,56 +209,89 @@ export function useCart() {
           ...prevItems,
           {
             ...product,
-            quantity: product.quantity || quantity,
+            quantity: product.quantity || deltaQty,
           },
         ];
       }
 
-      if (existingItem) {
-        // Update quantity if product already in cart
+      if (prevExisting) {
         return prevItems.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
+          item._id === product._id ? { ...item, quantity: item.quantity + deltaQty } : item
         );
-      } else {
-        // Add new product to cart
-        return [
-          ...prevItems,
-          {
-            _id: product._id,
-            name: product.name,
-            price: product.price || 0,
-            image: getProductImageUrl(product),
-            quantity,
-            product, // Store full product object for reference
-          },
-        ];
       }
+
+      return [
+        ...prevItems,
+        {
+          _id: product._id,
+          name: product.name,
+          price: product.price || 0,
+          image: getProductImageUrl(product),
+          quantity: deltaQty,
+          product,
+        },
+      ];
     });
-  }, []);
+
+    return true;
+  }, [cartItems, reserveLines]);
 
   // Remove item from cart
-  const removeFromCart = useCallback((productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item._id !== productId));
-  }, []);
+  const removeFromCart = useCallback(async (productId) => {
+    const item = cartItems.find((entry) => entry._id === productId);
+    if (item) {
+      const lines = buildReservationLines(item, Number(item.quantity || 1));
+      await releaseLines(lines);
+    }
+
+    setCartItems((prevItems) => prevItems.filter((entry) => entry._id !== productId));
+  }, [cartItems, releaseLines]);
 
   // Update item quantity
-  const updateQuantity = useCallback((productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
+  const updateQuantity = useCallback(async (productId, quantity) => {
+    const nextQty = Number(quantity) || 0;
+    const item = cartItems.find((entry) => entry._id === productId);
+    if (!item) return;
+
+    if (nextQty <= 0) {
+      await removeFromCart(productId);
       return;
     }
 
+    const currentQty = Number(item.quantity || 1);
+    const delta = nextQty - currentQty;
+    if (delta === 0) return;
+
+    const lines = buildReservationLines(item, Math.abs(delta));
+
+    if (delta > 0) {
+      try {
+        await reserveLines(lines);
+      } catch (err) {
+        console.error('Failed to reserve stock:', err);
+        return;
+      }
+    } else {
+      await releaseLines(lines);
+    }
+
     setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === productId ? { ...item, quantity } : item
+      prevItems.map((entry) =>
+        entry._id === productId ? { ...entry, quantity: nextQty } : entry
       )
     );
-  }, [removeFromCart]);
+  }, [cartItems, removeFromCart, releaseLines, reserveLines]);
 
   // Clear entire cart
-  const clearCart = useCallback(() => {
+  const clearCart = useCallback(async () => {
+    const lines = cartItems.flatMap((item) =>
+      buildReservationLines(item, Number(item.quantity || 1))
+    );
+    if (lines.length > 0) {
+      await releaseLines(lines);
+    }
     setCartItems([]);
-  }, []);
+  }, [cartItems, releaseLines]);
 
   // Calculate totals
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);

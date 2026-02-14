@@ -84,15 +84,21 @@ export default function ProductDetailModal({
   if (!isOpen || !product) return null;
 
   // Handlers
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product || !product._id) return;
     
     // Add to cart with proper price
     const productPrice = getProductPrice(product);
-    addToCart({
+    const ok = await addToCart({
       ...product,
       price: productPrice
     }, quantity);
+
+    if (!ok) {
+      setShowStockAlert(true);
+      setTimeout(() => setShowStockAlert(false), 3000);
+      return;
+    }
 
     // Show success message
     setAddedToCart(true);
