@@ -803,6 +803,52 @@
       "generic": "An error occurred."
     }
   },
+  "Checkout": {
+    "title": "Checkout",
+    "breadcrumb": {
+      "backToCart": "Back to cart",
+      "current": "Checkout"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "email@example.com"
+    },
+    "shipping": {
+      "title": "Shipping details",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "street": "Street Address",
+      "city": "City",
+      "postalCode": "Postal Code"
+    },
+    "payment": {
+      "title": "Payment",
+      "creditCard": "Credit Card",
+      "nameOnCard": "Name on card",
+      "nameOnCardPlaceholder": "e.g. Houda Gh",
+      "cardNumber": "Card number",
+      "cardNumberPlaceholder": "XXXX XXXX XXXX XXXX",
+      "expiry": "Expiry date",
+      "expiryPlaceholder": "MM / YY",
+      "cvc": "CVC",
+      "cvcPlaceholder": "CVV"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "total": "Total",
+      "qty": "Qty",
+      "promoCodeLabel": "Promo code",
+      "promoPlaceholder": "Enter coupon code",
+      "applyPromo": "Apply Coupon"
+    },
+    "actions": {
+      "confirmOrder": "Confirm Order"
+    },
+    "securityNote": "Secure SSL Encrypted Checkout"
+  },
   "Cart": {
     "title": "Your Cart",
     "breadcrumb": "Shop / Cart",

@@ -264,9 +264,13 @@ export default function CartPage() {
                     <span>{t('summary.total')}</span>
                     <span className="text-[#E10C69]">€{Number(total || 0).toFixed(2)}</span>
                   </div>
-                  <button style={{ backgroundColor: '#556822' }} className="w-full text-white py-3 rounded-md font-bold hover:opacity-90 transition-opacity mb-3">
+                  <Link
+                    href={`/${locale}/checkout`}
+                    style={{ backgroundColor: '#556822' }}
+                    className="block w-full text-white py-3 rounded-md font-bold hover:opacity-90 transition-opacity mb-3 text-center"
+                  >
                     {t('actions.checkout')}
-                  </button>
+                  </Link>
                   <Link href="/shop" className="block w-full bg-white border border-gray-200 text-[#556822] py-3 rounded-md font-bold hover:bg-gray-50 transition-colors text-center">
                     {t('actions.continueShopping')}
                   </Link>
