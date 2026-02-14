@@ -9,6 +9,7 @@ import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 // ✅ Helpers (Kept as is for functionality)
 const pickUrl = (v) => {
@@ -157,7 +158,7 @@ export default function CartPage() {
         <nav className="text-sm text-gray-500 mb-8">{t('breadcrumb')}</nav>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-grow bg-white rounded-lg shadow-sm p-6">
+          <div className="grow bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-black text-[#556822] font-[agrandir]">{t('title')}</h1>
               <span className="text-gray-500 text-sm">
@@ -179,12 +180,15 @@ export default function CartPage() {
                   const isPackage = isPackageItem(item);
                   const localImgs = getCartItemImagesLocal(item);
                   const images = isPackage && localImgs.length === 0 ? (remotePackageImages[item._id] || []) : localImgs;
+                  const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
+                  const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
+                  const displayName = translatedName || item.name;
 
                   return (
                     <div key={item._id} className="py-6 flex items-center gap-6">
                       
                       {/* --- START UPDATED IMAGE DISPLAY --- */}
-                      <div className="flex-shrink-0 flex items-center justify-center bg-transparent">
+                      <div className="shrink-0 flex items-center justify-center bg-transparent">
                         {isPackage ? (
                           <div className="grid grid-cols-2 gap-1 w-28">
                             {images.length > 0 ? (
@@ -215,8 +219,8 @@ export default function CartPage() {
                       </div>
                       {/* --- END UPDATED IMAGE DISPLAY --- */}
 
-                      <div className="flex-grow">
-                        <h3 className="font-bold text-[#556822] text-lg mb-0.5">{item.name}</h3>
+                      <div className="grow">
+                        <h3 className="font-bold text-[#556822] text-lg mb-0.5">{displayName}</h3>
                         <p className="text-sm text-gray-500">
                           {t('products.price')}: €{Number(item.price || 0).toFixed(2)}
                         </p>

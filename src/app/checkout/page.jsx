@@ -8,6 +8,7 @@ import Footer from '@/components/footer';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -52,7 +53,7 @@ const CheckoutPage = () => {
                 <div className="flex flex-col lg:flex-row gap-8">
 
                     {/* Left Column: Forms */}
-                    <div className="flex-grow space-y-6">
+                    <div className="grow space-y-6">
 
                         {/* Contact Information */}
                         <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
@@ -151,19 +152,22 @@ const CheckoutPage = () => {
                     </div>
 
                     {/* Right Column: Order Summary */}
-                    <aside className="lg:w-[400px]">
+                    <aside className="lg:w-100">
                         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 sticky top-8">
                             <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('summary.title')}</h2>
 
                             {/* Cart Items List */}
-                            <div className="max-h-[400px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
+                            <div className="max-h-100 overflow-y-auto mb-6 pr-2 custom-scrollbar">
                                 {cartItems.map((item) => {
                                     const imgs = getCartItemImagesLocal(item);
                                     const isPkg = item.type === 'package' || !!item.packageId;
+                                    const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
+                                    const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
+                                    const displayName = translatedName || item.name;
 
                                     return (
                                         <div key={item._id} className="flex gap-4 py-4 border-b border-gray-50 last:border-0">
-                                            <div className="w-16 h-16 flex-shrink-0">
+                                            <div className="w-16 h-16 shrink-0">
                                                 {isPkg ? (
                                                     <div className="grid grid-cols-2 gap-0.5">
                                                         {imgs.length > 0 ? imgs.map((img, idx) => (
@@ -174,8 +178,8 @@ const CheckoutPage = () => {
                                                     <img src={imgs[0]} className="w-full h-full object-contain bg-gray-50 rounded-lg" alt="" />
                                                 )}
                                             </div>
-                                            <div className="flex-grow">
-                                                <p className="text-sm font-bold text-[#556822] line-clamp-1">{item.name}</p>
+                                            <div className="grow">
+                                                <p className="text-sm font-bold text-[#556822] line-clamp-1">{displayName}</p>
                                                 <p className="text-xs text-gray-400">{t('summary.qty')}: {item.quantity}</p>
                                                 <p className="text-sm font-black text-[#E10C69]">€{(item.price * item.quantity).toFixed(2)}</p>
                                             </div>
