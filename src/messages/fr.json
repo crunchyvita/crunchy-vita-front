@@ -124,6 +124,14 @@
       }
     }
   },
+  "PreferredItem": {
+    "titleLine1": "Le prefere de",
+    "titleLine2": "nos clients",
+    "label": "PRODUIT",
+    "description": "Decouvrez notre selection preferee, le mix parfait pour gouter a l'explosion de saveurs Crunchy Vita.",
+    "cta": "Decouvrir le produit",
+    "imageAlt": "Crunchy Vita - Nos produits preferes"
+  },
   "ProfessionalSpace": {
     "hero": {
       "title": "Fruits lyophilisés en vrac pour professionnels",

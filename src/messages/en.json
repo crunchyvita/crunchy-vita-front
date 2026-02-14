@@ -124,6 +124,14 @@
       }
     }
   },
+  "PreferredItem": {
+    "titleLine1": "Our customers'",
+    "titleLine2": "favorite",
+    "label": "PRODUCT",
+    "description": "Discover our preferred selection, the perfect mix to taste the Crunchy Vita flavor explosion.",
+    "cta": "Discover the product",
+    "imageAlt": "Crunchy Vita - Our favorite products"
+  },
   "ProfessionalSpace": {
     "hero": {
       "title": "Bulk freeze-dried fruits for professionals",

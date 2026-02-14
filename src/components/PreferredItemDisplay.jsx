@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function PreferredItemDisplay() {
+  const t = useTranslations('PreferredItem');
+  const locale = useLocale();
   const [preferredLink, setPreferredLink] = useState('/shop');
 
   useEffect(() => {
@@ -50,26 +53,23 @@ export default function PreferredItemDisplay() {
             className="text-center lg:text-left order-2 lg:order-1"
           >
             <h2 className="mb-6 text-5xl md:text-6xl lg:text-7xl font-black text-[#556822] uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-              Le préféré de <br/>
+              {t('titleLine1')} <br/>
               <span className="text-[#E10C69] inline-block hover:scale-105 transition-transform duration-300 cursor-default" style={{ fontFamily: 'Agrandir, sans-serif' }}>
-                nos clients
+                {t('titleLine2')}
               </span>
             </h2>
 
-            <p className="mb-4 text-gray-600 text-sm lg:text-base font-bold uppercase tracking-widest" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
-              PRODUIT
-            </p>
 
             <p className="mb-10 text-gray-600 text-lg lg:text-xl font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
-              Découvrez notre sélection préférée, le mix parfait pour goûter à l'explosion de saveurs Crunchy Vita.
+              {t('description')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start">
               <Link
-                href={preferredLink}
+                href={`/${locale}${preferredLink}`}
                 className="group relative inline-flex items-center gap-3 rounded-full bg-[#E10C69] px-10 py-5 font-black uppercase tracking-widest text-white shadow-[0_15px_30px_rgba(225,12,105,0.3)] transition-all hover:bg-[#C40A5B] hover:-translate-y-1"
               >
-                Découvrir le produit
+                {t('cta')}
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
@@ -90,7 +90,7 @@ export default function PreferredItemDisplay() {
           >
             <Image 
               src="/assets/images/products.png" 
-              alt="Crunchy Vita - Nos produits préférés" 
+              alt={t('imageAlt')}
               fill 
               className="object-contain drop-shadow-[0_45px_45px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:scale-105" 
               priority
