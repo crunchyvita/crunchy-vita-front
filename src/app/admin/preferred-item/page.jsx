@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, Toggle2, Loader2, Save } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Toggle2, Loader2, Save, Package as PackageIcon } from 'lucide-react';
+
+// Neutral gray gradient placeholders for items without images
+const PLACEHOLDER_GRADIENTS = [
+  ['#F3F4F6', '#E5E7EB'],
+  ['#ECEFF1', '#D1D5DB'],
+  ['#F8FAFC', '#E6E6E6'],
+  ['#F7F7F8', '#EDEDED'],
+  ['#F2F4F7', '#D9D9D9'],
+];
 
 export default function PreferredItemAdminPage() {
   const [items, setItems] = useState([]);
@@ -305,12 +314,32 @@ export default function PreferredItemAdminPage() {
                     selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'bg-blue-50' : 'bg-white'
                   } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'border-blue-500' : 'border-gray-200'} transition-all`}>
                     
-                    {/* Image */}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+                    {/* Image or placeholder icon */}
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      (() => {
+                        const idx = item._id ? item._id.charCodeAt(0) % PLACEHOLDER_GRADIENTS.length : 0;
+                        const [c1, c2] = PLACEHOLDER_GRADIENTS[idx];
+                        return (
+                          <div
+                            className="w-full h-full flex items-center justify-center overflow-hidden"
+                            style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+                          >
+                            <div className="flex flex-col items-center gap-1 text-white">
+                              <div className="rounded-lg bg-white/10 p-4 shadow-inner">
+                                <PackageIcon size={48} strokeWidth={1.5} />
+                              </div>
+                              <span className="text-xs font-semibold mt-2 text-white/90">{item.name}</span>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    )}
                     
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2">
@@ -379,11 +408,31 @@ export default function PreferredItemAdminPage() {
                   } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id)) ? 'border-purple-500' : 'border-gray-200'} transition-all`}>
                     
                     {/* Image */}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      (() => {
+                        const idx = item._id ? item._id.charCodeAt(0) % PLACEHOLDER_GRADIENTS.length : 0;
+                        const [c1, c2] = PLACEHOLDER_GRADIENTS[idx];
+                        return (
+                          <div
+                            className="w-full h-full flex items-center justify-center overflow-hidden"
+                            style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+                          >
+                            <div className="flex flex-col items-center gap-1 text-white">
+                              <div className="rounded-lg bg-white/10 p-4 shadow-inner">
+                                <PackageIcon size={48} strokeWidth={1.5} />
+                              </div>
+                              <span className="text-xs font-semibold mt-2 text-white/90">{item.name}</span>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    )}
                     
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2">
