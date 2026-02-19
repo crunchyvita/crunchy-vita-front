@@ -60,34 +60,28 @@ export default function PromoCodeInput({ cartTotal, onPromoApplied }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">Code Promo</h3>
-
+    <div className="space-y-4">
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-sm">
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-sm">
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
       {appliedPromo ? (
-        <div className="space-y-3">
-          <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-green-900">Code promo appliqué ✓</span>
-              <button
-                onClick={handleRemovePromo}
-                className="text-red-600 hover:text-red-800"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-            <p className="text-sm text-green-700 mb-2">Code: {appliedPromo.code}</p>
-            <div className="text-sm text-green-700 space-y-1">
-              <p>Réduction: -€{appliedPromo.discount}</p>
-              <p className="font-bold">Nouveau total: €{appliedPromo.finalTotal}</p>
-            </div>
+        <div className="p-4 rounded-lg bg-[#556822]/10 border border-[#556822]/30">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-bold text-[#556822]">Code promo appliqué ✓</span>
+            <button
+              onClick={handleRemovePromo}
+              className="text-red-600 hover:text-red-800 transition-colors"
+              title="Retirer le code promo"
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
+          <p className="text-sm text-gray-700 mb-1">Code: <span className="font-bold">{appliedPromo.code}</span></p>
+          <p className="text-sm text-[#556822] font-bold">Réduction: -€{appliedPromo.discount}</p>
         </div>
       ) : (
         <form onSubmit={handleValidatePromo} className="space-y-3">
@@ -97,29 +91,17 @@ export default function PromoCodeInput({ cartTotal, onPromoApplied }) {
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               placeholder="Entrez votre code promo"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#556822] focus:ring-2 focus:ring-[#556822]/20 outline-none transition-all text-sm"
             />
             <button
               type="submit"
               disabled={loading || !promoCode}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold rounded-lg transition-colors"
+              className="px-5 py-3 bg-[#556822] hover:bg-[#556822]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all text-sm"
             >
               {loading ? 'Vérification...' : 'Appliquer'}
             </button>
           </div>
-          <p className="text-xs text-gray-600">
-            Entrez votre code promo pour bénéficier d'une réduction
-          </p>
         </form>
-      )}
-
-      {/* Display savings */}
-      {discount > 0 && (
-        <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-center">
-          <p className="text-sm font-bold text-blue-900">
-            Vous économisez €{discount.toFixed(2)}
-          </p>
-        </div>
       )}
     </div>
   );

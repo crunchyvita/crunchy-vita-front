@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import PromoCodeInput from '@/components/PromoCodeInput';
 import { Trash2, ShoppingBag, ArrowLeft, MapPin, Home, Loader2, Navigation } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslatedProduct } from '@/lib/productTranslations';
@@ -60,6 +61,10 @@ const CheckoutPage = () => {
   // Geolocation state
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
+
+  // Promo code state
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoCode, setPromoCode] = useState(null);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
@@ -608,19 +613,39 @@ const CheckoutPage = () => {
                 })}
               </div>
 
+              {/* Promo Code Section */}
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+                  {t('summary.promoCodeLabel') || 'Code promo'}
+                </h3>
+                <PromoCodeInput 
+                  cartTotal={subtotal} 
+                  onPromoApplied={(promo) => {
+                    setPromoDiscount(promo.discount || 0);
+                    setPromoCode(promo.code);
+                  }}
+                />
+              </div>
+
               {/* Totals */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.subtotal')}</span>
                   <span className="text-gray-900">€{Number(subtotal).toFixed(2)}</span>
                 </div>
+                {promoDiscount > 0 && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>{t('summary.promoCodeLabel') || 'Promo code'}</span>
+                    <span>-€{Number(promoDiscount).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
                   <span className="text-gray-900">€{Number(shipping).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
-                  <span className="text-[#E10C69]">€{Number(total).toFixed(2)}</span>
+                  <span className="text-[#E10C69]">€{Number(total - promoDiscount).toFixed(2)}</span>
                 </div>
               </div>
 
