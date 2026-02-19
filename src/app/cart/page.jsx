@@ -8,8 +8,17 @@ import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // ✅ Helpers (Kept as is for functionality)
 const pickUrl = (v) => {
@@ -85,8 +94,11 @@ export default function CartPage() {
   const t = useTranslations('Cart');
   const locale = useLocale();
   const router = useRouter();
-  const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error } = useCart();
   const [remotePackageImages, setRemotePackageImages] = useState({});
+  const [stockAlertOpen, setStockAlertOpen] = useState(false);
+  const [stockAlertMessage, setStockAlertMessage] = useState('');
+  const lastAlertRef = useRef(null);
 
   const API_URL = useMemo(() => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api', []);
 
@@ -133,6 +145,19 @@ export default function CartPage() {
     return () => { cancelled = true; };
   }, [cartItems, API_URL]);
 
+  useEffect(() => {
+    if (!error || typeof error !== 'string') return;
+    if (!error.toLowerCase().includes('insufficient stock')) return;
+    if (lastAlertRef.current === error) return;
+    lastAlertRef.current = error;
+    setStockAlertMessage(error);
+    setStockAlertOpen(true);
+    const timer = setTimeout(() => {
+      setStockAlertOpen(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -153,6 +178,20 @@ export default function CartPage() {
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
       <Header />
       <PromoBadge />
+
+      <AlertDialog open={stockAlertOpen} onOpenChange={setStockAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Stock limit reached</AlertDialogTitle>
+            <AlertDialogDescription>
+              {stockAlertMessage || 'Insufficient stock for this product'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <nav className="text-sm text-gray-500 mb-8">{t('breadcrumb')}</nav>

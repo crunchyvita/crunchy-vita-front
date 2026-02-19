@@ -23,6 +23,7 @@ async function apiRequest(endpoint, options = {}) {
 
   const config = {
     ...options,
+    credentials: 'include', // CRITICAL: Include cookies (guestId, session)
     headers: {
       ...defaultHeaders,
       ...options.headers,

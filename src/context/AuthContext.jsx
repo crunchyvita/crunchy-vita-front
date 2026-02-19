@@ -44,6 +44,11 @@ export function AuthProvider({ children }) {
       
       // Cloudinary returns full URLs - use them directly
       setUser(response.user);
+      
+      // Reload cart after login (merged guest cart will be available)
+      // Dispatch custom event so useCart hook can reload
+      window.dispatchEvent(new CustomEvent('cartNeedsReload'));
+      
       return { success: true, user: response.user };
     } catch (error) {
       return { success: false, error: error.message };
@@ -57,6 +62,11 @@ export function AuthProvider({ children }) {
       
       // Cloudinary returns full URLs - use them directly
       setUser(response.user);
+      
+      // Reload cart after register (merged guest cart will be available)
+      // Dispatch custom event so useCart hook can reload
+      window.dispatchEvent(new CustomEvent('cartNeedsReload'));
+      
       return { success: true, user: response.user };
     } catch (error) {
       return { success: false, error: error.message };
