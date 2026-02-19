@@ -321,7 +321,7 @@
     "noImages": "Aucune image disponible",
     "noReviews": "Aucun avis pour le moment",
     "perUnit": "par unite",
-    "stockMax": "Stock maximum atteint ({count} disponible(s))",
+    "stockMax": "Stock maximum atteint ",
     "quantity": "Quantite",
     "totalPrice": "Prix total",
     "outOfStock": "Rupture de stock",

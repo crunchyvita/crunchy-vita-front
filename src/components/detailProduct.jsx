@@ -240,7 +240,7 @@ export default function ProductDetailModal({
               {showStockAlert && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
                   <AlertCircle size={18} />
-                  <span>{t('stockMax', { count: availableStock })}</span>
+                  <span>{t('stockMax')}</span>
                 </div>
               )}
 
