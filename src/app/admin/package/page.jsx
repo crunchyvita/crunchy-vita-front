@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import {
 	Download,
 	MoreVertical,
@@ -311,30 +312,14 @@ export default function PackagesPage() {
 				)}
 			</div>
 
-			{deleteConfirm && (
-			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-					<div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
-						<h3 className="text-lg font-semibold text-slate-900">Delete Package?</h3>
-						<p className="mt-2 text-sm text-slate-600">
-							Are you sure you want to delete this package? This action cannot be undone.
-						</p>
-						<div className="mt-6 flex justify-end gap-3">
-							<button
-								onClick={() => setDeleteConfirm(null)}
-								className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={() => handleDelete(deleteConfirm)}
-								className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm"
-							>
-								Delete
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<DeleteConfirmationModal
+				isOpen={!!deleteConfirm}
+				onClose={() => setDeleteConfirm(null)}
+				onConfirm={() => handleDelete(deleteConfirm)}
+				title="Delete Package"
+				itemName={packages.find(p => p._id === deleteConfirm)?.name}
+				isDeleting={false}
+			/>
 		</div>
 		</>
 	);

@@ -27,6 +27,7 @@ import {
 	LogOut,
 	X,
 	Heart,
+	FolderTree,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
 	{ label: "Overview", href: "/admin/dashboard", icon: Home },
 	{ label: "Shop", href: "/shop", icon: ShoppingCart },
 	{ label: "Products", href: "/admin/products", icon: Boxes },
+	{ label: "Categories", href: "/admin/categories", icon: FolderTree },
 	{ label: "Packages", href: "/admin/package", icon: Package },
 	{ label: "Stock", href: "/admin/stock", icon: ShoppingCart },
 	{ label: "Blog", href: "/admin/blogs", icon: FileText },

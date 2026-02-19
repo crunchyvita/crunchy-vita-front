@@ -117,7 +117,6 @@ export default function FavoritesPage() {
             setError(err.message || t('errors.removeFavorite'));
         } finally {
             setRemovingId(null);
-            setError(err.message || 'Une erreur est survenue.');
         }
     };
 

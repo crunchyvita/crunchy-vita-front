@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { Trash2, Edit, Plus, AlertCircle } from "lucide-react";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -173,32 +174,14 @@ export default function BlogsPage() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900">Delete Blog Post?</h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Are you sure you want to delete this blog post? This action cannot be undone.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                disabled={deleting}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => handleDelete(deleteConfirm)}
+        title="Delete Blog Post"
+        itemName={blogs.find(b => b._id === deleteConfirm)?.title}
+        isDeleting={deleting}
+      />
     </div>
     </>
   );

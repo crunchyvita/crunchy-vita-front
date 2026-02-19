@@ -195,7 +195,9 @@
         "company": "Company",
         "activity": "Activity",
         "siret": "SIRET",
-        "vat": "VAT number"
+        "vat": "VAT number",
+        "address": "Address",
+        "website": "Company website"
       },
       "selects": {
         "products": "Requested products",

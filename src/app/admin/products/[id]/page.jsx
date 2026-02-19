@@ -6,6 +6,7 @@ import Link from "next/link";
 import { productAPI, reviewAPI } from "@/lib/api";
 import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import  {
   ArrowLeft,
   Calendar,
@@ -662,40 +663,17 @@ export default function ProductDetailPage() {
         </div>
       </main>
 
-      {/* Delete Confirmation Modal */}
-      {deleteAlertOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Delete this review?</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                This action is permanent. The review will be permanently deleted from the database.
-              </p>
-            </div>
-            <div className="flex border-t border-gray-100">
-              <button 
-                onClick={() => {
-                  setDeleteAlertOpen(false);
-                  setCommentToDelete(null);
-                }}
-                className="flex-1 px-4 py-4 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDeleteComment}
-                disabled={deletingCommentId === commentToDelete}
-                className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
-              >
-                {deletingCommentId === commentToDelete ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={deleteAlertOpen}
+        onClose={() => {
+          setDeleteAlertOpen(false);
+          setCommentToDelete(null);
+        }}
+        onConfirm={confirmDeleteComment}
+        title="Delete this review?"
+        description="This action is permanent. The review will be permanently deleted from the database."
+        isDeleting={deletingCommentId === commentToDelete}
+      />
     </div>
     </>
   );

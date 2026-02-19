@@ -195,7 +195,9 @@
         "company": "Société",
         "activity": "Activité",
         "siret": "Siret ",
-        "vat": "Numéro TVA"
+        "vat": "Numéro TVA",
+        "address": "Adresse",
+        "website": "Site web de société"
       },
       "selects": {
         "products": "Produits Recherchés",
