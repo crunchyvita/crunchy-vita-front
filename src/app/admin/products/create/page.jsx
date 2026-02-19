@@ -34,13 +34,13 @@ export default function CreateProductPage() {
   const [categoryInput, setCategoryInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const autocompleteRef = useRef(null);
 
   const [form, setForm] = useState({
     name: "",
     price: "",
     stock: "",
-    category: "",
     tags: [],
     description: "",
   });
@@ -114,6 +114,29 @@ export default function CreateProductPage() {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const addCategorySelection = (categoryItem) => {
+    if (!categoryItem?.name) return;
+
+    const normalizedId = String(categoryItem.id || categoryItem.name).trim();
+    const normalizedName = categoryItem.name.trim();
+    if (!normalizedId || !normalizedName) return;
+
+    setSelectedCategories((prev) => {
+      const alreadyExists = prev.some(
+        (item) =>
+          String(item.id).toLowerCase() === normalizedId.toLowerCase() ||
+          item.name.toLowerCase() === normalizedName.toLowerCase()
+      );
+
+      if (alreadyExists) return prev;
+      return [...prev, { id: normalizedId, name: normalizedName }];
+    });
+  };
+
+  const removeCategorySelection = (categoryId) => {
+    setSelectedCategories((prev) => prev.filter((item) => String(item.id) !== String(categoryId)));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -124,7 +147,7 @@ export default function CreateProductPage() {
         ...form,
         price: Number(form.price),
         stock: Number(form.stock),
-        category: form.category || categoryInput,
+        categoryIds: selectedCategories.map((item) => item.id),
         tags: Array.isArray(form.tags) ? form.tags.join(", ") : form.tags,
         files,
       };
@@ -350,8 +373,10 @@ export default function CreateProductPage() {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && categoryInput.trim() && suggestions.length === 0) {
-                      // Create new category on Enter if no matches
-                      setForm(p => ({...p, category: categoryInput}));
+                      e.preventDefault();
+                      addCategorySelection({ id: categoryInput.trim(), name: categoryInput.trim() });
+                      setCategoryInput("");
+                      setSuggestions([]);
                       setShowSuggestions(false);
                     }
                   }}
@@ -365,8 +390,9 @@ export default function CreateProductPage() {
                         <li
                           key={cat._id}
                           onClick={() => {
-                            setCategoryInput(cat.name);
-                            setForm(p => ({...p, category: cat._id}));
+                            addCategorySelection({ id: cat._id, name: cat.name });
+                            setCategoryInput("");
+                            setSuggestions([]);
                             setShowSuggestions(false);
                           }}
                           className="px-5 py-3 text-sm text-slate-900 hover:bg-emerald-50 hover:text-emerald-700 font-bold transition-colors cursor-pointer"
@@ -378,6 +404,27 @@ export default function CreateProductPage() {
                   </div>
                 )}
               </div>
+
+              {selectedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {selectedCategories.map((cat) => (
+                    <span
+                      key={cat.id}
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-3 py-1 text-xs font-black text-white"
+                    >
+                      {cat.name}
+                      <button
+                        type="button"
+                        onClick={() => removeCategorySelection(cat.id)}
+                        className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
+                        aria-label={`Remove ${cat.name}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Tags */}

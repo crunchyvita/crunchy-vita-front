@@ -169,8 +169,10 @@ export const productAPI = {
     formData.append("price", payload.price);
     formData.append("stock", payload.stock);
     
-    // Category can be either ID or name
-    if (payload.category) {
+    // Categories can be IDs and/or names
+    if (Array.isArray(payload.categoryIds) && payload.categoryIds.length > 0) {
+      formData.append("categoryIds", JSON.stringify(payload.categoryIds));
+    } else if (payload.category) {
       formData.append("category", payload.category);
     }
     
@@ -302,12 +304,9 @@ export const categoryAPI = {
 
   // Update category (admin)
   update: async (id, payload) => {
-    const formData = new FormData();
-    formData.append("name", payload.name);
-
     return apiRequest(`/categories/${id}`, {
       method: "PUT",
-      body: formData,
+      body: JSON.stringify({ name: payload.name }),
     });
   },
 

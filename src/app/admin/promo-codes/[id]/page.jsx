@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { AlertCircle, CheckCircle2, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
@@ -401,46 +402,14 @@ export default function PromoCodeDetailPage() {
         </div>
       </div>
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-lg p-6 sm:p-8 max-w-sm w-full shadow-xl">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
-              <Trash2 size={24} className="text-red-600" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 text-center mb-2">Supprimer ce code?</h3>
-            <p className="text-slate-600 text-center text-sm mb-6">
-              Êtes-vous sûr de vouloir supprimer <span className="font-semibold text-slate-900">{formData.code}</span>? Cette action ne peut pas être annulée.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                disabled={deleting}
-                className="flex-1 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 text-slate-900 font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                {deleting ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Suppression...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 size={16} />
-                    Supprimer
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Supprimer ce code?"
+        itemName={formData.code}
+        isDeleting={deleting}
+      />
     </div>
   );
 }

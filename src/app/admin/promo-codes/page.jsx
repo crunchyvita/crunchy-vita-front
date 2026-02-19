@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { AlertCircle, CheckCircle2, Plus, Trash2, Edit2, Eye } from 'lucide-react';
 import Link from 'next/link';
 
@@ -231,52 +232,18 @@ export default function PromoCodesPage() {
         </div>
       </div>
 
-      {/* Delete Modal */}
-      {showDeleteModal && selectedCode && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{backgroundColor: 'rgba(255, 255, 255, 0.5)'}}>
-          <div className="bg-white rounded-lg p-8 max-w-md mx-4 shadow-2xl">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
-              <Trash2 size={24} className="text-red-600" />
-            </div>
-            <h3 className="text-2xl font-black text-gray-900 text-center mb-2">Supprimer ce code promo?</h3>
-            <p className="text-gray-600 text-center mb-2">
-              Code: <span className="font-bold text-lg">{selectedCode.code}</span>
-            </p>
-            <p className="text-gray-600 text-center mb-6 text-sm">
-              Cette action ne peut pas être annulée. Toutes les données associées à ce code seront supprimées.
-            </p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedCode(null);
-                }}
-                disabled={deleting}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 disabled:bg-gray-200 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              >
-                {deleting ? (
-                  <>
-                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Suppression...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 size={18} />
-                    Supprimer
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal && !!selectedCode}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedCode(null);
+        }}
+        onConfirm={handleDelete}
+        title="Supprimer ce code promo?"
+        itemName={selectedCode?.code}
+        description="Cette action ne peut pas être annulée. Toutes les données associées à ce code seront supprimées."
+        isDeleting={deleting}
+      />
     </div>
   );
 }
