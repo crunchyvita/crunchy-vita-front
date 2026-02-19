@@ -1,24 +1,19 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from '@/navigation';
 import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert';
 
 // ✅ Helpers (Kept as is for functionality)
 const pickUrl = (v) => {
@@ -93,12 +88,11 @@ const getCartItemImagesLocal = (item) => {
 export default function CartPage() {
   const t = useTranslations('Cart');
   const locale = useLocale();
-  const router = useRouter();
   const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error } = useCart();
   const [remotePackageImages, setRemotePackageImages] = useState({});
   const [stockAlertOpen, setStockAlertOpen] = useState(false);
   const [stockAlertMessage, setStockAlertMessage] = useState('');
-  const lastAlertRef = useRef(null);
+  const lastAlertRef = useRef({ message: '', timestamp: 0 });
 
   const API_URL = useMemo(() => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api', []);
 
@@ -148,8 +142,14 @@ export default function CartPage() {
   useEffect(() => {
     if (!error || typeof error !== 'string') return;
     if (!error.toLowerCase().includes('insufficient stock')) return;
-    if (lastAlertRef.current === error) return;
-    lastAlertRef.current = error;
+    const now = Date.now();
+    if (
+      lastAlertRef.current.message === error &&
+      now - lastAlertRef.current.timestamp < 5000
+    ) {
+      return;
+    }
+    lastAlertRef.current = { message: error, timestamp: now };
     setStockAlertMessage(error);
     setStockAlertOpen(true);
     const timer = setTimeout(() => {
@@ -179,22 +179,18 @@ export default function CartPage() {
       <Header />
       <PromoBadge />
 
-      <AlertDialog open={stockAlertOpen} onOpenChange={setStockAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Stock limit reached</AlertDialogTitle>
-            <AlertDialogDescription>
-              {stockAlertMessage || 'Insufficient stock for this product'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>OK</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <main className="max-w-7xl mx-auto px-4 py-8">
         <nav className="text-sm text-gray-500 mb-8">{t('breadcrumb')}</nav>
+
+        {stockAlertOpen && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Stock limit reached</AlertTitle>
+            <AlertDescription>
+              {stockAlertMessage || 'Insufficient stock for this product'}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="grow bg-white rounded-lg shadow-sm p-6">

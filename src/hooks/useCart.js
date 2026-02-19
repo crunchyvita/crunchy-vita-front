@@ -4,6 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+const isStockErrorMessage = (message) =>
+  typeof message === 'string' && message.toLowerCase().includes('insufficient stock');
+
+const getErrorMessage = (err) => {
+  if (!err) return 'Something went wrong';
+  if (typeof err === 'string') return err;
+  return err.message || 'Something went wrong';
+};
+
 /**
  * Helper to make API requests with credentials and JWT token
  */
@@ -31,31 +40,17 @@ const cartAPI = async (endpoint, method = 'GET', body = null) => {
   const response = await fetch(`${API_URL}/cart${endpoint}`, options);
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || `HTTP ${response.status}`);
+    let errorMessage = `HTTP ${response.status}`;
+    try {
+      const error = await response.json();
+      errorMessage = error?.message || errorMessage;
+    } catch {}
+    const requestError = new Error(errorMessage);
+    requestError.isStockError = isStockErrorMessage(errorMessage);
+    throw requestError;
   }
 
   return await response.json();
-};
-
-// Utility functions for product images
-const pickUrl = (v) => {
-  if (!v || v === 'undefined') return null;
-  if (typeof v === 'string') return v;
-  if (typeof v === 'object') return v.url || v.secure_url || null;
-  return null;
-};
-
-const getProductImageUrl = (product) => {
-  if (!product) return null;
-  if (product.media && product.media.length > 0) {
-    const mediaItem = product.media[0];
-    const url = mediaItem?.url || mediaItem;
-    if (url && url !== 'undefined') return url;
-  }
-  const url = product.image || product.imageUrl || product.productImage;
-  if (url && url !== 'undefined') return url;
-  return null;
 };
 
 export function useCart() {
@@ -67,6 +62,7 @@ export function useCart() {
   const loadCart = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const result = await cartAPI('/', 'GET');
       if (result && result.success === false) {
         setError(result.message || 'Insufficient stock for this product');
@@ -75,8 +71,11 @@ export function useCart() {
       setCartItems(result.data.items || []);
       setError(null);
     } catch (err) {
-      console.error('Failed to load cart:', err);
-      setError(err.message);
+      const message = getErrorMessage(err);
+      if (!isStockErrorMessage(message)) {
+        console.error('Failed to load cart:', err);
+      }
+      setError(message);
       setCartItems([]);
     } finally {
       setIsLoading(false);
@@ -103,12 +102,12 @@ export function useCart() {
   const addToCart = useCallback(
     async (product, quantity = 1) => {
       if (!product || !product._id) {
-        console.error('Invalid product');
         return false;
       }
 
       try {
         setIsLoading(true);
+        setError(null);
 
         const isPackage = product.type === 'package' || !!product.packageId;
         
@@ -135,8 +134,11 @@ export function useCart() {
         setError(null);
         return true;
       } catch (err) {
-        console.error('Failed to add to cart:', err);
-        setError(err.message);
+        const message = getErrorMessage(err);
+        if (!isStockErrorMessage(message)) {
+          console.error('Failed to add to cart:', err);
+        }
+        setError(message);
         return false;
       } finally {
         setIsLoading(false);
@@ -149,6 +151,7 @@ export function useCart() {
   const removeFromCart = useCallback(async (itemId) => {
     try {
       setIsLoading(true);
+      setError(null);
 
       // Find item by _id directly
       const item = cartItems.find((i) => i._id === itemId);
@@ -181,6 +184,7 @@ export function useCart() {
 
       try {
         setIsLoading(true);
+        setError(null);
 
         // Find item by _id directly
         const item = cartItems.find((i) => i._id === itemId);
@@ -199,8 +203,11 @@ export function useCart() {
         setError(null);
         return true;
       } catch (err) {
-        console.error('Failed to update quantity:', err);
-        setError(err.message);
+        const message = getErrorMessage(err);
+        if (!isStockErrorMessage(message)) {
+          console.error('Failed to update quantity:', err);
+        }
+        setError(message);
         return false;
       } finally {
         setIsLoading(false);
@@ -213,8 +220,9 @@ export function useCart() {
   const clearCart = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
 
-      const result = await cartAPI('/', 'DELETE');
+      await cartAPI('/', 'DELETE');
       setCartItems([]);
       setError(null);
     } catch (err) {
