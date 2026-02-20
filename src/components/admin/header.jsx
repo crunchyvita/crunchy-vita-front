@@ -208,6 +208,20 @@ export default function AdminHeader() {
       } else {
         console.error('[Notification Click] Missing productId or commentId');
       }
+    } else if (notification?.type === 'stock_alert') {
+      // Navigate to stock edit page for the product
+      const productId = notification?.relatedId;
+      
+      console.log('[Notification Click] Stock Alert - ProductId:', productId);
+      
+      if (productId) {
+        const url = `/admin/stock/edit/${productId}`;
+        console.log('[Notification Click] Navigating to stock edit:', url);
+        router.push(url);
+      } else {
+        console.error('[Notification Click] Missing productId for stock alert');
+      }
+      setShowNotificationsDropdown(false);
     } else {
       // For other notifications, just mark as read and close dropdown
       setShowNotificationsDropdown(false);

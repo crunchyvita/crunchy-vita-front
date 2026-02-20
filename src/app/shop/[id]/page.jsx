@@ -319,11 +319,9 @@ export default function ProductDetailPage() {
     
     setAddedToCart(true);
     
-    // Redirect to cart after 1.5 seconds
-    setTimeout(() => {
-      setQuantity(1);
-      router.push('/cart');
-    }, 1500);
+    // Redirect to cart immediately
+    setQuantity(1);
+    router.push('/cart');
   };
 
   const handleAddToWishlist = async () => {

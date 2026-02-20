@@ -7,13 +7,9 @@ import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // ✅ Helpers (Kept as is for functionality)
 const pickUrl = (v) => {
@@ -41,23 +37,29 @@ const getProductImageUrl = (product) => {
 
 const isPackageItem = (item) => {
   if (!item) return false;
-  return item.type === 'package' || !!item.packageId || (Array.isArray(item.selectedProducts) && item.selectedProducts.length > 0);
+  return (
+    item.type === 'package' ||
+    !!item.packageId ||
+    (Array.isArray(item.selectedProducts) && item.selectedProducts.length > 0)
+  );
 };
 
 const extractPackageProductIds = (item) => {
   const sp = item?.selectedProducts;
   if (!Array.isArray(sp) || sp.length === 0) return [];
   if (typeof sp[0] === 'string') return sp.filter(Boolean);
-  return sp.map((x) => {
-    if (!x) return null;
-    if (typeof x === 'string') return x;
-    const pid = x.productId;
-    if (typeof pid === 'string') return pid;
-    if (typeof pid === 'object' && pid?._id) return pid._id;
-    if (x?.product?._id) return x.product._id;
-    if (x?._id) return x._id;
-    return null;
-  }).filter(Boolean);
+  return sp
+    .map((x) => {
+      if (!x) return null;
+      if (typeof x === 'string') return x;
+      const pid = x.productId;
+      if (typeof pid === 'string') return pid;
+      if (typeof pid === 'object' && pid?._id) return pid._id;
+      if (x?.product?._id) return x.product._id;
+      if (x?._id) return x._id;
+      return null;
+    })
+    .filter(Boolean);
 };
 
 const getCartItemImagesLocal = (item) => {
@@ -66,13 +68,17 @@ const getCartItemImagesLocal = (item) => {
     const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
-  let imgs = Array.isArray(item?.packageImages) ? item.packageImages.map(pickUrl).filter(Boolean) : [];
+  let imgs = Array.isArray(item?.packageImages)
+    ? item.packageImages.map(pickUrl).filter(Boolean)
+    : [];
   if (imgs.length === 0 && Array.isArray(item?.selectedProducts)) {
-    imgs = item.selectedProducts.map((sp) => {
-      const direct = pickUrl(sp?.image);
-      if (direct) return direct;
-      return getProductImageUrl(sp?.product);
-    }).filter(Boolean);
+    imgs = item.selectedProducts
+      .map((sp) => {
+        const direct = pickUrl(sp?.image);
+        if (direct) return direct;
+        return getProductImageUrl(sp?.product);
+      })
+      .filter(Boolean);
   }
   const seen = new Set();
   const unique = [];
@@ -85,80 +91,235 @@ const getCartItemImagesLocal = (item) => {
   return unique;
 };
 
+const getItemAvailableStock = async (item, API_URL) => {
+  // ✅ Fetch FRESH stock data (never use stale snapshots from cart)
+  const productId = (typeof item?.productId === 'object' ? item.productId?._id : item?.productId) || null;
+  if (!productId) return null;
+
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const response = await fetch(`${API_URL}/products/${productId}/stock`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+    });
+    if (!response.ok) return null;
+    const result = await response.json();
+    const stock = result?.data || result;
+    if (!stock) return null;
+
+    // Return the TOTAL quantity (absolute max for this product)
+    return {
+      quantityTotal: Number(stock.quantity || 0),
+      availableQuantity: stock.availableQuantity !== undefined 
+        ? Number(stock.availableQuantity || 0)
+        : Math.max(0, Number(stock.quantity || 0) - Number(stock.reservedQuantity || 0))
+    };
+  } catch (err) {
+    console.error('Failed to fetch stock:', err);
+    return null;
+  }
+};
+
 export default function CartPage() {
   const t = useTranslations('Cart');
   const locale = useLocale();
-  const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error, stockAlertTick } =
+    useCart();
+
   const [remotePackageImages, setRemotePackageImages] = useState({});
   const [stockAlertOpen, setStockAlertOpen] = useState(false);
   const [stockAlertMessage, setStockAlertMessage] = useState('');
-  const lastAlertRef = useRef({ message: '', timestamp: 0 });
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
+
+  // ✅ instant UI quantity map (fix successive clicks)
+  const [uiQty, setUiQty] = useState({});
+
+  // ✅ Cache fresh stock data for each item to show accurate maxAllowed
+  const [freshStockData, setFreshStockData] = useState({});
 
   const API_URL = useMemo(() => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api', []);
+
+  // ✅ sync uiQty with cartItems (server/optimistic)
+  useEffect(() => {
+    const next = {};
+    for (const it of cartItems || []) {
+      if (it?._id) next[it._id] = Number(it.quantity || 1);
+    }
+    setUiQty(next);
+  }, [cartItems]);
+
+  // ✅ Fetch fresh stock data for all cart items (for accurate max validation)
+  useEffect(() => {
+    if (!Array.isArray(cartItems) || cartItems.length === 0) return;
+    let cancelled = false;
+
+    const loadFreshStock = async () => {
+      const updates = {};
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+      for (const item of cartItems) {
+        if (!item?._id) continue;
+
+        // For product items, fetch stock for the product
+        if (!isPackageItem(item)) {
+          const productId = typeof item?.productId === 'object' ? item.productId?._id : item?.productId;
+          if (!productId) continue;
+
+          try {
+            const res = await fetch(`${API_URL}/products/${productId}/stock`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              credentials: 'include',
+            });
+            if (res.ok) {
+              const result = await res.json();
+              const stock = result?.data || result;
+              if (stock) {
+                updates[item._id] = {
+                  quantityTotal: Number(stock.quantity || 0),
+                  availableQuantity: stock.availableQuantity !== undefined 
+                    ? Number(stock.availableQuantity || 0)
+                    : Math.max(0, Number(stock.quantity || 0) - Number(stock.reservedQuantity || 0))
+                };
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to fetch stock for product ${productId}:`, err);
+          }
+        } else {
+          // ✅ For package items: fetch and find minimum available across all selected products
+          const selectedIds = extractPackageProductIds(item);
+          if (selectedIds.length === 0) continue;
+
+          let minMaxQty = Infinity;
+          for (const productId of selectedIds) {
+            try {
+              const res = await fetch(`${API_URL}/products/${productId}/stock`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                credentials: 'include',
+              });
+              if (res.ok) {
+                const result = await res.json();
+                const stock = result?.data || result;
+                if (stock) {
+                  const quantityTotal = Number(stock.quantity || 0);
+                  minMaxQty = Math.min(minMaxQty, quantityTotal);
+                }
+              }
+            } catch (err) {
+              console.error(`Failed to fetch stock for package product ${productId}:`, err);
+            }
+          }
+
+          if (minMaxQty !== Infinity) {
+            updates[item._id] = {
+              quantityTotal: minMaxQty,
+              availableQuantity: minMaxQty
+            };
+          }
+        }
+      }
+
+      if (!cancelled && Object.keys(updates).length > 0) {
+        setFreshStockData(prev => ({ ...prev, ...updates }));
+      }
+    };
+
+    loadFreshStock();
+    return () => { cancelled = true; };
+  }, [cartItems, API_URL]);
 
   useEffect(() => {
     if (!Array.isArray(cartItems) || cartItems.length === 0) return;
     let cancelled = false;
+
     const loadMissingPackageImages = async () => {
       const packagesNeedingFetch = cartItems.filter((item) => {
         if (!isPackageItem(item)) return false;
         return getCartItemImagesLocal(item).length === 0 && !remotePackageImages[item._id];
       });
+
       if (packagesNeedingFetch.length === 0) return;
+
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        const results = await Promise.all(packagesNeedingFetch.map(async (item) => {
-          const ids = extractPackageProductIds(item);
-          if (ids.length === 0) return [item._id, []];
-          const prods = await Promise.all(ids.slice(0, 12).map(async (id) => {
-            try {
-              const res = await fetch(`${API_URL}/products/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                cache: 'no-store',
-              });
-              if (!res.ok) return null;
-              const json = await res.json();
-              return json?.data || json;
-            } catch { return null; }
-          }));
-          const imgs = prods.filter(Boolean).map((p) => getProductImageUrl(p)).filter(Boolean);
-          const seen = new Set();
-          const unique = [];
-          for (const u of imgs) { if (!seen.has(u)) { seen.add(u); unique.push(u); } }
-          return [item._id, unique];
-        }));
+
+        const results = await Promise.all(
+          packagesNeedingFetch.map(async (item) => {
+            const ids = extractPackageProductIds(item);
+            if (ids.length === 0) return [item._id, []];
+
+            const prods = await Promise.all(
+              ids.slice(0, 12).map(async (id) => {
+                try {
+                  const res = await fetch(`${API_URL}/products/${id}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    cache: 'no-store',
+                  });
+                  if (!res.ok) return null;
+                  const json = await res.json();
+                  return json?.data || json;
+                } catch {
+                  return null;
+                }
+              })
+            );
+
+            const imgs = prods
+              .filter(Boolean)
+              .map((p) => getProductImageUrl(p))
+              .filter(Boolean);
+
+            const seen = new Set();
+            const unique = [];
+            for (const u of imgs) {
+              if (!seen.has(u)) {
+                seen.add(u);
+                unique.push(u);
+              }
+            }
+            return [item._id, unique];
+          })
+        );
+
         if (cancelled) return;
+
         setRemotePackageImages((prev) => {
           const next = { ...prev };
-          for (const [key, imgs] of results) { next[key] = imgs; }
+          for (const [key, imgs] of results) next[key] = imgs;
           return next;
         });
       } catch {}
     };
+
     loadMissingPackageImages();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems, API_URL]);
 
+  // ✅ keep your server stock error alert (only if backend rejects)
   useEffect(() => {
     if (!error || typeof error !== 'string') return;
     if (!error.toLowerCase().includes('insufficient stock')) return;
-    const now = Date.now();
-    if (
-      lastAlertRef.current.message === error &&
-      now - lastAlertRef.current.timestamp < 5000
-    ) {
-      return;
-    }
-    lastAlertRef.current = { message: error, timestamp: now };
+
     setStockAlertMessage(error);
     setStockAlertOpen(true);
+
     const timer = setTimeout(() => {
       setStockAlertOpen(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [error]);
+    }, 2500);
 
-  if (isLoading) {
+    return () => clearTimeout(timer);
+  }, [error, stockAlertTick]);
+
+  useEffect(() => {
+    if (!isLoading && !hasInitialLoad) {
+      setHasInitialLoad(true);
+    }
+  }, [isLoading, hasInitialLoad]);
+
+  if (!hasInitialLoad && isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -186,9 +347,7 @@ export default function CartPage() {
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Stock limit reached</AlertTitle>
-            <AlertDescription>
-              {stockAlertMessage || 'Insufficient stock for this product'}
-            </AlertDescription>
+            <AlertDescription>{stockAlertMessage || 'Insufficient stock for this product'}</AlertDescription>
           </Alert>
         )}
 
@@ -205,7 +364,10 @@ export default function CartPage() {
               <div className="text-center py-20">
                 <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 font-medium mb-6">{t('emptyTitle')}</p>
-                <Link href="/shop" className="inline-flex items-center gap-2 bg-[#556822] text-white px-6 py-3 rounded-full font-bold hover:bg-[#3d4617] transition-all">
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 bg-[#556822] text-white px-6 py-3 rounded-full font-bold hover:bg-[#3d4617] transition-all"
+                >
                   {t('actions.continueShopping')} <ArrowRight size={18} />
                 </Link>
               </div>
@@ -213,16 +375,27 @@ export default function CartPage() {
               <div className="divide-y divide-gray-100">
                 {cartItems.map((item) => {
                   const isPackage = isPackageItem(item);
+
                   const localImgs = getCartItemImagesLocal(item);
-                  const images = isPackage && localImgs.length === 0 ? (remotePackageImages[item._id] || []) : localImgs;
+                  const images =
+                    isPackage && localImgs.length === 0 ? remotePackageImages[item._id] || [] : localImgs;
+
                   const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
                   const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
                   const displayName = translatedName || item.name;
 
+                  const currentQty = uiQty[item._id] ?? Number(item.quantity || 1);
+
+                  // ✅ Use fresh stock data (fetched async) for accurate max validation
+                  const stockInfo = freshStockData[item._id];
+                  const maxAllowed = stockInfo?.quantityTotal || null;
+
+                  // ✅ BLOCK MODE: disable + at max
+                  const atMax = maxAllowed !== null && Number(currentQty) >= Number(maxAllowed);
+
                   return (
                     <div key={item._id} className="py-6 flex items-center gap-6">
-                      
-                      {/* --- START UPDATED IMAGE DISPLAY --- */}
+                      {/* Images */}
                       <div className="shrink-0 flex items-center justify-center bg-transparent">
                         {isPackage ? (
                           <div className="grid grid-cols-2 gap-1 w-28">
@@ -252,7 +425,6 @@ export default function CartPage() {
                           </div>
                         )}
                       </div>
-                      {/* --- END UPDATED IMAGE DISPLAY --- */}
 
                       <div className="grow">
                         <h3 className="font-bold text-[#556822] text-lg mb-0.5">{displayName}</h3>
@@ -262,20 +434,57 @@ export default function CartPage() {
                       </div>
 
                       <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                        <button onClick={() => updateQuantity(item._id, Math.max(1, (item.quantity || 1) - 1))} className="text-gray-400 hover:text-black">
+                        <button
+                          onClick={() => {
+                            const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
+                            setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
+                            updateQuantity(item._id, nextQty);
+                          }}
+                          className="text-gray-400 hover:text-black"
+                        >
                           <Minus size={14} />
                         </button>
-                        <span className="w-4 text-center font-bold text-sm">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item._id, (item.quantity || 1) + 1)} className="text-gray-400 hover:text-black">
+
+                        <span className="w-4 text-center font-bold text-sm">{currentQty}</span>
+
+                        <button
+                          // ✅ SOFT BLOCK: if at max, show alert (no visual disabled state for better UX)
+                          onClick={() => {
+                            if (atMax) {
+                              setStockAlertMessage('Insufficient stock for this product');
+                              setStockAlertOpen(true);
+                              setTimeout(() => setStockAlertOpen(false), 3000);
+                              return;
+                            }
+
+                            const baseQty = uiQty[item._id] ?? (item.quantity || 1);
+                            const nextQty = Number(baseQty) + 1;
+
+                            // ✅ Clamp to maxAllowed (safety measure: should not be needed since hook also validates)
+                            const clampedQty = maxAllowed === null ? nextQty : Math.min(nextQty, maxAllowed);
+
+                            // if clamp didn’t change => already at max => do nothing
+                            if (clampedQty === baseQty) return;
+
+                            setUiQty((prev) => ({ ...prev, [item._id]: clampedQty }));
+                            updateQuantity(item._id, clampedQty);
+                          }}
+                          disabled={false}
+                          className="text-gray-400 hover:text-black"
+                          title="Increase quantity"
+                        >
                           <Plus size={14} />
                         </button>
                       </div>
 
                       <div className="w-24 text-right font-black text-[#E10C69] text-lg">
-                        €{(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}
+                        €{(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)}
                       </div>
 
-                      <button onClick={() => removeFromCart(item._id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                      <button
+                        onClick={() => removeFromCart(item._id)}
+                        className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                      >
                         <Trash2 size={20} />
                       </button>
                     </div>
@@ -310,7 +519,10 @@ export default function CartPage() {
                   >
                     {t('actions.checkout')}
                   </Link>
-                  <Link href="/shop" className="block w-full bg-white border border-gray-200 text-[#556822] py-3 rounded-md font-bold hover:bg-gray-50 transition-colors text-center">
+                  <Link
+                    href="/shop"
+                    className="block w-full bg-white border border-gray-200 text-[#556822] py-3 rounded-md font-bold hover:bg-gray-50 transition-colors text-center"
+                  >
                     {t('actions.continueShopping')}
                   </Link>
                 </div>
@@ -319,6 +531,7 @@ export default function CartPage() {
           </aside>
         </div>
       </main>
+
       <Footer />
     </div>
   );

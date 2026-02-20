@@ -402,7 +402,7 @@ export default function PackageCustomizationPage() {
       clearPackConfig();
 
       setSuccess(t("success.addedToCart"));
-      setTimeout(() => router.push("/cart"), 1500);
+      router.push("/cart");
     } catch (err) {
       setError(t("errors.addToCart"));
     }
@@ -465,7 +465,7 @@ export default function PackageCustomizationPage() {
       }
 
       setSuccess(t("success.addedToCart"));
-      setTimeout(() => router.push("/cart"), 1500);
+      router.push("/cart");
     } catch (err) {
       setError(t("errors.addToCart"));
     }

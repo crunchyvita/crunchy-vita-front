@@ -103,10 +103,8 @@ export default function ProductDetailModal({
     // Show success message
     setAddedToCart(true);
     
-    // Redirect to cart after 1.5 seconds
-    setTimeout(() => {
-      router.push('/cart');
-    }, 1500);
+    // Redirect to cart immediately
+    router.push('/cart');
   };
 
   const handleIncrement = () => {

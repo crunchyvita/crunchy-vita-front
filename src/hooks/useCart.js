@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -53,10 +53,62 @@ const cartAPI = async (endpoint, method = 'GET', body = null) => {
   return await response.json();
 };
 
+const getProductAvailableStock = async (productId) => {
+  if (!productId) return null;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  };
+
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      options.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/products/${productId}/stock`, options);
+    if (!response.ok) return null;
+    const result = await response.json();
+    const stock = result?.data || result;
+    if (!stock) return null;
+    
+    // ✅ Return BOTH total quantity and available quantity for validation
+    const totalQuantity = Number(stock.quantity || 0);
+    let availableQuantity = 0;
+    
+    if (stock.availableQuantity !== undefined && stock.availableQuantity !== null) {
+      availableQuantity = Number(stock.availableQuantity) || 0;
+    } else {
+      const reserved = Number(stock.reservedQuantity || 0);
+      availableQuantity = Math.max(0, totalQuantity - reserved);
+    }
+    
+    return {
+      quantity: availableQuantity,
+      quantityTotal: totalQuantity,
+      reserved: Number(stock.reservedQuantity || 0),
+      availableQuantity: availableQuantity
+    };
+  } catch {
+    return null;
+  }
+};
+
 export function useCart() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stockAlertTick, setStockAlertTick] = useState(0);
+
+  const pendingQuantityUpdatesRef = useRef(new Map());
+  const pendingRemoveRef = useRef(new Map());
+  const optimisticQuantitiesRef = useRef(new Map());
 
   // Helper function to load cart
   const loadCart = useCallback(async () => {
@@ -87,6 +139,14 @@ export function useCart() {
     loadCart();
   }, [loadCart]);
 
+  useEffect(() => {
+    const next = new Map();
+    for (const item of cartItems) {
+      if (item?._id) next.set(item._id, item.quantity || 0);
+    }
+    optimisticQuantitiesRef.current = next;
+  }, [cartItems]);
+
   // Listen for cart reload events (triggered on login/register)
   useEffect(() => {
     const handleCartReload = () => {
@@ -99,121 +159,226 @@ export function useCart() {
   }, [loadCart]);
 
   // Add item to cart
-  const addToCart = useCallback(
-    async (product, quantity = 1) => {
-      if (!product || !product._id) {
-        return false;
-      }
+  const addToCart = useCallback(async (product, quantity = 1) => {
+    if (!product || !product._id) return false;
 
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const isPackage = product.type === 'package' || !!product.packageId;
-        
-        const payload = {
-          quantity: Math.max(1, parseInt(quantity) || 1),
-          packageType: isPackage ? 'package' : 'product',
-        };
-
-        // Only include packageId if it's a package
-        if (isPackage) {
-          payload.packageId = product.packageId || product._id;
-          payload.selectedProducts = product.selectedProducts || [];
-        } else {
-          // Only include productId if it's a product
-          payload.productId = product._id;
-        }
-
-        const result = await cartAPI('/add', 'POST', payload);
-        if (result && result.success === false) {
-          setError(result.message || 'Insufficient stock for this product');
-          return false;
-        }
-        setCartItems(result.data.items || []);
-        setError(null);
-        return true;
-      } catch (err) {
-        const message = getErrorMessage(err);
-        if (!isStockErrorMessage(message)) {
-          console.error('Failed to add to cart:', err);
-        }
-        setError(message);
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  // Remove item from cart
-  const removeFromCart = useCallback(async (itemId) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Find item by _id directly
-      const item = cartItems.find((i) => i._id === itemId);
+      const isPackage = product.type === 'package' || !!product.packageId;
 
-      if (!item || !item._id) {
-        console.error('Item not found in cart');
-        return;
+      const payload = {
+        quantity: Math.max(1, parseInt(quantity) || 1),
+        packageType: isPackage ? 'package' : 'product',
+      };
+
+      if (isPackage) {
+        payload.packageId = product.packageId || product._id;
+        payload.selectedProducts = product.selectedProducts || [];
+      } else {
+        payload.productId = product._id;
       }
 
-      const result = await cartAPI(`/items/${item._id}`, 'DELETE');
+      const result = await cartAPI('/add', 'POST', payload);
+      if (result && result.success === false) {
+        const message = result.message || 'Insufficient stock for this product';
+        setError(message);
+        if (isStockErrorMessage(message)) setStockAlertTick((prev) => prev + 1);
+        return false;
+      }
+
       setCartItems(result.data.items || []);
       setError(null);
+      return true;
     } catch (err) {
-      console.error('Failed to remove from cart:', err);
-      setError(err.message);
+      const message = getErrorMessage(err);
+      if (!isStockErrorMessage(message)) console.error('Failed to add to cart:', err);
+      setError(message);
+      return false;
     } finally {
       setIsLoading(false);
     }
-  }, [cartItems]);
+  }, []);
 
-  // Update item quantity
-  const updateQuantity = useCallback(
-    async (itemId, quantity) => {
-      const nextQty = parseInt(quantity) || 0;
+  // Remove item from cart
+  const removeFromCart = useCallback(
+    async (itemId) => {
+      setCartItems((prev) => prev.filter((item) => item._id !== itemId));
+      setError(null);
+      optimisticQuantitiesRef.current.delete(itemId);
 
-      if (nextQty <= 0) {
-        await removeFromCart(itemId);
-        return;
-      }
+      const existing = pendingRemoveRef.current.get(itemId);
+      if (existing?.timeoutId) clearTimeout(existing.timeoutId);
 
       try {
-        setIsLoading(true);
-        setError(null);
+        const requestId = (existing?.requestId || 0) + 1;
+        const timeoutId = setTimeout(async () => {
+          try {
+            const result = await cartAPI(`/items/${itemId}`, 'DELETE');
+            const latest = pendingRemoveRef.current.get(itemId);
+            if (!latest || latest.requestId !== requestId) return;
+            setCartItems(result.data.items || []);
+            setError(null);
+          } catch (err) {
+            console.error('Failed to remove from cart:', err);
+            setError(getErrorMessage(err));
+            await loadCart();
+          } finally {
+            const latest = pendingRemoveRef.current.get(itemId);
+            if (latest?.requestId === requestId) pendingRemoveRef.current.delete(itemId);
+          }
+        }, 1000);
 
-        // Find item by _id directly
-        const item = cartItems.find((i) => i._id === itemId);
+        pendingRemoveRef.current.set(itemId, { timeoutId, requestId });
+        return true;
+      } catch (err) {
+        console.error('Failed to remove from cart:', err);
+        setError(getErrorMessage(err));
+        return false;
+      }
+    },
+    [loadCart]
+  );
 
-        if (!item || !item._id) {
-          console.error('Item not found in cart');
-          return;
+  // Update item quantity (✅ HARD BLOCK at max; no rollback visual)
+  const updateQuantity = useCallback(
+    async (itemId, quantity) => {
+      const requestedQty = parseInt(quantity) || 0;
+
+      if (requestedQty <= 0) {
+        await removeFromCart(itemId);
+        return false;
+      }
+
+      const item = cartItems.find((i) => i._id === itemId);
+      if (!item || !item._id) {
+        console.error('Item not found in cart');
+        return false;
+      }
+
+      const currentQty = optimisticQuantitiesRef.current.get(itemId) ?? item.quantity ?? 0;
+
+      // ✅ FINAL qty we will apply (may be clamped)
+      let finalQty = requestedQty;
+
+      // ✅ When increasing quantity, ALWAYS fetch fresh stock for validation
+      if (finalQty > (currentQty || 0)) {
+        if (item.type === 'product') {
+          // ✅ Fetch latest stock (never trust cart snapshot)
+          const productId = typeof item.productId === 'string' ? item.productId : item.productId?._id;
+          const freshStock = await getProductAvailableStock(productId);
+
+          if (freshStock !== null) {
+            // ✅ CORRECT FORMULA: maxAllowed = product total quantity (absolute max for any single item)
+            // This prevents one cart item from exceeding total product inventory
+            const maxAllowed = freshStock.quantityTotal || freshStock.quantity || 0;
+
+            if (finalQty > maxAllowed) {
+              finalQty = maxAllowed;
+              if (finalQty === currentQty) {
+                // ✅ Already at max, block and notify
+                setStockAlertTick((prev) => prev + 1);
+                return false;
+              }
+            }
+          }
+        } else if (item.type === 'package' && Array.isArray(item.selectedProducts)) {
+          // ✅ For packages: validate each selected product can support the increase
+          let maxQtyAllowed = Infinity;
+
+          for (const selectedProduct of item.selectedProducts) {
+            const spProductId = typeof selectedProduct.productId === 'string' 
+              ? selectedProduct.productId 
+              : selectedProduct.productId?._id;
+            if (!spProductId) continue;
+
+            const freshStock = await getProductAvailableStock(spProductId);
+            if (freshStock !== null) {
+              // Each selected product in package has a qty factor
+              const qtyPerSelection = selectedProduct.quantity || 1;
+              const maxQtyForThisProduct = Math.floor((freshStock.quantityTotal || freshStock.quantity || 0) / qtyPerSelection);
+              maxQtyAllowed = Math.min(maxQtyAllowed, maxQtyForThisProduct);
+            }
+          }
+
+          if (maxQtyAllowed !== Infinity && finalQty > maxQtyAllowed) {
+            finalQty = maxQtyAllowed;
+            if (finalQty === currentQty) {
+              // ✅ Already at max, block and notify
+              setStockAlertTick((prev) => prev + 1);
+              return false;
+            }
+          }
+        }
+      }
+
+      // ✅ If no change after clamp, do nothing (prevents flicker + useless requests)
+      if (finalQty === currentQty) return true;
+
+      // ✅ optimistic UI update with finalQty
+      setCartItems((prev) => prev.map((x) => (x._id === itemId ? { ...x, quantity: finalQty } : x)));
+      setError(null);
+      optimisticQuantitiesRef.current.set(itemId, finalQty);
+
+      try {
+        const existing = pendingQuantityUpdatesRef.current.get(itemId);
+        if (existing?.timeoutId) clearTimeout(existing.timeoutId);
+
+        // packages: immediate call (as you had)
+        if (item.type === 'package') {
+          const result = await cartAPI(`/items/${item._id}`, 'PUT', { quantity: finalQty });
+          if (result && result.success === false) {
+            const message = result.message || 'Insufficient stock for this product';
+            setError(message);
+            if (isStockErrorMessage(message)) setStockAlertTick((prev) => prev + 1);
+            await loadCart();
+            return false;
+          }
+          setCartItems(result.data.items || []);
+          setError(null);
+          return true;
         }
 
-        const result = await cartAPI(`/items/${item._id}`, 'PUT', { quantity: nextQty });
-        if (result && result.success === false) {
-          setError(result.message || 'Insufficient stock for this product');
-          return false;
-        }
-        setCartItems(result.data.items || []);
-        setError(null);
+        // products: debounced
+        const requestId = (existing?.requestId || 0) + 1;
+        const timeoutId = setTimeout(async () => {
+          try {
+            const result = await cartAPI(`/items/${item._id}`, 'PUT', { quantity: finalQty });
+            const latest = pendingQuantityUpdatesRef.current.get(itemId);
+            if (!latest || latest.requestId !== requestId) return;
+
+            if (result && result.success === false) {
+              const message = result.message || 'Insufficient stock for this product';
+              setError(message);
+              if (isStockErrorMessage(message)) setStockAlertTick((prev) => prev + 1);
+              await loadCart();
+              return;
+            }
+
+            setCartItems(result.data.items || []);
+            setError(null);
+          } catch (err) {
+            const message = getErrorMessage(err);
+            if (!isStockErrorMessage(message)) console.error('Failed to update quantity:', err);
+            setError(message);
+            await loadCart();
+          } finally {
+            const latest = pendingQuantityUpdatesRef.current.get(itemId);
+            if (latest?.requestId === requestId) pendingQuantityUpdatesRef.current.delete(itemId);
+          }
+        }, 1000);
+
+        pendingQuantityUpdatesRef.current.set(itemId, { timeoutId, requestId });
         return true;
       } catch (err) {
         const message = getErrorMessage(err);
-        if (!isStockErrorMessage(message)) {
-          console.error('Failed to update quantity:', err);
-        }
+        if (!isStockErrorMessage(message)) console.error('Failed to update quantity:', err);
         setError(message);
         return false;
-      } finally {
-        setIsLoading(false);
       }
     },
-    [cartItems, removeFromCart]
+    [cartItems, removeFromCart, loadCart]
   );
 
   // Clear entire cart
@@ -239,6 +404,7 @@ export function useCart() {
     const quantity = item.quantity || 1;
     return acc + price * quantity;
   }, 0);
+
   const shipping = cartItems.length > 0 ? 10 : 0;
   const total = subtotal + shipping;
 
@@ -254,5 +420,6 @@ export function useCart() {
     itemCount: cartItems.length,
     isLoading,
     error,
+    stockAlertTick, // keep this since CartPage listens to it
   };
 }
