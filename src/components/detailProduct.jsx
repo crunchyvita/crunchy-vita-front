@@ -19,7 +19,8 @@ export default function ProductDetailModal({
   getProductPrice,
   getAvailableStock,
   onToggleFavorite,
-  isFavorite
+  isFavorite,
+  onShowCartModal
 }) {
   const t = useTranslations('ProductModal');
   const locale = useLocale();
@@ -80,7 +81,16 @@ export default function ProductDetailModal({
   useEffect(() => {
     setQuantity(1);
     setCurrentImageIndex(0);
+    setAddedToCart(false);
   }, [product]);
+
+  // Reset addedToCart state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAddedToCart(false);
+      setQuantity(1);
+    }
+  }, [isOpen]);
 
   if (!isOpen || !product) return null;
 
@@ -105,11 +115,18 @@ export default function ProductDetailModal({
       return;
     }
 
-    // Show success message
+    // Show success message and modal
     setAddedToCart(true);
     
-    // Redirect to cart immediately
-    router.push('/cart');
+    // Show cart modal via parent callback and close detail modal
+    if (onShowCartModal) {
+      onShowCartModal({
+        ...product,
+        name: productName,
+        price: productPrice,
+        image: productImages[0]
+      }, quantity);
+    }
   };
 
   const handleIncrement = () => {
