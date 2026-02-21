@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useRef } from "react";
 import { useParams } from "next/navigation";
 import { Link, useRouter } from "@/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -128,6 +129,7 @@ export default function PackageCustomizationPage() {
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
   const [showStockAlerts, setShowStockAlerts] = useState({});
   const [packageQuantity, setPackageQuantity] = useState(1);
+  const addCooldownUntilRef = useRef(0);
 
   // ✅ Package name NOT translated (handled by getTranslatedPackage)
   const translatedPackage = useMemo(
@@ -347,6 +349,9 @@ export default function PackageCustomizationPage() {
       const product = products.find((p) => p._id === productId);
       return product && isProductOutOfStock(product);
     });
+    const now = Date.now();
+    if (now < addCooldownUntilRef.current) return;
+    addCooldownUntilRef.current = now + 1000;
 
     if (outOfStockProducts.length > 0) {
       setError(t("errors.selectionOutOfStock"));
@@ -415,6 +420,9 @@ export default function PackageCustomizationPage() {
       setTimeout(() => setError(""), 4000);
       return;
     }
+    const now = Date.now();
+    if (now < addCooldownUntilRef.current) return;
+    addCooldownUntilRef.current = now + 1000;
 
     try {
       const selectedProductsPayload = fixedItems.map((item) => {

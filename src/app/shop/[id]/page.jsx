@@ -1,7 +1,7 @@
 // src/app/shop/[id]/page.jsx
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { motion } from 'framer-motion';
@@ -34,6 +34,7 @@ export default function ProductDetailPage() {
   const [searchParams, setSearchParams] = useState({});
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const addCooldownUntilRef = useRef(0);
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
@@ -305,6 +306,10 @@ export default function ProductDetailPage() {
     
     // Add to real cart system
     if (!product || !product._id) return;
+
+    const now = Date.now();
+    if (now < addCooldownUntilRef.current) return;
+    addCooldownUntilRef.current = now + 1000;
     
     const ok = await addToCart({
       ...product,

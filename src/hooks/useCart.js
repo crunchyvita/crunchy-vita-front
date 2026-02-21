@@ -46,6 +46,7 @@ const cartAPI = async (endpoint, method = 'GET', body = null) => {
       errorMessage = error?.message || errorMessage;
     } catch {}
     const requestError = new Error(errorMessage);
+    requestError.status = response.status;
     requestError.isStockError = isStockErrorMessage(errorMessage);
     throw requestError;
   }
@@ -218,38 +219,44 @@ export function useCart() {
   // Remove item from cart
   const removeFromCart = useCallback(
     async (itemId) => {
+      if (!itemId) return false;
+
       setCartItems((prev) => prev.filter((item) => item._id !== itemId));
       setError(null);
       optimisticQuantitiesRef.current.delete(itemId);
 
       const existing = pendingRemoveRef.current.get(itemId);
-      if (existing?.timeoutId) clearTimeout(existing.timeoutId);
+      if (existing?.inFlight) return true;
 
       try {
         const requestId = (existing?.requestId || 0) + 1;
-        const timeoutId = setTimeout(async () => {
-          try {
-            const result = await cartAPI(`/items/${itemId}`, 'DELETE');
-            const latest = pendingRemoveRef.current.get(itemId);
-            if (!latest || latest.requestId !== requestId) return;
-            setCartItems(result.data.items || []);
-            setError(null);
-          } catch (err) {
-            console.error('Failed to remove from cart:', err);
-            setError(getErrorMessage(err));
-            await loadCart();
-          } finally {
-            const latest = pendingRemoveRef.current.get(itemId);
-            if (latest?.requestId === requestId) pendingRemoveRef.current.delete(itemId);
-          }
-        }, 1000);
+        pendingRemoveRef.current.set(itemId, { inFlight: true, requestId });
 
-        pendingRemoveRef.current.set(itemId, { timeoutId, requestId });
+        const result = await cartAPI(`/items/${itemId}`, 'DELETE');
+        const latest = pendingRemoveRef.current.get(itemId);
+        if (!latest || latest.requestId !== requestId) return true;
+        setCartItems(result.data.items || []);
+        setError(null);
         return true;
       } catch (err) {
+        const message = getErrorMessage(err);
+        const isAlreadyRemoved =
+          err?.status === 404 &&
+          typeof message === 'string' &&
+          message.toLowerCase().includes('cart item not found');
+
+        if (isAlreadyRemoved) {
+          setError(null);
+          return true;
+        }
+
         console.error('Failed to remove from cart:', err);
-        setError(getErrorMessage(err));
+        setError(message);
+        await loadCart();
         return false;
+      } finally {
+        const latest = pendingRemoveRef.current.get(itemId);
+        if (latest?.requestId) pendingRemoveRef.current.delete(itemId);
       }
     },
     [loadCart]

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/navigation';
 import { getTranslatedProduct } from '@/lib/productTranslations';
@@ -32,6 +32,7 @@ export default function ProductDetailModal({
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const addCooldownUntilRef = useRef(0);
 
   // Memoize images to avoid recalculation on every render
   const productImages = useMemo(() => {
@@ -86,6 +87,10 @@ export default function ProductDetailModal({
   // Handlers
   const handleAddToCart = async () => {
     if (!product || !product._id) return;
+
+    const now = Date.now();
+    if (now < addCooldownUntilRef.current) return;
+    addCooldownUntilRef.current = now + 1000;
     
     // Add to cart with proper price
     const productPrice = getProductPrice(product);
