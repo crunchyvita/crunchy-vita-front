@@ -115,10 +115,10 @@ export default function ProductDetailModal({
       return;
     }
 
-    // Show success message and modal
+    // Show success message
     setAddedToCart(true);
     
-    // Show cart modal via parent callback and close detail modal
+    // Show cart modal via parent callback
     if (onShowCartModal) {
       onShowCartModal({
         ...product,
@@ -127,6 +127,11 @@ export default function ProductDetailModal({
         image: productImages[0]
       }, quantity);
     }
+    
+    // Close detail modal after 1.5 seconds 
+    setTimeout(() => {
+      onClose();
+    }, 1500);
   };
 
   const handleIncrement = () => {
@@ -139,7 +144,10 @@ export default function ProductDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]"
+      onClick={onClose}
+    >
       <div
         className="relative bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col lg:flex-row transition-all duration-500 scale-100 font-[Agrandir]"
         onClick={(e) => e.stopPropagation()}
