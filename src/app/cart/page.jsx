@@ -7,7 +7,7 @@ import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -133,6 +133,7 @@ export default function CartPage() {
 
   // ✅ instant UI quantity map (fix successive clicks)
   const [uiQty, setUiQty] = useState({});
+  const itemCooldownUntilRef = useRef(new Map());
 
   // ✅ Cache fresh stock data for each item to show accurate maxAllowed
   const [freshStockData, setFreshStockData] = useState({});
@@ -435,10 +436,18 @@ export default function CartPage() {
 
                       <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
                         <button
-                          onClick={() => {
+                          onClick={async () => {
+                            const now = Date.now();
+                            const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
+                            if (now < cooldownUntil) return;
+                            itemCooldownUntilRef.current.set(item._id, now + 1000);
+
                             const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
                             setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
-                            updateQuantity(item._id, nextQty);
+                            const ok = await updateQuantity(item._id, nextQty);
+                            if (!ok) {
+                              setUiQty((prev) => ({ ...prev, [item._id]: uiQty[item._id] ?? (item.quantity || 1) }));
+                            }
                           }}
                           className="text-gray-400 hover:text-black"
                         >
@@ -449,13 +458,18 @@ export default function CartPage() {
 
                         <button
                           // ✅ SOFT BLOCK: if at max, show alert (no visual disabled state for better UX)
-                          onClick={() => {
+                          onClick={async () => {
                             if (atMax) {
                               setStockAlertMessage('Insufficient stock for this product');
                               setStockAlertOpen(true);
                               setTimeout(() => setStockAlertOpen(false), 3000);
                               return;
                             }
+
+                            const now = Date.now();
+                            const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
+                            if (now < cooldownUntil) return;
+                            itemCooldownUntilRef.current.set(item._id, now + 1000);
 
                             const baseQty = uiQty[item._id] ?? (item.quantity || 1);
                             const nextQty = Number(baseQty) + 1;
@@ -467,7 +481,10 @@ export default function CartPage() {
                             if (clampedQty === baseQty) return;
 
                             setUiQty((prev) => ({ ...prev, [item._id]: clampedQty }));
-                            updateQuantity(item._id, clampedQty);
+                            const ok = await updateQuantity(item._id, clampedQty);
+                            if (!ok) {
+                              setUiQty((prev) => ({ ...prev, [item._id]: baseQty }));
+                            }
                           }}
                           disabled={false}
                           className="text-gray-400 hover:text-black"
