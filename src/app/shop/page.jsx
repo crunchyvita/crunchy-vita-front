@@ -10,6 +10,7 @@ import {
 
 import { useAuth } from '@/context/AuthContext';
 import ProductDetailModal from '@/components/detailProduct';
+import AddedToCartModal from '@/components/AddedToCartModal';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
@@ -333,6 +334,10 @@ function ClientShop() {
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [cartModalProduct, setCartModalProduct] = useState(null);
+  const [cartModalQuantity, setCartModalQuantity] = useState(1);
 
   const [favoritesIds, setFavoritesIds] = useState(new Set());
   const [favoritesLoading, setFavoritesLoading] = useState(false);
@@ -727,6 +732,22 @@ function ClientShop() {
         getAvailableStock={getAvailableStock}
         onToggleFavorite={handleToggleFavorite}
         isFavorite={selectedProduct ? favoritesIds.has(selectedProduct._id) : false}
+        onShowCartModal={(product, quantity) => {
+          setCartModalProduct(product);
+          setCartModalQuantity(quantity);
+          setShowCartModal(true);
+          setIsDetailModalOpen(false);
+        }}
+      />
+
+      <AddedToCartModal
+        isOpen={showCartModal}
+        onClose={() => {
+          setShowCartModal(false);
+          setCartModalProduct(null);
+        }}
+        product={cartModalProduct}
+        quantity={cartModalQuantity}
       />
 
       <Footer />

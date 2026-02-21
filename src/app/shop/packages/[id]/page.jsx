@@ -19,6 +19,7 @@ import {
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import PromoBadge from "@/components/PromoBadge";
+import AddedToCartModal from "@/components/AddedToCartModal";
 import { useAuth } from "@/context/AuthContext";
 import { usePackStorage } from "@/hooks/usePackStorage";
 import { useCart } from "@/hooks/useCart";
@@ -129,6 +130,9 @@ export default function PackageCustomizationPage() {
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
   const [showStockAlerts, setShowStockAlerts] = useState({});
   const [packageQuantity, setPackageQuantity] = useState(1);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [cartModalProduct, setCartModalProduct] = useState(null);
+  const [cartModalQuantity, setCartModalQuantity] = useState(1);
   const addCooldownUntilRef = useRef(0);
   const packagePlusCooldownRef = useRef(0);
 
@@ -408,7 +412,15 @@ export default function PackageCustomizationPage() {
       clearPackConfig();
 
       setSuccess(t("success.addedToCart"));
-      router.push("/cart");
+      
+      // Show cart modal instead of redirecting
+      setCartModalProduct({
+        ...packageCartItem,
+        name: translatedPackage.name || packageData.name,
+        image: packageImages[0]
+      });
+      setCartModalQuantity(1);
+      setShowCartModal(true);
     } catch (err) {
       setError(t("errors.addToCart"));
     }
@@ -474,7 +486,15 @@ export default function PackageCustomizationPage() {
       }
 
       setSuccess(t("success.addedToCart"));
-      router.push("/cart");
+      
+      // Show cart modal instead of redirecting
+      setCartModalProduct({
+        ...packageCartItem,
+        name: translatedPackage.name || packageData.name,
+        image: packageImages[0]
+      });
+      setCartModalQuantity(packageQuantity);
+      setShowCartModal(true);
     } catch (err) {
       setError(t("errors.addToCart"));
     }
@@ -644,6 +664,17 @@ export default function PackageCustomizationPage() {
         </main>
 
         <Footer />
+
+        {/* Added to Cart Modal */}
+        <AddedToCartModal
+          isOpen={showCartModal}
+          onClose={() => {
+            setShowCartModal(false);
+            setCartModalProduct(null);
+          }}
+          product={cartModalProduct}
+          quantity={cartModalQuantity}
+        />
       </div>
     );
   }
@@ -940,6 +971,17 @@ export default function PackageCustomizationPage() {
       </main>
 
       <Footer />
+
+      {/* Added to Cart Modal */}
+      <AddedToCartModal
+        isOpen={showCartModal}
+        onClose={() => {
+          setShowCartModal(false);
+          setCartModalProduct(null);
+        }}
+        product={cartModalProduct}
+        quantity={cartModalQuantity}
+      />
     </div>
   );
 }

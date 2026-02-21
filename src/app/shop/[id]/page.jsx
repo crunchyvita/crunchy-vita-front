@@ -16,6 +16,7 @@ import { useCart } from '@/hooks/useCart';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
+import AddedToCartModal from '@/components/AddedToCartModal';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 
@@ -49,6 +50,9 @@ export default function ProductDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [cartModalProduct, setCartModalProduct] = useState(null);
+  const [cartModalQuantity, setCartModalQuantity] = useState(1);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -329,9 +333,16 @@ export default function ProductDetailPage() {
     
     setAddedToCart(true);
     
-    // Redirect to cart immediately
+    // Show cart modal instead of redirecting
+    setCartModalProduct({
+      ...product,
+      name: productName,
+      price: productPrice,
+      image: productImages[0]
+    });
+    setCartModalQuantity(quantity);
+    setShowCartModal(true);
     setQuantity(1);
-    router.push('/cart');
   };
 
   const handleAddToWishlist = async () => {
@@ -1183,6 +1194,18 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Added to Cart Modal */}
+      <AddedToCartModal
+        isOpen={showCartModal}
+        onClose={() => {
+          setShowCartModal(false);
+          setCartModalProduct(null);
+          setAddedToCart(false);
+        }}
+        product={cartModalProduct}
+        quantity={cartModalQuantity}
+      />
     </div>
   );
 }

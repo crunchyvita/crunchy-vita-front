@@ -19,7 +19,8 @@ export default function ProductDetailModal({
   getProductPrice,
   getAvailableStock,
   onToggleFavorite,
-  isFavorite
+  isFavorite,
+  onShowCartModal
 }) {
   const t = useTranslations('ProductModal');
   const locale = useLocale();
@@ -81,7 +82,16 @@ export default function ProductDetailModal({
   useEffect(() => {
     setQuantity(1);
     setCurrentImageIndex(0);
+    setAddedToCart(false);
   }, [product]);
+
+  // Reset addedToCart state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAddedToCart(false);
+      setQuantity(1);
+    }
+  }, [isOpen]);
 
   if (!isOpen || !product) return null;
 
@@ -109,8 +119,20 @@ export default function ProductDetailModal({
     // Show success message
     setAddedToCart(true);
     
-    // Redirect to cart immediately
-    router.push('/cart');
+    // Show cart modal via parent callback
+    if (onShowCartModal) {
+      onShowCartModal({
+        ...product,
+        name: productName,
+        price: productPrice,
+        image: productImages[0]
+      }, quantity);
+    }
+    
+    // Close detail modal after 1.5 seconds 
+    setTimeout(() => {
+      onClose();
+    }, 1500);
   };
 
   const handleIncrement = () => {
@@ -127,7 +149,10 @@ export default function ProductDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]"
+      onClick={onClose}
+    >
       <div
         className="relative bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col lg:flex-row transition-all duration-500 scale-100 font-[Agrandir]"
         onClick={(e) => e.stopPropagation()}
