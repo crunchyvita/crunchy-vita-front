@@ -267,22 +267,6 @@ export function useCart() {
     async (itemId, quantity) => {
       const requestedQty = parseInt(quantity) || 0;
 
-      // ✅ CHECK COOLDOWN: 1 second throttle per item
-      const lastUpdateTime = lastUpdateTimeRef.current.get(itemId) || 0;
-      const timeSinceLastUpdate = Date.now() - lastUpdateTime;
-      if (timeSinceLastUpdate < 1000) {
-        // Still in cooldown, block the update
-        return false;
-      }
-
-      // ✅ RECORD TIME IMMEDIATELY - This is the key!
-      lastUpdateTimeRef.current.set(itemId, Date.now());
-
-      if (requestedQty <= 0) {
-        await removeFromCart(itemId);
-        return false;
-      }
-
       const item = cartItems.find((i) => i._id === itemId);
       if (!item || !item._id) {
         console.error('Item not found in cart');
@@ -290,6 +274,21 @@ export function useCart() {
       }
 
       const currentQty = optimisticQuantitiesRef.current.get(itemId) ?? item.quantity ?? 0;
+
+      // ✅ Cooldown only for '+' (quantity increase): 0.5 second per item
+      if (requestedQty > currentQty) {
+        const lastUpdateTime = lastUpdateTimeRef.current.get(itemId) || 0;
+        const timeSinceLastUpdate = Date.now() - lastUpdateTime;
+        if (timeSinceLastUpdate < 500) {
+          return false;
+        }
+        lastUpdateTimeRef.current.set(itemId, Date.now());
+      }
+
+      if (requestedQty <= 0) {
+        await removeFromCart(itemId);
+        return false;
+      }
 
       // ✅ FINAL qty we will apply (may be clamped)
       let finalQty = requestedQty;

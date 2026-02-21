@@ -33,6 +33,7 @@ export default function ProductDetailModal({
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const addCooldownUntilRef = useRef(0);
+  const quantityPlusCooldownRef = useRef(0);
 
   // Memoize images to avoid recalculation on every render
   const productImages = useMemo(() => {
@@ -113,6 +114,10 @@ export default function ProductDetailModal({
   };
 
   const handleIncrement = () => {
+    const now = Date.now();
+    if (now < quantityPlusCooldownRef.current) return;
+    quantityPlusCooldownRef.current = now + 500;
+
     if (quantity >= availableStock) {
       setShowStockAlert(true);
       setTimeout(() => setShowStockAlert(false), 3000);

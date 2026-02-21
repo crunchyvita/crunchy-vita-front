@@ -35,6 +35,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const addCooldownUntilRef = useRef(0);
+  const quantityPlusCooldownRef = useRef(0);
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
@@ -268,6 +269,10 @@ export default function ProductDetailPage() {
   }, [product]);
 
   const incrementQuantity = () => {
+    const now = Date.now();
+    if (now < quantityPlusCooldownRef.current) return;
+    quantityPlusCooldownRef.current = now + 500;
+
     if (quantity < availableStock) setQuantity(quantity + 1);
   };
 

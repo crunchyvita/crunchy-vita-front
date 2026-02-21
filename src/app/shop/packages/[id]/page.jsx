@@ -130,6 +130,7 @@ export default function PackageCustomizationPage() {
   const [showStockAlerts, setShowStockAlerts] = useState({});
   const [packageQuantity, setPackageQuantity] = useState(1);
   const addCooldownUntilRef = useRef(0);
+  const packagePlusCooldownRef = useRef(0);
 
   // ✅ Package name NOT translated (handled by getTranslatedPackage)
   const translatedPackage = useMemo(
@@ -572,7 +573,12 @@ export default function PackageCustomizationPage() {
                     </button>
                     <span className="font-black text-lg w-8 text-center">{packageQuantity}</span>
                     <button
-                      onClick={() => setPackageQuantity(packageQuantity + 1)}
+                      onClick={() => {
+                        const now = Date.now();
+                        if (now < packagePlusCooldownRef.current) return;
+                        packagePlusCooldownRef.current = now + 500;
+                        setPackageQuantity(packageQuantity + 1);
+                      }}
                       className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
                       style={{ color: COLORS.grass }}
                     >

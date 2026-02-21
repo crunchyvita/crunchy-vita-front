@@ -437,11 +437,6 @@ export default function CartPage() {
                       <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
                         <button
                           onClick={async () => {
-                            const now = Date.now();
-                            const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
-                            if (now < cooldownUntil) return;
-                            itemCooldownUntilRef.current.set(item._id, now + 1000);
-
                             const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
                             setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
                             const ok = await updateQuantity(item._id, nextQty);
@@ -469,7 +464,7 @@ export default function CartPage() {
                             const now = Date.now();
                             const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
                             if (now < cooldownUntil) return;
-                            itemCooldownUntilRef.current.set(item._id, now + 1000);
+                            itemCooldownUntilRef.current.set(item._id, now + 500);
 
                             const baseQty = uiQty[item._id] ?? (item.quantity || 1);
                             const nextQty = Number(baseQty) + 1;
