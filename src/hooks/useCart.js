@@ -109,6 +109,8 @@ export function useCart() {
   const pendingQuantityUpdatesRef = useRef(new Map());
   const pendingRemoveRef = useRef(new Map());
   const optimisticQuantitiesRef = useRef(new Map());
+  const lastUpdateTimeRef = useRef(new Map()); // Track last successful update time per item
+  const lastAddTimeRef = useRef(new Map()); // Track last successful add time per product
 
   // Helper function to load cart
   const loadCart = useCallback(async () => {
@@ -161,6 +163,18 @@ export function useCart() {
   // Add item to cart
   const addToCart = useCallback(async (product, quantity = 1) => {
     if (!product || !product._id) return false;
+
+    // ✅ CHECK COOLDOWN: 1 second throttle per product
+    const productKey = product.packageId || product._id;
+    const lastAddTime = lastAddTimeRef.current.get(productKey) || 0;
+    const timeSinceLastAdd = Date.now() - lastAddTime;
+    if (timeSinceLastAdd < 1000) {
+      // Still in cooldown, block the add
+      return false;
+    }
+
+    // ✅ RECORD TIME IMMEDIATELY
+    lastAddTimeRef.current.set(productKey, Date.now());
 
     try {
       setIsLoading(true);
@@ -245,6 +259,17 @@ export function useCart() {
   const updateQuantity = useCallback(
     async (itemId, quantity) => {
       const requestedQty = parseInt(quantity) || 0;
+
+      // ✅ CHECK COOLDOWN: 1 second throttle per item
+      const lastUpdateTime = lastUpdateTimeRef.current.get(itemId) || 0;
+      const timeSinceLastUpdate = Date.now() - lastUpdateTime;
+      if (timeSinceLastUpdate < 1000) {
+        // Still in cooldown, block the update
+        return false;
+      }
+
+      // ✅ RECORD TIME IMMEDIATELY - This is the key!
+      lastUpdateTimeRef.current.set(itemId, Date.now());
 
       if (requestedQty <= 0) {
         await removeFromCart(itemId);
