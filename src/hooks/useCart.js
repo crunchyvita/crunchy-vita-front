@@ -290,6 +290,13 @@ export function useCart() {
         return false;
       }
 
+      const existingSequence = pendingQuantityUpdatesRef.current.get(itemId)?.sequence || 0;
+      const sequence = existingSequence + 1;
+      pendingQuantityUpdatesRef.current.set(itemId, {
+        ...pendingQuantityUpdatesRef.current.get(itemId),
+        sequence,
+      });
+
       // ✅ FINAL qty we will apply (may be clamped)
       let finalQty = requestedQty;
 
@@ -299,6 +306,10 @@ export function useCart() {
           // ✅ Fetch latest stock (never trust cart snapshot)
           const productId = typeof item.productId === 'string' ? item.productId : item.productId?._id;
           const freshStock = await getProductAvailableStock(productId);
+
+          if (pendingQuantityUpdatesRef.current.get(itemId)?.sequence !== sequence) {
+            return true;
+          }
 
           if (freshStock !== null) {
             // ✅ CORRECT FORMULA: maxAllowed = product total quantity (absolute max for any single item)
@@ -325,6 +336,9 @@ export function useCart() {
             if (!spProductId) continue;
 
             const freshStock = await getProductAvailableStock(spProductId);
+            if (pendingQuantityUpdatesRef.current.get(itemId)?.sequence !== sequence) {
+              return true;
+            }
             if (freshStock !== null) {
               // Each selected product in package has a qty factor
               const qtyPerSelection = selectedProduct.quantity || 1;
@@ -354,30 +368,16 @@ export function useCart() {
 
       try {
         const existing = pendingQuantityUpdatesRef.current.get(itemId);
+        if (existing?.sequence !== sequence) return true;
         if (existing?.timeoutId) clearTimeout(existing.timeoutId);
 
-        // packages: immediate call (as you had)
-        if (item.type === 'package') {
-          const result = await cartAPI(`/items/${item._id}`, 'PUT', { quantity: finalQty });
-          if (result && result.success === false) {
-            const message = result.message || 'Insufficient stock for this product';
-            setError(message);
-            if (isStockErrorMessage(message)) setStockAlertTick((prev) => prev + 1);
-            await loadCart();
-            return false;
-          }
-          setCartItems(result.data.items || []);
-          setError(null);
-          return true;
-        }
-
-        // products: debounced
-        const requestId = (existing?.requestId || 0) + 1;
+        // ✅ Debounce BOTH product and package updates; keep only the last request
+        const requestId = sequence;
         const timeoutId = setTimeout(async () => {
           try {
             const result = await cartAPI(`/items/${item._id}`, 'PUT', { quantity: finalQty });
             const latest = pendingQuantityUpdatesRef.current.get(itemId);
-            if (!latest || latest.requestId !== requestId) return;
+            if (!latest || latest.requestId !== requestId || latest.sequence !== sequence) return;
 
             if (result && result.success === false) {
               const message = result.message || 'Insufficient stock for this product';
@@ -396,11 +396,13 @@ export function useCart() {
             await loadCart();
           } finally {
             const latest = pendingQuantityUpdatesRef.current.get(itemId);
-            if (latest?.requestId === requestId) pendingQuantityUpdatesRef.current.delete(itemId);
+            if (latest?.requestId === requestId && latest.sequence === sequence) {
+              pendingQuantityUpdatesRef.current.delete(itemId);
+            }
           }
         }, 1000);
 
-        pendingQuantityUpdatesRef.current.set(itemId, { timeoutId, requestId });
+        pendingQuantityUpdatesRef.current.set(itemId, { timeoutId, requestId, sequence });
         return true;
       } catch (err) {
         const message = getErrorMessage(err);
