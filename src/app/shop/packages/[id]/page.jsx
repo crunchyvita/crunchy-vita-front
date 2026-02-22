@@ -597,6 +597,24 @@ export default function PackageCustomizationPage() {
                         const now = Date.now();
                         if (now < packagePlusCooldownRef.current) return;
                         packagePlusCooldownRef.current = now + 500;
+
+                        if (!packageData.inStock) {
+                          setError(t("fixed.notAvailable"));
+                          setTimeout(() => setError(""), 3000);
+                          return;
+                        }
+
+                        const maxFixedQuantity = packageData?.maxPackageQuantity;
+                        if (Number.isFinite(maxFixedQuantity) && maxFixedQuantity > 0) {
+                          if (packageQuantity >= maxFixedQuantity) {
+                            setError(t("quantity.maxReached"));
+                            setTimeout(() => setError(""), 3000);
+                            return;
+                          }
+                          setPackageQuantity(Math.min(packageQuantity + 1, maxFixedQuantity));
+                          return;
+                        }
+
                         setPackageQuantity(packageQuantity + 1);
                       }}
                       className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
