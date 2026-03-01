@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import { AlertCircle, CheckCircle2, Plus, Trash2, Edit2, Eye } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Plus, Trash2, Edit2, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 
 export default function PromoCodesPage() {
@@ -14,6 +14,7 @@ export default function PromoCodesPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCode, setSelectedCode] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -36,7 +37,7 @@ export default function PromoCodesPage() {
       }
     } catch (err) {
       console.error('Error fetching promo codes:', err);
-      setError('Erreur lors du chargement des codes promo');
+      setError('Error loading promo codes');
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ export default function PromoCodesPage() {
 
       const result = await response.json();
       if (result.success) {
-        setSuccess('✅ Code promo supprimé!');
+        setSuccess('✅ Promo code deleted!');
         setShowDeleteModal(false);
         setSelectedCode(null);
         fetchPromoCodes();
@@ -87,6 +88,16 @@ export default function PromoCodesPage() {
 
   const isExpired = (date) => new Date(date) < new Date();
 
+  const formatFrenchDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const months = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month}, ${year}`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -94,8 +105,8 @@ export default function PromoCodesPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-black text-gray-900 mb-2">Codes Promo</h1>
-              <p className="text-gray-600 text-lg">Gérez les codes promo et les réductions</p>
+              <h1 className="text-4xl font-black text-gray-900 mb-2">Promo Codes</h1>
+              <p className="text-gray-600 text-lg">Manage promo codes and discounts</p>
             </div>
             <Link
               href="/admin/promo-codes/create"
@@ -105,7 +116,7 @@ export default function PromoCodesPage() {
               onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
             >
               <Plus size={20} />
-              Nouveau Code
+              New Code
             </Link>
           </div>
         </div>
@@ -120,15 +131,15 @@ export default function PromoCodesPage() {
               <p className="text-3xl font-bold text-gray-900">{stats.totalCodes}</p>
             </div>
             <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Actifs</p>
+              <p className="text-gray-600 text-sm mb-2">Active</p>
               <p className="text-3xl font-bold text-green-600">{stats.activeCodes}</p>
             </div>
             <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Expirés</p>
+              <p className="text-gray-600 text-sm mb-2">Expired</p>
               <p className="text-3xl font-bold text-red-600">{stats.expiredCodes}</p>
             </div>
             <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Utilisations</p>
+              <p className="text-gray-600 text-sm mb-2">Usages</p>
               <p className="text-3xl font-bold text-blue-600">{stats.totalUsages}</p>
             </div>
           </div>
@@ -149,26 +160,27 @@ export default function PromoCodesPage() {
         )}
 
         {/* Promo Codes Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
           {loading ? (
             <div className="p-8 text-center text-gray-600">
-              Chargement...
+              Loading...
             </div>
           ) : promoCodes.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-600 mb-4">Aucun code promo créé.</p>
+              <p className="text-gray-600 mb-4">No promo code created.</p>
             
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-100 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Code</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Réduction</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Utilisations</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Discount</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Usages</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Expiration</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Statut</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Actions</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Status</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -178,14 +190,16 @@ export default function PromoCodesPage() {
                     <td className="px-6 py-4 text-gray-700">
                       {code.discountType === 'PERCENTAGE'
                         ? `${code.discountValue}%`
-                        : `€${code.discountValue}`}
+                        : code.discountType === 'FREE_ITEM'
+                        ? (code.freeItemType === 'PACKAGE' ? 'Free package' : 'Free product')
+                        : '-'}
                     </td>
                     <td className="px-6 py-4 text-gray-700">
                       {code.usageCount}/{code.usageLimit || '∞'}
                     </td>
                     <td className="px-6 py-4 text-gray-700">
                       <span className={isExpired(code.expirationDate) ? 'text-red-600 font-bold' : ''}>
-                        {new Date(code.expirationDate).toLocaleDateString('fr-FR')}
+                        {formatFrenchDate(code.expirationDate)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -194,40 +208,48 @@ export default function PromoCodesPage() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {code.isActive && !isExpired(code.expirationDate) ? 'Actif' : 'Inactif'}
+                        {code.isActive && !isExpired(code.expirationDate) ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 flex gap-2">
-                      <Link
-                        href={`/admin/promo-codes/${code._id}?mode=view`}
-                        className="text-white font-bold p-2 rounded-lg transition-colors"
-                        style={{backgroundColor: '#556622'}}
-                        title="Voir les détails"
-                      >
-                        <Eye size={18} />
-                      </Link>
-                      <Link
-                        href={`/admin/promo-codes/${code._id}`}
-                        className="text-amber-600 hover:text-amber-800 font-bold p-2 hover:bg-amber-50 rounded-lg transition-colors"
-                        title="Éditer"
-                      >
-                        <Edit2 size={18} />
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setSelectedCode(code);
-                          setShowDeleteModal(true);
-                        }}
-                        className="text-red-600 hover:text-red-800 font-bold p-2 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Supprimer"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <td className="px-4 py-3 text-right">
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => setOpenDropdown(openDropdown === code._id ? null : code._id)}
+                          className="inline-flex items-center rounded-md p-1 text-slate-600 transition hover:bg-slate-100"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+
+                        {openDropdown === code._id && (
+                          <div className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-slate-200 bg-white shadow-lg">
+                            <Link
+                              href={`/admin/promo-codes/${code._id}`}
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
+                              onClick={() => setOpenDropdown(null)}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              Edit
+                            </Link>
+                            <button
+                              onClick={() => {
+                                setSelectedCode(code);
+                                setShowDeleteModal(true);
+                                setOpenDropdown(null);
+                              }}
+                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
@@ -239,9 +261,9 @@ export default function PromoCodesPage() {
           setSelectedCode(null);
         }}
         onConfirm={handleDelete}
-        title="Supprimer ce code promo?"
+        title="Delete this promo code?"
         itemName={selectedCode?.code}
-        description="Cette action ne peut pas être annulée. Toutes les données associées à ce code seront supprimées."
+        description="This action cannot be undone. All data associated with this code will be deleted."
         isDeleting={deleting}
       />
     </div>
