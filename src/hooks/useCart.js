@@ -312,9 +312,9 @@ export function useCart() {
           }
 
           if (freshStock !== null) {
-            // ✅ CORRECT FORMULA: maxAllowed = product total quantity (absolute max for any single item)
-            // This prevents one cart item from exceeding total product inventory
-            const maxAllowed = freshStock.quantityTotal || freshStock.quantity || 0;
+            // ✅ CORRECT FORMULA: maxAllowed = available + current quantity already in cart
+            // This accounts for the fact that currentQty is already part of reservedQuantity
+            const maxAllowed = (freshStock.availableQuantity || 0) + (currentQty || 0);
 
             if (finalQty > maxAllowed) {
               finalQty = maxAllowed;
@@ -342,7 +342,9 @@ export function useCart() {
             if (freshStock !== null) {
               // Each selected product in package has a qty factor
               const qtyPerSelection = selectedProduct.quantity || 1;
-              const maxQtyForThisProduct = Math.floor((freshStock.quantityTotal || freshStock.quantity || 0) / qtyPerSelection);
+              // ✅ Account for stock already reserved by this package item
+              const currentProductReserved = currentQty * qtyPerSelection;
+              const maxQtyForThisProduct = Math.floor(((freshStock.availableQuantity || 0) + currentProductReserved) / qtyPerSelection);
               maxQtyAllowed = Math.min(maxQtyAllowed, maxQtyForThisProduct);
             }
           }
