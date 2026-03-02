@@ -6,7 +6,6 @@ import { productAPI } from "@/lib/api";
 import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
 import {
-	Download,
 	MoreVertical,
 	Plus,
 	Search,
@@ -41,7 +40,6 @@ export default function ProductsPage() {
 	const [error, setError] = useState("");
 	const [search, setSearch] = useState("");
 	const [openDropdown, setOpenDropdown] = useState(null);
-	const [selectedProducts, setSelectedProducts] = useState([]);
 
 	useEffect(() => {
 		const load = async () => {
@@ -70,25 +68,6 @@ export default function ProductsPage() {
 		});
 	}, [products, search]);
 
-	const handleSelectAll = (e) => {
-		if (e.target.checked) {
-			const allIds = filteredProducts.map(p => p._id || p.id);
-			setSelectedProducts(allIds);
-		} else {
-			setSelectedProducts([]);
-		}
-	};
-
-	const handleSelectProduct = (productId) => {
-		if (selectedProducts.includes(productId)) {
-			setSelectedProducts(selectedProducts.filter(id => id !== productId));
-		} else {
-			setSelectedProducts([...selectedProducts, productId]);
-		}
-	};
-
-	const isAllSelected = filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length;
-
 	return (
 		<>
 		<AdminHeader />
@@ -105,10 +84,6 @@ export default function ProductsPage() {
 				</div>
 
 				<div className="flex items-center gap-3">
-					<button className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-						<Download className="h-4 w-4" />
-						Download
-					</button>
 
 					<Link
 						href="/admin/products/create"
@@ -147,7 +122,7 @@ export default function ProductsPage() {
 					<table className="min-w-full">
 						<tbody>
 							<tr>
-								<td colSpan={7} className="py-20 text-center">
+								<td colSpan={6} className="py-20 text-center">
 									<div className="flex flex-col items-center gap-2">
 										<Package className="h-10 w-10 text-slate-200" />
 										<p className="font-bold text-slate-400">Aucun produit trouvé</p>
@@ -161,14 +136,6 @@ export default function ProductsPage() {
 						<table className="min-w-full text-sm">
 							<thead>
 								<tr className="border-b border-slate-200 text-left text-slate-500">
-									<th className="px-3 py-2">
-									<input 
-										type="checkbox" 
-										aria-label="Select all" 
-										checked={isAllSelected}
-										onChange={handleSelectAll}
-									/>
-								</th>
 								<th className="px-3 py-2 font-medium">Product name</th>
 								<th className="px-3 py-2 font-medium">Total Stock</th>
 								<th className="px-3 py-2 font-medium">Reserved</th>
@@ -187,14 +154,6 @@ export default function ProductsPage() {
 								
 								return (
 									<tr key={productId} className="text-slate-700">
-										<td className="px-3 py-3 align-middle">
-										<input 
-											type="checkbox" 
-											aria-label="Select product" 
-											checked={selectedProducts.includes(productId)}
-											onChange={() => handleSelectProduct(productId)}
-										/>
-									</td>
 									<td className="px-3 py-3 align-middle">
 										<p className="font-medium text-slate-900">{translated.name}</p>
 									</td>

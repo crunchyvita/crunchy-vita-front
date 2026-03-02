@@ -5,7 +5,6 @@ import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import {
-	Download,
 	MoreVertical,
 	Plus,
 	Search,
@@ -132,10 +131,6 @@ export default function PackagesPage() {
 				</div>
 
 				<div className="flex items-center gap-3">
-					<button className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-						<Download className="h-4 w-4" />
-						Download
-					</button>
 					<Link
 						href="/admin/package/create"
 						className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition"
