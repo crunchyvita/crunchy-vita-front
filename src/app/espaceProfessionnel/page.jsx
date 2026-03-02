@@ -1,27 +1,97 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/header';
-import { useTranslations } from 'next-intl';
-import { categoryAPI } from '@/lib/api';
+import { useLocale, useTranslations } from 'next-intl';
+import { categoryAPI, productAPI } from '@/lib/api';
 import { Search, ChevronDown, Check, FileText, Mail, Leaf, Truck, ShieldCheck, Factory, Coffee, ShoppingBasket, Activity } from 'lucide-react';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 const CrunchyVita = () => {
   const t = useTranslations('ProfessionalSpace');
+  const locale = useLocale();
   const [activeTab, setActiveTab] = useState('all');
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadData = async () => {
       try {
-        const res = await categoryAPI.list();
-        const list = Array.isArray(res) ? res : res?.data || [];
-        setCategories(list);
+        const [categoriesRes, productsRes] = await Promise.all([
+          categoryAPI.list(),
+          productAPI.list(),
+        ]);
+
+        const categoriesList = Array.isArray(categoriesRes) ? categoriesRes : categoriesRes?.data || [];
+        const productsList = Array.isArray(productsRes) ? productsRes : productsRes?.data || [];
+
+        setCategories(categoriesList);
+        setProducts(productsList);
       } catch (err) {
-        console.error('Failed to load categories:', err);
+        console.error('Failed to load categories/products:', err);
+      } finally {
+        setProductsLoading(false);
       }
     };
-    loadCategories();
+    loadData();
   }, []);
+
+  const getProductCategoryIds = (product) => {
+    const ids = new Set();
+
+    if (Array.isArray(product?.categoryIds)) {
+      product.categoryIds.forEach((entry) => {
+        if (!entry) return;
+        if (typeof entry === 'object' && entry._id) {
+          ids.add(String(entry._id));
+        } else {
+          ids.add(String(entry));
+        }
+      });
+    }
+
+    if (product?.categoryId) {
+      if (typeof product.categoryId === 'object' && product.categoryId._id) {
+        ids.add(String(product.categoryId._id));
+      } else {
+        ids.add(String(product.categoryId));
+      }
+    }
+
+    return Array.from(ids);
+  };
+
+  const filteredProducts = products.filter((product) => {
+    if (activeTab === 'all') return true;
+    const categoryIds = getProductCategoryIds(product);
+    return categoryIds.includes(String(activeTab));
+  });
+
+  const getProductImage = (product) => {
+    const media = Array.isArray(product?.media) ? product.media : [];
+    if (!media.length) return null;
+
+    const preferredMedia = media[2] || media[1] || media[0];
+    if (typeof preferredMedia === 'string') return preferredMedia;
+    return preferredMedia?.url || null;
+  };
+
+  const getCategoryNames = (product) => {
+    const names = new Set();
+
+    if (Array.isArray(product?.categoryIds)) {
+      product.categoryIds.forEach((entry) => {
+        if (!entry) return;
+        if (typeof entry === 'object' && entry.name) names.add(entry.name);
+      });
+    }
+
+    if (product?.categoryId && typeof product.categoryId === 'object' && product.categoryId.name) {
+      names.add(product.categoryId.name);
+    }
+
+    return Array.from(names);
+  };
 
   return (
     <div className="min-h-screen bg-[#f9f7f2] font-sans text-gray-800">
@@ -144,7 +214,68 @@ const CrunchyVita = () => {
 
         {/* Product Grid */}
         <div className="grid md:grid-cols-3 gap-6">
-         
+          {productsLoading ? (
+            <div className="md:col-span-3 text-center text-gray-500 py-6">Chargement des produits...</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="md:col-span-3 text-center text-gray-500 py-6">Aucun produit dans cette catégorie.</div>
+          ) : (
+            filteredProducts.map((product) => {
+              const imageUrl = getProductImage(product);
+              const translated = getTranslatedProduct(product, locale);
+              const categoryNames = getCategoryNames(product);
+              const productTags = Array.isArray(product?.tag) ? product.tag : [];
+              const productId = product._id || product.id;
+
+              return (
+                <div key={productId} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={translated.name || product.name}
+                      className="w-full h-40 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-gray-100" />
+                  )}
+
+                  <div className="p-4 flex flex-col gap-3">
+                    <h3 className="font-bold text-gray-800 text-[26px] leading-snug line-clamp-1">
+                      {translated.name || product.name}
+                    </h3>
+
+                    <div className="flex flex-wrap gap-2">
+                      {categoryNames.map((categoryName) => (
+                        <span
+                          key={`${productId}-${categoryName}`}
+                          className="text-[11px] font-bold px-2 py-1 rounded bg-[#eef6e6] text-[#556822] border border-[#d9e7c8]"
+                        >
+                          {categoryName}
+                        </span>
+                      ))}
+                    </div>
+
+                    <ul className="text-[12px] text-gray-600 space-y-1 min-h-[44px]">
+                      {productTags.slice(0, 2).map((item, index) => (
+                        <li key={`${productId}-tag-${index}`} className="flex items-start gap-2">
+                          <span className="text-[#556822] mt-[2px]">•</span>
+                          <span className="line-clamp-1">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="text-[13px] text-gray-700 font-medium">Formats: 100 g, 1 kg, 5 kg</p>
+
+                    <a
+                      href={`/shop/${productId}`}
+                      className="mt-1 w-full bg-[#556822] hover:bg-[#3f6e0d] text-white font-semibold text-center py-2 rounded transition-colors"
+                    >
+                      {t('products.learnMore')}
+                    </a>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 
