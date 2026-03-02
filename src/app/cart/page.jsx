@@ -187,12 +187,20 @@ export default function CartPage() {
             console.error(`Failed to fetch stock for product ${productId}:`, err);
           }
         } else {
-          // ✅ For package items: fetch and find minimum available across all selected products
-          const selectedIds = extractPackageProductIds(item);
-          if (selectedIds.length === 0) continue;
+          // ✅ For package items: validate each product considering its quantity per package
+          const selectedProducts = item.selectedProducts || [];
+          if (selectedProducts.length === 0) continue;
 
-          let minMaxQty = Infinity;
-          for (const productId of selectedIds) {
+          let minMaxAllowed = Infinity;
+          const currentPackageQty = item.quantity || 1;
+
+          for (const sp of selectedProducts) {
+            const productId = typeof sp.productId === 'string' ? sp.productId : sp.productId?._id;
+            if (!productId) continue;
+
+            const qtyPerPackage = sp.quantity || 1;
+            const currentReservedByThisPackage = currentPackageQty * qtyPerPackage;
+
             try {
               const res = await fetch(`${API_URL}/products/${productId}/stock`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -202,8 +210,13 @@ export default function CartPage() {
                 const result = await res.json();
                 const stock = result?.data || result;
                 if (stock) {
-                  const quantityTotal = Number(stock.quantity || 0);
-                  minMaxQty = Math.min(minMaxQty, quantityTotal);
+                  const available = stock.availableQuantity !== undefined 
+                    ? Number(stock.availableQuantity || 0)
+                    : Math.max(0, Number(stock.quantity || 0) - Number(stock.reservedQuantity || 0));
+                  
+                  // ✅ Calculate max packages: (available + already reserved by this package) / qty per package
+                  const maxPackagesForThisProduct = Math.floor((available + currentReservedByThisPackage) / qtyPerPackage);
+                  minMaxAllowed = Math.min(minMaxAllowed, maxPackagesForThisProduct);
                 }
               }
             } catch (err) {
@@ -211,10 +224,10 @@ export default function CartPage() {
             }
           }
 
-          if (minMaxQty !== Infinity) {
+          if (minMaxAllowed !== Infinity) {
             updates[item._id] = {
-              quantityTotal: minMaxQty,
-              availableQuantity: minMaxQty
+              quantityTotal: minMaxAllowed,
+              availableQuantity: Math.max(0, minMaxAllowed - currentPackageQty)
             };
           }
         }
@@ -389,7 +402,10 @@ export default function CartPage() {
 
                   // ✅ Use fresh stock data (fetched async) for accurate max validation
                   const stockInfo = freshStockData[item._id];
-                  const maxAllowed = stockInfo?.quantityTotal || null;
+                  // ✅ CORRECT: maxAllowed = available + current (since current is already reserved)
+                  const maxAllowed = stockInfo 
+                    ? (stockInfo.availableQuantity || 0) + currentQty
+                    : null;
 
                   // ✅ BLOCK MODE: disable + at max
                   const atMax = maxAllowed !== null && Number(currentQty) >= Number(maxAllowed);
