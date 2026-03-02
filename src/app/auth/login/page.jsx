@@ -57,9 +57,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* Colonne Gauche - Visuel (Caché sur mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-emerald-900 items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#EF8EB8] items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-emerald-900/90 z-10" />
+          <div className="absolute inset-0 bg-[#EF8EB8]/90 z-10" />
           <img 
             src="/assets/images/pic2.jpg" 
             alt="Organic Food"
@@ -70,35 +70,35 @@ export default function LoginPage() {
         <div className="relative z-20 max-w-lg">
           <div className="flex flex-col items-center mb-8">
             <div className="p-3 backdrop-blur-md rounded-2xl border border-white/20">
-              <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-40 w-40" />
+              <img src="/assets/images/logo.png" alt="Crunchy Vita Logo" className="h-40 w-40" />
             </div>
           </div>
           <h2 className="text-5xl font-bold text-white leading-tight mb-6">
             Essayez, <br /> 
-            <span className="text-emerald-400"> vous allez adorer.</span>
+            <span className="text-white"> vous allez adorer.</span>
           </h2>
-          <p className="text-emerald-100/80 text-lg leading-relaxed">
+          <p className="text-white/80 text-lg leading-relaxed">
                 Rejoignez-nous pour des produits sans additifs, sans sucres ajoutés, 100% bio et naturels.
           </p>
         </div>
         
         {/* Décoration abstraite */}
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Colonne Droite - Formulaire */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16">
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden flex flex-col items-center">
-             <div className="w-24 h-24 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
+             <div className="w-24 h-24 bg-[#EF8EB8] rounded-xl flex items-center justify-center mb-4">
                <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
              </div>
-             <h1 className="text-2xl font-bold text-slate-900">Crunchy Vita</h1>
+             <h1 className="text-2xl font-bold text-[#556822]">Crunchy Vita</h1>
           </div>
 
           <div className="mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Bon retour !</h2>
-            <p className="text-slate-500 mt-2">
+            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">Bon retour !</h2>
+            <p className="text-[#556822] mt-2">
               Ravi de vous revoir. Connectez-vous à votre compte.
             </p>
           </div>
@@ -112,9 +112,9 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Email</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">Email</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Mail size={18} />
                 </div>
                 <input
@@ -122,7 +122,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="nom@exemple.com"
                 />
               </div>
@@ -130,13 +130,13 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-medium text-slate-700">Mot de passe</label>
-                <Link href="/auth/forgot-password" size="sm" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                <label className="text-sm font-medium text-[#556822]">Mot de passe</label>
+                <Link href="/auth/forgot-password" size="sm" className="text-xs font-semibold text-[#556822] hover:text-[#3F4F18] transition-colors">
                   Oublié ?
                 </Link>
               </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Lock size={18} />
                 </div>
                 <input
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="••••••••"
                 />
                 <button
@@ -161,7 +161,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-200 hover:shadow-emerald-300 active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] disabled:bg-[#F5B9D1] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-[#EF8EB8]/30 hover:shadow-[#E10C69]/30 active:scale-[0.98]"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Se connecter'}
               {!loading && <ArrowRight size={18} />}
@@ -171,7 +171,7 @@ export default function LoginPage() {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-slate-500 font-medium">Ou continuer avec</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">Ou continuer avec</span></div>
             </div>
 
             <button
@@ -189,9 +189,9 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <p className="mt-10 text-center text-slate-500 text-sm">
+          <p className="mt-10 text-center text-[#556822] text-sm">
             Nouveau sur CrunchyVita ?{' '}
-            <Link href="/auth/register" className="font-bold text-emerald-600 hover:text-emerald-700 underline-offset-4 hover:underline transition-all">
+            <Link href="/auth/register" className="font-bold text-[#556822] hover:text-[#3F4F18] underline-offset-4 hover:underline transition-all">
               Créer un compte
             </Link>
           </p>

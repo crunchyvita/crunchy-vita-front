@@ -1,33 +1,58 @@
 // src/app/shop/[id]/page.jsx
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { motion } from 'framer-motion';
 import {
   Star, Heart, ShoppingCart, Plus, Minus, Package, Send, MessageSquare,
-  Trash2, Loader2, AlertTriangle, RefreshCw, User, Clock
+  Trash2, Loader2, AlertTriangle, RefreshCw, User, Clock, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { reviewAPI } from '@/lib/api';
+import { usePackStorage } from '@/hooks/usePackStorage';
+import { useCart } from '@/hooks/useCart';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
+import AddedToCartModal from '@/components/AddedToCartModal';
+import { useTranslations, useLocale } from 'next-intl';
+import { getTranslatedProduct } from '@/lib/productTranslations';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('ProductDetail');
+  const locale = useLocale();
+  const { addToCart } = useCart();
+  const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
+    ? rawApiBaseUrl.replace(/\/$/, '')
+    : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
 
   const [searchParams, setSearchParams] = useState({});
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const addCooldownUntilRef = useRef(0);
+  const quantityPlusCooldownRef = useRef(0);
+  const translatedProduct = getTranslatedProduct(product, locale);
+  const productName = translatedProduct.name;
+  const productDescription = translatedProduct.description;
 
   // ✅ IMPORTANT: error doit être remis à null avant chaque fetch
   const [error, setError] = useState(null);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showStockAlert, setShowStockAlert] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [cartModalProduct, setCartModalProduct] = useState(null);
+  const [cartModalQuantity, setCartModalQuantity] = useState(1);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '', isAnonymous: false });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -47,6 +72,8 @@ export default function ProductDetailPage() {
 
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+
+  const { savePackConfig, loadPackConfig, isStorageReady } = usePackStorage(searchParams.packageId);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -72,6 +99,37 @@ export default function ProductDetailPage() {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.id]);
+
+  useEffect(() => {
+    if (!user || !product?._id) {
+      setIsFavorite(false);
+      return;
+    }
+
+    const loadFavorites = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${apiBaseUrl}/users/favorites`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (!response.ok) return;
+
+        const favorites = result.data || [];
+        const isFav = favorites.some((fav) => fav._id === product._id);
+        setIsFavorite(isFav);
+      } catch (err) {
+        console.error('Failed to load favorites:', err);
+      }
+    };
+
+    loadFavorites();
+  }, [user, product?._id]);
 
   // Auto-scroll to moderated comment when in moderation mode
   useEffect(() => {
@@ -107,12 +165,11 @@ export default function ProductDetailPage() {
       if (!response.ok) {
         const text = await response.text().catch(() => '');
         console.error('[Product Detail] API error body:', text?.substring?.(0, 300));
-        throw new Error(`Product not found (${response.status})`);
+        throw new Error(`${t('errors.productNotFound')} (${response.status})`);
       }
 
       let rawData = await response.json();
-      console.log('[Product Detail] RAW Response:', rawData);
-      console.log('[Product Detail] Response keys:', rawData ? Object.keys(rawData) : 'no keys');
+
       
       // ✅ FIX: Unwrap {success: true, data: {...}} format from backend
       let data = rawData;
@@ -121,18 +178,11 @@ export default function ProductDetailPage() {
         data = rawData.data;
       }
       
-      console.log('[Product Detail] Product data after unwrap:', data);
-      console.log('[Product Detail] Data type:', typeof data);
-      console.log('[Product Detail] Data keys:', data ? Object.keys(data) : 'no keys');
-      console.log('[Product Detail] Has _id?', !!data?._id);
-      console.log('[Product Detail] Product name:', data?.name);
-      console.log('[Product Detail] Product description:', data?.description);
-      console.log('[Product Detail] Product pricingHistory:', data?.pricingHistory);
-      console.log('[Product Detail] Product stock:', data?.stock);
+
       
       if (!data || !data._id) {
         console.error('[Product Detail] ❌ Invalid data structure - missing _id!');
-        throw new Error('Invalid product data received');
+        throw new Error(t('errors.invalidProductData'));
       }
 
       console.log('[Product Detail] ✅ Setting product with valid data');
@@ -157,7 +207,7 @@ export default function ProductDetailPage() {
     } catch (err) {
       console.error('[Product Detail] Error:', err);
       setProduct(null); // ✅ propre
-      setError(err.message || 'Product not found');
+      setError(err.message || t('errors.productNotFound'));
     } finally {
       setLoading(false);
     }
@@ -223,6 +273,10 @@ export default function ProductDetailPage() {
   }, [product]);
 
   const incrementQuantity = () => {
+    const now = Date.now();
+    if (now < quantityPlusCooldownRef.current) return;
+    quantityPlusCooldownRef.current = now + 500;
+
     if (quantity < availableStock) setQuantity(quantity + 1);
   };
 
@@ -230,16 +284,107 @@ export default function ProductDetailPage() {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (searchParams.packageId) {
+      if (!isStorageReady || !product?._id) {
+        router.push(`/shop/packages/${searchParams.packageId}`);
+        return;
+      }
+
+      const existingConfig = loadPackConfig() || {};
+      const existingSelected = Array.isArray(existingConfig.selectedProducts)
+        ? existingConfig.selectedProducts
+        : [];
+      const selectedSet = new Set(existingSelected);
+      selectedSet.add(product._id);
+
+      const nextQuantities = {
+        ...(existingConfig.quantities || {}),
+        [product._id]: quantity,
+      };
+
+      savePackConfig({
+        selectedProducts: Array.from(selectedSet),
+        quantities: nextQuantities,
+        packageData: existingConfig.packageData,
+      });
+
       router.push(`/shop/packages/${searchParams.packageId}`);
       return;
     }
-    // TODO: cart
+    
+    // Add to real cart system
+    if (!product || !product._id) return;
+
+    const now = Date.now();
+    if (now < addCooldownUntilRef.current) return;
+    addCooldownUntilRef.current = now + 1000;
+    
+    const ok = await addToCart({
+      ...product,
+      price: productPrice
+    }, quantity);
+
+    if (!ok) {
+      setShowStockAlert(true);
+      setTimeout(() => setShowStockAlert(false), 3000);
+      return;
+    }
+    
+    setAddedToCart(true);
+    
+    // Show cart modal instead of redirecting
+    setCartModalProduct({
+      ...product,
+      name: productName,
+      price: productPrice,
+      image: productImages[0]
+    });
+    setCartModalQuantity(quantity);
+    setShowCartModal(true);
+    setQuantity(1);
   };
 
-  const handleAddToWishlist = () => {
-    // TODO
+  const handleAddToWishlist = async () => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!product?._id) return;
+
+    try {
+      setFavoritesLoading(true);
+      const token = localStorage.getItem('token');
+
+      if (isFavorite) {
+        const response = await fetch(`${apiBaseUrl}/users/favorites/${product._id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to remove favorite');
+        setIsFavorite(false);
+      } else {
+        const response = await fetch(`${apiBaseUrl}/users/favorites`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId: product._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to add favorite');
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFavoritesLoading(false);
+    }
   };
 
   const getAllReviews = () => {
@@ -297,11 +442,11 @@ export default function ProductDetailPage() {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const months = [
-      'January','February','March','April','May','June',
-      'July','August','September','October','November','December'
-    ];
-    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const handleSubmitReview = async (e) => {
@@ -313,19 +458,19 @@ export default function ProductDetailPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setReviewError('Veuillez vous connecter pour soumettre un avis');
+        setReviewError(t('errors.loginRequired'));
         return;
       }
 
       const { rating, comment, isAnonymous } = reviewForm;
 
       if (!rating && (!comment || !comment.trim())) {
-        setReviewError('Veuillez fournir une note ou un commentaire (ou les deux)');
+        setReviewError(t('errors.reviewRequired'));
         return;
       }
 
       if (rating && (rating < 1 || rating > 5)) {
-        setReviewError('La note doit être entre 1 et 5');
+        setReviewError(t('errors.ratingRange'));
         return;
       }
 
@@ -337,7 +482,7 @@ export default function ProductDetailPage() {
       });
 
       if (!data || data.error) {
-        throw new Error(data?.message || "Échec de la soumission de l'avis");
+        throw new Error(data?.message || t('errors.submitFailed'));
       }
 
       const result = data.data || data;
@@ -385,10 +530,10 @@ export default function ProductDetailPage() {
         return { ...prev, ratings: updatedRatings, comments: updatedComments };
       });
 
-      setReviewSuccess("Avis envoyé avec succès !");
+      setReviewSuccess(t('success.submitted'));
       setTimeout(() => setReviewSuccess(''), 5000);
     } catch (err) {
-      setReviewError(err.message || "Échec de la soumission de l'avis");
+      setReviewError(err.message || t('errors.submitFailed'));
       console.error('Error submitting review:', err);
     } finally {
       setSubmittingReview(false);
@@ -482,12 +627,12 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 text-xl mb-4">{error || 'Produit non trouvé'}</p>
+          <p className="text-red-600 text-xl mb-4">{error || t('errors.productNotFound')}</p>
           <button
             onClick={() => router.push('/shop')}
             className="px-6 py-3 bg-[#469165] text-white rounded-lg hover:bg-[#3a7a4a] transition-colors"
           >
-            Retour à la boutique
+            {t('buttons.backToShop')}
           </button>
         </div>
       </div>
@@ -510,14 +655,14 @@ export default function ProductDetailPage() {
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 font-maison-neue-book">
           <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            Boutique
+            {t('breadcrumb.shop')}
           </button>
           <span>/</span>
           <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            Tous les produits
+            {t('breadcrumb.allProducts')}
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-maison-neue-bold">{product.name}</span>
+          <span className="text-gray-900 font-maison-neue-bold">{productName}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -527,7 +672,7 @@ export default function ProductDetailPage() {
               {productImages.length > 0 ? (
                 <img
                   src={productImages[selectedImageIndex]}
-                  alt={product.name}
+                  alt={productName}
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.src = '/assets/images/placeholder.png';
@@ -552,7 +697,7 @@ export default function ProductDetailPage() {
                         : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <img src={img} alt={`${product.name} - Image ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`${productName} - Image ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -563,7 +708,7 @@ export default function ProductDetailPage() {
           <div className="space-y-6">
             <div>
               <h1 className="text-5xl font-[Agrandir] text-[#556822] mb-3">
-                {product.name}
+                {productName}
               </h1>
 
               {(() => {
@@ -600,11 +745,11 @@ export default function ProductDetailPage() {
             <div>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-[Agrandir] font-bold text-[#E10c69]">
-                  ${productPrice.toFixed(2)}
+                  €{productPrice.toFixed(2)}
                 </span>
                 {product.originalPrice && Number(product.originalPrice) > productPrice && (
                   <span className="text-sm text-gray-400 line-through">
-                    ${Number(product.originalPrice).toFixed(2)}
+                    €{Number(product.originalPrice).toFixed(2)}
                   </span>
                 )}
               </div>
@@ -612,12 +757,18 @@ export default function ProductDetailPage() {
 
             <div>
               <p className="text-gray-600 leading-relaxed font-[maison-neue-book]">
-                {product.description || 'Aucune description disponible.'}
+                {productDescription || t('descriptionFallback')}
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">Quantité</h3>
+              <h3 className="text-sm font-maison-neue-bold text-gray-900 mb-3">{t('quantity.label')}</h3>
+              {showStockAlert && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
+                  <AlertCircle size={18} />
+                  <span>{t('quantity.maxReached')}</span>
+                </div>
+              )}
               <div className="flex items-center gap-4">
                 <div className="flex items-center border-2 border-gray-300 rounded-lg">
                   <button
@@ -631,18 +782,24 @@ export default function ProductDetailPage() {
                     {quantity}
                   </span>
                   <button
-                    onClick={incrementQuantity}
-                    disabled={quantity >= availableStock}
-                    className="p-3 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    onClick={() => {
+                      if (quantity >= availableStock) {
+                        setShowStockAlert(true);
+                        setTimeout(() => setShowStockAlert(false), 3000);
+                      } else {
+                        setQuantity(quantity + 1);
+                      }
+                    }}
+                    className="p-3 hover:bg-gray-100 transition-colors"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="text-lg">
-                  <span className="text-gray-600 font-[maison-neue-book]">Total: </span>
+                  <span className="text-gray-600 font-[maison-neue-book]">{t('total.label')} </span>
                   <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
-                    ${totalPrice.toFixed(2)}
+                    €{totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -651,22 +808,31 @@ export default function ProductDetailPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
-                disabled={availableStock === 0}
-                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold text-[#556822] hover:text-white transition-colors ${
+                disabled={availableStock === 0 || addedToCart}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold transition-colors ${
                   availableStock === 0
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-[#F2F8EE] hover:bg-[#556822]'
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : addedToCart
+                    ? 'bg-[#556822] text-white'
+                    : 'bg-[#F2F8EE] text-[#556822] hover:text-white hover:bg-[#556822]'
                 }`}
               >
-                {searchParams.packageId ? (
+                {addedToCart ? (
+                  <>
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {t('messages.addedToCart')}
+                  </>
+                ) : searchParams.packageId ? (
                   <>
                     <Package className="h-5 w-5" />
-                    {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au pack'}
+                    {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToPack')}
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="h-5 w-5" />
-                    {availableStock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                    {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToCart')}
                   </>
                 )}
               </button>
@@ -674,10 +840,15 @@ export default function ProductDetailPage() {
               {!searchParams.packageId && (
                 <button
                   onClick={handleAddToWishlist}
-                  className="px-6 py-4 border-2 border-red-500 text-red-500 rounded-lg font-agrandir font-semibold hover:bg-red-50 transition-colors"
-                  title="Ajouter aux favoris"
+                  disabled={favoritesLoading}
+                  className={`px-6 py-4 border-2 rounded-lg font-agrandir font-semibold transition-colors ${
+                    isFavorite
+                      ? 'border-red-500 bg-red-500 text-white hover:bg-red-600'
+                      : 'border-red-500 text-red-500 hover:bg-red-50'
+                  } ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  title={isFavorite ? 'Retirer des favoris' : t('buttons.addToWishlist')}
                 >
-                  <Heart className="h-6 w-6" />
+                  <Heart className={`h-6 w-6 ${isFavorite ? 'fill-white' : ''}`} />
                 </button>
               )}
             </div>
@@ -689,10 +860,10 @@ export default function ProductDetailPage() {
           <div className="mt-16 border-t border-gray-200 pt-16">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
-                Du fruit frais au fruit lyophilisé
+                {t('comparison.title')}
               </h2>
               <p className="text-gray-600 font-maison-neue-book">
-                Découvrez la transformation de nos fruits
+                {t('comparison.subtitle')}
               </p>
             </div>
 
@@ -708,9 +879,9 @@ export default function ProductDetailPage() {
             >
               {/* Fresh Fruit Image */}
               <div className="absolute inset-0">
-                <img src={freshImg} alt="Fruit frais" className="w-full h-full object-cover" draggable="false" />
+                <img src={freshImg} alt={t('comparison.freshAlt')} className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Frais</span>
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.freshLabel')}</span>
                 </div>
               </div>
 
@@ -719,9 +890,9 @@ export default function ProductDetailPage() {
                 className={`absolute inset-0 ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
                 style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
               >
-                <img src={lyoImg} alt="Fruit lyophilisé" className="w-full h-full object-cover" draggable="false" />
+                <img src={lyoImg} alt={t('comparison.lyoAlt')} className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">Fruit Lyophilisé</span>
+                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.lyoLabel')}</span>
                 </div>
               </div>
 
@@ -743,7 +914,7 @@ export default function ProductDetailPage() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                     </svg>
-                    Glissez pour comparer
+                    {t('comparison.slide')}
                   </span>
                 </div>
               )}
@@ -754,7 +925,7 @@ export default function ProductDetailPage() {
         {/* Reviews Section (inchangé à part les fonctions déjà présentes) */}
         <div className="mt-16 border-t border-gray-200 pt-8">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-2xl font-agrandir font-bold text-gray-900">Avis clients</h2>
+            <h2 className="text-2xl font-agrandir font-bold text-gray-900">{t('reviews.title')}</h2>
             <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-maison-neue-bold">
               {product.comments?.length || 0}
             </span>
@@ -763,7 +934,7 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[450px_1fr] gap-8">
             {user && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-20">
-                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">Écrire un avis</h3>
+                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">{t('reviews.writeTitle')}</h3>
                 <form onSubmit={handleSubmitReview} className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2">
@@ -790,7 +961,7 @@ export default function ProductDetailPage() {
                     <textarea
                       value={reviewForm.comment}
                       onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                      placeholder="Qu'avez-vous pensé de la qualité ?"
+                      placeholder={t('reviews.placeholder')}
                       rows="5"
                       className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#064E3B] focus:outline-none resize-none"
                     />
@@ -801,10 +972,10 @@ export default function ProductDetailPage() {
                       <User className={`h-5 w-5 transition-colors ${reviewForm.isAnonymous ? 'text-gray-400' : 'text-[#064E3B]'}`} />
                       <div>
                         <label htmlFor="anonymous-toggle" className="text-sm font-maison-neue-bold text-gray-900 cursor-pointer block">
-                          Publier en anonyme
+                          {t('reviews.anonymous.label')}
                         </label>
                         <p className="text-xs text-gray-500 mt-0.5 font-maison-neue-book">
-                          {reviewForm.isAnonymous ? 'Votre nom sera masqué' : 'Votre nom sera visible'}
+                          {reviewForm.isAnonymous ? t('reviews.anonymous.hidden') : t('reviews.anonymous.visible')}
                         </p>
                       </div>
                     </div>
@@ -851,12 +1022,12 @@ export default function ProductDetailPage() {
                     {submittingReview ? (
                       <>
                         <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Envoi en cours...</span>
+                        <span>{t('reviews.submitting')}</span>
                       </>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        <span>Publier l'avis</span>
+                        <span>{t('reviews.submit')}</span>
                       </>
                     )}
                   </button>
@@ -882,9 +1053,9 @@ export default function ProductDetailPage() {
                   return (
                     <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                       <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 font-maison-neue-bold">Aucun avis pour le moment</p>
+                      <p className="text-gray-600 font-maison-neue-bold">{t('reviews.emptyTitle')}</p>
                       <p className="text-sm text-gray-500 mt-2 font-maison-neue-book">
-                        {user ? 'Soyez le premier à donner votre avis !' : 'Connectez-vous pour laisser un avis'}
+                        {user ? t('reviews.emptySubtitleLoggedIn') : t('reviews.emptySubtitleLoggedOut')}
                       </p>
                     </div>
                   );
@@ -893,7 +1064,9 @@ export default function ProductDetailPage() {
                 return (
                   <div className="space-y-2">
                     {displayedReviews.map((review) => {
-                      const userName = review.isAnonymous ? 'Anonymous' : (review.userId?.name || 'Anonymous');
+                      const userName = review.isAnonymous
+                        ? t('reviews.anonymousName')
+                        : (review.userId?.name || t('reviews.anonymousName'));
                       const isOwnComment = user && review.userId?._id?.toString() === user.id?.toString();
 
                       return (
@@ -974,7 +1147,7 @@ export default function ProductDetailPage() {
                           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-maison-neue-bold text-sm transition-colors group"
                         >
                           <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
-                          Voir plus d'avis
+                          {t('reviews.loadMore')}
                         </button>
                       </div>
                     )}
@@ -995,9 +1168,9 @@ export default function ProductDetailPage() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-1">Supprimer votre avis ?</h3>
+              <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-1">{t('delete.title')}</h3>
               <p className="text-sm text-gray-500 leading-relaxed font-maison-neue-book">
-                Cette action est permanente. Votre avis sera définitivement supprimé.
+                {t('delete.description')}
               </p>
             </div>
             <div className="flex border-t border-gray-100">
@@ -1008,19 +1181,31 @@ export default function ProductDetailPage() {
                 }}
                 className="flex-1 px-4 py-4 text-sm font-maison-neue-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
               >
-                Annuler
+                {t('delete.cancel')}
               </button>
               <button
                 onClick={confirmDeleteComment}
                 disabled={deletingCommentId === commentToDelete}
                 className="flex-1 px-4 py-4 text-sm font-agrandir font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
               >
-                {deletingCommentId === commentToDelete ? 'Suppression...' : 'Supprimer'}
+                {deletingCommentId === commentToDelete ? t('delete.deleting') : t('delete.confirm')}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Added to Cart Modal */}
+      <AddedToCartModal
+        isOpen={showCartModal}
+        onClose={() => {
+          setShowCartModal(false);
+          setCartModalProduct(null);
+          setAddedToCart(false);
+        }}
+        product={cartModalProduct}
+        quantity={cartModalQuantity}
+      />
     </div>
   );
 }

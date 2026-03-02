@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import {
-	Download,
 	MoreVertical,
 	Plus,
 	Search,
@@ -131,13 +131,12 @@ export default function PackagesPage() {
 				</div>
 
 				<div className="flex items-center gap-3">
-					<button className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-						<Download className="h-4 w-4" />
-						Download
-					</button>
 					<Link
 						href="/admin/package/create"
-						className="flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+						className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition"
+						style={{backgroundColor: '#556622'}}
+						onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+						onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
 					>
 						<Plus className="h-4 w-4" />
 						Create Package
@@ -169,7 +168,7 @@ export default function PackagesPage() {
 					<table className="min-w-full">
 						<tbody>
 							<tr>
-								<td colSpan={6} className="py-20 text-center">
+								<td colSpan={7} className="py-20 text-center">
 									<div className="flex flex-col items-center gap-2">
 										<Box className="h-10 w-10 text-slate-200" />
 										<p className="font-bold text-slate-400">No packages found</p>
@@ -186,9 +185,11 @@ export default function PackagesPage() {
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
 										Package Name
 									</th>
-									
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Max Products
+										Type
+									</th>
+									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+										Products
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
 										Discount
@@ -220,11 +221,16 @@ export default function PackagesPage() {
 												)}
 											</div>
 										</td>
-										
 										<td className="px-4 py-3 text-sm text-slate-600">
-											{pkg.allowAllProducts ? (
-												<span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700">
-													All products
+											<span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${(pkg.packageType || "CUSTOM") === "FIXED" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
+												{(pkg.packageType || "CUSTOM") === "FIXED" ? "Fixed" : "Custom"}
+											</span>
+										</td>
+
+										<td className="px-4 py-3 text-sm text-slate-600">
+											{pkg.packageType === "FIXED" ? (
+												<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+													{pkg.products?.length || 0} items
 												</span>
 											) : (
 												<span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
@@ -301,30 +307,14 @@ export default function PackagesPage() {
 				)}
 			</div>
 
-			{deleteConfirm && (
-			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-					<div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
-						<h3 className="text-lg font-semibold text-slate-900">Delete Package?</h3>
-						<p className="mt-2 text-sm text-slate-600">
-							Are you sure you want to delete this package? This action cannot be undone.
-						</p>
-						<div className="mt-6 flex justify-end gap-3">
-							<button
-								onClick={() => setDeleteConfirm(null)}
-								className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={() => handleDelete(deleteConfirm)}
-								className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm"
-							>
-								Delete
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<DeleteConfirmationModal
+				isOpen={!!deleteConfirm}
+				onClose={() => setDeleteConfirm(null)}
+				onConfirm={() => handleDelete(deleteConfirm)}
+				title="Delete Package"
+				itemName={packages.find(p => p._id === deleteConfirm)?.name}
+				isDeleting={false}
+			/>
 		</div>
 		</>
 	);

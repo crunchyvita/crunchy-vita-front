@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { Trash2, Edit, Plus, AlertCircle } from "lucide-react";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -87,7 +88,10 @@ export default function BlogsPage() {
           <p className="text-gray-600 mt-2">Manage your blog posts</p>
         </div>
         <Link href="/admin/blogs/create">
-          <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-2">
+          <button className="text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Plus className="h-4 w-4" />
             Create Blog Post
           </button>
@@ -108,7 +112,10 @@ export default function BlogsPage() {
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No blog posts yet</p>
             <Link href="/admin/blogs/create">
-              <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">
+              <button className="text-white px-4 py-2 rounded-lg transition"
+                style={{backgroundColor: '#556622'}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
                 Create your first blog post
               </button>
             </Link>
@@ -167,32 +174,14 @@ export default function BlogsPage() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-md mx-4 border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900">Delete Blog Post?</h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Are you sure you want to delete this blog post? This action cannot be undone.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                disabled={deleting}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => handleDelete(deleteConfirm)}
+        title="Delete Blog Post"
+        itemName={blogs.find(b => b._id === deleteConfirm)?.title}
+        isDeleting={deleting}
+      />
     </div>
     </>
   );

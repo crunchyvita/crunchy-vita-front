@@ -23,6 +23,7 @@ async function apiRequest(endpoint, options = {}) {
 
   const config = {
     ...options,
+    credentials: 'include', // CRITICAL: Include cookies (guestId, session)
     headers: {
       ...defaultHeaders,
       ...options.headers,
@@ -169,8 +170,10 @@ export const productAPI = {
     formData.append("price", payload.price);
     formData.append("stock", payload.stock);
     
-    // Category can be either ID or name
-    if (payload.category) {
+    // Categories can be IDs and/or names
+    if (Array.isArray(payload.categoryIds) && payload.categoryIds.length > 0) {
+      formData.append("categoryIds", JSON.stringify(payload.categoryIds));
+    } else if (payload.category) {
       formData.append("category", payload.category);
     }
     
@@ -302,12 +305,9 @@ export const categoryAPI = {
 
   // Update category (admin)
   update: async (id, payload) => {
-    const formData = new FormData();
-    formData.append("name", payload.name);
-
     return apiRequest(`/categories/${id}`, {
       method: "PUT",
-      body: formData,
+      body: JSON.stringify({ name: payload.name }),
     });
   },
 
@@ -340,61 +340,52 @@ export const stockAPI = {
       method: "PUT",
       body: JSON.stringify({ quantity, type }),
     }),
+
+  // Reserve stock for cart
+  reserve: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/reserve`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
+
+  // Release reserved stock (cart removal)
+  release: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/release`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
+
+  // Finalize reserved stock (checkout)
+  finalize: async (productId, quantity) =>
+    apiRequest(`/products/${productId}/stock/finalize`, {
+      method: "POST",
+      body: JSON.stringify({ quantity }),
+    }),
 };
 
 // Contact/Message API functions
 export const messageAPI = {
-  // Get all messages (admin only)
-  list: async () => apiRequest("/contact", { method: "GET" }),
+  list: async () => apiRequest('/contact', { method: 'GET' }),
 
-  // Get a single message by ID (admin only)
-  getById: async (id) => apiRequest(`/contact/${id}`, { method: "GET" }),
+  getById: async (id) => apiRequest(`/contact/${id}`, { method: 'GET' }),
 
-  // Update message status (admin only)
   updateStatus: async (id, status) =>
     apiRequest(`/contact/${id}`, {
-      method: "PUT",
+      method: 'PUT',
       body: JSON.stringify({ status }),
     }),
 
-  // Delete message (admin only)
-  delete: async (id) => apiRequest(`/contact/${id}`, { method: "DELETE" }),
+  delete: async (id) => apiRequest(`/contact/${id}`, { method: 'DELETE' }),
 
-  // Reply to message (admin only)
   reply: async (id, replyMessage) =>
     apiRequest(`/contact/${id}/reply`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ message: replyMessage }),
     }),
 
-  // Send client reply email
-  sendClientReplyEmail: async (name, email, clientMessage, replyMessage) => {
-    try {
-      const response = await fetch('/api/emails/send-client-reply', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          clientMessage,
-          replyMessage,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send email');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error sending client reply email:', error);
-      throw error;
-    }
-  },
+ 
 };
+
 
 // Notification API functions
 export const notificationAPI = {

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { stockAPI } from "@/lib/api";
 import AdminHeader from "@/components/admin/header";
-import { Search, Edit2, AlertCircle, Package, AlertTriangle, CheckCircle2, Download, MoreVertical } from "lucide-react";
+import { Search, Edit2, AlertCircle, Package, AlertTriangle, CheckCircle2, MoreVertical } from "lucide-react";
 
 export default function StockPage() {
   const [stocks, setStocks] = useState([]);
@@ -54,12 +54,6 @@ export default function StockPage() {
             </span>
           </div>
           <p className="text-sm text-slate-500">Manage and track your product stock levels in real-time.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-            <Download className="h-4 w-4" />
-            Export Excel
-          </button>
         </div>
       </div>
 

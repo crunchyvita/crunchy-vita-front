@@ -11,6 +11,7 @@ const usePasswordReset = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [isTokenExpired, setIsTokenExpired] = useState(false);
 
   /**
    * Send password reset email
@@ -61,6 +62,7 @@ const usePasswordReset = () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setIsTokenExpired(false);
 
     try {
       // Validate inputs
@@ -99,6 +101,12 @@ const usePasswordReset = () => {
         err.response?.data?.message ||
         err.message ||
         'Failed to reset password';
+      
+      // Check if token is expired
+      if (errorMessage.includes('expired') || errorMessage.includes('Invalid or expired reset token')) {
+        setIsTokenExpired(true);
+      }
+      
       setError(errorMessage);
       setLoading(false);
       return false;
@@ -173,6 +181,7 @@ const usePasswordReset = () => {
     loading,
     error,
     success,
+    isTokenExpired,
     forgotPassword,
     resetPassword,
     updatePassword,

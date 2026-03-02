@@ -70,9 +70,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* Colonne Gauche - Visuel (Identique au Login pour la cohérence) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-emerald-900 items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#EF8EB8] items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-emerald-900/90 z-10" />
+          <div className="absolute inset-0 bg-[#EF8EB8]/90 z-10" />
           <img 
             src="/assets/images/pic2.jpg" 
             alt="Organic Food"
@@ -83,19 +83,19 @@ export default function RegisterPage() {
         <div className="relative z-20 max-w-lg">
           <div className="flex flex-col items-center mb-8">
             <div className="p-3 backdrop-blur-md rounded-2xl border border-white/20">
-              <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-40 w-40" />
+              <img src="/assets/images/logo.png" alt="Crunchy Vita Logo" className="h-40 w-40" />
             </div>
           </div>
           <h2 className="text-5xl font-bold text-white leading-tight mb-6">
             Changez de snack, <br /> 
-            <span className="text-emerald-400">  changez d'énergie.</span>
+            <span className="text-white">  changez d'énergie.</span>
           </h2>
-          <p className="text-emerald-100/80 text-lg leading-relaxed">
+          <p className="text-white text-lg leading-relaxed">
             Créez un compte gratuitement et accédez à une sélection exclusive de produits 100% naturels et bio.
           </p>
         </div>
         
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Colonne Droite - Formulaire */}
@@ -103,15 +103,15 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Logo Mobile */}
           <div className="mb-8 lg:hidden flex flex-col items-center">
-             <div className="w-24 h-24 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
+             <div className="w-24 h-24 bg-[#EF8EB8] rounded-xl flex items-center justify-center mb-4">
                <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
              </div>
-             <h1 className="text-2xl font-bold text-slate-900">Crunchy Vita</h1>
+             <h1 className="text-2xl font-bold text-[#556822]">Crunchy Vita</h1>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Créer un compte</h2>
-            <p className="text-slate-500 mt-2">
+            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">Créer un compte</h2>
+            <p className="text-[#556822] mt-2">
               Rejoignez notre communauté de passionnés du bio.
             </p>
           </div>
@@ -126,9 +126,9 @@ export default function RegisterPage() {
 
             {/* Nom Complet */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Nom complet</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">Nom complet</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <User size={18} />
                 </div>
                 <input
@@ -136,7 +136,7 @@ export default function RegisterPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="Jean Dupont"
                 />
               </div>
@@ -144,9 +144,9 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Email</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">Email</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Mail size={18} />
                 </div>
                 <input
@@ -154,7 +154,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="nom@exemple.com"
                 />
               </div>
@@ -162,9 +162,9 @@ export default function RegisterPage() {
 
             {/* Mot de passe */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Mot de passe</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">Mot de passe</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Lock size={18} />
                 </div>
                 <input
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="••••••••"
                 />
                 <button
@@ -188,9 +188,9 @@ export default function RegisterPage() {
 
             {/* Confirmer mot de passe */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 ml-1">Confirmer le mot de passe</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">Confirmer le mot de passe</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Lock size={18} />
                 </div>
                 <input
@@ -198,7 +198,7 @@ export default function RegisterPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                  className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
                   placeholder="••••••••"
                 />
                 <button
@@ -215,7 +215,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-200 hover:shadow-emerald-300 active:scale-[0.98] mt-4"
+              className="w-full flex items-center justify-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] disabled:bg-[#F5B9D1] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-[#EF8EB8]/30 hover:shadow-[#E10C69]/30 active:scale-[0.98] mt-4"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "S'inscrire"}
               {!loading && <ArrowRight size={18} />}
@@ -225,7 +225,7 @@ export default function RegisterPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-slate-500 font-medium">Ou continuer avec</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">Ou continuer avec</span></div>
             </div>
 
             <button
@@ -242,9 +242,9 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          <p className="mt-8 text-center text-slate-500 text-sm">
+          <p className="mt-8 text-center text-[#556822] text-sm">
             Déjà un compte ?{' '}
-            <Link href="/auth/login" className="font-bold text-emerald-600 hover:text-emerald-700 underline-offset-4 hover:underline transition-all">
+            <Link href="/auth/login" className="font-bold text-[#556822] hover:text-[#3F4F18] underline-offset-4 hover:underline transition-all">
               Se connecter
             </Link>
           </p>

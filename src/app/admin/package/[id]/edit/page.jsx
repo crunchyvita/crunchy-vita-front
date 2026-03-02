@@ -34,15 +34,25 @@ export default function EditPackagePage() {
 	const [success, setSuccess] = useState("");
 	const [imagePreview, setImagePreview] = useState("");
 	const [shouldDeleteImage, setShouldDeleteImage] = useState(false);
+	const [allProducts, setAllProducts] = useState([]);
+	const [fixedProducts, setFixedProducts] = useState([]);
+	const [selectedProductId, setSelectedProductId] = useState("");
 	const [formData, setFormData] = useState({
 		name: "",
 		description: "",
+		packageType: "CUSTOM",
 		minProducts: 1,
 		maxProducts: 5,
 		allowMultipleQuantities: false,
 		isActive: true,
 		discountPercentage: 0
 	});
+
+	const getProductImageUrl = (product) => {
+		if (!product) return null;
+		const url = product.imageUrl || product.image || product.productImage || (product.media?.[0]?.url || product.media?.[0]);
+		return (!url || url === "undefined") ? null : url;
+	};
 
 	const handleInputChange = (e) => {
 		const { name, value, type, checked } = e.target;
@@ -57,6 +67,35 @@ export default function EditPackagePage() {
 			...prev,
 			allowMultipleQuantities: !prev.allowMultipleQuantities
 		}));
+	};
+
+	const handleAddFixedProduct = () => {
+		if (!selectedProductId) return;
+		if (fixedProducts.find((p) => p.productId === selectedProductId)) return;
+		const product = allProducts.find((p) => p._id === selectedProductId);
+		setFixedProducts((prev) => ([...prev, {
+			productId: selectedProductId,
+			quantity: 1,
+			productName: product?.name,
+			imageUrl: product?.imageUrl || product?.image || product?.productImage,
+			media: product?.media || [],
+		}]));
+		setSelectedProductId("");
+	};
+
+	const availableProducts = allProducts.filter(
+		(product) => !fixedProducts.some((p) => p.productId === product._id)
+	);
+
+	const handleRemoveFixedProduct = (productId) => {
+		setFixedProducts((prev) => prev.filter((p) => p.productId !== productId));
+	};
+
+	const handleFixedQuantityChange = (productId, quantity) => {
+		const normalized = Math.max(1, Number(quantity) || 1);
+		setFixedProducts((prev) => prev.map((p) => (
+			p.productId === productId ? { ...p, quantity: normalized } : p
+		)));
 	};
 
 	const handleImageChange = (e) => {
@@ -84,32 +123,49 @@ export default function EditPackagePage() {
 		setSaving(true);
 		setError("");
 		setSuccess("");
-    
+
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) {
 				throw new Error("You must be logged in to update a package");
 			}
 
+			if (formData.packageType === "FIXED" && fixedProducts.length === 0) {
+				throw new Error("Fixed packages must include at least one product");
+			}
+
 			// Prepare FormData for multipart/form-data submission
 			const formDataToSend = new FormData();
 			formDataToSend.append("name", formData.name);
 			formDataToSend.append("description", formData.description || "");
+			formDataToSend.append("packageType", formData.packageType);
 			formDataToSend.append("discountPercentage", formData.discountPercentage);
-			formDataToSend.append("maxProducts", formData.maxProducts);
-			formDataToSend.append("allowAllProducts", false); // Always false as per requirements
-		formDataToSend.append("allowMultipleQuantities", formData.allowMultipleQuantities);
-		formDataToSend.append("isActive", formData.isActive);
+			formDataToSend.append("allowAllProducts", "false"); // Always false as per requirements
 
-		// Add image only if user selected a new one
-		if (fileInputRef.current?.files?.[0]) {
-			formDataToSend.append("image", fileInputRef.current.files[0]);
-		}
+			if (formData.packageType === "CUSTOM") {
+				formDataToSend.append("minProducts", formData.minProducts);
+				formDataToSend.append("maxProducts", formData.maxProducts);
+				formDataToSend.append("allowMultipleQuantities", formData.allowMultipleQuantities);
+			} else if (formData.packageType === "FIXED") {
+				// Only send productId and quantity for each product
+				const productsToSend = fixedProducts.map((p) => ({
+					productId: p.productId,
+					quantity: p.quantity
+				}));
+				formDataToSend.append("products", JSON.stringify(productsToSend));
+			}
 
-		// Tell backend to delete image if user removed it
-		if (shouldDeleteImage && !fileInputRef.current?.files?.[0]) {
-			formDataToSend.append("deleteImage", "true");
-		}
+			formDataToSend.append("isActive", formData.isActive);
+
+			// Add image only if user selected a new one
+			if (fileInputRef.current?.files?.[0]) {
+				formDataToSend.append("image", fileInputRef.current.files[0]);
+			}
+
+			// Tell backend to delete image if user removed it
+			if (shouldDeleteImage && !fileInputRef.current?.files?.[0]) {
+				formDataToSend.append("deleteImage", "true");
+			}
 
 			const response = await fetch(`http://localhost:5000/api/packages/${packageId}`, {
 				method: "PUT",
@@ -149,12 +205,23 @@ export default function EditPackagePage() {
 					setFormData({
 						name: packageData.name || "",
 						description: packageData.description || "",
+						packageType: packageData.packageType || "CUSTOM",
 						minProducts: packageData.minProducts ?? 1,
 						maxProducts: packageData.maxProducts ?? 5,
 						allowMultipleQuantities: packageData.allowMultipleQuantities ?? false,
 						isActive: packageData.isActive ?? true,
 						discountPercentage: packageData.discountPercentage ?? 0
 					});
+					if (packageData.packageType === "FIXED") {
+						const fixed = (packageData.products || []).map((item) => ({
+							productId: item.productId?._id || item.productId,
+							quantity: item.quantity || 1,
+							productName: item.productId?.name,
+							imageUrl: item.productId?.imageUrl || item.productId?.image || item.productId?.productImage,
+							media: item.productId?.media || [],
+						}));
+						setFixedProducts(fixed);
+					}
 					if (packageData.image) {
 						setImagePreview(packageData.image);					setShouldDeleteImage(false);					}
 				} catch (err) {
@@ -166,6 +233,21 @@ export default function EditPackagePage() {
 			loadPackage();
 		}
 	}, [packageId]);
+
+	useEffect(() => {
+		const loadProducts = async () => {
+			try {
+				const response = await fetch("/api/products");
+				if (!response.ok) throw new Error("Failed to load products");
+				const result = await response.json();
+				const list = Array.isArray(result) ? result : (result.data || []);
+				setAllProducts(list.filter((p) => p.status === "ACTIVE"));
+			} catch (err) {
+				console.error("Failed to load products", err);
+			}
+		};
+		loadProducts();
+	}, []);
 
 	if (loading) {
 		return (
@@ -206,7 +288,10 @@ export default function EditPackagePage() {
 							type="submit"
 							form="package-edit-form"
 							disabled={saving}
-							className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+							className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-black text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+							style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
+							onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
+							onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
 						>
 							{saving ? (
 								<>
@@ -292,6 +377,41 @@ export default function EditPackagePage() {
 								</h2>
 							</div>
 							<div className="p-6 space-y-6">
+								<div>
+									<label className="mb-2 block text-sm font-medium text-slate-900">Package Type</label>
+									<div className="grid gap-3 sm:grid-cols-2">
+										<label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "CUSTOM" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
+											<input
+												type="radio"
+												name="packageType"
+												value="CUSTOM"
+												checked={formData.packageType === "CUSTOM"}
+												onChange={handleInputChange}
+												className="mt-1 h-4 w-4 text-emerald-600"
+											/>
+											<div>
+												<p className="text-sm font-semibold text-slate-900">Custom Package</p>
+												<p className="text-xs text-slate-500">Customers build their own selection.</p>
+											</div>
+										</label>
+										<label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "FIXED" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
+											<input
+												type="radio"
+												name="packageType"
+												value="FIXED"
+												checked={formData.packageType === "FIXED"}
+												onChange={handleInputChange}
+												className="mt-1 h-4 w-4 text-emerald-600"
+											/>
+											<div>
+												<p className="text-sm font-semibold text-slate-900">Fixed Package</p>
+												<p className="text-xs text-slate-500">Admin defines products and quantities.</p>
+											</div>
+										</label>
+									</div>
+								</div>
+
+								{formData.packageType === "CUSTOM" && (
 								<div className="grid gap-6 sm:grid-cols-2">
 									<div>
 										<label className="mb-2 block text-sm font-medium text-slate-900">
@@ -322,7 +442,9 @@ export default function EditPackagePage() {
 										/>
 									</div>
 								</div>
+							)}
 
+							{formData.packageType === "CUSTOM" && (
 								<div className="pt-4 border-t border-slate-100">
 									<label className="flex items-start gap-3 cursor-pointer">
 										<input
@@ -339,6 +461,78 @@ export default function EditPackagePage() {
 										</div>
 									</label>
 								</div>
+							)}
+
+							{formData.packageType === "FIXED" && (
+								<div className="space-y-4 border-t border-slate-100 pt-4">
+									<div className="flex items-end gap-3">
+										<div className="flex-1">
+											<label className="mb-2 block text-sm font-medium text-slate-900">Add Product</label>
+											<select
+												value={selectedProductId}
+												onChange={(e) => setSelectedProductId(e.target.value)}
+												className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
+											>
+												<option value="">Select a product...</option>
+												{availableProducts.map((product) => (
+													<option key={product._id} value={product._id}>{product.name}</option>
+												))}
+											</select>
+										</div>
+										<button
+											type="button"
+											onClick={handleAddFixedProduct}
+											className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+											style={{backgroundColor: '#556622'}}
+											onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+											onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
+										>
+											Add
+										</button>
+									</div>
+
+									{fixedProducts.length === 0 ? (
+										<div className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">
+											No products selected yet.
+										</div>
+									) : (
+										<div className="space-y-3">
+											{fixedProducts.map((item) => {
+												const product = allProducts.find((p) => p._id === item.productId) || item;
+												return (
+													<div key={item.productId} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+														<div className="h-12 w-12 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
+															{getProductImageUrl(product) ? (
+																<img src={getProductImageUrl(product)} alt={product?.name || "Product"} className="h-full w-full object-cover" />
+															) : (
+																<ImageIcon className="h-5 w-5 text-slate-300" />
+															)}
+														</div>
+														<div className="flex-1">
+															<p className="text-sm font-semibold text-slate-900">{product?.name || item.productName || "Unknown product"}</p>
+															<p className="text-xs text-slate-500">Fixed quantity</p>
+														</div>
+														<input
+															type="number"
+															min="1"
+															value={item.quantity}
+															onChange={(e) => handleFixedQuantityChange(item.productId, e.target.value)}
+															className="w-20 rounded-md border border-slate-200 px-2 py-1 text-sm"
+														/>
+														<button
+															type="button"
+															onClick={() => handleRemoveFixedProduct(item.productId)}
+															className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+														>
+															Remove
+														</button>
+													</div>
+												);
+											})}
+										</div>
+									)}
+								</div>
+							)}
 							</div>
 						</div>
 					</div>
@@ -452,9 +646,11 @@ export default function EditPackagePage() {
 							<div className="flex items-start gap-3">
 								<Info className="h-5 w-5 text-blue-600 mt-0.5" />
 								<div>
-									<h3 className="text-sm font-semibold text-blue-900">Package Template</h3>
+									<h3 className="text-sm font-semibold text-blue-900">Package Type</h3>
 									<p className="mt-1 text-xs text-blue-700 leading-relaxed">
-										You are editing a template. Customers will use this to build their own bundles based on the constraints you define here.
+										{formData.packageType === "CUSTOM"
+											? "You are editing a template. Customers will build their own bundles based on your rules."
+											: "You are editing a fixed package. Customers cannot modify the products or quantities."}
 									</p>
 								</div>
 							</div>

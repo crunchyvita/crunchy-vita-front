@@ -3,61 +3,64 @@
 import HeaderHome from '@/components/header';
 import Footer from '@/components/footer';
 import { Truck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import '../fonts.css';
 
 export default function PolitiqueLivraison() {
+  const t = useTranslations('ShippingPolicy');
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <HeaderHome />
       
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
-        <h1 className="text-5xl font-bold text-slate-900 mb-16 font-[agrandir]">Politique de Livraison pourquoi crunchy vita</h1>
+        <h1 className="text-5xl font-bold text-slate-900 mb-16 font-[agrandir]">{t('title')}</h1>
 
         {/* Préparation et expédition */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Préparation et expédition</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('preparation.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Les colis sont préparés et expédiés dans un délai de 48 heures suivant la commande (hors samedi, dimanche et jours fériés). Dès le colis est confié au transporteur, vous recevez un email de confirmation du numéro de suivi de votre colis.
+            {t('preparation.p1')}
           </p>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Un période de forte activité, le délai de préparation peut être réduit à 72 heures. La livraison est assurée par les services de Mondial Relay, qui livrent les commandes à domicile, sur le lieu de travail du Client ou en point relais.
+            {t('preparation.p2')}
           </p>
         </section>
 
         {/* En cas d'absence */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">En cas d'absence</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('absence.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Si le Client est absent au moment de la livraison, un avis de passage sera laissé au transporteur prendra contact avec lui.
+            {t('absence.p1')}
           </p>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            Le Client peut aussi laisser des instructions précisées au livreur. En cas de non-retrait du colis dans les délais impartis, celui-ci sera retourné à notre entrepôt.
+            {t('absence.p2')}
           </p>
         </section>
 
         {/* Absence d'informations ou coordonnées incomplètes */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Absence d'informations ou coordonnées incomplètes</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('missingInfo.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Le Client est tenu de fournir toutes les informations nécessaires à la bonne livraison (adresse exacte, numéro de téléphone, code d'accès, etc.).
+            {t('missingInfo.p1')}
           </p>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            En cas de manquement, notre société sera dégagée de toute responsabilité d'un défaut de livraison. Les produits seront alors retournés à notre entrepôt et le Client devra contacter le service clientèle pour convenir d'une nouvelle livraison, qui sera facturée au Client.
+            {t('missingInfo.p2')}
           </p>
         </section>
 
         {/* Problèmes de livraison */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">Problèmes de livraison</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('issues.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Les produits voyagent aux risques et périls de notre société, sauf cas particuliers.
+            {t('issues.p1')}
           </p>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
-            Le Client doit vérifier l'état du colis et le nombre de produits à la réception. Toute réserve (avarie, produit manquant, emballage endommagé) doit être mentionnée sur le bon de livraison, dont le Client doit conserver un exemplaire.
+            {t('issues.p2')}
           </p>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            Toute réclamation concernant la livraison doit être formulée dans un délai de 3 jours ouvrés suivant la réception des produits, par e-mail à :{' '}
+            {t('issues.p3')}{' '}
             <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700 font-semibold">
               contact@crunchyvita.com
             </a>
@@ -70,7 +73,7 @@ export default function PolitiqueLivraison() {
             <div className="flex items-start gap-3">
               <Truck className="text-green-600 shrink-0 mt-1" size={24} />
               <p className="text-slate-900 font-semibold">
-                🎉 Livraison offerte en France en point relais Chronopost dès 40€ d'achats !
+                {t('promo')}
               </p>
             </div>
           </div>

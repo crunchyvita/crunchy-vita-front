@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 import { productAPI, stockAPI, categoryAPI } from "@/lib/api";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 import { 
   ArrowLeft, 
   Upload, 
@@ -36,6 +37,7 @@ export default function EditProductPage() {
   const [categoryInput, setCategoryInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const autocompleteRef = useRef(null); 
 
   const [formData, setFormData] = useState({
@@ -45,8 +47,31 @@ export default function EditProductPage() {
     description: "",
     alertThreshold: 10,
     status: "ACTIVE",
-    category: "", // Stores the ID
+    categories: [],
   });
+
+  const addCategorySelection = (categoryItem) => {
+    if (!categoryItem?.name) return;
+
+    const normalizedId = String(categoryItem.id || categoryItem.name).trim();
+    const normalizedName = categoryItem.name.trim();
+    if (!normalizedId || !normalizedName) return;
+
+    setSelectedCategories((prev) => {
+      const alreadyExists = prev.some(
+        (item) =>
+          String(item.id).toLowerCase() === normalizedId.toLowerCase() ||
+          item.name.toLowerCase() === normalizedName.toLowerCase()
+      );
+
+      if (alreadyExists) return prev;
+      return [...prev, { id: normalizedId, name: normalizedName }];
+    });
+  };
+
+  const removeCategorySelection = (categoryId) => {
+    setSelectedCategories((prev) => prev.filter((item) => String(item.id) !== String(categoryId)));
+  };
 
   const loadProduct = async () => {
     try {
@@ -55,11 +80,35 @@ export default function EditProductPage() {
       const data = res.data || res;
       setProduct(data);
       
-      // 1. POPULATE FORM DATA WITH OLD CATEGORY ID
-      // categoryId can be an object { _id, name } when populated, or just an ID string
-      const categoryId = typeof data.categoryId === 'object' && data.categoryId?._id 
-        ? data.categoryId._id 
-        : (data.categoryId || data.category?._id || "");
+      const normalizedCategoryItems =
+        Array.isArray(data.categoryIds) && data.categoryIds.length > 0
+          ? data.categoryIds
+              .map((cat) => {
+                if (!cat) return null;
+                if (typeof cat === 'object') {
+                  const id = cat._id ? String(cat._id) : (cat.name ? String(cat.name) : '');
+                  const name = cat.name ? String(cat.name) : '';
+                  if (!id || !name) return null;
+                  return { id, name };
+                }
+
+                const value = String(cat).trim();
+                if (!value) return null;
+                return { id: value, name: value };
+              })
+              .filter(Boolean)
+          : (() => {
+              const legacyCategoryId = typeof data.categoryId === 'object' && data.categoryId?._id
+                ? String(data.categoryId._id)
+                : (data.categoryId ? String(data.categoryId) : '');
+
+              const legacyCategoryName = typeof data.categoryId === 'object' && data.categoryId?.name
+                ? String(data.categoryId.name)
+                : (data.category?.name ? String(data.category.name) : legacyCategoryId);
+
+              if (!legacyCategoryId && !legacyCategoryName) return [];
+              return [{ id: legacyCategoryId || legacyCategoryName, name: legacyCategoryName || legacyCategoryId }];
+            })();
       
       setFormData({
         name: data.name || "",
@@ -70,18 +119,9 @@ export default function EditProductPage() {
         description: data.description || "",
         alertThreshold: data.stock?.alertThreshold || 10,
         status: data.status || "ACTIVE",
-        category: categoryId, 
+        categories: normalizedCategoryItems.map((item) => item.id),
       });
-
-      // 2. POPULATE INPUT FIELD WITH OLD CATEGORY NAME
-      // categoryId is populated with name, so check categoryId.name
-      const categoryName = typeof data.categoryId === 'object' && data.categoryId?.name
-        ? data.categoryId.name
-        : (data.category?.name || "");
-      
-      if (categoryName) {
-        setCategoryInput(categoryName);
-      }
+      setSelectedCategories(normalizedCategoryItems);
     } catch (err) {
       setError(err.message || "Failed to load product");
     } finally {
@@ -96,12 +136,7 @@ export default function EditProductPage() {
   // Category Search with debounce
   useEffect(() => {
     const searchCategories = async () => {
-      // Don't search if the input matches the current category name (prevents redundant calls on load)
-      const currentCategoryName = typeof product?.categoryId === 'object' && product?.categoryId?.name
-        ? product.categoryId.name
-        : (product?.category?.name || "");
-      
-      if (!categoryInput.trim() || categoryInput === currentCategoryName) {
+      if (!categoryInput.trim()) {
         setSuggestions([]);
         return;
       }
@@ -114,7 +149,7 @@ export default function EditProductPage() {
     };
     const timeoutId = setTimeout(searchCategories, 300);
     return () => clearTimeout(timeoutId);
-  }, [categoryInput, product]);
+  }, [categoryInput]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -201,8 +236,7 @@ export default function EditProductPage() {
       formDataObj.append("description", formData.description || "");
       formDataObj.append("status", formData.status);
       
-      // Use the stored category ID
-      if (formData.category) formDataObj.append("categoryId", formData.category);
+      formDataObj.append("categoryIds", JSON.stringify(selectedCategories.map((item) => item.id)));
       
       const tagsArray = Array.isArray(formData.tags) 
         ? formData.tags.filter(t => t && t.trim())
@@ -263,7 +297,9 @@ export default function EditProductPage() {
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to Details
           </Link>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Edit <span className="text-green-800">{product?.name}</span></h1>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+            Edit <span className="text-green-800">{getTranslatedProduct(product, "fr").name}</span>
+          </h1>
         </div>
         
         <div className="flex items-center gap-4">
@@ -273,7 +309,11 @@ export default function EditProductPage() {
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-black text-white hover:bg-emerald-800 shadow-xl shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-black text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
+            onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
+            onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
+            disabled={saving}
           >
             {saving ? (
               <>
@@ -435,6 +475,19 @@ export default function EditProductPage() {
                     setCategoryInput(e.target.value);
                     setShowSuggestions(true);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && categoryInput.trim() && suggestions.length === 0) {
+                      e.preventDefault();
+                      addCategorySelection({ id: categoryInput.trim(), name: categoryInput.trim() });
+                      setFormData((prev) => ({
+                        ...prev,
+                        categories: [...new Set([...prev.categories, categoryInput.trim()])],
+                      }));
+                      setCategoryInput('');
+                      setSuggestions([]);
+                      setShowSuggestions(false);
+                    }
+                  }}
                   placeholder="Start typing..."
                   className="w-full rounded-xl bg-white/5 border border-white/10 px-5 py-3.5 text-sm font-bold text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-emerald-500 outline-none transition-all"
                 />
@@ -445,8 +498,13 @@ export default function EditProductPage() {
                         <li
                           key={cat._id}
                           onClick={() => {
-                            setCategoryInput(cat.name);
-                            setFormData(p => ({...p, category: cat._id}));
+                            addCategorySelection({ id: cat._id, name: cat.name });
+                            setFormData((prev) => ({
+                              ...prev,
+                              categories: [...new Set([...prev.categories, String(cat._id)])],
+                            }));
+                            setCategoryInput('');
+                            setSuggestions([]);
                             setShowSuggestions(false);
                           }}
                           className="px-5 py-3 text-sm text-slate-900 hover:bg-emerald-50 hover:text-emerald-700 font-bold transition-colors cursor-pointer"
@@ -458,6 +516,33 @@ export default function EditProductPage() {
                   </div>
                 )}
               </div>
+
+              {selectedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {selectedCategories.map((cat) => (
+                    <span
+                      key={cat.id}
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-3 py-1 text-xs font-black text-white"
+                    >
+                      {cat.name}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeCategorySelection(cat.id);
+                          setFormData((prev) => ({
+                            ...prev,
+                            categories: prev.categories.filter((id) => String(id) !== String(cat.id)),
+                          }));
+                        }}
+                        className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
+                        aria-label={`Remove ${cat.name}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Tags */}

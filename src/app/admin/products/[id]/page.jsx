@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { productAPI, reviewAPI } from "@/lib/api";
+import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import  {
   ArrowLeft,
   Calendar,
@@ -303,6 +305,8 @@ export default function ProductDetailPage() {
       .slice(0, 2);
   };
 
+  const translatedProduct = product ? getTranslatedProduct(product, "fr") : { name: "", description: "" };
+
   return (
     <>
     <AdminHeader />
@@ -313,7 +317,10 @@ export default function ProductDetailPage() {
             <ArrowLeft size={20} />
             <span>Back to Products</span>
           </Link>
-          <Link href="/admin/promotions" className="bg-green-800 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+          <Link href="/admin/promotions" className="text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+            style={{backgroundColor: '#556622'}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Calendar size={18} />
             Schedule Promotion
           </Link>
@@ -338,7 +345,7 @@ export default function ProductDetailPage() {
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 <div className="lg:col-span-2 p-8 bg-white flex items-center justify-center relative border-r border-slate-100">
-                  <img src={images[imageIdx] || "/placeholder.png"} alt={product.name} className="max-h-125 w-full object-contain" />
+                  <img src={images[imageIdx] || "/placeholder.png"} alt={translatedProduct.name} className="max-h-125 w-full object-contain" />
                   {images.length > 1 && (
                     <div className="absolute bottom-6 right-6 flex gap-2">
                       <button onClick={() => setImageIdx((prev) => (prev - 1 + images.length) % images.length)} className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all"><ChevronLeft size={20}/></button>
@@ -563,7 +570,7 @@ export default function ProductDetailPage() {
                     {[...product.pricingHistory].reverse().map((h, i) => (
                       <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <span className="text-sm font-semibold text-slate-500">{formatDate(h.date)}</span>
-                        <span className="text-lg font-bold text-slate-900">${Number(h.price).toFixed(2)}</span>
+                        <span className="text-lg font-bold text-slate-900">€{Number(h.price).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -605,8 +612,8 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-black  leading-tight">{product.name}</h2>
-                  <p className="text-slate-500 text-sm leading-relaxed">{product.description}</p>
+                  <h2 className="text-3xl font-black  leading-tight">{translatedProduct.name}</h2>
+                  <p className="text-slate-500 text-sm leading-relaxed">{translatedProduct.description}</p>
                 </div>
                 
                 <div className="pt-2">
@@ -656,40 +663,17 @@ export default function ProductDetailPage() {
         </div>
       </main>
 
-      {/* Delete Confirmation Modal */}
-      {deleteAlertOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Delete this review?</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                This action is permanent. The review will be permanently deleted from the database.
-              </p>
-            </div>
-            <div className="flex border-t border-gray-100">
-              <button 
-                onClick={() => {
-                  setDeleteAlertOpen(false);
-                  setCommentToDelete(null);
-                }}
-                className="flex-1 px-4 py-4 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors border-r border-gray-100"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDeleteComment}
-                disabled={deletingCommentId === commentToDelete}
-                className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight disabled:opacity-50"
-              >
-                {deletingCommentId === commentToDelete ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={deleteAlertOpen}
+        onClose={() => {
+          setDeleteAlertOpen(false);
+          setCommentToDelete(null);
+        }}
+        onConfirm={confirmDeleteComment}
+        title="Delete this review?"
+        description="This action is permanent. The review will be permanently deleted from the database."
+        isDeleting={deletingCommentId === commentToDelete}
+      />
     </div>
     </>
   );
