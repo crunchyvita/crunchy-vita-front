@@ -81,7 +81,7 @@ export default function PromoCodeInput({ cartTotal, onPromoApplied }) {
             </button>
           </div>
           <p className="text-sm text-gray-700 mb-1">Code: <span className="font-bold">{appliedPromo.code}</span></p>
-          <p className="text-sm text-[#556822] font-bold">Réduction: -€{appliedPromo.discount}</p>
+          <p className="text-sm text-[#556822] font-bold">Réduction: -{appliedPromo.discount} €</p>
         </div>
       ) : (
         <form onSubmit={handleValidatePromo} className="space-y-3">

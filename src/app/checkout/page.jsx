@@ -603,7 +603,7 @@ const CheckoutPage = () => {
                         <p className="text-xs text-gray-400">
                           {t('summary.qty')}: {item.quantity}
                         </p>
-                        <p className="text-sm font-black text-[#E10C69]">€{(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm font-black text-[#E10C69]">{(item.price * item.quantity).toFixed(2)} €</p>
                       </div>
                       <button onClick={() => removeFromCart(item._id)} className="text-gray-300 hover:text-red-500 transition-colors">
                         <Trash2 size={16} />
@@ -631,21 +631,21 @@ const CheckoutPage = () => {
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.subtotal')}</span>
-                  <span className="text-gray-900">€{Number(subtotal).toFixed(2)}</span>
+                  <span className="text-gray-900">{Number(subtotal).toFixed(2)} €</span>
                 </div>
                 {promoDiscount > 0 && (
                   <div className="flex justify-between text-green-600 font-medium">
                     <span>{t('summary.promoCodeLabel') || 'Promo code'}</span>
-                    <span>-€{Number(promoDiscount).toFixed(2)}</span>
+                    <span>-{Number(promoDiscount).toFixed(2)} €</span>
                   </div>
                 )}
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
-                  <span className="text-gray-900">€{Number(shipping).toFixed(2)}</span>
+                  <span className="text-gray-900">{Number(shipping).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
-                  <span className="text-[#E10C69]">€{Number(total - promoDiscount).toFixed(2)}</span>
+                  <span className="text-[#E10C69]">{Number(total - promoDiscount).toFixed(2)} €</span>
                 </div>
               </div>
 

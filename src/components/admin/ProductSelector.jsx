@@ -226,7 +226,7 @@ export default function ProductSelector({
 													{product.productName}
 												</p>
 												<p className="text-xs text-slate-500">
-													€{Number(product.productPrice).toFixed(2)}
+													{Number(product.productPrice).toFixed(2)} €
 												</p>
 											</div>
 											<div className="absolute top-2 right-2 bg-emerald-500 text-white rounded-full p-1">
@@ -302,7 +302,7 @@ export default function ProductSelector({
 																{translated.name}
 															</p>
 															<p className="text-xs font-semibold text-emerald-700">
-															€{Number(product.price).toFixed(2)}
+																{Number(product.price).toFixed(2)} €
 															</p>
 															{!isInStock && (
 																<p className="text-xs text-red-600 font-medium">Out of Stock</p>

@@ -570,7 +570,7 @@ export default function ProductDetailPage() {
                     {[...product.pricingHistory].reverse().map((h, i) => (
                       <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <span className="text-sm font-semibold text-slate-500">{formatDate(h.date)}</span>
-                        <span className="text-lg font-bold text-slate-900">€{Number(h.price).toFixed(2)}</span>
+                        <span className="text-lg font-bold text-slate-900">{Number(h.price).toFixed(2)} €</span>
                       </div>
                     ))}
                   </div>
