@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useRouter, Link } from '@/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/api';
-import { Mail, Lock, User, ArrowRight, Leaf, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const { register, user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const t = useTranslations('Auth');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -42,12 +43,12 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t('register.errors.passwordMismatch'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError(t('register.errors.passwordMinLength'));
       return;
     }
 
@@ -55,9 +56,9 @@ export default function RegisterPage() {
     try {
       const result = await register(name, email, password);
       if (result.success) redirectBasedOnRole(result.user.role);
-      else setError(result.error || 'Inscription échouée');
+      else setError(result.error || t('register.errors.registerFailed'));
     } catch (err) {
-      setError('Une erreur est survenue lors de l\'inscription');
+      setError(t('register.errors.genericRegisterError'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex bg-slate-50 relative">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 z-30 inline-flex items-center gap-2 text-sm font-semibold text-[#556822] lg:text-white hover:opacity-80 transition-opacity"
+      >
+        <ArrowLeft size={16} />
+        {t('common.back')}
+      </Link>
+
       {/* Colonne Gauche - Visuel (Identique au Login pour la cohérence) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-[#EF8EB8] items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -87,11 +96,11 @@ export default function RegisterPage() {
             </div>
           </div>
           <h2 className="text-5xl font-bold text-white leading-tight mb-6">
-            Changez de snack, <br /> 
-            <span className="text-white">  changez d'énergie.</span>
+            {t('register.hero.titleLine1')} <br /> 
+            <span className="text-white">{t('register.hero.titleLine2')}</span>
           </h2>
           <p className="text-white text-lg leading-relaxed">
-            Créez un compte gratuitement et accédez à une sélection exclusive de produits 100% naturels et bio.
+            {t('register.hero.description')}
           </p>
         </div>
         
@@ -106,13 +115,13 @@ export default function RegisterPage() {
              <div className="w-24 h-24 bg-[#EF8EB8] rounded-xl flex items-center justify-center mb-4">
                <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
              </div>
-             <h1 className="text-2xl font-bold text-[#556822]">Crunchy Vita</h1>
+             <h1 className="text-2xl font-bold text-[#556822]">{t('common.brand')}</h1>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">Créer un compte</h2>
+            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">{t('register.title')}</h2>
             <p className="text-[#556822] mt-2">
-              Rejoignez notre communauté de passionnés du bio.
+              {t('register.subtitle')}
             </p>
           </div>
 
@@ -126,7 +135,7 @@ export default function RegisterPage() {
 
             {/* Nom Complet */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#556822] ml-1">Nom complet</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">{t('register.fullNameLabel')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <User size={18} />
@@ -137,14 +146,14 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="Jean Dupont"
+                  placeholder={t('register.fullNamePlaceholder')}
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#556822] ml-1">Email</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">{t('common.emailLabel')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Mail size={18} />
@@ -155,14 +164,14 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="nom@exemple.com"
+                  placeholder={t('common.emailPlaceholder')}
                 />
               </div>
             </div>
 
             {/* Mot de passe */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#556822] ml-1">Mot de passe</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">{t('common.passwordLabel')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Lock size={18} />
@@ -173,13 +182,13 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="••••••••"
+                  placeholder={t('common.passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
-                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-label={showPassword ? t('common.hidePassword') : t('common.showPassword')}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -188,7 +197,7 @@ export default function RegisterPage() {
 
             {/* Confirmer mot de passe */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#556822] ml-1">Confirmer le mot de passe</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">{t('register.confirmPasswordLabel')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Lock size={18} />
@@ -199,13 +208,13 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="block w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="••••••••"
+                  placeholder={t('common.passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
-                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-label={showPassword ? t('common.hidePassword') : t('common.showPassword')}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -217,7 +226,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] disabled:bg-[#F5B9D1] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-[#EF8EB8]/30 hover:shadow-[#E10C69]/30 active:scale-[0.98] mt-4"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "S'inscrire"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t('register.submit')}
               {!loading && <ArrowRight size={18} />}
             </button>
           </form>
@@ -225,7 +234,7 @@ export default function RegisterPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">Ou continuer avec</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">{t('common.continueWith')}</span></div>
             </div>
 
             <button
@@ -238,16 +247,17 @@ export default function RegisterPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Google
+              {t('common.google')}
             </button>
           </div>
 
           <p className="mt-8 text-center text-[#556822] text-sm">
-            Déjà un compte ?{' '}
+            {t('register.alreadyHaveAccount')}{' '}
             <Link href="/auth/login" className="font-bold text-[#556822] hover:text-[#3F4F18] underline-offset-4 hover:underline transition-all">
-              Se connecter
+              {t('register.signIn')}
             </Link>
           </p>
+
         </div>
       </div>
     </div>

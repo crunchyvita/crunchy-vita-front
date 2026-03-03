@@ -76,13 +76,13 @@
     "hero": {
       "titleLine1": "Croquez la nature",
       "titleLine2": "avec",
-      "brand": "Crunchy Vita",
+      "brand": "CrunchyVita",
       "subtitle": "Naturellement croquant, irresistiblement bon",
       "ctaDiscover": "Decouvrir nos produits",
       "ctaJoin": "Rejoindre la communaute"
     },
     "why": {
-      "title": "Pourquoi choisir Crunchy Vita ?",
+      "title": "Pourquoi choisir CrunchyVita ?",
       "cards": {
         "card1": { "title": "100% fruits", "desc": "Uniquement des fruits, rien d'autre." },
         "card2": { "title": "Certifie BIO", "desc": "Des fruits selectionnes avec soin." },
@@ -102,9 +102,9 @@
     "favorite": {
       "titleLine1": "Le prefere de",
       "titleLine2": "nos clients",
-      "description": "Decouvrez notre coffret decouverte, le mix parfait pour gouter a l'explosion de saveurs Crunchy Vita.",
+      "description": "Decouvrez notre coffret decouverte, le mix parfait pour gouter a l'explosion de saveurs CrunchyVita.",
       "cta": "Decouvrir le coffret",
-      "imageAlt": "Coffret Crunchy Vita avec fruits volants"
+      "imageAlt": "Coffret CrunchyVita avec fruits volants"
     },
     "commitments": {
       "title": "Nos engagements",
@@ -128,9 +128,9 @@
     "titleLine1": "Le prefere de",
     "titleLine2": "nos clients",
     "label": "PRODUIT",
-    "description": "Decouvrez notre selection preferee, le mix parfait pour gouter a l'explosion de saveurs Crunchy Vita.",
+    "description": "Decouvrez notre selection preferee, le mix parfait pour gouter a l'explosion de saveurs CrunchyVita.",
     "cta": "Decouvrir le produit",
-    "imageAlt": "Crunchy Vita - Nos produits preferes"
+    "imageAlt": "CrunchyVita - Nos produits preferes"
   },
   "ProfessionalSpace": {
     "hero": {
@@ -139,7 +139,7 @@
       "cta": "Demander un devis"
     },
     "audience": {
-      "title": "À qui s'adresse Crunchy Vita?",
+      "title": "À qui s'adresse CrunchyVita?",
       "items": {
         "foodBrands": "Marques Alimentaires",
         "agriIndustry": "Industrie Agroalimentaire",
@@ -219,7 +219,7 @@
     },
     "mission": {
       "title": "Notre mission",
-      "p1": "Chez Crunchy Vita, nous croyons que le snacking peut etre a la fois delicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutes ni conservateurs, a base de fruits frais de qualite.",
+      "p1": "Chez CrunchyVita, nous croyons que le snacking peut etre a la fois delicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutes ni conservateurs, a base de fruits frais de qualite.",
       "p2": "Nous selectionnons nos fruits avec soin, issus de cultures biologiques certifiees, pour vous offrir le meilleur de la nature dans chaque sachet."
     },
     "collab": {
@@ -305,8 +305,8 @@
       "packages": "Crunchy Packs"
     },
     "heading": {
-      "productsTitle": "La Boutique.",
-      "packagesTitle": "Les Coffrets.",
+      "productsTitle": "La Boutique",
+      "packagesTitle": "Les Coffrets",
       "productsSubtitle": "Le meilleur des fruits lyophilises, sans aucun additif.",
       "packagesSubtitle": "Composez votre mix parfait et profitez de reductions exclusives."
     },
@@ -916,6 +916,58 @@
       "itemRemoved": "Article retiré du panier",
       "cartCleared": "Panier vidé",
       "quantityUpdated": "Quantité mise à jour"
+    }
+  },
+  "Auth": {
+    "common": {
+      "back": "Retour",
+      "brand": "CrunchyVita",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nom@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "continueWith": "Ou continuer avec",
+      "google": "Google"
+    },
+    "login": {
+      "title": "Bon retour !",
+      "subtitle": "Ravi de vous revoir. Connectez-vous à votre compte.",
+      "forgotPassword": "Oublié ?",
+      "submit": "Se connecter",
+      "newOnCrunchyVita": "Nouveau sur CrunchyVita ?",
+      "createAccount": "Créer un compte",
+      "hero": {
+        "titleLine1": "Essayez,",
+        "titleLine2": "vous allez adorer.",
+        "description": "Rejoignez-nous pour des produits sans additifs, sans sucres ajoutés, 100% bio et naturels."
+      },
+      "errors": {
+        "invalidCredentials": "Identifiants invalides",
+        "loginFailed": "Une erreur est survenue lors de la connexion"
+      }
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez notre communauté de passionnés du bio.",
+      "fullNameLabel": "Nom complet",
+      "fullNamePlaceholder": "Jean Dupont",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "submit": "S'inscrire",
+      "alreadyHaveAccount": "Déjà un compte ?",
+      "signIn": "Se connecter",
+      "hero": {
+        "titleLine1": "Changez de snack,",
+        "titleLine2": "changez d'énergie.",
+        "description": "Créez un compte gratuitement et accédez à une sélection exclusive de produits 100% naturels et bio."
+      },
+      "errors": {
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+        "registerFailed": "Inscription échouée",
+        "genericRegisterError": "Une erreur est survenue lors de l'inscription"
+      }
     }
   }
 }

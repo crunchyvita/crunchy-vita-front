@@ -446,7 +446,7 @@ export default function CartPage() {
                       <div className="grow">
                         <h3 className="font-bold text-[#556822] text-lg mb-0.5">{displayName}</h3>
                         <p className="text-sm text-gray-500">
-                          {t('products.price')}: €{Number(item.price || 0).toFixed(2)}
+                          {t('products.price')}: {Number(item.price || 0).toFixed(2)} €
                         </p>
                       </div>
 
@@ -506,7 +506,7 @@ export default function CartPage() {
                       </div>
 
                       <div className="w-24 text-right font-black text-[#E10C69] text-lg">
-                        €{(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)}
+                        {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
                       </div>
 
                       <button
@@ -529,16 +529,16 @@ export default function CartPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between text-gray-600">
                     <span className="font-medium">{t('summary.subtotal')}</span>
-                    <span className="font-bold text-gray-900">€{Number(subtotal || 0).toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">{Number(subtotal || 0).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span className="font-medium">{t('summary.shipping')}</span>
-                    <span className="font-bold text-gray-900">€{Number(shipping || 0).toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">{Number(shipping || 0).toFixed(2)} €</span>
                   </div>
                   <hr className="border-gray-100" />
                   <div className="flex justify-between text-lg font-black text-[#556822] pb-4">
                     <span>{t('summary.total')}</span>
-                    <span className="text-[#E10C69]">€{Number(total || 0).toFixed(2)}</span>
+                    <span className="text-[#E10C69]">{Number(total || 0).toFixed(2)} €</span>
                   </div>
                   <Link
                     href={`/${locale}/checkout`}

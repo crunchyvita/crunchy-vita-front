@@ -261,7 +261,7 @@ export default function ProductDetailModal({
             </h1>
 
             <p className="text-3xl font-black text-[#E10c69] mb-6 font-[Erica One]">
-              €{productPrice.toFixed(2)}
+              {productPrice.toFixed(2)} €
               <span className="text-sm text-gray-400 font-medium ml-2 uppercase font-[Maison Neue Book]">{t('perUnit')}</span>
             </p>
 
@@ -299,7 +299,7 @@ export default function ProductDetailModal({
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">{t('totalPrice')}</span>
-                  <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">€ {totalPrice.toFixed(2)}</span>
+                  <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">{totalPrice.toFixed(2)} €</span>
                 </div>
               </div>
               <div className="flex gap-4">

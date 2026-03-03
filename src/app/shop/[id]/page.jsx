@@ -745,11 +745,11 @@ export default function ProductDetailPage() {
             <div>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-[Agrandir] font-bold text-[#E10c69]">
-                  €{productPrice.toFixed(2)}
+                  {productPrice.toFixed(2)} €
                 </span>
                 {product.originalPrice && Number(product.originalPrice) > productPrice && (
                   <span className="text-sm text-gray-400 line-through">
-                    €{Number(product.originalPrice).toFixed(2)}
+                    {Number(product.originalPrice).toFixed(2)} €
                   </span>
                 )}
               </div>
@@ -799,7 +799,7 @@ export default function ProductDetailPage() {
                 <div className="text-lg">
                   <span className="text-gray-600 font-[maison-neue-book]">{t('total.label')} </span>
                   <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
-                    €{totalPrice.toFixed(2)}
+                    {totalPrice.toFixed(2)} €
                   </span>
                 </div>
               </div>

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useRouter, Link } from '@/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/api';
-import { Mail, Lock, ArrowRight, Leaf, Loader2, Eye, EyeOff } from 'lucide-react'; 
+import { Mail, Lock, ArrowRight, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react'; 
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login, user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const t = useTranslations('Auth');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -42,9 +43,9 @@ export default function LoginPage() {
     try {
       const result = await login(email, password);
       if (result.success) redirectBasedOnRole(result.user.role);
-      else setError(result.error || 'Identifiants invalides');
+      else setError(result.error || t('login.errors.invalidCredentials'));
     } catch (err) {
-      setError('Une erreur est survenue lors de la connexion');
+      setError(t('login.errors.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex bg-slate-50 relative">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 z-30 inline-flex items-center gap-2 text-sm font-semibold text-[#556822] lg:text-white hover:opacity-80 transition-opacity"
+      >
+        <ArrowLeft size={16} />
+        {t('common.back')}
+      </Link>
+
       {/* Colonne Gauche - Visuel (Caché sur mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-[#EF8EB8] items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -74,11 +83,11 @@ export default function LoginPage() {
             </div>
           </div>
           <h2 className="text-5xl font-bold text-white leading-tight mb-6">
-            Essayez, <br /> 
-            <span className="text-white"> vous allez adorer.</span>
+            {t('login.hero.titleLine1')} <br /> 
+            <span className="text-white"> {t('login.hero.titleLine2')}</span>
           </h2>
           <p className="text-white/80 text-lg leading-relaxed">
-                Rejoignez-nous pour des produits sans additifs, sans sucres ajoutés, 100% bio et naturels.
+            {t('login.hero.description')}
           </p>
         </div>
         
@@ -93,13 +102,13 @@ export default function LoginPage() {
              <div className="w-24 h-24 bg-[#EF8EB8] rounded-xl flex items-center justify-center mb-4">
                <img src="/assets/images/logo_white.png" alt="Crunchy Vita Logo" className="h-16 w-16" />
              </div>
-             <h1 className="text-2xl font-bold text-[#556822]">Crunchy Vita</h1>
+             <h1 className="text-2xl font-bold text-[#556822]">{t('common.brand')}</h1>
           </div>
 
           <div className="mb-10">
-            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">Bon retour !</h2>
+            <h2 className="text-3xl font-bold text-[#556822] tracking-tight">{t('login.title')}</h2>
             <p className="text-[#556822] mt-2">
-              Ravi de vous revoir. Connectez-vous à votre compte.
+              {t('login.subtitle')}
             </p>
           </div>
 
@@ -112,7 +121,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#556822] ml-1">Email</label>
+              <label className="text-sm font-medium text-[#556822] ml-1">{t('common.emailLabel')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#EF8EB8] transition-colors">
                   <Mail size={18} />
@@ -123,16 +132,16 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="nom@exemple.com"
+                  placeholder={t('common.emailPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-medium text-[#556822]">Mot de passe</label>
-                <Link href="/auth/forgot-password" size="sm" className="text-xs font-semibold text-[#556822] hover:text-[#3F4F18] transition-colors">
-                  Oublié ?
+                <label className="text-sm font-medium text-[#556822]">{t('common.passwordLabel')}</label>
+                <Link href="/auth/forgot-password" className="text-xs font-semibold text-[#556822] hover:text-[#3F4F18] transition-colors">
+                  {t('login.forgotPassword')}
                 </Link>
               </div>
               <div className="relative group">
@@ -145,13 +154,13 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF8EB8]/30 focus:border-[#EF8EB8] transition-all shadow-sm"
-                  placeholder="••••••••"
+                  placeholder={t('common.passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
-                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-label={showPassword ? t('common.hidePassword') : t('common.showPassword')}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -163,7 +172,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 bg-[#EF8EB8] hover:bg-[#E10C69] disabled:bg-[#F5B9D1] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-[#EF8EB8]/30 hover:shadow-[#E10C69]/30 active:scale-[0.98]"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Se connecter'}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t('login.submit')}
               {!loading && <ArrowRight size={18} />}
             </button>
           </form>
@@ -171,7 +180,7 @@ export default function LoginPage() {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">Ou continuer avec</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-4 text-[#556822] font-medium">{t('common.continueWith')}</span></div>
             </div>
 
             <button
@@ -185,16 +194,17 @@ export default function LoginPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Google
+              {t('common.google')}
             </button>
           </div>
 
           <p className="mt-10 text-center text-[#556822] text-sm">
-            Nouveau sur CrunchyVita ?{' '}
+            {t('login.newOnCrunchyVita')}{' '}
             <Link href="/auth/register" className="font-bold text-[#556822] hover:text-[#3F4F18] underline-offset-4 hover:underline transition-all">
-              Créer un compte
+              {t('login.createAccount')}
             </Link>
           </p>
+
         </div>
       </div>
     </div>

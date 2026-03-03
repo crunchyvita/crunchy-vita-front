@@ -32,7 +32,7 @@ export default function PromoBadge() {
               Livraison Offerte !
             </h3>
             <p className="text-[10px] font-bold leading-tight opacity-90 uppercase tracking-wide font-[Maison Neue Book]">
-              Dès <span className="text-base font-black underline font-[Agrandir]">40€</span> d'achats en point relais
+              Dès <span className="text-base font-black underline font-[Agrandir]">40 €</span> d'achats en point relais
             </p>
           </div>
         </div>

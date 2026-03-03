@@ -222,7 +222,7 @@ export default function CreatePromoCodePage() {
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Minimum Purchase (€)</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Minimum Purchase ( € )</label>
                     <input
                       type="number"
                       name="minPurchaseAmount"
