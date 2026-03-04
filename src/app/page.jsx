@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
 import PreferredItemDisplay from '@/components/PreferredItemDisplay';
+import RouletteModal from '@/components/RouletteModal';
 import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
@@ -51,6 +53,7 @@ const popIn = {
 export default function Home() {
   const { user } = useAuth();
   const t = useTranslations('Home');
+  const [isRouletteOpen, setIsRouletteOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -290,6 +293,26 @@ export default function Home() {
       </section>
 
       <Footer />
+      
+      {/* Fixed Roulette Button */}
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsRouletteOpen(true)}
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-4 font-black uppercase tracking-wider text-white shadow-2xl hover:shadow-[#E10C69]/50 transition-shadow"
+      >
+        <span className="hidden sm:inline">{t('roulette.title', 'Spin to Win!')}</span>
+      </motion.button>
+      
+      {/* Roulette Modal */}
+      <RouletteModal 
+        isOpen={isRouletteOpen} 
+        onClose={() => setIsRouletteOpen(false)}
+        userEmail={user?.email || ''}
+      />
     </div>
   );
 }

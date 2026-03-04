@@ -122,6 +122,12 @@
           "desc": "Tous nos fruits sont issus de l'agriculture biologique."
         }
       }
+    },
+    "roulette": {
+      "title": "Tournez pour gagner !",
+      "subtitle": "Tentez votre chance et obtenez un code de reduction exclusif",
+      "description": "Tournez notre roulette et remportez des lots incroyables ! Obtenez des reductions instantanees, des produits gratuits ou des packs exclusifs.",
+      "limit": "Un tirage par adresse email. Les codes sont valides 30 jours."
     }
   },
   "PreferredItem": {
@@ -917,5 +923,12 @@
       "cartCleared": "Panier vidé",
       "quantityUpdated": "Quantité mise à jour"
     }
+  },
+  "Roulette": {
+    "description": "Tentez votre chance et remportez un code de reduction exclusif !",
+    "emailNote": "Nous enverrons votre code gagnant a cette adresse email",
+    "congratulations": "Felicitations !",
+    "youWon": "Vous avez gagne :",
+    "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email."
   }
 }
