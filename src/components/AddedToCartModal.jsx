@@ -102,7 +102,7 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
                         </p>
                         {product.price && (
                             <p className="text-xs font-bold text-[#E10C69]">
-                                €{(Number(product.price) * Number(quantity)).toFixed(2)}
+                                {(Number(product.price) * Number(quantity)).toFixed(2)} €
                             </p>
                         )}
                     </div>

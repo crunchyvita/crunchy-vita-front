@@ -76,13 +76,13 @@
     "hero": {
       "titleLine1": "Taste Nature",
       "titleLine2": "with",
-      "brand": "Crunchy Vita",
+      "brand": "CrunchyVita",
       "subtitle": "Naturally crunchy, irresistibly good",
       "ctaDiscover": "Discover our products",
       "ctaJoin": "Join the community"
     },
     "why": {
-      "title": "Why choose Crunchy Vita?",
+      "title": "Why choose CrunchyVita?",
       "cards": {
         "card1": { "title": "100% fruits", "desc": "Only fruit, nothing else." },
         "card2": { "title": "Organic certified", "desc": "Carefully selected fruits." },
@@ -102,9 +102,9 @@
     "favorite": {
       "titleLine1": "Our customers'",
       "titleLine2": "favorite",
-      "description": "Discover our discovery box, the perfect mix to taste the Crunchy Vita flavor explosion.",
+      "description": "Discover our discovery box, the perfect mix to taste the CrunchyVita flavor explosion.",
       "cta": "Discover the box",
-      "imageAlt": "Crunchy Vita box with flying fruits"
+      "imageAlt": "CrunchyVita box with flying fruits"
     },
     "commitments": {
       "title": "Our commitments",
@@ -134,9 +134,9 @@
     "titleLine1": "Our customers'",
     "titleLine2": "favorite",
     "label": "PRODUCT",
-    "description": "Discover our preferred selection, the perfect mix to taste the Crunchy Vita flavor explosion.",
+    "description": "Discover our preferred selection, the perfect mix to taste the CrunchyVita flavor explosion.",
     "cta": "Discover the product",
-    "imageAlt": "Crunchy Vita - Our favorite products"
+    "imageAlt": "CrunchyVita - Our favorite products"
   },
   "ProfessionalSpace": {
     "hero": {
@@ -145,7 +145,7 @@
       "cta": "Request a quote"
     },
     "audience": {
-      "title": "Who is Crunchy Vita for?",
+      "title": "Who is CrunchyVita for?",
       "items": {
         "foodBrands": "Food brands",
         "agriIndustry": "Food industry",
@@ -225,7 +225,7 @@
     },
     "mission": {
       "title": "Our mission",
-      "p1": "At Crunchy Vita, we believe snacking can be both delicious and healthy. Our mission is to offer 100% natural snacks, with no added sugar or preservatives, made from quality fresh fruit.",
+      "p1": "At CrunchyVita, we believe snacking can be both delicious and healthy. Our mission is to offer 100% natural snacks, with no added sugar or preservatives, made from quality fresh fruit.",
       "p2": "We select our fruits carefully from certified organic farms to bring you the best of nature in every pouch."
     },
     "collab": {
@@ -311,8 +311,8 @@
       "packages": "Crunchy Packs"
     },
     "heading": {
-      "productsTitle": "The Shop.",
-      "packagesTitle": "The Boxes.",
+      "productsTitle": "The Shop",
+      "packagesTitle": "The Boxes",
       "productsSubtitle": "The best freeze-dried fruits, with no additives.",
       "packagesSubtitle": "Build your perfect mix and enjoy exclusive discounts."
     },
@@ -922,6 +922,58 @@
       "itemRemoved": "Item removed from cart",
       "cartCleared": "Cart cleared",
       "quantityUpdated": "Quantity updated"
+    }
+  },
+  "Auth": {
+    "common": {
+      "back": "Back",
+      "brand": "CrunchyVita",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "continueWith": "Or continue with",
+      "google": "Google"
+    },
+    "login": {
+      "title": "Welcome back!",
+      "subtitle": "Great to see you again. Sign in to your account.",
+      "forgotPassword": "Forgot?",
+      "submit": "Sign in",
+      "newOnCrunchyVita": "New to CrunchyVita?",
+      "createAccount": "Create an account",
+      "hero": {
+        "titleLine1": "Try it,",
+        "titleLine2": "you will love it.",
+        "description": "Join us for products with no additives, no added sugar, 100% organic and natural."
+      },
+      "errors": {
+        "invalidCredentials": "Invalid credentials",
+        "loginFailed": "An error occurred during sign in"
+      }
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Join our community of organic snack lovers.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "John Doe",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Sign up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "hero": {
+        "titleLine1": "Change your snack,",
+        "titleLine2": "change your energy.",
+        "description": "Create a free account and get access to an exclusive selection of 100% natural and organic products."
+      },
+      "errors": {
+        "passwordMismatch": "Passwords do not match",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "registerFailed": "Registration failed",
+        "genericRegisterError": "An error occurred during registration"
+      }
     }
   },
   "Roulette": {

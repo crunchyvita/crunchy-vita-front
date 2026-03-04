@@ -223,7 +223,7 @@ export default function PromoCodeDetailPage() {
             </div>
             <div>
               <p className="text-sm text-slate-500 font-medium">Minimum Purchase</p>
-              <p className="text-3xl font-bold text-slate-900">€{formData.minPurchaseAmount}</p>
+              <p className="text-3xl font-bold text-slate-900">{formData.minPurchaseAmount} €</p>
             </div>
           </div>
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">

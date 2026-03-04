@@ -563,7 +563,7 @@ export default function PackageCustomizationPage() {
                           {t("fixed.itemQuantity", { count: item.quantity || 1 })}
                         </p>
                         <p className="text-2xl font-black mt-auto text-[#E10c69]">
-                          €{(getProductPrice(product) * (item.quantity || 1)).toFixed(2)}
+                          {(getProductPrice(product) * (item.quantity || 1)).toFixed(2)} €
                         </p>
                       </div>
                     </div>
@@ -628,20 +628,20 @@ export default function PackageCustomizationPage() {
                 <div className="space-y-4 border-t border-dashed pt-6 mb-8">
                   <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
                     <span>{t("summary.total")}</span>
-                    <span>€{(fixedTotalPrice * packageQuantity).toFixed(2)}</span>
+                    <span>{(fixedTotalPrice * packageQuantity).toFixed(2)} €</span>
                   </div>
 
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                       <span>{t("summary.discount", { percent: discountPercentage })}</span>
-                      <span>-€{(totalFixedSavings * packageQuantity).toFixed(2)}</span>
+                      <span>-{(totalFixedSavings * packageQuantity).toFixed(2)} €</span>
                     </div>
                   )}
 
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-lg font-black uppercase">{t("summary.toPay")}</span>
                     <span className="text-3xl font-black text-[#E10C69]">
-                      €{(discountedFixedPrice * packageQuantity).toFixed(2)}
+                      {(discountedFixedPrice * packageQuantity).toFixed(2)} €
                     </span>
                   </div>
                 </div>
@@ -803,11 +803,10 @@ export default function PackageCustomizationPage() {
 
                       <div className="mt-auto">
                         <p className="text-2xl font-black mb-4 text-[#E10c69]">
-                          €
                           {(
                             getProductPrice(product) *
                             (packageData?.allowMultipleQuantities === false ? 1 : qty)
-                          ).toFixed(2)}
+                          ).toFixed(2)} €
                         </p>
 
                         <div className="flex flex-col gap-2">
@@ -927,19 +926,19 @@ export default function PackageCustomizationPage() {
               <div className="space-y-4 border-t border-dashed pt-6 mb-8">
                 <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
                   <span>{t("summary.total")}</span>
-                  <span>€{totalPrice.toFixed(2)}</span>
+                  <span>{totalPrice.toFixed(2)} €</span>
                 </div>
 
                 {discountPercentage > 0 && (
                   <div className="flex justify-between text-sm font-bold uppercase tracking-widest" style={{ color: COLORS.grass }}>
                     <span>{t("summary.discount", { percent: discountPercentage })}</span>
-                    <span>-€{totalSavings.toFixed(2)}</span>
+                    <span>-{totalSavings.toFixed(2)} €</span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-lg font-black uppercase">{t("summary.toPay")}</span>
-                  <span className="text-3xl font-black text-[#E10C69]">€{discountedPrice.toFixed(2)}</span>
+                  <span className="text-3xl font-black text-[#E10C69]">{discountedPrice.toFixed(2)} €</span>
                 </div>
               </div>
 
