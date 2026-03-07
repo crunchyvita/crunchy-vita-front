@@ -24,8 +24,13 @@ const getCartItemImagesLocal = (item) => {
     const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
-  let imgs = Array.isArray(item?.packageImages) ? item.packageImages.map(pickUrl).filter(Boolean) : [];
-  return imgs;
+  const packageImage =
+    pickUrl(item?.image) ||
+    pickUrl(item?.packageImage) ||
+    pickUrl(item?.package?.image) ||
+    pickUrl(item?.packageId?.image) ||
+    pickUrl(item?.packageImages?.[0]);
+  return packageImage ? [packageImage] : [];
 };
 
 const CheckoutPage = () => {
@@ -575,6 +580,7 @@ const CheckoutPage = () => {
                 {cartItems.map((item) => {
                   const imgs = getCartItemImagesLocal(item);
                   const isPkg = item.type === 'package' || !!item.packageId;
+                  const imageUrl = imgs[0] || null;
                   const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
                   const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
                   const displayName = translatedName || item.name;
@@ -582,20 +588,16 @@ const CheckoutPage = () => {
                   return (
                     <div key={item._id} className="flex gap-4 py-4 border-b border-gray-50 last:border-0">
                       <div className="w-16 h-16 shrink-0">
-                        {isPkg ? (
-                          <div className="grid grid-cols-2 gap-0.5">
-                            {imgs.length > 0 ? (
-                              imgs.map((img, idx) => (
-                                <img key={idx} src={img} className="w-full h-full object-cover rounded-sm" alt="" />
-                              ))
-                            ) : (
-                              <div className="col-span-2 h-16 bg-gray-100 rounded flex items-center justify-center">
-                                <ShoppingBag size={16} />
-                              </div>
-                            )}
-                          </div>
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            className={`w-full h-full rounded-lg ${isPkg ? 'object-cover' : 'object-contain bg-gray-50'}`}
+                            alt={displayName}
+                          />
                         ) : (
-                          <img src={imgs[0]} className="w-full h-full object-contain bg-gray-50 rounded-lg" alt="" />
+                          <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
+                            <ShoppingBag size={16} className="text-gray-300" />
+                          </div>
                         )}
                       </div>
                       <div className="grow">

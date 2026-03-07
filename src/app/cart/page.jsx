@@ -19,22 +19,6 @@ const pickUrl = (v) => {
   return null;
 };
 
-const getProductImageUrl = (product) => {
-  if (!product) return null;
-  const direct = pickUrl(product.imageUrl) || pickUrl(product.image) || pickUrl(product.productImage);
-  if (direct) return direct;
-  const media = product.media;
-  if (Array.isArray(media) && media.length > 0) {
-    const first = media[0];
-    return pickUrl(first?.url) || pickUrl(first) || pickUrl(first?.secure_url) || null;
-  }
-  const images = product.images;
-  if (Array.isArray(images) && images.length > 0) {
-    return pickUrl(images[0]?.url) || pickUrl(images[0]) || null;
-  }
-  return null;
-};
-
 const isPackageItem = (item) => {
   if (!item) return false;
   return (
@@ -44,51 +28,20 @@ const isPackageItem = (item) => {
   );
 };
 
-const extractPackageProductIds = (item) => {
-  const sp = item?.selectedProducts;
-  if (!Array.isArray(sp) || sp.length === 0) return [];
-  if (typeof sp[0] === 'string') return sp.filter(Boolean);
-  return sp
-    .map((x) => {
-      if (!x) return null;
-      if (typeof x === 'string') return x;
-      const pid = x.productId;
-      if (typeof pid === 'string') return pid;
-      if (typeof pid === 'object' && pid?._id) return pid._id;
-      if (x?.product?._id) return x.product._id;
-      if (x?._id) return x._id;
-      return null;
-    })
-    .filter(Boolean);
-};
-
 const getCartItemImagesLocal = (item) => {
   const isPackage = isPackageItem(item);
   if (!isPackage) {
     const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
-  let imgs = Array.isArray(item?.packageImages)
-    ? item.packageImages.map(pickUrl).filter(Boolean)
-    : [];
-  if (imgs.length === 0 && Array.isArray(item?.selectedProducts)) {
-    imgs = item.selectedProducts
-      .map((sp) => {
-        const direct = pickUrl(sp?.image);
-        if (direct) return direct;
-        return getProductImageUrl(sp?.product);
-      })
-      .filter(Boolean);
-  }
-  const seen = new Set();
-  const unique = [];
-  for (const u of imgs) {
-    if (!seen.has(u)) {
-      seen.add(u);
-      unique.push(u);
-    }
-  }
-  return unique;
+  const packageImage =
+    pickUrl(item?.image) ||
+    pickUrl(item?.packageImage) ||
+    pickUrl(item?.package?.image) ||
+    pickUrl(item?.packageId?.image) ||
+    pickUrl(item?.packageImages?.[0]);
+
+  return packageImage ? [packageImage] : [];
 };
 
 const getItemAvailableStock = async (item, API_URL) => {
@@ -126,7 +79,6 @@ export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error, stockAlertTick } =
     useCart();
 
-  const [remotePackageImages, setRemotePackageImages] = useState({});
   const [stockAlertOpen, setStockAlertOpen] = useState(false);
   const [stockAlertMessage, setStockAlertMessage] = useState('');
   const [hasInitialLoad, setHasInitialLoad] = useState(false);
@@ -242,76 +194,6 @@ export default function CartPage() {
     return () => { cancelled = true; };
   }, [cartItems, API_URL]);
 
-  useEffect(() => {
-    if (!Array.isArray(cartItems) || cartItems.length === 0) return;
-    let cancelled = false;
-
-    const loadMissingPackageImages = async () => {
-      const packagesNeedingFetch = cartItems.filter((item) => {
-        if (!isPackageItem(item)) return false;
-        return getCartItemImagesLocal(item).length === 0 && !remotePackageImages[item._id];
-      });
-
-      if (packagesNeedingFetch.length === 0) return;
-
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-        const results = await Promise.all(
-          packagesNeedingFetch.map(async (item) => {
-            const ids = extractPackageProductIds(item);
-            if (ids.length === 0) return [item._id, []];
-
-            const prods = await Promise.all(
-              ids.slice(0, 12).map(async (id) => {
-                try {
-                  const res = await fetch(`${API_URL}/products/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                    cache: 'no-store',
-                  });
-                  if (!res.ok) return null;
-                  const json = await res.json();
-                  return json?.data || json;
-                } catch {
-                  return null;
-                }
-              })
-            );
-
-            const imgs = prods
-              .filter(Boolean)
-              .map((p) => getProductImageUrl(p))
-              .filter(Boolean);
-
-            const seen = new Set();
-            const unique = [];
-            for (const u of imgs) {
-              if (!seen.has(u)) {
-                seen.add(u);
-                unique.push(u);
-              }
-            }
-            return [item._id, unique];
-          })
-        );
-
-        if (cancelled) return;
-
-        setRemotePackageImages((prev) => {
-          const next = { ...prev };
-          for (const [key, imgs] of results) next[key] = imgs;
-          return next;
-        });
-      } catch {}
-    };
-
-    loadMissingPackageImages();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems, API_URL]);
-
   // ✅ keep your server stock error alert (only if backend rejects)
   useEffect(() => {
     if (!error || typeof error !== 'string') return;
@@ -391,8 +273,7 @@ export default function CartPage() {
                   const isPackage = isPackageItem(item);
 
                   const localImgs = getCartItemImagesLocal(item);
-                  const images =
-                    isPackage && localImgs.length === 0 ? remotePackageImages[item._id] || [] : localImgs;
+                  const images = localImgs;
 
                   const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
                   const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
@@ -414,33 +295,19 @@ export default function CartPage() {
                     <div key={item._id} className="py-6 flex items-center gap-6">
                       {/* Images */}
                       <div className="shrink-0 flex items-center justify-center bg-transparent">
-                        {isPackage ? (
-                          <div className="grid grid-cols-2 gap-1 w-28">
-                            {images.length > 0 ? (
-                              <>
-                                {images.map((img, idx) => (
-                                  <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm">
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center">
-                                <ShoppingBag size={24} className="text-gray-300" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="w-20 h-24 bg-transparent overflow-hidden">
-                            {images[0] ? (
-                              <img src={images[0]} alt={item.name} className="w-full h-full object-contain" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
-                                <ShoppingBag size={24} className="text-gray-300" />
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        <div className="w-20 h-24 bg-transparent overflow-hidden">
+                          {images[0] ? (
+                            <img
+                              src={images[0]}
+                              alt={displayName}
+                              className={`w-full h-full ${isPackage ? 'object-cover' : 'object-contain'}`}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                              <ShoppingBag size={24} className="text-gray-300" />
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="grow">

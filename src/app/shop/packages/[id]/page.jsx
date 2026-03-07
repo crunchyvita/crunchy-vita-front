@@ -390,10 +390,8 @@ export default function PackageCustomizationPage() {
         packageName: packageData.name,
         description: packageData.description,
 
-        // ✅ DO NOT store package image (so cart won’t show it)
-        // image: packageData?.image,
+        image: packageData?.image || null,
 
-        // ✅ store multi images (cart should use this)
         packageImages,
 
         selectedProducts: selectedProductsPayload,
@@ -417,7 +415,7 @@ export default function PackageCustomizationPage() {
       setCartModalProduct({
         ...packageCartItem,
         name: translatedPackage.name || packageData.name,
-        image: packageImages[0]
+        image: packageData?.image || packageImages[0] || null
       });
       setCartModalQuantity(1);
       setShowCartModal(true);
@@ -465,8 +463,7 @@ export default function PackageCustomizationPage() {
         description: packageData.description,
         packageType: "FIXED",
 
-        // ✅ DO NOT store package image
-        // image: packageData?.image,
+        image: packageData?.image || null,
 
         packageImages,
 
@@ -491,7 +488,7 @@ export default function PackageCustomizationPage() {
       setCartModalProduct({
         ...packageCartItem,
         name: translatedPackage.name || packageData.name,
-        image: packageImages[0]
+        image: packageData?.image || packageImages[0] || null
       });
       setCartModalQuantity(packageQuantity);
       setShowCartModal(true);

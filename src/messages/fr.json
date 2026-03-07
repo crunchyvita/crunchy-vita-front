@@ -195,10 +195,11 @@
       "fields": {
         "company": "Société",
         "activity": "Activité",
-        "siret": "Siret ",
+        "siren": "SIREN",
         "vat": "Numéro TVA",
         "address": "Adresse",
-        "website": "Site web de société"
+        "website": "Site web de société",
+        "message": "Message..."
       },
       "selects": {
         "products": "Produits Recherchés",

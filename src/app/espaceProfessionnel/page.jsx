@@ -324,39 +324,16 @@ const CrunchyVita = () => {
             <input type="text required" placeholder={t('form.fields.company')} className="border p-3 rounded text-sm w-full bg-gray-50" />
             <input type="text" placeholder={t('form.fields.activity')} className="border p-3 rounded text-sm w-full bg-gray-50" />
 
-            <input type="text required" placeholder={t('form.fields.siret')} className="border p-3 rounded text-sm w-full bg-gray-50" />
+            <input type="text required" placeholder={t('form.fields.siren')} className="border p-3 rounded text-sm w-full bg-gray-50" />
             <input type="text" placeholder={t('form.fields.vat')} className="border p-3 rounded text-sm w-full bg-gray-50" />
 
             <input type="text" placeholder={t('form.fields.address')} className="border p-3 rounded text-sm w-full bg-gray-50" />
             <input type="url" placeholder={t('form.fields.website')} className="border p-3 rounded text-sm w-full bg-gray-50" />
 
-            <div className="relative">
-              <select className="border p-3 rounded text-sm w-full bg-gray-50 appearance-none text-gray-500">
-                <option>{t('form.selects.products')}</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3.5 text-gray-400 w-4 h-4" />
-            </div>
-
-            <div className="relative">
-              <select className="border p-3 rounded text-sm w-full bg-gray-50 appearance-none text-gray-500">
-                <option>{t('form.selects.range')}</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3.5 text-gray-400 w-4 h-4" />
-            </div>
-
-            <div className="relative">
-              <select className="border p-3 rounded text-sm w-full bg-gray-50 appearance-none text-gray-500">
-                <option>{t('form.selects.volume')}</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3.5 text-gray-400 w-4 h-4" />
-            </div>
-
-            <div className="relative">
-              <select className="border p-3 rounded text-sm w-full bg-gray-50 appearance-none text-gray-500">
-                <option>{t('form.selects.country')}</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3.5 text-gray-400 w-4 h-4" />
-            </div>
+            <textarea
+              placeholder={t('form.fields.message')}
+              className="md:col-span-2 border p-3 rounded text-sm w-full bg-gray-50 min-h-[120px]"
+            />         
 
             <div className="md:col-span-2 flex justify-center mt-4">
               <button className="bg-[#556822] text-white font-bold py-3 px-12 rounded hover:bg-[#44591a] transition shadow-md w-full md:w-auto">
