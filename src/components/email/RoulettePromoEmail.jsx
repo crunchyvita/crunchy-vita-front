@@ -1,69 +1,56 @@
 export function RoulettePromoEmail({ code, reward, expirationDate, discountValue, discountType }) {
-  const formattedDate = new Date(expirationDate).toLocaleDateString('en-US', {
+  const formattedDate = new Date(expirationDate).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
   const containerStyle = {
-    fontFamily: "'Arial', sans-serif",
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: '#333',
-    margin: 0,
-    padding: '20px',
-  };
-
-  const mainContainerStyle = {
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     maxWidth: '600px',
     margin: '0 auto',
-    background: 'white',
-    borderRadius: '12px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: '16px',
     overflow: 'hidden',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+    color: '#334155',
   };
 
   const headerStyle = {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
+    backgroundColor: '#065f46',
     padding: '40px 20px',
     textAlign: 'center',
   };
 
-  const emojiStyle = {
-    fontSize: '50px',
-    marginBottom: '10px',
-    display: 'inline-block',
-    animation: 'shine 2s infinite',
-  };
-
   const h1Style = {
+    color: '#ffffff',
     margin: 0,
-    fontSize: '32px',
-    fontWeight: 'bold',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
+    fontSize: '28px',
+    letterSpacing: '-0.5px',
   };
 
   const contentStyle = {
     padding: '40px 30px',
+    lineHeight: '1.6',
     textAlign: 'center',
   };
 
   const pStyle = {
-    fontSize: '18px',
-    margin: '20px 0',
+    fontSize: '16px',
+    margin: '0 0 20px 0',
   };
 
   const rewardBoxStyle = {
-    background: '#f8f9ff',
-    border: '3px solid #667eea',
+    backgroundColor: '#f8fafc',
+    border: '2px solid #10b981',
     borderRadius: '12px',
     padding: '30px',
     margin: '20px 0',
   };
 
   const rewardTitleStyle = {
-    fontSize: '18px',
-    color: '#667eea',
+    fontSize: '16px',
+    color: '#065f46',
     fontWeight: 'bold',
     marginBottom: '10px',
     textTransform: 'uppercase',
@@ -72,18 +59,18 @@ export function RoulettePromoEmail({ code, reward, expirationDate, discountValue
 
   const rewardDescriptionStyle = {
     fontSize: '24px',
-    color: '#764ba2',
+    color: '#10b981',
     fontWeight: 'bold',
     margin: '15px 0',
   };
 
   const codeBoxStyle = {
-    background: '#333',
-    color: '#00ff00',
+    backgroundColor: '#0f172a',
+    color: '#10b981',
     fontFamily: "'Courier New', monospace",
     fontSize: '24px',
     fontWeight: 'bold',
-    padding: '20px',
+    padding: '15px',
     borderRadius: '8px',
     letterSpacing: '3px',
     margin: '20px 0',
@@ -92,40 +79,43 @@ export function RoulettePromoEmail({ code, reward, expirationDate, discountValue
 
   const expirationStyle = {
     fontSize: '14px',
-    color: '#e74c3c',
+    color: '#ef4444', 
     marginTop: '15px',
     fontWeight: 'bold',
   };
 
   const ctaButtonStyle = {
     display: 'inline-block',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    padding: '15px 40px',
-    borderRadius: '8px',
+    backgroundColor: '#10b981',
+    color: '#ffffff',
+    padding: '14px 28px',
+    borderRadius: '10px',
     textDecoration: 'none',
     fontWeight: 'bold',
-    margin: '20px 0',
+    marginTop: '25px',
+    boxShadow: '0 4px 6px rgba(16, 185, 129, 0.2)',
     transition: 'transform 0.3s',
   };
 
   const instructionsStyle = {
-    background: '#f0f0f0',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
     padding: '20px',
-    borderRadius: '8px',
-    margin: '20px 0',
+    borderRadius: '12px',
+    margin: '30px 0 10px 0',
     textAlign: 'left',
     fontSize: '14px',
-    color: '#555',
+    color: '#64748b',
   };
 
   const instructionsH3Style = {
     marginTop: 0,
-    color: '#333',
+    color: '#0f172a',
+    fontSize: '16px',
   };
 
   const olStyle = {
-    margin: '10px 0',
+    margin: '10px 0 0 0',
     paddingLeft: '20px',
   };
 
@@ -134,72 +124,66 @@ export function RoulettePromoEmail({ code, reward, expirationDate, discountValue
   };
 
   const footerStyle = {
-    background: '#f8f9ff',
     padding: '20px',
     textAlign: 'center',
     fontSize: '12px',
-    color: '#888',
-    borderTop: '1px solid #e0e0e0',
+    color: '#94a3b8',
+    backgroundColor: '#f8fafc',
+    borderTop: '1px solid #e2e8f0',
   };
 
   const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.crunchyvita.com';
 
   return (
     <div style={containerStyle}>
-      <style>{`
-        @keyframes shine {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.8; }
-        }
-      `}</style>
-      
-      <div style={mainContainerStyle}>
-        <div style={headerStyle}>
-          <h1 style={h1Style}>Congratulations!</h1>
+      <div style={headerStyle}>
+        <h1 style={h1Style}>Félicitations !</h1>
+      </div>
+
+      <div style={contentStyle}>
+        <p style={pStyle}>
+          Vous avez gagné ! Voici votre récompense exclusive de la Roue de la Fortune Crunchy Vita !
+        </p>
+
+        <div style={rewardBoxStyle}>
+          <div style={rewardTitleStyle}>Votre Récompense</div>
+          <div style={rewardDescriptionStyle}>{reward}</div>
+
+          <div style={codeBoxStyle}>{code}</div>
+          
+          {expirationDate && (
+             <div style={expirationStyle}>Valable jusqu'au {formattedDate}</div>
+          )}
         </div>
 
-        <div style={contentStyle}>
-          <p style={pStyle}>
-            You're a winner!  Here's your exclusive reward from CrunchyVita's Spinning Wheel!
-          </p>
-
-          <div style={rewardBoxStyle}>
-            <div style={rewardTitleStyle}>Your Winning Prize</div>
-            <div style={rewardDescriptionStyle}>{reward}</div>
-
-            <div style={codeBoxStyle}>{code}</div>
-
-         
-          </div>
-
-          <div style={instructionsStyle}>
-            <h3 style={instructionsH3Style}>How to Use Your Code:</h3>
-            <ol style={olStyle}>
-              <li style={liStyle}>Visit our shop at <strong>crunchyvita.com</strong></li>
-              <li style={liStyle}>Add your favorite products to your cart</li>
-              <li style={liStyle}>Go to checkout</li>
-              <li style={liStyle}>
-                Enter code <strong><u>{code}</u></strong> in the promo code field
-              </li>
-              <li style={liStyle}>
-                Enjoy your {discountType === 'PERCENTAGE' ? `${discountValue}% discount` : 'free item'}!
-              </li>
-            </ol>
-          </div>
-
-          <a href={`${frontendUrl}/shop`} style={ctaButtonStyle}>
-             Shop Now And Use Your Code!
-          </a>
-
+        <div style={instructionsStyle}>
+          <h3 style={instructionsH3Style}>Comment utiliser votre code :</h3>
+          <ol style={olStyle}>
+            <li style={liStyle}>Visitez notre boutique sur <strong>crunchyvita.com</strong></li>
+            <li style={liStyle}>Ajoutez vos produits préférés à votre panier</li>
+            <li style={liStyle}>Accédez à la caisse</li>
+            <li style={liStyle}>
+              Entrez le code <strong><u>{code}</u></strong> dans le champ code promo
+            </li>
+            <li style={liStyle}>
+              Profitez de votre {discountType === 'PERCENTAGE' ? `réduction de ${discountValue}%` : 'article gratuit'} !
+            </li>
+          </ol>
         </div>
 
-        <div style={footerStyle}>
-          <p style={{ margin: 0 }}>
-            © 2026 CrunchyVita. All rights reserved.
-            <br />
-            This is an exclusive promotional email. Please do not share your code with others.
-          </p>
-        </div>
+        <a href={`${frontendUrl}/shop`} style={ctaButtonStyle}>
+          Utiliser mon code maintenant
+        </a>
+
+      </div>
+
+      <div style={footerStyle}>
+        <p style={{ margin: '5px 0' }}>
+          © 2026 Crunchy Vita. Tous droits réservés.
+        </p>
+        <p style={{ margin: '5px 0' }}>
+          Ceci est un email promotionnel exclusif. Merci de ne pas partager votre code avec d'autres personnes.
+        </p>
       </div>
     </div>
   );
