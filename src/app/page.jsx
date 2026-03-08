@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
@@ -55,6 +55,8 @@ export default function Home() {
   const t = useTranslations('Home');
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
   const [isRouletteEnabled, setIsRouletteEnabled] = useState(false);
+  const hasAutoOpenedRoulette = useRef(false);
+  const rouletteUserKey = user?._id || user?.id || user?.email || 'guest';
 
   // Fetch settings from backend to check if roulette is enabled
   useEffect(() => {
@@ -80,6 +82,19 @@ export default function Home() {
     
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (!isRouletteEnabled || hasAutoOpenedRoulette.current) return;
+
+    const seenKey = `roulette_seen_${rouletteUserKey}`;
+    const hasSeenRoulette = typeof window !== 'undefined' && localStorage.getItem(seenKey) === 'true';
+
+    if (!hasSeenRoulette) {
+      hasAutoOpenedRoulette.current = true;
+      setIsRouletteOpen(true);
+      localStorage.setItem(seenKey, 'true');
+    }
+  }, [isRouletteEnabled, rouletteUserKey]);
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -320,28 +335,13 @@ export default function Home() {
 
       <Footer />
       
-      {/* Fixed Roulette Button - Only show if enabled */}
+      {/* Roulette Modal - Open automatically on page load when enabled */}
       {isRouletteEnabled && (
-        <>
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsRouletteOpen(true)}
-            className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-4 font-black uppercase tracking-wider text-white shadow-2xl hover:shadow-[#E10C69]/50 transition-shadow"
-          >
-            <span className="hidden sm:inline">{t('roulette.title', 'Spin to Win!')}</span>
-          </motion.button>
-          
-          {/* Roulette Modal */}
-          <RouletteModal 
-            isOpen={isRouletteOpen} 
-            onClose={() => setIsRouletteOpen(false)}
-            userEmail={user?.email || ''}
-          />
-        </>
+        <RouletteModal
+          isOpen={isRouletteOpen}
+          onClose={() => setIsRouletteOpen(false)}
+          userEmail={user?.email || ''}
+        />
       )}
     </div>
   );

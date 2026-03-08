@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Copy, Check, X, Gift } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamically import the Wheel to prevent SSR issues
 const Wheel = dynamic(
@@ -17,6 +17,10 @@ const BRAND_PINK = '#E10C69';
 
 export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   const t = useTranslations('Roulette');
+  const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
+    ? rawApiBaseUrl.replace(/\/$/, '')
+    : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
 
   const confettiCanvasRef = useRef(null);
   const [mustSpin, setMustSpin] = useState(false);
@@ -24,6 +28,8 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   const prizeNumberRef = useRef(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rewards, setRewards] = useState([]);
+  const [rewardsLoading, setRewardsLoading] = useState(false);
+  const [rewardsError, setRewardsError] = useState('');
   const [winResult, setWinResult] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
@@ -117,9 +123,10 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   }, [isOpen, winResult]);
 
   const fetchRewards = async () => {
+    setRewardsLoading(true);
+    setRewardsError('');
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${backendUrl}/roulette/rewards`);
+      const response = await fetch(`${apiBaseUrl}/roulette/rewards`);
       const result = await response.json();
 
       if (result.success && result.data.length > 0) {
@@ -131,9 +138,16 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
           },
         }));
         setRewards(formattedRewards);
+      } else {
+        setRewards([]);
+        setRewardsError('Aucune recompense disponible pour le moment.');
       }
     } catch (err) {
       console.error('Error fetching rewards:', err);
+      setRewards([]);
+      setRewardsError('Impossible de charger la roue.');
+    } finally {
+      setRewardsLoading(false);
     }
   };
 
@@ -169,8 +183,7 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
     console.log('🛑 Wheel stopped | prizeNumber:', safePrizeNumber, '| reward:', winningReward);
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${backendUrl}/roulette/spin`, {
+      const response = await fetch(`${apiBaseUrl}/roulette/spin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, selectedReward: winningReward }),
@@ -196,44 +209,74 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   if (!isOpen) return null;
 
   return (
-    <>
-      {winResult && (
-        <canvas
-          ref={confettiCanvasRef}
-          className="fixed inset-0 z-110 pointer-events-none"
-          aria-hidden="true"
-        />
-      )}
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <>
+          {winResult && (
+            <canvas
+              ref={confettiCanvasRef}
+              className="fixed inset-0 z-110 pointer-events-none"
+              aria-hidden="true"
+            />
+          )}
 
-      <motion.div
-        className="fixed inset-0 bg-black/60 z-100"
-        onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      />
-
-      <div className="fixed inset-0 flex items-center justify-center z-101 p-4 pointer-events-none">
-        <motion.div
-          className="bg-[#F5F3ED] rounded-[2.5rem] shadow-2xl max-w-4xl w-full overflow-hidden pointer-events-auto relative border-8 border-white"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          <button
+          {/* Backdrop overlay */}
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-100"
             onClick={onClose}
-            className="absolute top-4 right-4 z-50 text-slate-400 hover:text-black transition-all"
-          >
-            <X size={28} />
-          </button>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          />
 
-          <div className="px-8 py-8">
-            {!winResult ? (
+          {/* Curtain container - attached to top */}
+          <div className="fixed top-0 left-0 right-0 z-101 pointer-events-none flex justify-center">
+            <motion.div
+              className="w-full max-w-5xl bg-[#F5F3ED] shadow-2xl overflow-hidden pointer-events-auto relative"
+              initial={{ y: '-100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '-100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 120,
+                damping: 18,
+                mass: 0.9,
+                bounce: 0.25,
+              }}
+              style={{
+                borderBottomLeftRadius: '2.5rem',
+                borderBottomRightRadius: '2.5rem',
+                borderLeft: '8px solid white',
+                borderRight: '8px solid white',
+                borderBottom: '8px solid white',
+              }}
+            >
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-50 text-slate-400 hover:text-black transition-all hover:rotate-90 duration-300"
+              >
+                <X size={28} />
+              </button>
+
+              {/* Decorative header attachment line */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#556822] via-[#E10C69] to-[#556822]" />
+
+              <div className="px-6 py-10 md:px-10 md:py-12">{!winResult ? (
               <div className="flex flex-col md:flex-row items-center justify-around gap-10">
 
                 {/* Wheel Section */}
                 <div className="relative scale-75 md:scale-90 shrink-0">
 
                   <div className="relative rounded-full border-10 border-white ring-[6px] ring-[#E10C69] shadow-2xl bg-white flex items-center justify-center">
-                    {rewards.length > 0 && (
+                    {rewardsLoading && (
+                      <div className="h-90 w-90 rounded-full flex items-center justify-center text-slate-500 font-bold text-sm text-center px-8">
+                        Chargement de la roue...
+                      </div>
+                    )}
+
+                    {!rewardsLoading && rewards.length > 0 && (
                       <Wheel
                         mustStartSpinning={mustSpin}
                         prizeNumber={prizeNumber}
@@ -257,6 +300,19 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
                         fontSize={18}
                         textDistance={60}
                       />
+                    )}
+
+                    {!rewardsLoading && rewards.length === 0 && (
+                      <div className="h-90 w-90 rounded-full flex flex-col items-center justify-center text-center px-8">
+                        <p className="text-slate-500 font-semibold text-sm">{rewardsError || 'Roue indisponible'}</p>
+                        <button
+                          type="button"
+                          onClick={fetchRewards}
+                          className="mt-4 rounded-full bg-[#556822] px-4 py-2 text-xs font-black uppercase tracking-wider text-white"
+                        >
+                          Reessayer
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -366,9 +422,11 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
                 </button>
               </motion.div>
             )}
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-      </div>
-    </>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
