@@ -18,6 +18,7 @@ const BRAND_PINK = '#E10C69';
 export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   const t = useTranslations('Roulette');
 
+  const confettiCanvasRef = useRef(null);
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const prizeNumberRef = useRef(0);
@@ -31,6 +32,89 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   useEffect(() => {
     if (isOpen) fetchRewards();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !winResult) return;
+
+    const canvas = confettiCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId;
+    const confettiCount = 140;
+    const gravity = 0.18;
+    const drag = 0.992;
+    const colors = ['#556822', '#E10C69', '#ffffff', '#d9e3c5', '#ffd4e8'];
+    const pieces = [];
+
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const createPiece = () => ({
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * window.innerHeight * 0.4,
+      w: 6 + Math.random() * 8,
+      h: 8 + Math.random() * 12,
+      vx: -2 + Math.random() * 4,
+      vy: 2 + Math.random() * 3,
+      rotation: Math.random() * Math.PI * 2,
+      vr: -0.12 + Math.random() * 0.24,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 220 + Math.random() * 80,
+    });
+
+    resizeCanvas();
+    for (let i = 0; i < confettiCount; i += 1) {
+      pieces.push(createPiece());
+    }
+
+    const render = () => {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      let living = 0;
+      for (const piece of pieces) {
+        if (piece.life <= 0) continue;
+        living += 1;
+
+        piece.life -= 1;
+        piece.vx *= drag;
+        piece.vy = piece.vy * drag + gravity;
+        piece.x += piece.vx;
+        piece.y += piece.vy;
+        piece.rotation += piece.vr;
+
+        ctx.save();
+        ctx.translate(piece.x, piece.y);
+        ctx.rotate(piece.rotation);
+        ctx.fillStyle = piece.color;
+        ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+        ctx.restore();
+      }
+
+      if (living > 0) {
+        animationFrameId = window.requestAnimationFrame(render);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(render);
+    window.addEventListener('resize', resizeCanvas);
+
+    return () => {
+      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resizeCanvas);
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    };
+  }, [isOpen, winResult]);
 
   const fetchRewards = async () => {
     try {
@@ -79,6 +163,9 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
     const safePrizeNumber = prizeNumberRef.current;
     const winningReward = rewards[safePrizeNumber].option;
 
+    // Reveal winner immediately while code is being generated
+    setWinResult({ code: 'GENERATION...', reward: winningReward, pending: true });
+
     console.log('🛑 Wheel stopped | prizeNumber:', safePrizeNumber, '| reward:', winningReward);
 
     try {
@@ -94,13 +181,15 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
         setWinResult({
           code: result.data.code,
           reward: winningReward,
+          pending: false,
         });
       } else {
         setError(result.message || 'Something went wrong. Please try again.');
+        setWinResult(null);
       }
     } catch (err) {
       console.error('Error submitting spin:', err);
-      setWinResult({ code: 'CRUNCHYVITA15', reward: winningReward });
+      setWinResult({ code: 'CRUNCHYVITA15', reward: winningReward, pending: false });
     }
   };
 
@@ -108,6 +197,14 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
 
   return (
     <>
+      {winResult && (
+        <canvas
+          ref={confettiCanvasRef}
+          className="fixed inset-0 z-110 pointer-events-none"
+          aria-hidden="true"
+        />
+      )}
+
       <motion.div
         className="fixed inset-0 bg-black/60 z-100"
         onClick={onClose}
@@ -236,6 +333,7 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
 
                 <div
                   onClick={() => {
+                    if (winResult.pending) return;
                     navigator.clipboard.writeText(winResult.code);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
@@ -250,7 +348,9 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
                     {winResult.code}
                   </span>
                   <div className="mt-2 flex items-center justify-center gap-2 text-slate-400 font-bold uppercase text-xs">
-                    {copied ? (
+                    {winResult.pending ? (
+                      <>Generation du code...</>
+                    ) : copied ? (
                       <><Check size={16} className="text-green-500" /> Copié !</>
                     ) : (
                       <><Copy size={16} /> Cliquez pour copier</>

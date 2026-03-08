@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
@@ -54,6 +54,32 @@ export default function Home() {
   const { user } = useAuth();
   const t = useTranslations('Home');
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
+  const [isRouletteEnabled, setIsRouletteEnabled] = useState(false);
+
+  // Fetch settings from backend to check if roulette is enabled
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/settings`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setIsRouletteEnabled(data.data.features?.rouletteEnabled ?? false);
+          } else {
+            setIsRouletteEnabled(false);
+          }
+        } else {
+          setIsRouletteEnabled(false);
+        }
+      } catch (error) {
+        console.error('Error reading settings:', error);
+        setIsRouletteEnabled(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -294,25 +320,29 @@ export default function Home() {
 
       <Footer />
       
-      {/* Fixed Roulette Button */}
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsRouletteOpen(true)}
-        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-4 font-black uppercase tracking-wider text-white shadow-2xl hover:shadow-[#E10C69]/50 transition-shadow"
-      >
-        <span className="hidden sm:inline">{t('roulette.title', 'Spin to Win!')}</span>
-      </motion.button>
-      
-      {/* Roulette Modal */}
-      <RouletteModal 
-        isOpen={isRouletteOpen} 
-        onClose={() => setIsRouletteOpen(false)}
-        userEmail={user?.email || ''}
-      />
+      {/* Fixed Roulette Button - Only show if enabled */}
+      {isRouletteEnabled && (
+        <>
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 1, type: "spring", stiffness: 200, damping: 15 }}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsRouletteOpen(true)}
+            className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-4 font-black uppercase tracking-wider text-white shadow-2xl hover:shadow-[#E10C69]/50 transition-shadow"
+          >
+            <span className="hidden sm:inline">{t('roulette.title', 'Spin to Win!')}</span>
+          </motion.button>
+          
+          {/* Roulette Modal */}
+          <RouletteModal 
+            isOpen={isRouletteOpen} 
+            onClose={() => setIsRouletteOpen(false)}
+            userEmail={user?.email || ''}
+          />
+        </>
+      )}
     </div>
   );
 }
