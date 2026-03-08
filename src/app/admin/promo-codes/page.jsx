@@ -175,7 +175,7 @@ export default function PromoCodesPage() {
             <table className="w-full">
               <thead className="bg-gray-100 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Code</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Promotion</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Discount</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Usages</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Expiration</th>
@@ -186,7 +186,7 @@ export default function PromoCodesPage() {
               <tbody>
                 {promoCodes.map(code => (
                   <tr key={code._id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 font-bold text-gray-900">{code.code}</td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">{code.name || '-'}</td>
                     <td className="px-6 py-4 text-gray-700">
                       {code.discountType === 'PERCENTAGE'
                         ? `${code.discountValue}%`
@@ -262,7 +262,7 @@ export default function PromoCodesPage() {
         }}
         onConfirm={handleDelete}
         title="Delete this promo code?"
-        itemName={selectedCode?.code}
+        itemName={selectedCode?.name || selectedCode?.code}
         description="This action cannot be undone. All data associated with this code will be deleted."
         isDeleting={deleting}
       />

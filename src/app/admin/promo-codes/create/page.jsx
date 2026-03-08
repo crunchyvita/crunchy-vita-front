@@ -15,7 +15,7 @@ export default function CreatePromoCodePage() {
   const [packages, setPackages] = useState([]);
 
   const [formData, setFormData] = useState({
-    code: '',
+    name: '',
     discountType: 'PERCENTAGE',
     discountValue: '',
     freeItemType: 'PRODUCT',
@@ -71,7 +71,7 @@ export default function CreatePromoCodePage() {
       const token = localStorage.getItem('token');
       const payload = {
         ...formData,
-        code: formData.code.toUpperCase(),
+        name: formData.name?.trim(),
         discountValue: formData.discountType === 'FREE_ITEM' ? 0 : parseFloat(formData.discountValue),
         minPurchaseAmount: parseFloat(formData.minPurchaseAmount) || 0,
         usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
@@ -150,14 +150,14 @@ export default function CreatePromoCodePage() {
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Promo Code *</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Promotion Name *</label>
                     <input
                       type="text"
-                      name="code"
-                      value={formData.code}
+                      name="name"
+                      value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="PROMO2024"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 font-mono font-bold focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                      placeholder="Spring Wheel 15%"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                       required
                     />
                   </div>
