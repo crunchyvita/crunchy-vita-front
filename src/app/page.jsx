@@ -17,7 +17,12 @@ import {
   CandyOff,
   Award,
   Sparkle,
-  MapPinHouse
+  MapPinHouse,
+  Factory,
+  Truck,
+  ShieldCheck,
+  Headset,
+  Banana
 } from 'lucide-react';
 
 // --- Variantes d'animation ---
@@ -49,6 +54,17 @@ const popIn = {
     transition: { type: "spring", stiffness: 100, damping: 10 }
   }
 };
+
+const homeTickerItems = [
+{ label: '95% DES NUTRIMENTS CONSERVÉS', icon: Sparkle },
+{ label: '100% FRUITS NATURELS', icon: Banana },
+{ label: 'SANS AJOUT DE SUCRE', icon: CandyOff },
+{ label: 'CERTIFIÉ BIO', iconSrc: '/assets/images/bio2.png', iconAlt: 'Certifié bio' },
+{ label: 'FABRIQUÉ DANS DES STRUCTURES PROTÉGÉES', icon: Factory },
+{ label: 'LIVRAISON EXPRESS', icon: Truck },
+{ label: 'PAIEMENT 100% SÉCURISÉ', icon: ShieldCheck },
+{ label: 'SERVICE CLIENT PREMIUM', icon: Headset }
+];
 
 export default function Home() {
   const { user } = useAuth();
@@ -152,6 +168,38 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white border-y border-black/10 py-6 sm:py-7">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="home-ticker overflow-hidden" role="region" aria-label="Crunchy Vita highlights">
+            <div className="home-ticker-track flex w-max items-center">
+              {[...homeTickerItems, ...homeTickerItems].map((item, index) => (
+                <div key={`${item.label}-${index}`} className="flex shrink-0 items-center px-6 sm:px-8">
+                  <div className="flex flex-col items-center gap-2">
+                    {item.iconSrc ? (
+                      <Image
+                        src={item.iconSrc}
+                        alt={item.iconAlt || item.label}
+                        width={20}
+                        height={20}
+                        className="home-ticker-image-icon h-5 w-5 shrink-0 object-contain"
+                      />
+                    ) : (
+                      <item.icon size={20} className="shrink-0 text-gray-500" aria-hidden="true" />
+                    )}
+                    <span
+                      className="whitespace-nowrap text-sm sm:text-base font-black uppercase tracking-[0.18em] text-black"
+                      style={{ fontFamily: 'Maison Neue, sans-serif' }}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

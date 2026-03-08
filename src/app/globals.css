@@ -4,6 +4,15 @@ html {
   scroll-behavior: smooth;
 }
 
+@keyframes homeTickerScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 @layer components {
   .feature-card-hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -12,6 +21,23 @@ html {
   .feature-card-hover:hover {
     box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
     transform: translateY(-4px);
+  }
+
+  .home-ticker-track {
+    animation: homeTickerScroll 36s linear infinite;
+    will-change: transform;
+  }
+
+  .home-ticker:hover .home-ticker-track,
+  .home-ticker:focus-within .home-ticker-track {
+    animation-play-state: paused;
+  }
+
+  .home-ticker-image-icon {
+    transform: scale(2.3);
+    transform-origin: center;
+    filter: grayscale(1) brightness(0.38) contrast(160%);
+    opacity: 1;
   }
 }
 
