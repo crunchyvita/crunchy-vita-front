@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu } from "lucide-react";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu, FileText } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
 
@@ -638,8 +638,9 @@ export default function AdminHeader() {
                         const contactType = n.metadata?.contactType;
                         const companyName = n.metadata?.companyName;
                         
-                        // Determine if professional based on metadata or company name
-                        const isProfessional = contactType === 'professionnel' || !!companyName;
+                        // Determine if business/devis contact based on metadata or company name
+                        const isQuoteRequest = contactType === 'devis';
+                        const isBusinessContact = ['professionnel', 'devis'].includes(contactType) || !!companyName;
                         
                         const senderName = n.metadata?.senderName || 'Contact';
                         const senderEmail = n.metadata?.senderEmail || '';
@@ -658,12 +659,28 @@ export default function AdminHeader() {
                               onClick={() => handleContactNotificationClick(n)}
                               className="p-4 flex items-start gap-3 relative"
                             >
-                              {/* PRO Badge in bottom right for professional only */}
-                              {isProfessional && (
+                              {/* PRO/DEVIS Badge in bottom right for business contacts */}
+                              {isBusinessContact && (
                                 <div className="absolute bottom-2 right-2">
-                                  <div className="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-100 border border-purple-200">
-                                    <Building2 className="h-3 w-3 text-purple-600 mr-1" />
-                                    <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                                  <div
+                                    className={`inline-flex items-center px-1.5 py-0.5 rounded border ${
+                                      isQuoteRequest
+                                        ? 'bg-orange-100 border-orange-200'
+                                        : 'bg-purple-100 border-purple-200'
+                                    }`}
+                                  >
+                                    {isQuoteRequest ? (
+                                      <FileText className="h-3 w-3 text-orange-600 mr-1" />
+                                    ) : (
+                                      <Building2 className="h-3 w-3 text-purple-600 mr-1" />
+                                    )}
+                                    <span
+                                      className={`text-[10px] font-bold ${
+                                        isQuoteRequest ? 'text-orange-600' : 'text-purple-600'
+                                      }`}
+                                    >
+                                      {isQuoteRequest ? 'DEVIS' : 'PRO'}
+                                    </span>
                                   </div>
                                 </div>
                               )}

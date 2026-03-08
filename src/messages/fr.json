@@ -199,12 +199,15 @@
       "noticeLink": "formulaire de contact",
       "companyTitle": "Société",
       "fields": {
+        "contactName": "Nom du contact",
+        "email": "Email professionnel",
         "company": "Société",
         "activity": "Activité",
-        "siret": "Siret ",
+        "siren": "SIREN",
         "vat": "Numéro TVA",
         "address": "Adresse",
-        "website": "Site web de société"
+        "website": "Site web de société",
+        "message": "Message"
       },
       "selects": {
         "products": "Produits Recherchés",
@@ -212,7 +215,11 @@
         "volume": "Volumes Souhaités",
         "country": "Pays de Livraison"
       },
-      "submit": "Recevoir un Devis"
+      "quoteSubject": "Demande de devis - Espace professionnel",
+      "submit": "Recevoir un Devis",
+      "sending": "Envoi en cours...",
+      "success": "Votre demande de devis a été envoyée avec succès.",
+      "error": "Impossible d'envoyer la demande de devis pour le moment."
     }
   },
   "AboutUs": {

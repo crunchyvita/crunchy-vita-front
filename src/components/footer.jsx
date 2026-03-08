@@ -35,13 +35,22 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <div className="mb-1">
+            <div >
               <Image
-                src="/assets/images/logo.png"
+                src="/assets/images/logo2_green.png"
                 alt="Crunchy Vita Logo"
                 width={280}
                 height={120}
                 className="h-40 w-auto"
+              />
+            </div>
+            <div className="-mt-4 mb-4">
+              <Image
+                src="/assets/images/bio1.png"
+                alt="Certification Agriculture Biologique"
+                width={220}
+                height={140}
+                className="h-auto w-52"
               />
             </div>
             <p className="text-sm text-gray-900 leading-relaxed mb-6">
@@ -62,7 +71,7 @@ export default function Footer() {
                 <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
                   <p>{t('address.line1')}</p>
-                  <p>{t('address.line2')}</p>
+                
                   <p>{t('address.line3')}</p>
                 </div>
               </div>

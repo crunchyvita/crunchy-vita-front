@@ -178,10 +178,20 @@ export const productAPI = {
     }
     
     formData.append("description", payload.description || "");
+
+    ["width", "height", "depth", "weight"].forEach((field) => {
+      if (payload[field] !== undefined) {
+        formData.append(field, payload[field] ?? "");
+      }
+    });
     
     // Tags as comma-separated string
     if (payload.tags) {
       formData.append("tags", payload.tags);
+    }
+
+    if (payload.showInShop !== undefined) {
+      formData.append("showInShop", String(payload.showInShop));
     }
 
     (payload.files || []).forEach((file) => {

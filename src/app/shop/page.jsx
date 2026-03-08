@@ -413,7 +413,11 @@ function ClientShop() {
 
         if (pRes.ok) {
           const d = await pRes.json();
-          setProducts((d.data || d).filter((p) => p.status === 'ACTIVE'));
+          setProducts(
+            (d.data || d).filter(
+              (p) => p.status === 'ACTIVE' && p.showInShop !== false
+            )
+          );
         }
 
         if (pkgRes.ok) {

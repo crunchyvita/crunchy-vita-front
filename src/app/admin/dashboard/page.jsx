@@ -179,7 +179,7 @@ function AdminDashboard() {
                     <div className="min-w-0">
                       <h2 className="text-lg font-bold text-slate-900 truncate leading-tight">{selectedMessage.name}</h2>
                       <p className="text-xs text-blue-600 truncate">{selectedMessage.email}</p>
-                      {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
+                      {['professionnel', 'devis'].includes(selectedMessage.type) && selectedMessage.companyName && (
                         <div className="flex items-center gap-1 mt-1">
                           <Building2 size={12} className="text-purple-600" />
                           <span className="text-[12px] font-semibold text-purple-600">{selectedMessage.companyName}</span>

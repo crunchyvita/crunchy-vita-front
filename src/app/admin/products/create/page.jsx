@@ -12,7 +12,8 @@ import {
   Image as ImageIcon, 
   Loader2, 
   DollarSign, 
-  Package, 
+  ShieldCheck,
+  AlertTriangle,
   LayoutGrid,
   Info,
   Type
@@ -41,8 +42,13 @@ export default function CreateProductPage() {
     name: "",
     price: "",
     stock: "",
+    width: "",
+    height: "",
+    depth: "",
+    weight: "",
     tags: [],
     description: "",
+    showInShop: true,
   });
 
   // Previews logic
@@ -247,44 +253,106 @@ export default function CreateProductPage() {
             </div>
           </div>
 
-          {/* Section: Finance & Stock */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-8">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
-              <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl"><DollarSign size={24}/></div>
-              <h3 className="font-black text-xl text-slate-900">Inventory & Pricing</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Sale Price </label>
-                <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-black font-black text-lg">$</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    value={form.price}
-                    onChange={handleChange("price")}
-                    onWheel={(e) => e.currentTarget.blur()}
-                    className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-12 pr-6 py-4 text-xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
-                  />
-                </div>
+          {/* Section: Pricing & Stock */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><DollarSign size={20}/></div>
+                <h3 className="font-black text-lg text-slate-900">Pricing *</h3>
               </div>
-              <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Initial Stock Quantity</label>
-                <div className="relative">
-                  <Package className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={form.stock}
-                    onChange={handleChange("stock")}
-                    onWheel={(e) => e.currentTarget.blur()}
-                    className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-14 pr-6 py-4 text-xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
-                  />
-                </div>
+              <div className="relative">
+                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-black font-black text-lg">$ </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={form.price}
+                  onChange={handleChange("price")}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 pl-12 pr-6 py-4 text-2xl font-black text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="p-2 bg-amber-100 text-amber-700 rounded-xl"><ShieldCheck size={20}/></div>
+                <h3 className="font-black text-lg text-slate-900">Stock Alert *</h3>
+              </div>
+              <input
+                type="number"
+                min="0"
+                required
+                value={form.stock}
+                onChange={handleChange("stock")}
+                onWheel={(e) => e.currentTarget.blur()}
+                className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-2xl font-black text-black focus:border-amber-500 focus:bg-white outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="p-2 bg-slate-100 text-slate-700 rounded-xl"><AlertTriangle size={20}/></div>
+              <h3 className="font-black text-lg text-slate-900">Dimensions & Weight</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Width(cm) *</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={form.width}
+                  onChange={handleChange("width")}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Height(cm) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={form.height}
+                  onChange={handleChange("height")}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Depth(cm) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={form.depth}
+                  onChange={handleChange("depth")}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Weight(kg) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={form.weight}
+                  onChange={handleChange("weight")}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                />
               </div>
             </div>
           </div>
@@ -435,6 +503,24 @@ export default function CreateProductPage() {
                 onChange={(tags) => setForm((prev) => ({ ...prev, tags }))}
                 placeholder="SEO Keywords..."
               />
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Shop Visibility</label>
+              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.showInShop)}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      showInShop: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 accent-emerald-500"
+                />
+                <span className="text-sm font-bold text-white">Add this product to Shop</span>
+              </label>
             </div>
           </div>
 

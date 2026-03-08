@@ -199,12 +199,15 @@
       "noticeLink": "contact form",
       "companyTitle": "Company",
       "fields": {
+        "contactName": "Contact name",
+        "email": "Business email",
         "company": "Company",
         "activity": "Activity",
-        "siret": "SIRET",
+        "siren": "SIREN",
         "vat": "VAT number",
         "address": "Address",
-        "website": "Company website"
+        "website": "Company website",
+        "message": "Message"
       },
       "selects": {
         "products": "Requested products",
@@ -212,7 +215,11 @@
         "volume": "Desired volumes",
         "country": "Delivery country"
       },
-      "submit": "Receive a quote"
+      "quoteSubject": "Quote request - Professional space",
+      "submit": "Receive a quote",
+      "sending": "Sending...",
+      "success": "Your quote request was sent successfully.",
+      "error": "Unable to send the quote request right now."
     }
   },
   "AboutUs": {
