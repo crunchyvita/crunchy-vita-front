@@ -145,7 +145,8 @@ export default function CrunchyRoulette({
       const result = await response.json();
 
       if (result.success && result.data.length > 0) {
-        const formattedRewards = result.data.map((reward, index) => ({
+        const doubled = [...result.data, ...result.data];
+        const formattedRewards = doubled.map((reward, index) => ({
           option: reward,
           style: {
             backgroundColor: index % 2 === 0 ? BRAND_GREEN : BRAND_PINK,
@@ -155,12 +156,12 @@ export default function CrunchyRoulette({
         setRewards(formattedRewards);
       } else {
         setRewards([]);
-        setRewardsError('Aucune recompense disponible pour le moment.');
+        setRewardsError(t('noRewards'));
       }
     } catch (err) {
       console.error('Error fetching rewards:', err);
       setRewards([]);
-      setRewardsError('Impossible de charger la roue.');
+      setRewardsError(t('loadError'));
     } finally {
       setRewardsLoading(false);
     }
@@ -168,7 +169,7 @@ export default function CrunchyRoulette({
 
   const handleSpinClick = () => {
     if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address');
+      setError(t('invalidEmail'));
       return;
     }
     if (rewards.length === 0 || isSpinning) return;
@@ -192,9 +193,6 @@ export default function CrunchyRoulette({
     const safePrizeNumber = prizeNumberRef.current;
     const winningReward = rewards[safePrizeNumber].option;
 
-    // Reveal winner immediately while code is being generated
-    setWinResult({ code: 'GENERATION...', reward: winningReward, pending: true });
-
     console.log('🛑 Wheel stopped | prizeNumber:', safePrizeNumber, '| reward:', winningReward);
 
     try {
@@ -214,19 +212,18 @@ export default function CrunchyRoulette({
         setWinResult({
           code: generatedCode,
           reward: winningReward,
-          pending: false,
         });
 
         if (onSpinSuccess) {
           onSpinSuccess();
         }
       } else {
-        setError(result.message || 'Something went wrong. Please try again.');
+        setError(result.message || t('spinError'));
         setWinResult(null);
       }
     } catch (err) {
       console.error('Error submitting spin:', err);
-      setError('Unable to generate your code right now. Please try again.');
+      setError(t('codeError'));
       setWinResult(null);
     }
   };
@@ -297,7 +294,7 @@ export default function CrunchyRoulette({
                   <div className="relative rounded-full border-10 border-white ring-[6px] ring-[#E10C69] shadow-2xl bg-white flex items-center justify-center">
                     {rewardsLoading && (
                       <div className="h-90 w-90 rounded-full flex items-center justify-center text-slate-500 font-bold text-sm text-center px-8">
-                        Chargement de la roue...
+                        {t('loadingWheel')}
                       </div>
                     )}
 
@@ -329,13 +326,13 @@ export default function CrunchyRoulette({
 
                     {!rewardsLoading && rewards.length === 0 && (
                       <div className="h-90 w-90 rounded-full flex flex-col items-center justify-center text-center px-8">
-                        <p className="text-slate-500 font-semibold text-sm">{rewardsError || 'Roue indisponible'}</p>
+                        <p className="text-slate-500 font-semibold text-sm">{rewardsError || t('wheelUnavailable')}</p>
                         <button
                           type="button"
                           onClick={fetchRewards}
                           className="mt-4 rounded-full bg-[#556822] px-4 py-2 text-xs font-black uppercase tracking-wider text-white"
                         >
-                          Reessayer
+                          {t('retry')}
                         </button>
                       </div>
                     )}
@@ -358,10 +355,10 @@ export default function CrunchyRoulette({
                       style={{ color: BRAND_GREEN }}
                       className="text-3xl font-bold font-agrandir tracking-tight"
                     >
-                      Tournez pour Gagner !
+                      {t('title')}
                     </h3>
                     <p className="text-slate-500 font-medium mt-1">
-                      Profitez d'une surprise fruitée pour votre prochaine commande
+                      {t('subtitle')}
                     </p>
                   </div>
 
@@ -370,7 +367,7 @@ export default function CrunchyRoulette({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Votre adresse email"
+                      placeholder={t('emailPlaceholder')}
                       className="w-full px-6 py-3 rounded-xl border-2 border-slate-100 bg-slate-50 text-lg focus:border-[#556822] outline-none transition-all shadow-inner text-black"
                     />
 
@@ -384,7 +381,7 @@ export default function CrunchyRoulette({
                       style={{ backgroundColor: isSpinning ? '#cbd5e1' : BRAND_GREEN }}
                       className="w-full text-white font-black py-4 rounded-xl text-xl shadow-lg transition-all"
                     >
-                      {isSpinning ? 'EN COURS...' : 'Lancer la roue'}
+                      {isSpinning ? t('spinning') : t('spinButton')}
                     </motion.button>
                   </div>
                 </div>
@@ -404,17 +401,16 @@ export default function CrunchyRoulette({
                     style={{ color: BRAND_PINK }}
                     className="text-3xl font-black uppercase italic"
                   >
-                    C'est Gagné !
+                    {t('wonTitle')}
                   </h3>
                   <p className="text-slate-600">
-                    Vous avez remporté :{' '}
+                    {t('youWon')}{' '}
                     <span className="font-bold text-black">{winResult.reward}</span>
                   </p>
                 </div>
 
                 <div
                   onClick={() => {
-                    if (winResult.pending) return;
                     navigator.clipboard.writeText(winResult.code);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
@@ -429,12 +425,10 @@ export default function CrunchyRoulette({
                     {winResult.code}
                   </span>
                   <div className="mt-2 flex items-center justify-center gap-2 text-slate-400 font-bold uppercase text-xs">
-                    {winResult.pending ? (
-                      <>Generation du code...</>
-                    ) : copied ? (
-                      <><Check size={16} className="text-green-500" /> Copié !</>
+                    {copied ? (
+                      <><Check size={16} className="text-green-500" /> {t('copied')}</>
                     ) : (
-                      <><Copy size={16} /> Cliquez pour copier</>
+                      <><Copy size={16} /> {t('copyHint')}</>
                     )}
                   </div>
                 </div>
@@ -443,7 +437,7 @@ export default function CrunchyRoulette({
                   onClick={onClose}
                   className="mt-6 text-slate-400 font-bold uppercase text-sm tracking-widest hover:text-pink-600 transition-colors"
                 >
-                  Continuer mes achats
+                  {t('continueShopping')}
                 </button>
               </motion.div>
             )}
