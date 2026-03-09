@@ -175,6 +175,7 @@
     "products": {
       "title": "Nos Produits en Vrac",
       "learnMore": "En savoir plus",
+      "formatsLabel": "Formats disponibles :",
       "filters": {
         "all": "Tous",
         "organic": "BIO",

@@ -59,7 +59,7 @@ const homeTickerItems = [
 { label: '95% DES NUTRIMENTS CONSERVÉS', icon: Sparkle },
 { label: '100% FRUITS NATURELS', icon: Banana },
 { label: 'SANS AJOUT DE SUCRE', icon: CandyOff },
-{ label: 'CERTIFIÉ BIO', iconSrc: '/assets/images/bio2.png', iconAlt: 'Certifié bio' },
+{ label: 'CERTIFIÉ BIO', iconSrc: '/assets/images/certipack.png', iconAlt: 'Certifié bio' },
 { label: 'FABRIQUÉ DANS DES STRUCTURES PROTÉGÉES', icon: Factory },
 { label: 'LIVRAISON EXPRESS', icon: Truck },
 { label: 'PAIEMENT 100% SÉCURISÉ', icon: ShieldCheck },
@@ -222,20 +222,22 @@ export default function Home() {
               {[...homeTickerItems, ...homeTickerItems].map((item, index) => (
                 <div key={`${item.label}-${index}`} className="flex shrink-0 items-center px-6 sm:px-8">
                   <div className="flex flex-col items-center gap-2">
-                    {item.iconSrc ? (
-                      <Image
-                        src={item.iconSrc}
-                        alt={item.iconAlt || item.label}
-                        width={20}
-                        height={20}
-                        className="home-ticker-image-icon h-5 w-5 shrink-0 object-contain"
-                      />
-                    ) : (
-                      <item.icon size={20} className="shrink-0 text-gray-500" aria-hidden="true" />
-                    )}
+                    <div className="flex h-6 w-6 items-center justify-center">
+                      {item.iconSrc ? (
+                        <Image
+                          src={item.iconSrc}
+                          alt={item.iconAlt || item.label}
+                          width={24}
+                          height={24}
+                          className="h-6 w-6 shrink-0 object-contain"
+                        />
+                      ) : (
+                        <item.icon size={18} className="shrink-0 text-gray-500" aria-hidden="true" />
+                      )}
+                    </div>
                     <span
-                      className="whitespace-nowrap text-sm sm:text-base font-black uppercase tracking-[0.18em] text-black"
-                      style={{ fontFamily: 'Maison Neue, sans-serif' }}
+                      className="whitespace-nowrap text-[10px] sm:text-[11px] font-light uppercase tracking-[0.16em] text-[#556822]"
+                      style={{ fontFamily: 'Maison Neue Light, sans-serif' }}
                     >
                       {item.label}
                     </span>

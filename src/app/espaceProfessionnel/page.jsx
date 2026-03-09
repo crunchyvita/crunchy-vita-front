@@ -6,6 +6,8 @@ import { categoryAPI, productAPI } from '@/lib/api';
 import { Search, ChevronDown, Check, FileText, Mail, Leaf, Truck, ShieldCheck, Factory, Coffee, ShoppingBasket, Activity } from 'lucide-react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 const CrunchyVita = () => {
   const t = useTranslations('ProfessionalSpace');
   const locale = useLocale();
@@ -25,6 +27,38 @@ const CrunchyVita = () => {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteSuccess, setQuoteSuccess] = useState('');
   const [quoteError, setQuoteError] = useState('');
+  const [productFormats, setProductFormats] = useState('1kg, 2kg, 10kg');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProfessionalSettings = async () => {
+      try {
+        const response = await fetch(`${API_URL}/settings`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const formats = data?.data?.professionalSpace?.productFormats;
+
+        if (isMounted && typeof formats === 'string') {
+          setProductFormats(formats);
+        }
+      } catch (error) {
+        console.error('Failed to load professional settings:', error);
+      }
+    };
+
+    fetchProfessionalSettings();
+    const intervalId = setInterval(fetchProfessionalSettings, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -246,6 +280,10 @@ const CrunchyVita = () => {
           <span className="relative z-10 bg-[#f9f7f2] px-4 text-[#556822]">{t('products.title')}</span>
           <div className="absolute top-1/2 left-0 w-full h-px bg-[#556822]/20 z-0"></div>
         </h2>
+
+        <p className="text-center text-sm text-gray-600 mb-6">
+          {t('products.formatsLabel')} <span className="font-semibold text-[#556822]">{productFormats}</span>
+        </p>
 
         {/* Filters */}
         <div className="flex justify-center flex-wrap gap-2 mb-10">

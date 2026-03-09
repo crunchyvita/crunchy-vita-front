@@ -9,9 +9,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     emailNotifications: { contactMessages: true, stockAlerts: false },
-    features: { rouletteEnabled: false }
+    features: { rouletteEnabled: false },
+    professionalSpace: { productFormats: '1kg, 2kg, 10kg' },
   });
   const [loading, setLoading] = useState(true);
+  const [savingFormats, setSavingFormats] = useState(false);
 
   useEffect(() => { fetchSettings(); }, []);
 
@@ -32,7 +34,10 @@ export default function AdminSettingsPage() {
             },
             features: {
               rouletteEnabled: data.data.features?.rouletteEnabled ?? false,
-            }
+            },
+            professionalSpace: {
+              productFormats: data.data.professionalSpace?.productFormats ?? '1kg, 2kg, 10kg',
+            },
           });
         }
       } else {
@@ -86,6 +91,44 @@ export default function AdminSettingsPage() {
       // Revert on error
       setSettings(settings);
       toast.error('Erreur lors de la sauvegarde');
+    }
+  };
+
+  const handleFormatsSave = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        toast.error('Non authentifié');
+        return;
+      }
+
+      setSavingFormats(true);
+
+      const response = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          professionalSpace: {
+            productFormats: settings.professionalSpace.productFormats,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Formats enregistrés');
+      } else {
+        toast.error('Erreur lors de la sauvegarde des formats');
+      }
+    } catch (error) {
+      console.error('Error saving product formats:', error);
+      toast.error('Erreur lors de la sauvegarde des formats');
+    } finally {
+      setSavingFormats(false);
     }
   };
 
@@ -175,6 +218,46 @@ export default function AdminSettingsPage() {
                 }`}
               />
             </button>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="border-b border-slate-200 pb-3">
+            <h2 className="text-sm font-semibold text-slate-900">Professional Space</h2>
+            <p className="mt-1 text-xs text-slate-500">Update product formats shown on the Professional Space page.</p>
+          </div>
+
+          <div className="py-4 space-y-3">
+            <label htmlFor="productFormats" className="text-sm font-medium text-slate-900">
+              Product formats text
+            </label>
+            <input
+              id="productFormats"
+              type="text"
+              value={settings.professionalSpace.productFormats}
+              onChange={(e) => {
+                setSettings((prev) => ({
+                  ...prev,
+                  professionalSpace: {
+                    ...prev.professionalSpace,
+                    productFormats: e.target.value,
+                  },
+                }));
+              }}
+              placeholder="1kg, 2kg, 10kg"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20"
+            />
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleFormatsSave}
+                disabled={savingFormats}
+                className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingFormats ? 'Saving...' : 'Save'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
