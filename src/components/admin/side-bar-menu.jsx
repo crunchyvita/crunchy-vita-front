@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -17,7 +16,6 @@ import {
   Home,
   ShieldCheck,
   ShoppingCart,
-  Settings,
   Users,
   Package,
   MessageSquare,
@@ -235,22 +233,6 @@ export default function AdminSideBarMenu() {
             </div>
           </SidebarMenu>
         </SidebarContent>
-
-        {/* Fixed Footer */}
-        <SidebarFooter className="flex-shrink-0 border-t border-slate-200 p-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                href="/admin/settings"
-                icon={Settings}
-                isActive={pathname === "/admin/settings"}
-                onClick={handleItemClick}
-              >
-                Settings
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
       </Sidebar>
     </>
   );

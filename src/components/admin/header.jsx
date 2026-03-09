@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu, FileText } from "lucide-react";
+import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu, FileText, Settings } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
 
@@ -594,6 +594,15 @@ export default function AdminHeader() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/admin/settings')}
+              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative transition"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              <Settings className="h-6 w-6" />
+            </button>
+
             {/* Contact Notifications */}
             <div className="relative">
               <button 
@@ -826,8 +835,6 @@ export default function AdminHeader() {
                 </div>
               )}
             </div>
-  
-             
 
             <div className="h-8 w-px bg-slate-200 mx-2 hidden md:block" />
 

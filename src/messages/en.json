@@ -175,6 +175,7 @@
     "products": {
       "title": "Our bulk products",
       "learnMore": "Learn more",
+      "formatsLabel": "Available formats:",
       "filters": {
         "all": "All",
         "organic": "Organic",
