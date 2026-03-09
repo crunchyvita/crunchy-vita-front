@@ -215,11 +215,8 @@
         "company": "Company",
         "activity": "Activity",
         "siren": "SIREN",
-        "siren": "SIREN",
         "vat": "VAT number",
         "address": "Address",
-        "website": "Company website",
-        "message": "Message"
         "website": "Company website",
         "message": "Message..."
       },
