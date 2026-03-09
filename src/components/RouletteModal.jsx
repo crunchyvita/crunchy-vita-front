@@ -15,7 +15,12 @@ const Wheel = dynamic(
 const BRAND_GREEN = '#556822';
 const BRAND_PINK = '#E10C69';
 
-export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
+export default function CrunchyRoulette({
+  isOpen,
+  onClose,
+  userEmail,
+  onSpinSuccess,
+}) {
   const t = useTranslations('Roulette');
   const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const apiBaseUrl = rawApiBaseUrl.replace(/\/$/, '').endsWith('/api')
@@ -34,6 +39,12 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState(userEmail || '');
+
+  const getAuthHeaders = () => {
+    if (typeof window === 'undefined') return {};
+    const token = window.localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   useEffect(() => {
     if (isOpen) fetchRewards();
@@ -126,7 +137,11 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
     setRewardsLoading(true);
     setRewardsError('');
     try {
-      const response = await fetch(`${apiBaseUrl}/roulette/rewards`);
+      const response = await fetch(`${apiBaseUrl}/roulette/rewards`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      });
       const result = await response.json();
 
       if (result.success && result.data.length > 0) {
@@ -185,24 +200,34 @@ export default function CrunchyRoulette({ isOpen, onClose, userEmail }) {
     try {
       const response = await fetch(`${apiBaseUrl}/roulette/spin`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify({ email, selectedReward: winningReward }),
       });
       const result = await response.json();
 
-      if (result.success) {
+      const generatedCode = result?.data?.code;
+      if (result.success && generatedCode) {
         setWinResult({
-          code: result.data.code,
+          code: generatedCode,
           reward: winningReward,
           pending: false,
         });
+
+        if (onSpinSuccess) {
+          onSpinSuccess();
+        }
       } else {
         setError(result.message || 'Something went wrong. Please try again.');
         setWinResult(null);
       }
     } catch (err) {
       console.error('Error submitting spin:', err);
-      setWinResult({ code: 'CRUNCHYVITA15', reward: winningReward, pending: false });
+      setError('Unable to generate your code right now. Please try again.');
+      setWinResult(null);
     }
   };
 

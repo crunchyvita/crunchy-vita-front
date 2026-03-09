@@ -72,7 +72,40 @@ export default function Home() {
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
   const [isRouletteEnabled, setIsRouletteEnabled] = useState(false);
   const hasAutoOpenedRoulette = useRef(false);
-  const rouletteUserKey = user?._id || user?.id || user?.email || 'guest';
+  const userEmail = user?.email || '';
+
+  const hasUserAlreadySpunBackend = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const params = new URLSearchParams();
+      if (userEmail) {
+        params.set('email', userEmail);
+      }
+
+      const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
+      const response = await fetch(`${API_URL}/roulette/status?${params.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data?.success) {
+        return false;
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Roulette] backend status:', data.data);
+      }
+
+      return Boolean(data.data?.hasSpun);
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Roulette] backend status check failed:', err);
+      }
+      return false;
+    }
+  };
 
   // Fetch settings from backend to check if roulette is enabled
   useEffect(() => {
@@ -102,15 +135,25 @@ export default function Home() {
   useEffect(() => {
     if (!isRouletteEnabled || hasAutoOpenedRoulette.current) return;
 
-    const seenKey = `roulette_seen_${rouletteUserKey}`;
-    const hasSeenRoulette = typeof window !== 'undefined' && localStorage.getItem(seenKey) === 'true';
+    // Check if user has already spun (async operation)
+    const checkAndOpenRoulette = async () => {
+      const alreadySpun = await hasUserAlreadySpunBackend();
 
-    if (!hasSeenRoulette) {
-      hasAutoOpenedRoulette.current = true;
-      setIsRouletteOpen(true);
-      localStorage.setItem(seenKey, 'true');
-    }
-  }, [isRouletteEnabled, rouletteUserKey]);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Roulette] final decision:', {
+          alreadySpun,
+          willShowRoulette: !alreadySpun,
+        });
+      }
+
+      if (!alreadySpun) {
+        hasAutoOpenedRoulette.current = true;
+        setIsRouletteOpen(true);
+      }
+    };
+
+    checkAndOpenRoulette();
+  }, [isRouletteEnabled, userEmail]);
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -388,7 +431,7 @@ export default function Home() {
         <RouletteModal
           isOpen={isRouletteOpen}
           onClose={() => setIsRouletteOpen(false)}
-          userEmail={user?.email || ''}
+          userEmail={userEmail}
         />
       )}
     </div>
