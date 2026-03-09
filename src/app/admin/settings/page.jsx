@@ -52,20 +52,21 @@ export default function AdminSettingsPage() {
   };
 
   const handleToggle = async (category, key) => {
+    const previousSettings = settings;
     const newSettings = {
       ...settings,
       [category]: { ...settings[category], [key]: !settings[category][key] }
     };
-    
-    // Optimistically update UI
+
+    // Optimistically update UI immediately
     setSettings(newSettings);
-    
+
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         toast.error('Non authentifié');
-        setSettings(settings); // Revert
+        setSettings(previousSettings);
         return;
       }
 
@@ -80,30 +81,14 @@ export default function AdminSettingsPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setSettings({
-            emailNotifications: {
-              contactMessages: data.data.emailNotifications?.contactMessages ?? true,
-              stockAlerts: data.data.emailNotifications?.stockAlerts ?? false,
-            },
-            features: {
-              rouletteEnabled: data.data.features?.rouletteEnabled ?? false,
-            },
-            professionalSpace: {
-              productFormats: data.data.professionalSpace?.productFormats ?? '1kg, 2kg, 10kg',
-            },
-          });
-        }
         toast.success('Paramètre enregistré');
       } else {
-        // Revert to server state on error
-        await fetchSettings();
+        setSettings(previousSettings);
         toast.error('Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      await fetchSettings();
+      setSettings(previousSettings);
       toast.error('Erreur lors de la sauvegarde');
     }
   };
