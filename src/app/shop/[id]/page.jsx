@@ -185,6 +185,10 @@ export default function ProductDetailPage() {
         throw new Error(t('errors.invalidProductData'));
       }
 
+      if (data.showInShop === false) {
+        throw new Error(t('errors.productNotFound'));
+      }
+
       console.log('[Product Detail] ✅ Setting product with valid data');
       
       // Log nested structures

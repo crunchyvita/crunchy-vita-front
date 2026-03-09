@@ -43,10 +43,15 @@ export default function EditProductPage() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
+    width: "",
+    height: "",
+    depth: "",
+    weight: "",
     tags: [],
     description: "",
     alertThreshold: 10,
     status: "ACTIVE",
+    showInShop: true,
     categories: [],
   });
 
@@ -117,8 +122,13 @@ export default function EditProductPage() {
           : "",
         tags: Array.isArray(data.tag) ? data.tag : (data.tag ? [data.tag] : []),
         description: data.description || "",
+        width: data.width || "",
+        height: data.height || "",
+        depth: data.depth || "",
+        weight: data.weight || "",
         alertThreshold: data.stock?.alertThreshold || 10,
         status: data.status || "ACTIVE",
+        showInShop: data.showInShop !== false,
         categories: normalizedCategoryItems.map((item) => item.id),
       });
       setSelectedCategories(normalizedCategoryItems);
@@ -234,7 +244,12 @@ export default function EditProductPage() {
       formDataObj.append("name", formData.name);
       formDataObj.append("newPrice", formData.price);
       formDataObj.append("description", formData.description || "");
+      formDataObj.append("width", formData.width || "");
+      formDataObj.append("height", formData.height || "");
+      formDataObj.append("depth", formData.depth || "");
+      formDataObj.append("weight", formData.weight || "");
       formDataObj.append("status", formData.status);
+      formDataObj.append("showInShop", String(formData.showInShop));
       
       formDataObj.append("categoryIds", JSON.stringify(selectedCategories.map((item) => item.id)));
       
@@ -313,7 +328,6 @@ export default function EditProductPage() {
             style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
             onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
             onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
-            disabled={saving}
           >
             {saving ? (
               <>
@@ -408,6 +422,71 @@ export default function EditProductPage() {
             </div>
           </div>
 
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="p-2 bg-slate-100 text-slate-700 rounded-xl"><AlertTriangle size={20}/></div>
+              <h3 className="font-black text-lg text-slate-900">Dimensions & Weight</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Width(cm)</label>
+                <input
+                  type="number"
+                  name="width"
+                  min="0"
+                  step="0.01"
+                  value={formData.width}
+                  onChange={handleInputChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-blue-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Height(cm)</label>
+                <input
+                  type="number"
+                  name="height"
+                  min="0"
+                  step="0.01"
+                  value={formData.height}
+                  onChange={handleInputChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-blue-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Depth(cm)</label>
+                <input
+                  type="number"
+                  name="depth"
+                  min="0"
+                  step="0.01"
+                  value={formData.depth}
+                  onChange={handleInputChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-blue-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Weight(kg)</label>
+                <input
+                  type="number"
+                  name="weight"
+                  min="0"
+                  step="0.01"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-blue-500 focus:bg-white outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Media Gallery */}
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-5">
@@ -462,6 +541,24 @@ export default function EditProductPage() {
                 <option value="ACTIVE" className="text-slate-900">Active</option>
                 <option value="INACTIVE" className="text-slate-900">Inactive</option>
               </select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Shop Visibility</label>
+              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData.showInShop)}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      showInShop: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 accent-emerald-500"
+                />
+                <span className="text-sm font-bold text-white">Show this product in Shop</span>
+              </label>
             </div>
 
             {/* Category Search */}

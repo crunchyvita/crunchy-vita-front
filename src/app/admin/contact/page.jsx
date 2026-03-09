@@ -19,6 +19,33 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
+const URL_PATTERN = /(https?:\/\/[^\s]+)/gi;
+
+const linkifyMessageText = (text = '') =>
+  text.split(URL_PATTERN).map((part, index) => {
+    if (!/^https?:\/\/[^\s]+$/i.test(part)) {
+      return <span key={`text-${index}`}>{part}</span>;
+    }
+
+    const trailingPunctuationMatch = part.match(/[),.;!?]+$/);
+    const trailingPunctuation = trailingPunctuationMatch ? trailingPunctuationMatch[0] : '';
+    const cleanUrl = trailingPunctuation ? part.slice(0, -trailingPunctuation.length) : part;
+
+    return (
+      <span key={`link-${index}`}>
+        <a
+          href={cleanUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline break-all"
+        >
+          {cleanUrl}
+        </a>
+        {trailingPunctuation}
+      </span>
+    );
+  });
+
 /**
  * ✅ IMPORTANT FIX:
  * MessageDetail is OUTSIDE the page component.
@@ -107,26 +134,58 @@ function MessageDetail({
 
           <div className="prose prose-slate max-w-none mb-10 md:mb-12">
             <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {selectedMessage.message}
+              {linkifyMessageText(selectedMessage.message)}
             </div>
           </div>
 
           {/* Section Réponses précédentes */}
           {selectedMessage.replies && selectedMessage.replies.length > 0 && (
             <div className="border-t border-slate-200 pt-6 md:pt-8 mb-6 md:mb-8">
-              {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+              {['professionnel', 'devis'].includes(selectedMessage.type) && selectedMessage.companyName && (
+                <div
+                  className={`mb-4 p-4 border rounded-lg flex items-center gap-3 ${
+                    selectedMessage.type === 'devis'
+                      ? 'bg-orange-50 border-orange-100'
+                      : 'bg-purple-50 border-purple-100'
+                  }`}
+                >
                   <div className="flex-shrink-0">
-                    <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
-                      <Building2 className="h-3 w-3 text-purple-600 mr-1" />
-                      <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                    <div
+                      className={`inline-flex items-center px-2 py-1 rounded border ${
+                        selectedMessage.type === 'devis'
+                          ? 'bg-orange-100 border-orange-200'
+                          : 'bg-purple-100 border-purple-200'
+                      }`}
+                    >
+                      <Building2
+                        className={`h-3 w-3 mr-1 ${
+                          selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
+                        }`}
+                      />
+                      <span
+                        className={`text-[10px] font-bold ${
+                          selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
+                        }`}
+                      >
+                        {selectedMessage.type === 'devis' ? 'DEVIS' : 'PRO'}
+                      </span>
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-purple-900 truncate">
+                    <p
+                      className={`text-sm font-semibold truncate ${
+                        selectedMessage.type === 'devis' ? 'text-orange-900' : 'text-purple-900'
+                      }`}
+                    >
                       {selectedMessage.companyName}
                     </p>
-                    <p className="text-xs text-purple-600">Contact professionnel</p>
+                    <p
+                      className={`text-xs ${
+                        selectedMessage.type === 'devis' ? 'text-orange-700' : 'text-purple-600'
+                      }`}
+                    >
+                      {selectedMessage.type === 'devis' ? 'Demande de devis' : 'Contact professionnel'}
+                    </p>
                   </div>
                 </div>
               )}
@@ -185,19 +244,51 @@ function MessageDetail({
                 <Reply size={18} className="text-blue-600" /> Répondre à ce message
               </div>
 
-              {selectedMessage.type === 'professionnel' && selectedMessage.companyName && (
-                <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg flex items-center gap-3">
+              {['professionnel', 'devis'].includes(selectedMessage.type) && selectedMessage.companyName && (
+                <div
+                  className={`mb-4 p-4 border rounded-lg flex items-center gap-3 ${
+                    selectedMessage.type === 'devis'
+                      ? 'bg-orange-50 border-orange-100'
+                      : 'bg-purple-50 border-purple-100'
+                  }`}
+                >
                   <div className="flex-shrink-0">
-                    <div className="inline-flex items-center px-2 py-1 rounded bg-purple-100 border border-purple-200">
-                      <Building2 className="h-3 w-3 text-purple-600 mr-1" />
-                      <span className="text-[10px] font-bold text-purple-600">PRO</span>
+                    <div
+                      className={`inline-flex items-center px-2 py-1 rounded border ${
+                        selectedMessage.type === 'devis'
+                          ? 'bg-orange-100 border-orange-200'
+                          : 'bg-purple-100 border-purple-200'
+                      }`}
+                    >
+                      <Building2
+                        className={`h-3 w-3 mr-1 ${
+                          selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
+                        }`}
+                      />
+                      <span
+                        className={`text-[10px] font-bold ${
+                          selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
+                        }`}
+                      >
+                        {selectedMessage.type === 'devis' ? 'DEVIS' : 'PRO'}
+                      </span>
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-purple-900 truncate">
+                    <p
+                      className={`text-sm font-semibold truncate ${
+                        selectedMessage.type === 'devis' ? 'text-orange-900' : 'text-purple-900'
+                      }`}
+                    >
                       {selectedMessage.companyName}
                     </p>
-                    <p className="text-xs text-purple-600">Contact professionnel</p>
+                    <p
+                      className={`text-xs ${
+                        selectedMessage.type === 'devis' ? 'text-orange-700' : 'text-purple-600'
+                      }`}
+                    >
+                      {selectedMessage.type === 'devis' ? 'Demande de devis' : 'Contact professionnel'}
+                    </p>
                   </div>
                 </div>
               )}
@@ -478,10 +569,16 @@ export default function ContactMessagesPage() {
                   </p>
                   <p className="text-xs text-slate-500 line-clamp-1">{msg.message}</p>
 
-                  {msg.type === 'professionnel' && (
+                  {['professionnel', 'devis'].includes(msg.type) && (
                     <div className="mt-2 flex gap-2">
-                      <span className="text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset flex items-center gap-1 bg-purple-50 text-purple-700 ring-purple-600/20">
-                        <Building2 size={12} /> Pro
+                      <span
+                        className={`text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border flex items-center gap-1 ${
+                          msg.type === 'devis'
+                            ? 'bg-orange-100 border-orange-200 text-orange-700'
+                            : 'bg-purple-50 border-purple-200 text-purple-700'
+                        }`}
+                      >
+                        <Building2 size={12} /> {msg.type === 'devis' ? 'Devis' : 'Pro'}
                       </span>
                     </div>
                   )}

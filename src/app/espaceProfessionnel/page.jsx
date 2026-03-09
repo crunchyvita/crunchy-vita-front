@@ -6,6 +6,8 @@ import { categoryAPI, productAPI } from '@/lib/api';
 import { Search, ChevronDown, Check, FileText, Mail, Leaf, Truck, ShieldCheck, Factory, Coffee, ShoppingBasket, Activity } from 'lucide-react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 const CrunchyVita = () => {
   const t = useTranslations('ProfessionalSpace');
   const locale = useLocale();
@@ -13,6 +15,50 @@ const CrunchyVita = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [quoteForm, setQuoteForm] = useState({
+    email: '',
+    company: '',
+    activity: '',
+    siren: '',
+    vat: '',
+    website: '',
+    message: '',
+  });
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteSuccess, setQuoteSuccess] = useState('');
+  const [quoteError, setQuoteError] = useState('');
+  const [productFormats, setProductFormats] = useState('1kg, 2kg, 10kg');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProfessionalSettings = async () => {
+      try {
+        const response = await fetch(`${API_URL}/settings`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const formats = data?.data?.professionalSpace?.productFormats;
+
+        if (isMounted && typeof formats === 'string') {
+          setProductFormats(formats);
+        }
+      } catch (error) {
+        console.error('Failed to load professional settings:', error);
+      }
+    };
+
+    fetchProfessionalSettings();
+    const intervalId = setInterval(fetchProfessionalSettings, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -71,26 +117,79 @@ const CrunchyVita = () => {
     const media = Array.isArray(product?.media) ? product.media : [];
     if (!media.length) return null;
 
-    const preferredMedia = media[2] || media[1] || media[0];
+    const preferredMedia = media[3] || media[2] || media[1] || media[0];
     if (typeof preferredMedia === 'string') return preferredMedia;
     return preferredMedia?.url || null;
   };
 
-  const getCategoryNames = (product) => {
-    const names = new Set();
+  const handleQuoteChange = (e) => {
+    const { name, value } = e.target;
+    setQuoteForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-    if (Array.isArray(product?.categoryIds)) {
-      product.categoryIds.forEach((entry) => {
-        if (!entry) return;
-        if (typeof entry === 'object' && entry.name) names.add(entry.name);
+  const handleQuoteSubmit = async (e) => {
+    e.preventDefault();
+    setQuoteError('');
+    setQuoteSuccess('');
+    setQuoteLoading(true);
+
+    try {
+      const detailLines = [
+        [t('form.fields.activity'), quoteForm.activity],
+        [t('form.fields.siren'), quoteForm.siren],
+        [t('form.fields.vat'), quoteForm.vat],
+        [t('form.fields.website'), quoteForm.website],
+      ]
+        .filter(([, value]) => value && value.trim())
+        .map(([label, value]) => `${label}: ${value.trim()}`);
+
+      const composedMessage = [
+        quoteForm.message.trim(),
+        detailLines.length > 0 ? '' : null,
+        ...detailLines,
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: quoteForm.company.trim(),
+          email: quoteForm.email.trim(),
+          message: composedMessage,
+          subject: t('form.quoteSubject'),
+          contactType: 'devis',
+          companyName: quoteForm.company.trim(),
+        }),
       });
-    }
 
-    if (product?.categoryId && typeof product.categoryId === 'object' && product.categoryId.name) {
-      names.add(product.categoryId.name);
-    }
+      const data = await response.json();
 
-    return Array.from(names);
+      if (!response.ok) {
+        throw new Error(data?.error || t('form.error'));
+      }
+
+      setQuoteSuccess(t('form.success'));
+      setQuoteForm({
+        email: '',
+        company: '',
+        activity: '',
+        siren: '',
+        vat: '',
+        website: '',
+        message: '',
+      });
+    } catch (error) {
+      setQuoteError(error?.message || t('form.error'));
+    } finally {
+      setQuoteLoading(false);
+    }
   };
 
   return (
@@ -182,6 +281,10 @@ const CrunchyVita = () => {
           <div className="absolute top-1/2 left-0 w-full h-px bg-[#556822]/20 z-0"></div>
         </h2>
 
+        <p className="text-center text-sm text-gray-600 mb-6">
+          {t('products.formatsLabel')} <span className="font-semibold text-[#556822]">{productFormats}</span>
+        </p>
+
         {/* Filters */}
         <div className="flex justify-center flex-wrap gap-2 mb-10">
           {/* All button */}
@@ -213,66 +316,54 @@ const CrunchyVita = () => {
         </div>
 
         {/* Product Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {productsLoading ? (
-            <div className="md:col-span-3 text-center text-gray-500 py-6">Chargement des produits...</div>
+            <div className="col-span-full text-center text-gray-500 py-6">Chargement des produits...</div>
           ) : filteredProducts.length === 0 ? (
-            <div className="md:col-span-3 text-center text-gray-500 py-6">Aucun produit dans cette catégorie.</div>
+            <div className="col-span-full text-center text-gray-500 py-6">Aucun produit dans cette catégorie.</div>
           ) : (
             filteredProducts.map((product) => {
               const imageUrl = getProductImage(product);
               const translated = getTranslatedProduct(product, locale);
-              const categoryNames = getCategoryNames(product);
-              const productTags = Array.isArray(product?.tag) ? product.tag : [];
               const productId = product._id || product.id;
+              const productDescription = (translated.description || product.description || '').trim();
 
               return (
-                <div key={productId} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={translated.name || product.name}
-                      className="w-full h-40 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-40 bg-gray-100" />
+                <a
+                  key={productId}
+                  href={`/shop/${productId}`}
+                  className="group relative bg-white rounded-3xl border border-gray-200 p-4 md:p-5 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-start text-center"
+                >
+                  {productDescription && (
+                    <div className="pointer-events-none absolute left-1/2 top-0 z-30 w-[220px] -translate-x-1/2 -translate-y-[calc(100%+10px)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                      <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-lg">
+                        <p className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">
+                          {translated.name || product.name}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700 leading-snug line-clamp-4">
+                          {productDescription}
+                        </p>
+                      </div>
+                      <div className="mx-auto -mt-[6px] h-3 w-3 rotate-45 border-r border-b border-gray-200 bg-white" />
+                    </div>
                   )}
 
-                  <div className="p-4 flex flex-col gap-3">
-                    <h3 className="font-bold text-gray-800 text-[26px] leading-snug line-clamp-1">
-                      {translated.name || product.name}
-                    </h3>
-
-                    <div className="flex flex-wrap gap-2">
-                      {categoryNames.map((categoryName) => (
-                        <span
-                          key={`${productId}-${categoryName}`}
-                          className="text-[11px] font-bold px-2 py-1 rounded bg-[#eef6e6] text-[#556822] border border-[#d9e7c8]"
-                        >
-                          {categoryName}
-                        </span>
-                      ))}
-                    </div>
-
-                    <ul className="text-[12px] text-gray-600 space-y-1 min-h-[44px]">
-                      {productTags.slice(0, 2).map((item, index) => (
-                        <li key={`${productId}-tag-${index}`} className="flex items-start gap-2">
-                          <span className="text-[#556822] mt-[2px]">•</span>
-                          <span className="line-clamp-1">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <p className="text-[13px] text-gray-700 font-medium">Formats: 100 g, 1 kg, 5 kg</p>
-
-                    <a
-                      href={`/shop/${productId}`}
-                      className="mt-1 w-full bg-[#556822] hover:bg-[#3f6e0d] text-white font-semibold text-center py-2 rounded transition-colors"
-                    >
-                      {t('products.learnMore')}
-                    </a>
+                  <div className="h-28 w-28 md:h-32 md:w-32 rounded-full overflow-hidden bg-gray-100">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={translated.name || product.name}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gray-200" />
+                    )}
                   </div>
-                </div>
+
+                  <h3 className="mt-4 text-xl md:text-[26px] leading-tight font-bold text-gray-900 line-clamp-2">
+                    {translated.name || product.name}
+                  </h3>
+                </a>
               );
             })
           )}
@@ -336,8 +427,12 @@ const CrunchyVita = () => {
             />         
 
             <div className="md:col-span-2 flex justify-center mt-4">
-              <button className="bg-[#556822] text-white font-bold py-3 px-12 rounded hover:bg-[#44591a] transition shadow-md w-full md:w-auto">
-                {t('form.submit')}
+              <button
+                type="submit"
+                disabled={quoteLoading}
+                className="bg-[#556822] text-white font-bold py-3 px-12 rounded hover:bg-[#44591a] transition shadow-md w-full md:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {quoteLoading ? t('form.sending') : t('form.submit')}
               </button>
             </div>
           </form>

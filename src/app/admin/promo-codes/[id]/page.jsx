@@ -30,6 +30,7 @@ export default function PromoCodeDetailPage() {
   const [packages, setPackages] = useState([]);
 
   const [formData, setFormData] = useState({
+    name: '',
     code: '',
     discountType: 'PERCENTAGE',
     discountValue: '',
@@ -81,6 +82,7 @@ export default function PromoCodeDetailPage() {
       if (result.success) {
         setPromoCode(result.data);
         setFormData({
+          name: result.data.name || '',
           code: result.data.code,
           discountType: result.data.discountType,
           discountValue: result.data.discountValue.toString(),
@@ -117,6 +119,7 @@ export default function PromoCodeDetailPage() {
       const token = localStorage.getItem('token');
       const payload = {
         ...formData,
+        name: formData.name?.trim(),
         discountValue: formData.discountType === 'FREE_ITEM' ? 0 : parseFloat(formData.discountValue),
         minPurchaseAmount: parseFloat(formData.minPurchaseAmount) || 0,
         usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
@@ -180,7 +183,7 @@ export default function PromoCodeDetailPage() {
               Back to promo codes
             </Link>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              {formData.code}
+              {formData.name || formData.code}
               <span className={`rounded-full px-3 py-1 text-xs font-medium ${
                 formData.isActive && !isExpired ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
               }`}>
@@ -251,6 +254,17 @@ export default function PromoCodeDetailPage() {
               </div>
               
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-slate-700">Promotion Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Type de Réduction</label>
                   <label className="text-sm font-bold text-slate-700">Discount Type</label>

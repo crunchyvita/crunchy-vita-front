@@ -1,10 +1,12 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import HeaderHome from '@/components/header-home';
 import Footer from '@/components/footer';
 import PreferredItemDisplay from '@/components/PreferredItemDisplay';
+import RouletteModal from '@/components/RouletteModal';
 import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
@@ -15,7 +17,12 @@ import {
   CandyOff,
   Award,
   Sparkle,
-  MapPinHouse
+  MapPinHouse,
+  Factory,
+  Truck,
+  ShieldCheck,
+  Headset,
+  Banana
 } from 'lucide-react';
 
 // --- Variantes d'animation ---
@@ -48,9 +55,105 @@ const popIn = {
   }
 };
 
+const homeTickerItems = (t) => [
+{ label: t('ticker.ultraCrunchy'), icon: Sparkle },
+{ label: t('ticker.naturalFruits'), icon: Banana },
+{ label: t('ticker.noSugar'), icon: CandyOff },
+{ label: t('ticker.organic'), iconSrc: '/assets/images/certipack.png', iconAlt: t('ticker.organic') },
+{ label: t('ticker.protected'), icon: Factory },
+{ label: t('ticker.expressDelivery'), icon: Truck },
+{ label: t('ticker.securePayment'), icon: ShieldCheck },
+{ label: t('ticker.premiumSupport'), icon: Headset }
+];
+
 export default function Home() {
   const { user } = useAuth();
   const t = useTranslations('Home');
+  const [isRouletteOpen, setIsRouletteOpen] = useState(false);
+  const [isRouletteEnabled, setIsRouletteEnabled] = useState(false);
+  const hasAutoOpenedRoulette = useRef(false);
+  const userEmail = user?.email || '';
+
+  const hasUserAlreadySpunBackend = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const params = new URLSearchParams();
+      if (userEmail) {
+        params.set('email', userEmail);
+      }
+
+      const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
+      const response = await fetch(`${API_URL}/roulette/status?${params.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data?.success) {
+        return false;
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Roulette] backend status:', data.data);
+      }
+
+      return Boolean(data.data?.hasSpun);
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Roulette] backend status check failed:', err);
+      }
+      return false;
+    }
+  };
+
+  // Fetch settings from backend to check if roulette is enabled
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/settings`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setIsRouletteEnabled(data.data.features?.rouletteEnabled ?? false);
+          } else {
+            setIsRouletteEnabled(false);
+          }
+        } else {
+          setIsRouletteEnabled(false);
+        }
+      } catch (error) {
+        console.error('Error reading settings:', error);
+        setIsRouletteEnabled(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    if (!isRouletteEnabled || hasAutoOpenedRoulette.current) return;
+
+    // Check if user has already spun (async operation)
+    const checkAndOpenRoulette = async () => {
+      const alreadySpun = await hasUserAlreadySpunBackend();
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Roulette] final decision:', {
+          alreadySpun,
+          willShowRoulette: !alreadySpun,
+        });
+      }
+
+      if (!alreadySpun) {
+        hasAutoOpenedRoulette.current = true;
+        setIsRouletteOpen(true);
+      }
+    };
+
+    checkAndOpenRoulette();
+  }, [isRouletteEnabled, userEmail]);
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] selection:bg-[#E10C69] selection:text-white overflow-x-hidden pt-20">
@@ -128,6 +231,40 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white border-y border-black/10 py-6 sm:py-7">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="home-ticker overflow-hidden" role="region" aria-label="Crunchy Vita highlights">
+            <div className="home-ticker-track flex w-max items-center">
+              {[...homeTickerItems(t), ...homeTickerItems(t)].map((item, index) => (
+                <div key={`${item.label}-${index}`} className="flex shrink-0 items-center px-6 sm:px-8">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center">
+                      {item.iconSrc ? (
+                        <Image
+                          src={item.iconSrc}
+                          alt={item.iconAlt || item.label}
+                          width={24}
+                          height={24}
+                          className="h-6 w-6 shrink-0 object-contain"
+                        />
+                      ) : (
+                        <item.icon size={18} className="shrink-0 text-gray-500" aria-hidden="true" />
+                      )}
+                    </div>
+                    <span
+                      className="whitespace-nowrap text-[11px] sm:text-[12px] font-black uppercase tracking-[0.16em] text-[#556822]"
+                      style={{ fontFamily: 'Maison Neue, sans-serif' }}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -310,6 +447,15 @@ export default function Home() {
       </section>
 
       <Footer />
+      
+      {/* Roulette Modal - Open automatically on page load when enabled */}
+      {isRouletteEnabled && (
+        <RouletteModal
+          isOpen={isRouletteOpen}
+          onClose={() => setIsRouletteOpen(false)}
+          userEmail={userEmail}
+        />
+      )}
     </div>
   );
 }

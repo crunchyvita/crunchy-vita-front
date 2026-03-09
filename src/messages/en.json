@@ -122,6 +122,22 @@
           "desc": "All our fruits come from organic farming."
         }
       }
+    },
+    "roulette": {
+      "title": "Spin to Win!",
+      "subtitle": "Try your luck and get an exclusive discount code",
+      "description": "Spin our roulette wheel and win amazing prizes! Get instant discounts, free products, or exclusive packages.",
+      "limit": "Spin once per email address. Codes valid for 30 days."
+    },
+    "ticker": {
+      "ultraCrunchy": "Ultra Crunchy",
+      "naturalFruits": "100% NATURAL FRUITS",
+      "noSugar": "NO ADDED SUGAR",
+      "organic": "CERTIFIED ORGANIC",
+      "protected": "MADE IN PROTECTED FACILITIES",
+      "expressDelivery": "EXPRESS DELIVERY",
+      "securePayment": "100% SECURE PAYMENT",
+      "premiumSupport": "PREMIUM CUSTOMER SERVICE"
     }
   },
   "PreferredItem": {
@@ -169,6 +185,7 @@
     "products": {
       "title": "Our bulk products",
       "learnMore": "Learn more",
+      "formatsLabel": "Available formats:",
       "filters": {
         "all": "All",
         "organic": "Organic",
@@ -193,11 +210,16 @@
       "noticeLink": "contact form",
       "companyTitle": "Company",
       "fields": {
+        "contactName": "Contact name",
+        "email": "Business email",
         "company": "Company",
         "activity": "Activity",
         "siren": "SIREN",
+        "siren": "SIREN",
         "vat": "VAT number",
         "address": "Address",
+        "website": "Company website",
+        "message": "Message"
         "website": "Company website",
         "message": "Message..."
       },
@@ -207,7 +229,11 @@
         "volume": "Desired volumes",
         "country": "Delivery country"
       },
-      "submit": "Receive a quote"
+      "quoteSubject": "Quote request - Professional space",
+      "submit": "Receive a quote",
+      "sending": "Sending...",
+      "success": "Your quote request was sent successfully.",
+      "error": "Unable to send the quote request right now."
     }
   },
   "AboutUs": {
@@ -970,5 +996,29 @@
         "genericRegisterError": "An error occurred during registration"
       }
     }
+  },
+  "Roulette": {
+    "description": "Try your luck and win an exclusive discount code!",
+    "emailNote": "We will send your winning code to this email",
+    "congratulations": "Congratulations!",
+    "youWon": "You won:",
+    "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email.",
+    "loadingWheel": "Loading wheel...",
+    "noRewards": "No rewards available at the moment.",
+    "loadError": "Unable to load the wheel.",
+    "wheelUnavailable": "Wheel unavailable",
+    "retry": "Try again",
+    "title": "Spin to Win!",
+    "subtitle": "Enjoy a fruity surprise on your next order",
+    "emailPlaceholder": "Your email address",
+    "invalidEmail": "Please enter a valid email address",
+    "spinning": "IN PROGRESS...",
+    "spinButton": "Spin the wheel",
+    "wonTitle": "You Won!",
+    "copied": "Copied!",
+    "copyHint": "Click to copy",
+    "continueShopping": "Continue shopping",
+    "spinError": "Something went wrong. Please try again.",
+    "codeError": "Unable to generate your code right now. Please try again."
   }
 }
