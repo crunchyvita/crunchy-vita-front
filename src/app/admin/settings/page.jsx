@@ -80,16 +80,30 @@ export default function AdminSettingsPage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setSettings({
+            emailNotifications: {
+              contactMessages: data.data.emailNotifications?.contactMessages ?? true,
+              stockAlerts: data.data.emailNotifications?.stockAlerts ?? false,
+            },
+            features: {
+              rouletteEnabled: data.data.features?.rouletteEnabled ?? false,
+            },
+            professionalSpace: {
+              productFormats: data.data.professionalSpace?.productFormats ?? '1kg, 2kg, 10kg',
+            },
+          });
+        }
         toast.success('Paramètre enregistré');
       } else {
-        // Revert on error
-        setSettings(settings);
+        // Revert to server state on error
+        await fetchSettings();
         toast.error('Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      // Revert on error
-      setSettings(settings);
+      await fetchSettings();
       toast.error('Erreur lors de la sauvegarde');
     }
   };
@@ -120,6 +134,15 @@ export default function AdminSettingsPage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setSettings((prev) => ({
+            ...prev,
+            professionalSpace: {
+              productFormats: data.data.professionalSpace?.productFormats ?? prev.professionalSpace.productFormats,
+            },
+          }));
+        }
         toast.success('Formats enregistrés');
       } else {
         toast.error('Erreur lors de la sauvegarde des formats');
