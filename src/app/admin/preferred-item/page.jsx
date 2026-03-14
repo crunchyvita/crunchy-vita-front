@@ -66,7 +66,7 @@ export default function PreferredItemAdminPage() {
       // Validate: if best seller is disabled, require manual selection
       if (!isBestSellerEnabled) {
         if (!selectedItem || selectedItem === '') {
-          setError('❌ Please select an item when Best Seller is disabled');
+          setError('Please select an item when Best Seller is disabled');
           return;
         }
       }
@@ -80,7 +80,7 @@ export default function PreferredItemAdminPage() {
 
       // Validate item was found
       if (!isBestSellerEnabled && !selectedItemObj) {
-        setError('❌ Selected item not found in list');
+        setError('Selected item not found in list');
         setLoading(false);
         return;
       }
@@ -111,7 +111,7 @@ export default function PreferredItemAdminPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('HTTP Error:', response.status, errorText);
-        setError(`❌ Server Error (${response.status}): ${errorText || 'Unknown error'}`);
+        setError(`Server Error (${response.status}): ${errorText || 'Unknown error'}`);
         setLoading(false);
         return;
       }
@@ -120,17 +120,17 @@ export default function PreferredItemAdminPage() {
       console.log('Response data:', result);
       
       if (result.success) {
-        setSuccess('✅ Preferred item updated successfully!');
+        setSuccess('Preferred item updated successfully!');
         setPreferredItem(result.data);
         setTimeout(() => setSuccess(''), 3000);
       } else {
         const errorMsg = result.message || 'Failed to update preferred item';
-        setError('❌ ' + errorMsg);
+        setError(' ' + errorMsg);
         console.error('Error response:', result);
       }
     } catch (err) {
       const errorMsg = err.message || 'Error saving preferred item';
-      setError('❌ ' + errorMsg);
+      setError( errorMsg);
       console.error('Catch error:', err);
     } finally {
       setLoading(false);
@@ -243,7 +243,7 @@ export default function PreferredItemAdminPage() {
               />
             </button>
             <p className="text-xs text-gray-600 font-semibold max-w-xs text-right">
-              {isBestSellerEnabled ? '✓ Auto Best Seller' : 'Manual Selection'}
+              {isBestSellerEnabled ? ' Auto Best Seller' : 'Manual Selection'}
             </p>
           </div>
         </div>
@@ -298,21 +298,21 @@ export default function PreferredItemAdminPage() {
                   disabled={isBestSellerEnabled}
                   className={`relative group rounded-xl overflow-hidden transition-all duration-300 ${
                     selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id))
-                      ? 'ring-4 ring-blue-500 shadow-xl scale-105'
+                      ? 'ring-4 ring-[#556822] shadow-xl scale-105'
                       : 'hover:shadow-lg hover:scale-102'
                   } ${isBestSellerEnabled ? 'cursor-default' : ''}`}
                 >
                   {/* Best Seller Badge */}
                   {isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id) && (
                     <div className="absolute top-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 flex items-center gap-1">
-                     
+                     best seller
                     </div>
                   )}
                   
                   {/* Card Background */}
                   <div className={`w-full aspect-square rounded-xl overflow-hidden ${
-                    selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'bg-blue-50' : 'bg-white'
-                  } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'border-blue-500' : 'border-gray-200'} transition-all`}>
+                    selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'bg-[#f5f7ee]' : 'bg-white'
+                  } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId) ? 'border-[#556822]' : 'border-gray-200'} transition-all`}>
                     
                     {/* Image or placeholder icon */}
                     {item.image ? (
@@ -350,7 +350,7 @@ export default function PreferredItemAdminPage() {
                   
                   {/* Selection Badge */}
                   {(selectedItem === item._id || (isBestSellerEnabled && preferredItem && item._id === preferredItem.itemId)) && (
-                    <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-2 shadow-lg">
+                    <div className="absolute top-2 right-2 bg-[#556822] text-white rounded-full p-2 shadow-lg">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
@@ -391,7 +391,7 @@ export default function PreferredItemAdminPage() {
                   disabled={isBestSellerEnabled}
                   className={`relative group rounded-xl overflow-hidden transition-all duration-300 ${
                     selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id))
-                      ? 'ring-4 ring-purple-500 shadow-xl scale-105'
+                      ? 'ring-4 ring-[#556822] shadow-xl scale-105'
                       : 'hover:shadow-lg hover:scale-102'
                   } ${isBestSellerEnabled ? 'cursor-default' : ''}`}
                 >
@@ -404,8 +404,8 @@ export default function PreferredItemAdminPage() {
                   
                   {/* Card Background */}
                   <div className={`w-full aspect-square rounded-xl overflow-hidden ${
-                    selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id)) ? 'bg-purple-50' : 'bg-white'
-                  } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id)) ? 'border-purple-500' : 'border-gray-200'} transition-all`}>
+                    selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id)) ? 'bg-[#f5f7ee]' : 'bg-white'
+                  } border-2 ${selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id)) ? 'border-[#556822]' : 'border-gray-200'} transition-all`}>
                     
                     {/* Image */}
                     {item.image ? (
@@ -443,7 +443,7 @@ export default function PreferredItemAdminPage() {
                   
                   {/* Selection Badge */}
                   {(selectedItem === item._id || (isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id))) && (
-                    <div className="absolute top-2 right-2 bg-purple-500 text-white rounded-full p-2 shadow-lg">
+                    <div className="absolute top-2 right-2 bg-[#556822] text-white rounded-full p-2 shadow-lg">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>

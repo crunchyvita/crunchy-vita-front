@@ -482,7 +482,6 @@ export default function ProductDetailPage() {
         rating: rating || undefined,
         content: comment?.trim() || undefined,
         isAnonymous,
-        displayName: null,
       });
 
       if (!data || data.error) {
@@ -524,7 +523,6 @@ export default function ProductDetailPage() {
               : { _id: user?.id, name: user?.name, photo: user?.photo },
             content: result.comment.content,
             isAnonymous: result.comment.isAnonymous,
-            displayName: result.comment.displayName,
             status: result.comment.status || 'pending',
             createdAt: result.comment.createdAt,
           };

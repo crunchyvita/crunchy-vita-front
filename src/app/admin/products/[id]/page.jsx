@@ -203,10 +203,12 @@ export default function ProductDetailPage() {
     // Store original state for rollback
     const originalProduct = { ...product };
 
-    // Optimistic update: mark as deleted
+    setDeletingCommentId(commentIdToDelete);
+
+    // Optimistic update: remove comment immediately
     setProduct(prevProduct => ({
       ...prevProduct,
-      comments: (prevProduct.comments || []).map(c => c._id === commentIdToDelete ? { ...c, status: 'deleted' } : c)
+      comments: (prevProduct.comments || []).filter(c => c._id !== commentIdToDelete)
     }));
 
     // Close modal immediately
@@ -220,6 +222,8 @@ export default function ProductDetailPage() {
       // Rollback on error
       setProduct(originalProduct);
       alert("Failed to delete comment. Please try again.");
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -257,10 +261,10 @@ export default function ProductDetailPage() {
     try {
       await reviewAPI.reject(productId, commentId);
       console.log('[Admin Product] Comment rejected successfully');
-      // Update comment status to rejected (soft delete)
+      // Remove rejected comment because the backend deletes it permanently
       setProduct(prev => ({
         ...prev,
-        comments: (prev.comments || []).map(c => c._id === commentId ? { ...c, status: 'rejected' } : c)
+        comments: (prev.comments || []).filter(c => c._id !== commentId)
       }));
       // Clear moderation mode after rejection
       if (moderateParams.moderateMode) {

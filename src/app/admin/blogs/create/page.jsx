@@ -7,6 +7,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Image as ImageIcon,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
@@ -18,8 +19,6 @@ export default function CreateBlogPage() {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    title_en: "",
-    content_en: "",
   });
 
   const [imageFile, setImageFile] = useState(null);
@@ -50,29 +49,20 @@ export default function CreateBlogPage() {
     setLoading(true);
 
     try {
-      // ✅ required FR fields
       if (!formData.title?.trim() || !formData.content?.trim()) {
-        setError("Title and content are required");
-        return;
+        throw new Error("Title and content are required");
       }
 
       const token = localStorage.getItem("token");
-
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title.trim());
       formDataToSend.append("content", formData.content.trim());
-
-      // ✅ optional EN fields
-      if (formData.title_en?.trim()) formDataToSend.append("title_en", formData.title_en.trim());
-      if (formData.content_en?.trim()) formDataToSend.append("content_en", formData.content_en.trim());
 
       if (imageFile) formDataToSend.append("image", imageFile);
 
       const response = await fetch(`${backendUrl}/blogs`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formDataToSend,
       });
 
@@ -91,154 +81,120 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <AdminHeader />
 
-      <div className="max-w-4xl mx-auto p-6 lg:p-8">
-        {/* Back Button */}
-        <Link href="/admin/blogs">
-          <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6 transition">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Blogs
-          </button>
-        </Link>
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create Blog Post</h1>
-          <p className="text-gray-600 mt-2">Add a new blog post</p>
+      <div className="w-full px-4 py-6 sm:px-8 lg:px-12">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <Link href="/admin/blogs" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-2 transition w-fit">
+              <ArrowLeft className="h-4 w-4" /> Back to Blogs
+            </Link>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Create Blog Post</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <Link href="/admin/blogs" className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition text-sm font-medium">
+                Cancel
+             </Link>
+             <button 
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-5 py-2.5 text-white rounded-lg transition disabled:opacity-50 text-sm font-medium shadow-sm"
+                style={{backgroundColor: '#556622'}}
+             >
+                {loading ? "Publishing..." : "Publish Post"}
+             </button>
+          </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 mb-6">
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
+        {/* Alerts */}
+        <div className="mb-6 space-y-4">
+          {error && (
+            <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+          )}
+          {success && (
+            <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+              <p className="text-sm font-medium text-green-800">{success}</p>
+            </div>
+          )}
+        </div>
 
-        {/* Success Message */}
-        {success && (
-          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 flex items-start gap-3 mb-6">
-            <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-green-700">{success}</p>
-          </div>
-        )}
-
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white border border-gray-200 rounded-lg p-8"
-        >
-          {/* Title FR */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Title (FR) <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Enter blog title (French)"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
-          </div>
-
-       
-
-          {/* Image Upload */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Image
-            </label>
-
-            <div className="flex gap-4">
-              {imagePreview ? (
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview(null);
-                    }}
-                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
-                    aria-label="Remove image"
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition bg-gray-50">
-                  <div className="text-center">
-                    <ImageIcon className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-600">Upload image</p>
-                  </div>
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 sm:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              
+              {/* Main Content Column */}
+              <div className="lg:col-span-2 space-y-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Blog Title <span className="text-red-500">*</span></label>
                   <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Enter post title"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition text-lg font-medium"
                   />
-                </label>
-              )}
+                </div>
 
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Image specifications:</p>
-                <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• Recommended: 1200×600</li>
-                  <li>• Format: JPG, PNG</li>
-                  <li>• Max size: 5MB</li>
-                </ul>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Content <span className="text-red-500">*</span></label>
+                  <textarea
+                    name="content"
+                    value={formData.content}
+                    onChange={handleInputChange}
+                    placeholder="Start writing your article..."
+                    rows="18"
+                    className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition resize-none leading-relaxed"
+                  />
+                </div>
               </div>
+
+              {/* Sidebar Column */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-6 space-y-6">
+                  <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-6">
+                    <label className="block text-sm font-bold text-gray-700 mb-4">
+                      Featured Image
+                    </label>
+                    
+                    {imagePreview ? (
+                      <div className="relative group aspect-video rounded-xl overflow-hidden shadow-md">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => { setImageFile(null); setImagePreview(null); }}
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white p-1.5 rounded-full transition backdrop-blur-sm"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white hover:border-[#556622] transition-all group">
+                        <ImageIcon className="h-10 w-10 text-gray-400 group-hover:text-[#556622] mb-2" />
+                        <p className="text-sm font-medium text-gray-600">Click to upload</p>
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      </label>
+                    )}
+
+                   
+                  </div>
+
+                  
+                </div>
+              </div>
+
             </div>
           </div>
-
-          {/* Content FR */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Content (FR) <span className="text-red-600">*</span>
-            </label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleInputChange}
-              placeholder="Write your blog content here (French)..."
-              rows={10}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
-            />
-          </div>
-
-        {/* Submit Button */}
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="px-6 py-2 text-white rounded-lg transition disabled:opacity-50"
-            style={{backgroundColor: '#556622'}}
-            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#3d4617')}
-            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#556622')}
-            disabled={loading}
-          >
-            {loading ? "Creating..." : "Create Blog Post"}
-          </button>
-
-          <Link href="/admin/blogs">
-            <button
-              type="button"
-              disabled={loading}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
-            >
-              Back to Blogs
-            </button>
-          </Link>
-        </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }

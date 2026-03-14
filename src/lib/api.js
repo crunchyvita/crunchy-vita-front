@@ -237,27 +237,27 @@ addRating: async (productId, rating) =>
   }),
 
 // Add comment to product
-addComment: async (productId, content, isAnonymous = false, displayName = null) => 
+addComment: async (productId, content, isAnonymous = false) => 
   apiRequest(`/reviews/products/${productId}/comments`, {
     method: "POST",
-    body: JSON.stringify({ content, isAnonymous, displayName }),
+    body: JSON.stringify({ content, isAnonymous }),
   }),
 
 // Add review (rating and/or comment) to product
-addReview: async (productId, rating, content, isAnonymous = false, displayName = null) => 
+addReview: async (productId, rating, content, isAnonymous = false) => 
   apiRequest(`/reviews/products/${productId}`, {
     method: "POST",
-    body: JSON.stringify({ rating, content, isAnonymous, displayName }),
+    body: JSON.stringify({ rating, content, isAnonymous }),
   }),
 };
 
 // Review API functions
 export const reviewAPI = {
   // Add review to a product
-  create: async (productId, { rating, content, isAnonymous, displayName }) =>
+  create: async (productId, { rating, content, isAnonymous }) =>
     apiRequest(`/reviews/products/${productId}`, {
       method: "POST",
-      body: JSON.stringify({ rating, content, isAnonymous, displayName }),
+      body: JSON.stringify({ rating, content, isAnonymous }),
     }),
 
   // Add rating only
@@ -268,10 +268,10 @@ export const reviewAPI = {
     }),
 
   // Add comment only
-  addComment: async (productId, content, isAnonymous = false, displayName = null) =>
+  addComment: async (productId, content, isAnonymous = false) =>
     apiRequest(`/reviews/products/${productId}/comments`, {
       method: "POST",
-      body: JSON.stringify({ content, isAnonymous, displayName }),
+      body: JSON.stringify({ content, isAnonymous }),
     }),
 
   // Delete own comment (CLIENT)
@@ -453,10 +453,10 @@ export const notificationAPI = {
 
 // Blog API functions
 export const blogAPI = {
-  // Get all published blogs (public)
+  // Get all blogs (public)
   list: async () => apiRequest("/blogs", { method: "GET" }),
 
-  // Get all blogs (admin - includes unpublished)
+  // Get all blogs (admin)
   listAdmin: async () => apiRequest("/blogs/admin/all", { method: "GET" }),
 
   // Get single blog by ID (public)
@@ -471,18 +471,6 @@ export const blogAPI = {
     
     formData.append("title", payload.title);
     formData.append("content", payload.content);
-    
-    if (payload.publicationDate) {
-      formData.append("publicationDate", payload.publicationDate);
-    }
-    
-    if (payload.creationDate) {
-      formData.append("creationDate", payload.creationDate);
-    }
-    
-    if (payload.isPublished !== undefined) {
-      formData.append("isPublished", payload.isPublished);
-    }
     
     if (payload.image) {
       formData.append("image", payload.image);
@@ -500,10 +488,6 @@ export const blogAPI = {
     
     if (payload.title) formData.append("title", payload.title);
     if (payload.content) formData.append("content", payload.content);
-    if (payload.publicationDate) formData.append("publicationDate", payload.publicationDate);
-    if (payload.creationDate) formData.append("creationDate", payload.creationDate);
-    if (payload.isPublished !== undefined) formData.append("isPublished", payload.isPublished);
-    if (payload.isArchived !== undefined) formData.append("isArchived", payload.isArchived);
     if (payload.image) formData.append("image", payload.image);
 
     return apiRequest(`/blogs/${id}`, {
@@ -511,13 +495,6 @@ export const blogAPI = {
       body: formData,
     });
   },
-
-  // Archive/unarchive blog (admin only)
-  archive: async (id, archived = true) =>
-    apiRequest(`/blogs/${id}/archive`, {
-      method: "PATCH",
-      body: JSON.stringify({ archived }),
-    }),
 
   // Delete blog (admin only)
   delete: async (id) => apiRequest(`/blogs/${id}`, { method: "DELETE" }),
