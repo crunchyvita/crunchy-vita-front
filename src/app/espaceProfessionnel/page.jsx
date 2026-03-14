@@ -137,23 +137,6 @@ const CrunchyVita = () => {
     setQuoteLoading(true);
 
     try {
-      const detailLines = [
-        [t('form.fields.activity'), quoteForm.activity],
-        [t('form.fields.siren'), quoteForm.siren],
-        [t('form.fields.vat'), quoteForm.vat],
-        [t('form.fields.website'), quoteForm.website],
-      ]
-        .filter(([, value]) => value && value.trim())
-        .map(([label, value]) => `${label}: ${value.trim()}`);
-
-      const composedMessage = [
-        quoteForm.message.trim(),
-        detailLines.length > 0 ? '' : null,
-        ...detailLines,
-      ]
-        .filter(Boolean)
-        .join('\n');
-
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -162,10 +145,14 @@ const CrunchyVita = () => {
         body: JSON.stringify({
           name: quoteForm.company.trim(),
           email: quoteForm.email.trim(),
-          message: composedMessage,
+          message: quoteForm.message.trim(),
           subject: t('form.quoteSubject'),
           contactType: 'devis',
           companyName: quoteForm.company.trim(),
+          activity: quoteForm.activity.trim(),
+          siren: quoteForm.siren.trim(),
+          tva: quoteForm.vat.trim(),
+          website: quoteForm.website.trim(),
         }),
       });
 

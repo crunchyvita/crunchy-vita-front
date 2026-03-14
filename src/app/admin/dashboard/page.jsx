@@ -56,7 +56,7 @@ function AdminDashboard() {
       const data = await response.json();
       let messagesArray = Array.isArray(data) ? data : (data.messages || data.data || []);
       setMessages(messagesArray);
-      setUnreadMessages(messagesArray.filter(m => m.status === 'new' || (!m.status && !m.read)).length);
+      setUnreadMessages(messagesArray.filter(m => m.status === 'new').length);
     } catch (error) {
       // Backend connection failed, silently continue without messages
       if (error.message === 'Failed to fetch') {
