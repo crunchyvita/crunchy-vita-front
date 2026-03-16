@@ -19,13 +19,8 @@ const pickUrl = (v) => {
 };
 
 const getCartItemImagesLocal = (item) => {
-  const isPackage = item.type === 'package' || !!item.packageId;
-  if (!isPackage) {
-    const one = pickUrl(item?.image);
-    return one ? [one] : [];
-  }
-  let imgs = Array.isArray(item?.packageImages) ? item.packageImages.map(pickUrl).filter(Boolean) : [];
-  return imgs;
+  const one = pickUrl(item?.image);
+  return one ? [one] : [];
 };
 
 const CheckoutPage = () => {
