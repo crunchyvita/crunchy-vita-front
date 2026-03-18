@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  AlertCircle,
-  CheckCircle2,
-  Image as ImageIcon,
-  X,
-} from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 
@@ -102,7 +96,6 @@ export default function CreateBlogPage() {
       imageFiles.forEach((file) => {
         formDataToSend.append("images", file);
       });
-      if (imageFile) formDataToSend.append("image", imageFile);
 
       const response = await fetch(`${backendUrl}/blogs`, {
         method: "POST",
@@ -127,136 +120,58 @@ export default function CreateBlogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminHeader />
-
       <div className="w-full px-4 py-6 sm:px-8 lg:px-12">
-        
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <Link href="/admin/blogs" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-2 transition w-fit">
-              <ArrowLeft className="h-4 w-4" /> Back to Blogs
+              <ArrowLeft className="h-4 w-4" />
+              Back to Blogs
             </Link>
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Create Blog Post</h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
-             <Link href="/admin/blogs" className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition text-sm font-medium">
-                Cancel
-             </Link>
-             <button 
-                onClick={handleSubmit}
-                disabled={loading}
-                className="px-5 py-2.5 text-white rounded-lg transition disabled:opacity-50 text-sm font-medium shadow-sm"
-                style={{backgroundColor: '#556622'}}
-             >
-                {loading ? "Publishing..." : "Publish Post"}
-             </button>
+            <Link href="/admin/blogs" className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition text-sm font-medium">
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              form="create-blog-form"
+              disabled={loading}
+              className="px-5 py-2.5 text-white rounded-lg transition disabled:opacity-50 text-sm font-medium shadow-sm"
+              style={{ backgroundColor: "#556622" }}
+            >
+              {loading ? "Publishing..." : "Publish Post"}
+            </button>
           </div>
         </div>
 
-        {/* Alerts */}
-        <div className="mb-6 space-y-4">
-          {error && (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
-          )}
-          {success && (
-            <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-              <p className="text-sm font-medium text-green-800">{success}</p>
-            </div>
-          )}
-        </div>
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 mb-6">
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-        {/* Success Message */}
         {success && (
           <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 flex items-start gap-3 mb-6">
-            <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
             <p className="text-sm text-green-700">{success}</p>
           </div>
         )}
 
-        {/* Form */}
         <form
+          id="create-blog-form"
           onSubmit={handleSubmit}
-          className="bg-white border border-gray-200 rounded-lg p-8"
+          className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
         >
-          {/* Title FR */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Title (FR) <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Enter blog title (French)"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
-          </div>
-
-       
-
-          {/* Image Upload */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Images
-            </label>
-
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap gap-4">
-                {imagePreviews.map((preview, index) => (
-                  <div key={`${preview}-${index}`} className="relative w-32 h-32 rounded-lg overflow-hidden">
-                    <img
-                      src={preview}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImageAtIndex(index)}
-                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
-                      aria-label="Remove image"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-
-                <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition bg-gray-50">
-                  <div className="text-center">
-                    <ImageIcon className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-600">Upload images</p>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Image specifications:</p>
-                <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• Recommended: 1200×600</li>
-                  <li>• Format: JPG, PNG</li>
-                  <li>• Up to 10 images</li>
-                  <li>• Max size: 5MB</li>
-                </ul>
-        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-6 sm:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              
-              {/* Main Content Column */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               <div className="lg:col-span-2 space-y-6">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Blog Title <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Post Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     name="title"
@@ -268,52 +183,88 @@ export default function CreateBlogPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Content <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Content Body <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     name="content"
                     value={formData.content}
                     onChange={handleInputChange}
                     placeholder="Start writing your article..."
-                    rows="18"
+                    rows={18}
                     className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition resize-none leading-relaxed"
                   />
                 </div>
               </div>
 
-              {/* Sidebar Column */}
               <div className="lg:col-span-1">
                 <div className="sticky top-6 space-y-6">
                   <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-6">
                     <label className="block text-sm font-bold text-gray-700 mb-4">
                       Featured Image
                     </label>
-                    
-                    {imagePreview ? (
+
+                    {imagePreviews[0] ? (
                       <div className="relative group aspect-video rounded-xl overflow-hidden shadow-md">
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <img src={imagePreviews[0]} alt="Featured preview" className="w-full h-full object-cover" />
                         <button
                           type="button"
-                          onClick={() => { setImageFile(null); setImagePreview(null); }}
-                          className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white p-1.5 rounded-full transition backdrop-blur-sm"
+                          onClick={() => removeImageAtIndex(0)}
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white px-2 py-1 rounded-full text-xs transition"
                         >
-                          <X className="h-4 w-4" />
+                          x
                         </button>
                       </div>
                     ) : (
                       <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white hover:border-[#556622] transition-all group">
                         <ImageIcon className="h-10 w-10 text-gray-400 group-hover:text-[#556622] mb-2" />
                         <p className="text-sm font-medium text-gray-600">Click to upload</p>
-                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
                       </label>
                     )}
 
-                   
-                  </div>
+                    <p className="mt-4 text-xs text-gray-500 leading-tight">
+                      This image will appear at the top of your blog post and in list views.
+                    </p>
 
-                  
+                    {imagePreviews.length > 1 && (
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        {imagePreviews.slice(1).map((preview, index) => (
+                          <div key={`${preview}-${index + 1}`} className="relative w-full aspect-square rounded-md overflow-hidden">
+                            <img src={preview} alt={`Preview ${index + 2}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeImageAtIndex(index + 1)}
+                              className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white w-5 h-5 rounded-full text-xs"
+                            >
+                              x
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {imagePreviews[0] && (
+                      <label className="mt-4 inline-flex items-center justify-center w-full px-3 py-2 text-xs border border-gray-300 rounded-lg cursor-pointer hover:bg-white transition">
+                        Add more images
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
-
             </div>
           </div>
         </form>

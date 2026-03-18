@@ -126,7 +126,7 @@ export default function BlogsPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Author</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Publication Date</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created At</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>

@@ -1020,17 +1020,6 @@
     "emailNote": "Nous enverrons votre code gagnant a cette adresse email",
     "congratulations": "Felicitations !",
     "youWon": "Vous avez gagne :",
-<<<<<<< HEAD
-    "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email."
-  },
-  "Lyophilisation": {
-    "errors": {
-      "fetchFailed": "Erreur lors du chargement du contenu",
-      "loadFailed": "Impossible de charger la page La lyophilisation",
-      "notFoundTitle": "Contenu non trouve",
-      "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
-    }
-=======
     "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email.",
     "loadingWheel": "Chargement de la roue...",
     "noRewards": "Aucune recompense disponible pour le moment.",
@@ -1049,6 +1038,13 @@
     "continueShopping": "Continuer mes achats",
     "spinError": "Une erreur est survenue. Veuillez reessayer.",
     "codeError": "Impossible de generer votre code. Veuillez reessayer."
->>>>>>> 1ba5eea70ba10c2b696f08f23392c6f2be90bfd0
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Erreur lors du chargement du contenu",
+      "loadFailed": "Impossible de charger la page La lyophilisation",
+      "notFoundTitle": "Contenu non trouve",
+      "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
+    }
   }
 }

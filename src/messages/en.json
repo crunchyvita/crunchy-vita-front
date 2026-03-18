@@ -1020,17 +1020,6 @@
     "emailNote": "We will send your winning code to this email",
     "congratulations": "Congratulations!",
     "youWon": "You won:",
-<<<<<<< HEAD
-    "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email."
-  },
-  "Lyophilisation": {
-    "errors": {
-      "fetchFailed": "Failed to load content",
-      "loadFailed": "Unable to load the Freeze-drying page",
-      "notFoundTitle": "Content not found",
-      "notFoundDescription": "The page you are looking for does not exist or is not available."
-    }
-=======
     "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email.",
     "loadingWheel": "Loading wheel...",
     "noRewards": "No rewards available at the moment.",
@@ -1049,6 +1038,13 @@
     "continueShopping": "Continue shopping",
     "spinError": "Something went wrong. Please try again.",
     "codeError": "Unable to generate your code right now. Please try again."
->>>>>>> 1ba5eea70ba10c2b696f08f23392c6f2be90bfd0
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Failed to load content",
+      "loadFailed": "Unable to load the Freeze-drying page",
+      "notFoundTitle": "Content not found",
+      "notFoundDescription": "The page you are looking for does not exist or is not available."
+    }
   }
 }
