@@ -20,6 +20,7 @@ import {
   Save
 } from "lucide-react";
 import TagInput from "@/components/TagInput";
+import { createEmptyNutrition, normalizeNutrition, NUTRITION_ROWS } from "@/lib/nutrition";
 
 export default function EditProductPage() {
   const { id: productId } = useParams();
@@ -53,6 +54,7 @@ export default function EditProductPage() {
     status: "ACTIVE",
     showInShop: true,
     categories: [],
+    nutrition: createEmptyNutrition(),
   });
 
   const addCategorySelection = (categoryItem) => {
@@ -130,6 +132,7 @@ export default function EditProductPage() {
         status: data.status || "ACTIVE",
         showInShop: data.showInShop !== false,
         categories: normalizedCategoryItems.map((item) => item.id),
+        nutrition: normalizeNutrition(data.nutrition),
       });
       setSelectedCategories(normalizedCategoryItems);
     } catch (err) {
@@ -198,6 +201,20 @@ export default function EditProductPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleNutritionChange = (columnKey, field) => (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      nutrition: {
+        ...prev.nutrition,
+        [columnKey]: {
+          ...prev.nutrition[columnKey],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   const handleMediaChange = (e) => {
     const files = Array.from(e.target.files || []);
     setNewFiles((prev) => [...prev, ...files]);
@@ -248,6 +265,7 @@ export default function EditProductPage() {
       formDataObj.append("height", formData.height || "");
       formDataObj.append("depth", formData.depth || "");
       formDataObj.append("weight", formData.weight || "");
+      formDataObj.append("nutrition", JSON.stringify(formData.nutrition));
       formDataObj.append("status", formData.status);
       formDataObj.append("showInShop", String(formData.showInShop));
       
@@ -483,6 +501,69 @@ export default function EditProductPage() {
                   onWheel={(e) => e.currentTarget.blur()}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black focus:border-blue-500 focus:bg-white outline-none transition-all"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="p-2 bg-fuchsia-100 text-fuchsia-700 rounded-xl"><ShieldCheck size={20}/></div>
+              <div>
+                <h3 className="font-black text-lg text-slate-900">Tableau nutritionnel</h3>
+                <p className="text-sm text-slate-500">Mettez a jour les valeurs nutritionnelles affichees sur la fiche produit.</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Libelle portion</label>
+              <input
+                type="text"
+                value={formData.nutrition.servingLabel}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    nutrition: {
+                      ...prev.nutrition,
+                      servingLabel: e.target.value,
+                    },
+                  }))
+                }
+                placeholder="16 g"
+                className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-medium text-black placeholder:text-slate-400 focus:border-[#556822] focus:bg-white outline-none transition-all"
+              />
+            </div>
+
+            <div className="overflow-x-auto">
+              <div className="space-y-3" style={{ minWidth: "760px" }}>
+                <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-3">
+                  <div className="rounded-2xl bg-slate-900 px-5 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">Infos nutritionnelles</div>
+                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>100 g</div>
+                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>
+                    {formData.nutrition.servingLabel}
+                  </div>
+                </div>
+
+                {NUTRITION_ROWS.map((row) => (
+                  <div key={row.key} className="grid grid-cols-[1.3fr_1fr_1fr] gap-3">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900">
+                      {row.label}
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.nutrition.per100g[row.key]}
+                      onChange={handleNutritionChange("per100g", row.key)}
+                      placeholder={row.placeholder100g}
+                      className="rounded-2xl border-2 border-slate-100 bg-white px-5 py-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-[#556822] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={formData.nutrition.perServing[row.key]}
+                      onChange={handleNutritionChange("perServing", row.key)}
+                      placeholder={row.placeholderServing}
+                      className="rounded-2xl border-2 border-slate-100 bg-white px-5 py-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-[#556822] focus:outline-none"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

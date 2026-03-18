@@ -184,6 +184,10 @@ export const productAPI = {
         formData.append(field, payload[field] ?? "");
       }
     });
+
+    if (payload.nutrition) {
+      formData.append("nutrition", JSON.stringify(payload.nutrition));
+    }
     
     // Tags as comma-separated string
     if (payload.tags) {

@@ -7,6 +7,8 @@ import { productAPI, reviewAPI } from "@/lib/api";
 import { getTranslatedProduct } from "@/lib/productTranslations";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import NutritionTable from "@/components/NutritionTable";
+import { hasNutritionData } from "@/lib/nutrition";
 import  {
   ArrowLeft,
   Calendar,
@@ -398,6 +400,12 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             </div>
+
+            {hasNutritionData(product.nutrition) && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+                <NutritionTable nutrition={product.nutrition} />
+              </div>
+            )}
 
             {/* COMMENTS & HISTORY */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">

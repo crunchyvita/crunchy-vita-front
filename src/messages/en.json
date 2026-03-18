@@ -393,6 +393,27 @@
       "lyoLabel": "Freeze-dried fruit",
       "slide": "Slide to compare"
     },
+    "nutrition": {
+      "title": "Nutrition facts",
+      "subtitle": "Explore the nutritional richness of our fruits",
+      "infoHeader": "Nutritional information",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 serving",
+      "rows": {
+        "energy": "Energy",
+        "fat": "Fat",
+        "saturatedFat": "Saturated fat",
+        "carbohydrates": "Carbohydrates",
+        "sugars": "Sugars",
+        "protein": "Protein",
+        "salt": "Salt",
+        "fiber": "Dietary fiber",
+        "vitaminC": "Vitamin C",
+        "calcium": "Calcium",
+        "iron": "Iron",
+        "potassium": "Potassium"
+      }
+    },
     "reviews": {
       "title": "Customer reviews",
       "writeTitle": "Write a review",

@@ -393,6 +393,27 @@
       "lyoLabel": "Fruit Lyophilise",
       "slide": "Glissez pour comparer"
     },
+    "nutrition": {
+      "title": "Tableau nutritionnel",
+      "subtitle": "Explorez la richesse nutritionnelle de nos fruits",
+      "infoHeader": "Infos nutritionnelles",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 portion",
+      "rows": {
+        "energy": "Energie",
+        "fat": "Matieres grasses",
+        "saturatedFat": "Dont saturees",
+        "carbohydrates": "Glucides",
+        "sugars": "Dont sucres",
+        "protein": "Proteines",
+        "salt": "Sel",
+        "fiber": "Fibres alimentaires",
+        "vitaminC": "Vitamine C",
+        "calcium": "Calcium",
+        "iron": "Fer",
+        "potassium": "Potassium"
+      }
+    },
     "reviews": {
       "title": "Avis clients",
       "writeTitle": "Ecrire un avis",
