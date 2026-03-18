@@ -8,7 +8,7 @@ import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getTranslatedProduct } from '@/lib/productTranslations';
+import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // ✅ Helpers (Kept as is for functionality)
@@ -35,31 +35,47 @@ const getCartItemImagesLocal = (item) => {
   if (!isPackage) {
     return one ? [one] : [];
   }
-<<<<<<< HEAD
-  const packageImage =
-    pickUrl(item?.image) ||
-    pickUrl(item?.packageImage) ||
-    pickUrl(item?.package?.image) ||
-    pickUrl(item?.packageId?.image) ||
-    pickUrl(item?.packageImages?.[0]);
-
-  return packageImage ? [packageImage] : [];
-=======
 
   // Prefer package main image for package items
   if (one) {
     return [one];
   }
 
+  const packageMainImage =
+    pickUrl(item?.packageImage) ||
+    pickUrl(item?.package?.image) ||
+    pickUrl(item?.packageId?.image);
+  if (packageMainImage) {
+    return [packageMainImage];
+  }
+
   let imgs = [];
+  if (Array.isArray(item?.packageImages)) {
+    imgs = item.packageImages.map((img) => pickUrl(img)).filter(Boolean);
+  }
+
   if (Array.isArray(item?.selectedProducts)) {
-    imgs = item.selectedProducts
-      .map((sp) => {
-        const direct = pickUrl(sp?.image);
-        if (direct) return direct;
-        return getProductImageUrl(sp?.product);
-      })
-      .filter(Boolean);
+    imgs = [
+      ...imgs,
+      ...item.selectedProducts
+        .map((sp) => {
+          const direct = pickUrl(sp?.image);
+          if (direct) return direct;
+
+          const product = sp?.product || (typeof sp?.productId === 'object' ? sp.productId : null);
+          if (!product) return null;
+
+          const fromProduct =
+            pickUrl(product?.image) ||
+            pickUrl(product?.imageUrl) ||
+            pickUrl(product?.productImage) ||
+            pickUrl(product?.media?.[0]?.url) ||
+            pickUrl(product?.media?.[0]);
+
+          return fromProduct;
+        })
+        .filter(Boolean),
+    ];
   }
   const seen = new Set();
   const unique = [];
@@ -70,7 +86,6 @@ const getCartItemImagesLocal = (item) => {
     }
   }
   return unique;
->>>>>>> dev
 };
 
 const getItemAvailableStock = async (item, API_URL) => {
@@ -300,13 +315,23 @@ export default function CartPage() {
               <div className="divide-y divide-gray-100">
                 {cartItems.map((item) => {
                   const isPackage = isPackageItem(item);
-                  const hasPackageMainImage = isPackage && !!pickUrl(item?.image);
+                  const hasPackageMainImage =
+                    isPackage &&
+                    !!(
+                      pickUrl(item?.image) ||
+                      pickUrl(item?.packageImage) ||
+                      pickUrl(item?.package?.image) ||
+                      pickUrl(item?.packageId?.image)
+                    );
 
                   const localImgs = getCartItemImagesLocal(item);
                   const images = localImgs;
 
                   const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
-                  const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
+                  const sourcePackage = item?.package || (typeof item?.packageId === 'object' ? item.packageId : null);
+                  const translatedName = isPackage
+                    ? (sourcePackage ? getTranslatedPackage(sourcePackage, locale).name : null)
+                    : (sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null);
                   const displayName = translatedName || item.name;
 
                   const currentQty = uiQty[item._id] ?? Number(item.quantity || 1);
@@ -325,19 +350,6 @@ export default function CartPage() {
                     <div key={item._id} className="py-6 flex items-center gap-6">
                       {/* Images */}
                       <div className="shrink-0 flex items-center justify-center bg-transparent">
-                        <div className="w-20 h-24 bg-transparent overflow-hidden">
-                          {images[0] ? (
-                            <img
-                              src={images[0]}
-                              alt={displayName}
-                              className={`w-full h-full ${isPackage ? 'object-cover' : 'object-contain'}`}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
-                              <ShoppingBag size={24} className="text-gray-300" />
-                            </div>
-                          )}
-                        </div>
                         {isPackage && !hasPackageMainImage ? (
                           <div className="grid grid-cols-2 gap-1 w-28">
                             {images.length > 0 ? (
@@ -357,7 +369,11 @@ export default function CartPage() {
                         ) : (
                           <div className="w-20 h-24 bg-transparent overflow-hidden">
                             {images[0] ? (
-                              <img src={images[0]} alt={item.name} className="w-full h-full object-contain" />
+                              <img
+                                src={images[0]}
+                                alt={displayName}
+                                className={`w-full h-full ${isPackage ? 'object-cover' : 'object-contain'}`}
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
                                 <ShoppingBag size={24} className="text-gray-300" />

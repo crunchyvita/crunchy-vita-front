@@ -214,20 +214,11 @@
         "email": "Email professionnel*",
         "company": "Société*",
         "activity": "Activité",
-<<<<<<< HEAD
-        "siren": "SIREN",
-        "siren": "SIREN",
-=======
         "siren": "SIREN*",
->>>>>>> dev
         "vat": "Numéro TVA",
         "address": "Adresse*",
         "website": "Site web de société",
-<<<<<<< HEAD
-        "message": "Message..."
-=======
         "message": "Message*"
->>>>>>> dev
       },
       "selects": {
         "products": "Produits Recherchés",

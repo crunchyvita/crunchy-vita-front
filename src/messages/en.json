@@ -218,11 +218,7 @@
         "vat": "VAT number",
         "address": "Address*",
         "website": "Company website",
-<<<<<<< HEAD
-        "message": "Message..."
-=======
         "message": "Message*"
->>>>>>> dev
       },
       "selects": {
         "products": "Requested products",
