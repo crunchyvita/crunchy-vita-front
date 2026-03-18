@@ -18,6 +18,7 @@
     "nav": {
       "home": "Home",
       "products": "Our products",
+      "freezeDriedFruits": "Freeze-dried fruit",
       "espace professionnel": "Professional space",
       "commitments": "Our commitments",
       "blog": "Blog",
@@ -31,9 +32,8 @@
     "email": "contact@crunchyvita.com",
     "phone": "+33 7 45 15 07 88",
     "address": {
-      "line1": "1460 Chemin des Terriers",
-      "line2": "Building B-04",
-      "line3": "06600 Antibes, France"
+   
+      "line3": " Antibes, France"
     },
     "nav": {
       "title": "Navigation",
@@ -200,15 +200,15 @@
       "noticeLink": "contact form",
       "companyTitle": "Company",
       "fields": {
-        "contactName": "Contact name",
-        "email": "Business email",
-        "company": "Company",
+        "contactName": "Contact name*",
+        "email": "Business email*",
+        "company": "Company*",
         "activity": "Activity",
-        "siren": "SIREN",
+        "siren": "SIREN*",
         "vat": "VAT number",
-        "address": "Address",
+        "address": "Address*",
         "website": "Company website",
-        "message": "Message"
+        "message": "Message*"
       },
       "selects": {
         "products": "Requested products",
@@ -990,5 +990,13 @@
     "congratulations": "Congratulations!",
     "youWon": "You won:",
     "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email."
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Failed to load content",
+      "loadFailed": "Unable to load the Freeze-drying page",
+      "notFoundTitle": "Content not found",
+      "notFoundDescription": "The page you are looking for does not exist or is not available."
+    }
   }
 }

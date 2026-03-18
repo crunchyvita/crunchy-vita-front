@@ -19,8 +19,7 @@ export default function EditBlogPage() {
     publicationDate: "",
     isPublished: false,
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -29,6 +28,18 @@ export default function EditBlogPage() {
   useEffect(() => {
     fetchBlog();
   }, [blogId]);
+
+  const getExistingImageUrls = (blog) => {
+    if (Array.isArray(blog?.imageUrls) && blog.imageUrls.length > 0) {
+      return blog.imageUrls.filter(Boolean);
+    }
+
+    if (blog?.imageUrl) {
+      return [blog.imageUrl];
+    }
+
+    return [];
+  };
 
   const fetchBlog = async () => {
     try {
@@ -53,10 +64,8 @@ export default function EditBlogPage() {
         isPublished: blog.isPublished,
       });
 
-      if (blog.imageUrl) {
-        // Cloudinary returns full URLs - use them directly
-        setImagePreview(blog.imageUrl);
-      }
+      const existingImages = getExistingImageUrls(blog);
+      setImages(existingImages.map((url) => ({ url, isNew: false, file: null })));
     } catch (err) {
       setError(err.message || "Failed to fetch blog");
     } finally {
@@ -72,16 +81,45 @@ export default function EditBlogPage() {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const remainingSlots = Math.max(0, 10 - images.length);
+    if (remainingSlots === 0) {
+      setError("Maximum 10 images allowed");
+      e.target.value = "";
+      return;
     }
+
+    const filesToAdd = files.slice(0, remainingSlots);
+
+    const previewPromises = filesToAdd.map(
+      (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve({
+            file,
+            url: event.target?.result || null,
+          });
+          reader.readAsDataURL(file);
+        })
+    );
+
+    const newImages = (await Promise.all(previewPromises))
+      .filter((entry) => entry.url)
+      .map((entry) => ({
+        url: entry.url,
+        file: entry.file,
+        isNew: true,
+      }));
+
+    setImages((prev) => [...prev, ...newImages]);
+    e.target.value = "";
+  };
+
+  const removeImageAtIndex = (indexToRemove) => {
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSubmit = async (e) => {
@@ -104,9 +142,16 @@ export default function EditBlogPage() {
       formDataToSend.append("publicationDate", formData.publicationDate);
       formDataToSend.append("isPublished", formData.isPublished);
 
-      if (imageFile) {
-        formDataToSend.append("image", imageFile);
-      }
+      const existingImageUrls = images
+        .filter((image) => !image.isNew)
+        .map((image) => image.url);
+      formDataToSend.append("existingImageUrls", JSON.stringify(existingImageUrls));
+
+      images
+        .filter((image) => image.isNew && image.file)
+        .forEach((image) => {
+          formDataToSend.append("images", image.file);
+        });
 
       const response = await fetch(`${backendUrl}/blogs/${blogId}`, {
         method: "PUT",
@@ -208,41 +253,40 @@ export default function EditBlogPage() {
         {/* Image Upload */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Blog Image
+            Blog Images
           </label>
-          <div className="flex gap-4">
-            {imagePreview ? (
-              <div className="relative w-32 h-32 rounded-lg overflow-hidden">
+          <div className="flex flex-wrap gap-4">
+            {images.map((image, index) => (
+              <div key={`${image.url}-${index}`} className="relative w-32 h-32 rounded-lg overflow-hidden">
                 <img
-                  src={imagePreview}
-                  alt="Preview"
+                  src={image.url}
+                  alt={`Preview ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
-                  }}
+                  onClick={() => removeImageAtIndex(index)}
                   className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                  aria-label="Remove image"
                 >
                   ×
                 </button>
               </div>
-            ) : (
-              <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition bg-gray-50">
-                <div className="text-center">
-                  <ImageIcon className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                  <p className="text-xs text-gray-600">Upload image</p>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
-            )}
+            ))}
+
+            <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition bg-gray-50">
+              <div className="text-center">
+                <ImageIcon className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+                <p className="text-xs text-gray-600">Upload images</p>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
 
@@ -282,9 +326,9 @@ export default function EditBlogPage() {
             type="submit"
             className="px-6 py-2 text-white rounded-lg transition disabled:opacity-50"
             style={{backgroundColor: '#556622'}}
-            onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617')}
-            onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622')}
-            disabled={saving}
+            onMouseEnter={(e) => !submitting && (e.target.style.backgroundColor = '#3d4617')}
+            onMouseLeave={(e) => !submitting && (e.target.style.backgroundColor = '#556622')}
+            disabled={submitting}
           >
             {submitting ? "Updating..." : "Update Blog Post"}
           </button>

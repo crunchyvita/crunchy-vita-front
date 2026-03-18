@@ -18,6 +18,7 @@
     "nav": {
       "home": "Accueil",
       "products": "Nos produits",
+      "freezeDriedFruits": "Fruit lyophilise",
       "espace professionnel": "Espace professionnel",
       "commitments": "Nos engagements",
       "blog": "Blog",
@@ -29,11 +30,10 @@
   "Footer": {
     "about": "Fruits lyophilises bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.",
     "email": "contact@crunchyvita.com",
-    "phone": "+33 7 45 15 07 88",
+  
     "address": {
-      "line1": "1460 Chemin des Terriers",
-      "line2": "Batiment B-04",
-      "line3": "06600 Antibes, France"
+     
+      "line3": " Antibes, France"
     },
     "nav": {
       "title": "Navigation",
@@ -200,15 +200,15 @@
       "noticeLink": "formulaire de contact",
       "companyTitle": "Société",
       "fields": {
-        "contactName": "Nom du contact",
-        "email": "Email professionnel",
-        "company": "Société",
+        "contactName": "Nom du contact*",
+        "email": "Email professionnel*",
+        "company": "Société*",
         "activity": "Activité",
-        "siren": "SIREN",
+        "siren": "SIREN*",
         "vat": "Numéro TVA",
-        "address": "Adresse",
+        "address": "Adresse*",
         "website": "Site web de société",
-        "message": "Message"
+        "message": "Message*"
       },
       "selects": {
         "products": "Produits Recherchés",
@@ -990,5 +990,13 @@
     "congratulations": "Felicitations !",
     "youWon": "Vous avez gagne :",
     "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email."
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Erreur lors du chargement du contenu",
+      "loadFailed": "Impossible de charger la page La lyophilisation",
+      "notFoundTitle": "Contenu non trouve",
+      "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
+    }
   }
 }

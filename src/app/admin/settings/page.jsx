@@ -11,9 +11,13 @@ export default function AdminSettingsPage() {
     emailNotifications: { contactMessages: true, stockAlerts: false },
     features: { rouletteEnabled: false },
     professionalSpace: { productFormats: '1kg, 2kg, 10kg' },
+    promoBadge: {
+      highlightedValue: '40 €',
+    },
   });
   const [loading, setLoading] = useState(true);
   const [savingFormats, setSavingFormats] = useState(false);
+  const [savingPromoBadge, setSavingPromoBadge] = useState(false);
 
   useEffect(() => { fetchSettings(); }, []);
 
@@ -37,6 +41,9 @@ export default function AdminSettingsPage() {
             },
             professionalSpace: {
               productFormats: data.data.professionalSpace?.productFormats ?? '1kg, 2kg, 10kg',
+            },
+            promoBadge: {
+              highlightedValue: data.data.promoBadge?.highlightedValue ?? '40 €',
             },
           });
         }
@@ -129,6 +136,58 @@ export default function AdminSettingsPage() {
       toast.error('Erreur lors de la sauvegarde des formats');
     } finally {
       setSavingFormats(false);
+    }
+  };
+
+  const handlePromoBadgeSave = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        toast.error('Non authentifié');
+        return;
+      }
+
+      setSavingPromoBadge(true);
+
+      const response = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          promoBadge: {
+            highlightedValue: settings.promoBadge.highlightedValue,
+          },
+        }),
+      });
+
+      const responseData = await response.json().catch(() => null);
+
+      if (response.ok && responseData?.success) {
+        const savedValue =
+          responseData?.data?.promoBadge?.highlightedValue
+          ?? settings.promoBadge.highlightedValue;
+
+        setSettings((prev) => ({
+          ...prev,
+          promoBadge: {
+            ...prev.promoBadge,
+            highlightedValue: savedValue,
+          },
+        }));
+
+        toast.success('Promo badge enregistré');
+      } else {
+        toast.error('Erreur lors de la sauvegarde du promo badge');
+      }
+    } catch (error) {
+      console.error('Error saving promo badge settings:', error);
+      toast.error('Erreur lors de la sauvegarde du promo badge');
+    } finally {
+      setSavingPromoBadge(false);
     }
   };
 
@@ -256,6 +315,46 @@ export default function AdminSettingsPage() {
                 className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {savingFormats ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="border-b border-slate-200 pb-3">
+            <h2 className="text-sm font-semibold text-slate-900">Promo Badge</h2>
+            <p className="mt-1 text-xs text-slate-500">Update only the highlighted amount shown in the floating delivery promo badge.</p>
+          </div>
+
+          <div className="py-4 space-y-3">
+            <label htmlFor="promoBadgeHighlightedValue" className="text-sm font-medium text-slate-900">
+              Highlighted value
+            </label>
+            <input
+              id="promoBadgeHighlightedValue"
+              type="text"
+              value={settings.promoBadge.highlightedValue}
+              onChange={(e) => {
+                setSettings((prev) => ({
+                  ...prev,
+                  promoBadge: {
+                    ...prev.promoBadge,
+                    highlightedValue: e.target.value,
+                  },
+                }));
+              }}
+              placeholder="40 €"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20"
+            />
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handlePromoBadgeSave}
+                disabled={savingPromoBadge}
+                className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingPromoBadge ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

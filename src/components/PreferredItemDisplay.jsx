@@ -89,7 +89,7 @@ export default function PreferredItemDisplay() {
             className="relative h-100 lg:h-162.5 order-1 lg:order-2 group"
           >
             <Image 
-              src="/assets/images/products.png" 
+              src="/assets/images/products2.png" 
               alt={t('imageAlt')}
               fill 
               className="object-contain drop-shadow-[0_45px_45px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:scale-105" 

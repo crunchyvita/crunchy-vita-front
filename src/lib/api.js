@@ -484,6 +484,12 @@ export const blogAPI = {
       formData.append("isPublished", payload.isPublished);
     }
     
+    if (Array.isArray(payload.images)) {
+      payload.images.filter(Boolean).forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
     if (payload.image) {
       formData.append("image", payload.image);
     }
@@ -504,6 +510,17 @@ export const blogAPI = {
     if (payload.creationDate) formData.append("creationDate", payload.creationDate);
     if (payload.isPublished !== undefined) formData.append("isPublished", payload.isPublished);
     if (payload.isArchived !== undefined) formData.append("isArchived", payload.isArchived);
+
+    if (payload.existingImageUrls !== undefined) {
+      formData.append("existingImageUrls", JSON.stringify(payload.existingImageUrls));
+    }
+
+    if (Array.isArray(payload.images)) {
+      payload.images.filter(Boolean).forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
     if (payload.image) formData.append("image", payload.image);
 
     return apiRequest(`/blogs/${id}`, {

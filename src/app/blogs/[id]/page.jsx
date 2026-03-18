@@ -20,6 +20,7 @@ export default function BlogDetailPage() {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     if (blogId) fetchBlog();
@@ -33,6 +34,7 @@ export default function BlogDetailPage() {
 
       const result = await response.json();
       setBlog(result.data);
+      setActiveImageIndex(0);
     } catch (err) {
       setError(err?.message || t("errors.loadFailed"));
     } finally {
@@ -53,8 +55,22 @@ export default function BlogDetailPage() {
     return b.content || b.content_en || "";
   };
 
+  const getBlogImages = (b) => {
+    if (Array.isArray(b?.imageUrls) && b.imageUrls.length > 0) {
+      return b.imageUrls.filter(Boolean);
+    }
+
+    if (b?.imageUrl) {
+      return [b.imageUrl];
+    }
+
+    return [];
+  };
+
   const title = getTitle(blog);
   const content = getContent(blog);
+  const blogImages = getBlogImages(blog);
+  const activeImageUrl = blogImages[activeImageIndex] || blogImages[0] || null;
 
   if (loading) {
     return (
@@ -112,17 +128,42 @@ export default function BlogDetailPage() {
               })}
             </div>
 
-            {/* Featured Image */}
-            {blog.imageUrl && (
-              <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden mb-12">
-                <Image
-                  src={blog.imageUrl}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  priority
-                  unoptimized={true}
-                />
+            {/* Blog Images */}
+            {activeImageUrl && (
+              <div className="mb-12">
+                <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden">
+                  <Image
+                    src={activeImageUrl}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                    priority
+                    unoptimized={true}
+                  />
+                </div>
+
+                {blogImages.length > 1 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                    {blogImages.map((imageUrl, index) => (
+                      <button
+                        key={`${imageUrl}-${index}`}
+                        type="button"
+                        onClick={() => setActiveImageIndex(index)}
+                        className={`relative h-24 w-full rounded-lg overflow-hidden border-2 transition ${
+                          activeImageUrl === imageUrl ? "border-[#556822]" : "border-transparent"
+                        }`}
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={`${title} ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          unoptimized={true}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

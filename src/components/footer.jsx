@@ -63,14 +63,10 @@ export default function Footer() {
                 <Mail size={16} />
                 {t('email')}
               </a>
-              <a href="tel:+33745150788" className="flex items-center gap-2 text-sm text-gray-900 hover:text-[#556822] transition">
-                <Phone size={16} />
-                {t('phone')}
-              </a>
+            
               <div className="flex items-start gap-2 text-sm text-gray-900">
                 <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
-                  <p>{t('address.line1')}</p>
                 
                   <p>{t('address.line3')}</p>
                 </div>

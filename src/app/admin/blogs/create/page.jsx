@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   AlertCircle,
@@ -15,6 +15,7 @@ const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function CreateBlogPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -22,25 +23,61 @@ export default function CreateBlogPage() {
     content_en: "",
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const topic = searchParams.get("topic");
+
+    if (topic === "lyophilisation") {
+      setFormData((prev) => ({
+        ...prev,
+        title: prev.title || "La lyophilisation",
+      }));
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = (event) => setImagePreview(event.target.result);
-    reader.readAsDataURL(file);
+    const remainingSlots = Math.max(0, 10 - imageFiles.length);
+    if (remainingSlots === 0) {
+      setError("Maximum 10 images allowed");
+      e.target.value = "";
+      return;
+    }
+
+    const filesToAdd = files.slice(0, remainingSlots);
+
+    setImageFiles((prev) => [...prev, ...filesToAdd]);
+
+    const previewPromises = filesToAdd.map(
+      (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve(event.target?.result || null);
+          reader.readAsDataURL(file);
+        })
+    );
+
+    const previews = (await Promise.all(previewPromises)).filter(Boolean);
+    setImagePreviews((prev) => [...prev, ...previews]);
+
+    e.target.value = "";
+  };
+
+  const removeImageAtIndex = (indexToRemove) => {
+    setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setImagePreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSubmit = async (e) => {
@@ -66,7 +103,9 @@ export default function CreateBlogPage() {
       if (formData.title_en?.trim()) formDataToSend.append("title_en", formData.title_en.trim());
       if (formData.content_en?.trim()) formDataToSend.append("content_en", formData.content_en.trim());
 
-      if (imageFile) formDataToSend.append("image", imageFile);
+      imageFiles.forEach((file) => {
+        formDataToSend.append("images", file);
+      });
 
       const response = await fetch(`${backendUrl}/blogs`, {
         method: "POST",
@@ -150,49 +189,50 @@ export default function CreateBlogPage() {
           {/* Image Upload */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Blog Image
+              Blog Images
             </label>
 
-            <div className="flex gap-4">
-              {imagePreview ? (
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview(null);
-                    }}
-                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
-                    aria-label="Remove image"
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={`${preview}-${index}`} className="relative w-32 h-32 rounded-lg overflow-hidden">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImageAtIndex(index)}
+                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                      aria-label="Remove image"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+
                 <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition bg-gray-50">
                   <div className="text-center">
                     <ImageIcon className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-600">Upload image</p>
+                    <p className="text-xs text-gray-600">Upload images</p>
                   </div>
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageChange}
                     className="hidden"
                   />
                 </label>
-              )}
+              </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-2">Image specifications:</p>
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li>• Recommended: 1200×600</li>
                   <li>• Format: JPG, PNG</li>
+                  <li>• Up to 10 images</li>
                   <li>• Max size: 5MB</li>
                 </ul>
               </div>
