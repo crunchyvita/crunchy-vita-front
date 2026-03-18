@@ -55,15 +55,15 @@ const popIn = {
   }
 };
 
-const homeTickerItems = [
-{ label: '95% DES NUTRIMENTS CONSERVÉS', icon: Sparkle },
-{ label: '100% FRUITS NATURELS', icon: Banana },
-{ label: 'SANS AJOUT DE SUCRE', icon: CandyOff },
-{ label: 'CERTIFIÉ BIO', iconSrc: '/assets/images/certipack.png', iconAlt: 'Certifié bio' },
-{ label: 'FABRIQUÉ DANS DES STRUCTURES PROTÉGÉES', icon: Factory },
-{ label: 'LIVRAISON EXPRESS', icon: Truck },
-{ label: 'PAIEMENT 100% SÉCURISÉ', icon: ShieldCheck },
-{ label: 'SERVICE CLIENT PREMIUM', icon: Headset }
+const homeTickerItems = (t) => [
+{ label: t('ticker.ultraCrunchy'), icon: Sparkle },
+{ label: t('ticker.naturalFruits'), icon: Banana },
+{ label: t('ticker.noSugar'), icon: CandyOff },
+{ label: t('ticker.organic'), iconSrc: '/assets/images/certipack.png', iconAlt: t('ticker.organic') },
+{ label: t('ticker.protected'), icon: Factory },
+{ label: t('ticker.expressDelivery'), icon: Truck },
+{ label: t('ticker.securePayment'), icon: ShieldCheck },
+{ label: t('ticker.premiumSupport'), icon: Headset }
 ];
 
 export default function Home() {
@@ -219,7 +219,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="home-ticker overflow-hidden" role="region" aria-label="Crunchy Vita highlights">
             <div className="home-ticker-track flex w-max items-center">
-              {[...homeTickerItems, ...homeTickerItems].map((item, index) => (
+              {[...homeTickerItems(t), ...homeTickerItems(t)].map((item, index) => (
                 <div key={`${item.label}-${index}`} className="flex shrink-0 items-center px-6 sm:px-8">
                   <div className="flex flex-col items-center gap-2">
                     <div className="flex h-6 w-6 items-center justify-center">
@@ -236,8 +236,8 @@ export default function Home() {
                       )}
                     </div>
                     <span
-                      className="whitespace-nowrap text-[10px] sm:text-[11px] font-light uppercase tracking-[0.16em] text-[#556822]"
-                      style={{ fontFamily: 'Maison Neue Light, sans-serif' }}
+                      className="whitespace-nowrap text-[11px] sm:text-[12px] font-black uppercase tracking-[0.16em] text-[#556822]"
+                      style={{ fontFamily: 'Maison Neue, sans-serif' }}
                     >
                       {item.label}
                     </span>

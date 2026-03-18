@@ -64,14 +64,19 @@ const extractPackageProductIds = (item) => {
 
 const getCartItemImagesLocal = (item) => {
   const isPackage = isPackageItem(item);
+  const one = pickUrl(item?.image);
+
   if (!isPackage) {
-    const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
-  let imgs = Array.isArray(item?.packageImages)
-    ? item.packageImages.map(pickUrl).filter(Boolean)
-    : [];
-  if (imgs.length === 0 && Array.isArray(item?.selectedProducts)) {
+
+  // Prefer package main image for package items
+  if (one) {
+    return [one];
+  }
+
+  let imgs = [];
+  if (Array.isArray(item?.selectedProducts)) {
     imgs = item.selectedProducts
       .map((sp) => {
         const direct = pickUrl(sp?.image);
@@ -389,6 +394,7 @@ export default function CartPage() {
               <div className="divide-y divide-gray-100">
                 {cartItems.map((item) => {
                   const isPackage = isPackageItem(item);
+                  const hasPackageMainImage = isPackage && !!pickUrl(item?.image);
 
                   const localImgs = getCartItemImagesLocal(item);
                   const images =
@@ -414,12 +420,12 @@ export default function CartPage() {
                     <div key={item._id} className="py-6 flex items-center gap-6">
                       {/* Images */}
                       <div className="shrink-0 flex items-center justify-center bg-transparent">
-                        {isPackage ? (
+                        {isPackage && !hasPackageMainImage ? (
                           <div className="grid grid-cols-2 gap-1 w-28">
                             {images.length > 0 ? (
                               <>
-                                {images.map((img, idx) => (
-                                  <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm">
+                                {images.slice(0, 4).map((img, idx) => (
+                                  <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
                                     <img src={img} alt="" className="w-full h-full object-cover" />
                                   </div>
                                 ))}

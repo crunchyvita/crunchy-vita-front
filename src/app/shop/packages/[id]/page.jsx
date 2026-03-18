@@ -417,7 +417,7 @@ export default function PackageCustomizationPage() {
       setCartModalProduct({
         ...packageCartItem,
         name: translatedPackage.name || packageData.name,
-        image: packageImages[0]
+        image: packageData?.image || null
       });
       setCartModalQuantity(1);
       setShowCartModal(true);
@@ -491,7 +491,7 @@ export default function PackageCustomizationPage() {
       setCartModalProduct({
         ...packageCartItem,
         name: translatedPackage.name || packageData.name,
-        image: packageImages[0]
+        image: packageData?.image || null
       });
       setCartModalQuantity(packageQuantity);
       setShowCartModal(true);

@@ -66,7 +66,7 @@ function MessageDetail({
 
   useEffect(() => {
     if (!selectedMessage) return;
-    if (selectedMessage.replies && selectedMessage.replies.length > 0) return;
+    if (selectedMessage.replyMessage) return;
     if (replyInputRef.current) replyInputRef.current.focus();
   }, [selectedMessage]);
 
@@ -132,14 +132,56 @@ function MessageDetail({
             </div>
           </div>
 
-          <div className="prose prose-slate max-w-none mb-10 md:mb-12">
+          <div className="prose prose-slate max-w-none mb-6 md:mb-8">
             <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-wrap">
               {linkifyMessageText(selectedMessage.message)}
             </div>
           </div>
 
-          {/* Section Réponses précédentes */}
-          {selectedMessage.replies && selectedMessage.replies.length > 0 && (
+          {/* Devis Attributes */}
+          {selectedMessage.type === 'devis' && (selectedMessage.activity || selectedMessage.siren || selectedMessage.tva || selectedMessage.website) && (
+            <div className="mb-8 md:mb-10 bg-orange-50 border border-orange-100 rounded-2xl p-4 md:p-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-orange-600 mb-4">
+                Informations société
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {selectedMessage.activity && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Activité</p>
+                    <p className="text-sm font-medium text-slate-800">{selectedMessage.activity}</p>
+                  </div>
+                )}
+                {selectedMessage.siren && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">SIREN</p>
+                    <p className="text-sm font-medium text-slate-800">{selectedMessage.siren}</p>
+                  </div>
+                )}
+                {selectedMessage.tva && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Numéro TVA</p>
+                    <p className="text-sm font-medium text-slate-800">{selectedMessage.tva}</p>
+                  </div>
+                )}
+                {selectedMessage.website && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Site web</p>
+                    <a
+                      href={selectedMessage.website.startsWith('http') ? selectedMessage.website : `https://${selectedMessage.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-blue-600 hover:underline break-all"
+                    >
+                      {selectedMessage.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Previous Reply */}
+          {selectedMessage.replyMessage && (
             <div className="border-t border-slate-200 pt-6 md:pt-8 mb-6 md:mb-8">
               {['professionnel', 'devis'].includes(selectedMessage.type) && selectedMessage.companyName && (
                 <div
@@ -191,54 +233,49 @@ function MessageDetail({
               )}
 
               <div className="space-y-4">
-                {selectedMessage.replies.map((reply, index) => (
-                  <div key={index} className="relative group">
+                  <div className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                     <div className="relative bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 md:p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-300 transition-all duration-300 pointer-events-none select-none">
-                      {/* Header */}
                       <div className="flex items-start justify-between gap-4 mb-4">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-900 truncate">
                               {user?.name || 'Admin'}
                             </p>
-                            <p className="text-xs text-slate-500">
-                              {new Date(reply.sentAt).toLocaleDateString('fr-FR', {
-                                day: '2-digit',
-                                month: 'long',
-                                year: 'numeric',
-                              })}{' '}
-                              à{' '}
-                              {new Date(reply.sentAt).toLocaleTimeString('fr-FR', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
+                            {selectedMessage.repliedAt && (
+                              <p className="text-xs text-slate-500">
+                                {new Date(selectedMessage.repliedAt).toLocaleDateString('fr-FR', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                })}{' '}
+                                à{' '}
+                                {new Date(selectedMessage.repliedAt).toLocaleTimeString('fr-FR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
-
-                      {/* Content */}
                       <div className="md:ml-11 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                         <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
-                          {reply.message}
+                          {selectedMessage.replyMessage}
                         </p>
                       </div>
-
-                      {/* Footer indicator */}
                       <div className="mt-3 md:ml-11 flex items-center gap-2">
                         <div className="h-1 w-1 rounded-full bg-emerald-500" />
                         <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
                       </div>
                     </div>
                   </div>
-                ))}
               </div>
             </div>
           )}
 
-          {/* Section Réponse - Disponible seulement si pas de réponse précédente */}
-          {(!selectedMessage.replies || selectedMessage.replies.length === 0) && (
+          {/* Reply Form - only if not yet replied */}
+          {!selectedMessage.replyMessage && (
             <div className="border-t border-slate-200 pt-6 md:pt-8">
               <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
                 <Reply size={18} className="text-blue-600" /> Répondre à ce message
@@ -417,14 +454,8 @@ export default function ContactMessagesPage() {
       const messageWithReply = {
         ...selectedMessage,
         status: 'replied',
-        replies: updatedMessage.replies || [
-          ...(selectedMessage.replies || []),
-          {
-            message: replyText.trim(),
-            sentAt: new Date().toISOString(),
-            sentBy: 'Admin',
-          },
-        ],
+        replyMessage: replyText.trim(),
+        repliedAt: new Date().toISOString(),
       };
 
       setMessages((prev) => prev.map((m) => (m._id === selectedMessage._id ? messageWithReply : m)));

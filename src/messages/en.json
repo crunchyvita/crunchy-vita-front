@@ -128,6 +128,16 @@
       "subtitle": "Try your luck and get an exclusive discount code",
       "description": "Spin our roulette wheel and win amazing prizes! Get instant discounts, free products, or exclusive packages.",
       "limit": "Spin once per email address. Codes valid for 30 days."
+    },
+    "ticker": {
+      "ultraCrunchy": "Ultra Crunchy",
+      "naturalFruits": "100% NATURAL FRUITS",
+      "noSugar": "NO ADDED SUGAR",
+      "organic": "CERTIFIED ORGANIC",
+      "protected": "MADE IN PROTECTED FACILITIES",
+      "expressDelivery": "EXPRESS DELIVERY",
+      "securePayment": "100% SECURE PAYMENT",
+      "premiumSupport": "PREMIUM CUSTOMER SERVICE"
     }
   },
   "PreferredItem": {
@@ -382,6 +392,27 @@
       "lyoAlt": "Freeze-dried fruit",
       "lyoLabel": "Freeze-dried fruit",
       "slide": "Slide to compare"
+    },
+    "nutrition": {
+      "title": "Nutrition facts",
+      "subtitle": "Explore the nutritional richness of our fruits",
+      "infoHeader": "Nutritional information",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 serving",
+      "rows": {
+        "energy": "Energy",
+        "fat": "Fat",
+        "saturatedFat": "Saturated fat",
+        "carbohydrates": "Carbohydrates",
+        "sugars": "Sugars",
+        "protein": "Protein",
+        "salt": "Salt",
+        "fiber": "Dietary fiber",
+        "vitaminC": "Vitamin C",
+        "calcium": "Calcium",
+        "iron": "Iron",
+        "potassium": "Potassium"
+      }
     },
     "reviews": {
       "title": "Customer reviews",
@@ -989,6 +1020,7 @@
     "emailNote": "We will send your winning code to this email",
     "congratulations": "Congratulations!",
     "youWon": "You won:",
+<<<<<<< HEAD
     "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email."
   },
   "Lyophilisation": {
@@ -998,5 +1030,25 @@
       "notFoundTitle": "Content not found",
       "notFoundDescription": "The page you are looking for does not exist or is not available."
     }
+=======
+    "terms": "By spinning, you agree to receive marketing emails. Your code will be sent to your email.",
+    "loadingWheel": "Loading wheel...",
+    "noRewards": "No rewards available at the moment.",
+    "loadError": "Unable to load the wheel.",
+    "wheelUnavailable": "Wheel unavailable",
+    "retry": "Try again",
+    "title": "Spin to Win!",
+    "subtitle": "Enjoy a fruity surprise on your next order",
+    "emailPlaceholder": "Your email address",
+    "invalidEmail": "Please enter a valid email address",
+    "spinning": "IN PROGRESS...",
+    "spinButton": "Spin the wheel",
+    "wonTitle": "You Won!",
+    "copied": "Copied!",
+    "copyHint": "Click to copy",
+    "continueShopping": "Continue shopping",
+    "spinError": "Something went wrong. Please try again.",
+    "codeError": "Unable to generate your code right now. Please try again."
+>>>>>>> 1ba5eea70ba10c2b696f08f23392c6f2be90bfd0
   }
 }

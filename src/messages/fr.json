@@ -128,6 +128,16 @@
       "subtitle": "Tentez votre chance et obtenez un code de reduction exclusif",
       "description": "Tournez notre roulette et remportez des lots incroyables ! Obtenez des reductions instantanees, des produits gratuits ou des packs exclusifs.",
       "limit": "Un tirage par adresse email. Les codes sont valides 30 jours."
+    },
+    "ticker": {
+      "ultraCrunchy": "Ultra Crunchy",
+      "naturalFruits": "100% FRUITS NATURELS",
+      "noSugar": "SANS AJOUT DE SUCRE",
+      "organic": "CERTIFIÉ BIO",
+      "protected": "FABRIQUÉ DANS DES STRUCTURES PROTÉGÉES",
+      "expressDelivery": "LIVRAISON EXPRESS",
+      "securePayment": "PAIEMENT 100% SÉCURISÉ",
+      "premiumSupport": "SERVICE CLIENT PREMIUM"
     }
   },
   "PreferredItem": {
@@ -382,6 +392,27 @@
       "lyoAlt": "Fruit lyophilise",
       "lyoLabel": "Fruit Lyophilise",
       "slide": "Glissez pour comparer"
+    },
+    "nutrition": {
+      "title": "Tableau nutritionnel",
+      "subtitle": "Explorez la richesse nutritionnelle de nos fruits",
+      "infoHeader": "Infos nutritionnelles",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 portion",
+      "rows": {
+        "energy": "Energie",
+        "fat": "Matieres grasses",
+        "saturatedFat": "Dont saturees",
+        "carbohydrates": "Glucides",
+        "sugars": "Dont sucres",
+        "protein": "Proteines",
+        "salt": "Sel",
+        "fiber": "Fibres alimentaires",
+        "vitaminC": "Vitamine C",
+        "calcium": "Calcium",
+        "iron": "Fer",
+        "potassium": "Potassium"
+      }
     },
     "reviews": {
       "title": "Avis clients",
@@ -989,6 +1020,7 @@
     "emailNote": "Nous enverrons votre code gagnant a cette adresse email",
     "congratulations": "Felicitations !",
     "youWon": "Vous avez gagne :",
+<<<<<<< HEAD
     "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email."
   },
   "Lyophilisation": {
@@ -998,5 +1030,25 @@
       "notFoundTitle": "Contenu non trouve",
       "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
     }
+=======
+    "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email.",
+    "loadingWheel": "Chargement de la roue...",
+    "noRewards": "Aucune recompense disponible pour le moment.",
+    "loadError": "Impossible de charger la roue.",
+    "wheelUnavailable": "Roue indisponible",
+    "retry": "Reessayer",
+    "title": "Tournez pour Gagner !",
+    "subtitle": "Profitez d'une surprise fruitee pour votre prochaine commande",
+    "emailPlaceholder": "Votre adresse email",
+    "invalidEmail": "Veuillez saisir une adresse email valide",
+    "spinning": "EN COURS...",
+    "spinButton": "Lancer la roue",
+    "wonTitle": "C'est Gagne !",
+    "copied": "Copie !",
+    "copyHint": "Cliquez pour copier",
+    "continueShopping": "Continuer mes achats",
+    "spinError": "Une erreur est survenue. Veuillez reessayer.",
+    "codeError": "Impossible de generer votre code. Veuillez reessayer."
+>>>>>>> 1ba5eea70ba10c2b696f08f23392c6f2be90bfd0
   }
 }

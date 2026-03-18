@@ -119,9 +119,9 @@ export default function BlogDetailPage() {
               {title}
             </h1>
 
-            {/* Publication Date */}
+            {/* Creation Date */}
             <div className="text-center text-gray-600 text-sm mb-12">
-              {new Date(blog.publicationDate).toLocaleDateString(locale, {
+              {new Date(blog.createdAt).toLocaleDateString(locale, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

@@ -8,6 +8,13 @@ import { useLocale } from 'next-intl';
 export default function AddedToCartModal({ isOpen, onClose, product, quantity }) {
     const locale = useLocale();
 
+    const pickUrl = (v) => {
+        if (!v || v === 'undefined') return null;
+        if (typeof v === 'string') return v;
+        if (typeof v === 'object') return v.url || v.secure_url || null;
+        return null;
+    };
+
     // Auto-dismiss after 3 seconds
     useEffect(() => {
         if (isOpen) {
@@ -22,12 +29,24 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
     if (!isOpen || !product) return null;
 
     // Check if it's a package item
-    const isPackage = product.type === 'package' || !!product.packageId || (Array.isArray(product.packageImages) && product.packageImages.length > 0);
-    
-    // Get images array for packages
-    const packageImages = isPackage 
-        ? (Array.isArray(product.packageImages) ? product.packageImages : [])
+    const isPackage = product.type === 'package' || !!product.packageId;
+
+    // Main package image (preferred display for package)
+    const packageMainImage = pickUrl(product.image) || pickUrl(product.imageUrl);
+
+    // Grid fallback images when package has no main image
+    const packageImages = isPackage
+        ? [
+            ...(Array.isArray(product.packageImages) ? product.packageImages : []),
+            ...(Array.isArray(product.selectedProducts)
+                ? product.selectedProducts
+                    .map((sp) => pickUrl(sp?.image) || pickUrl(sp?.product?.image) || pickUrl(sp?.product?.imageUrl))
+                    .filter(Boolean)
+                : []),
+        ]
         : [];
+
+    const uniquePackageImages = [...new Set(packageImages)].slice(0, 4);
 
     // Get single image for products
     const imageUrl = product.image ||
@@ -60,22 +79,31 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
                     {/* Images Section */}
                     <div className="shrink-0">
                         {isPackage ? (
-                            // Grid of package product images
-                            <div className="grid grid-cols-2 gap-1 w-20">
-                                {packageImages.length > 0 ? (
-                                    <>
-                                        {packageImages.map((img, idx) => (
-                                            <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
-                                                <img src={img} alt="" className="w-full h-full object-cover" />
-                                            </div>
-                                        ))}
-                                    </>
-                                ) : (
-                                    <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center h-20">
-                                        <ShoppingBag size={20} className="text-gray-300" />
-                                    </div>
-                                )}
-                            </div>
+                            packageMainImage ? (
+                                <div className="w-16 h-16 shrink-0 flex items-center justify-center bg-gray-50 rounded">
+                                    <img
+                                        src={packageMainImage}
+                                        alt={product.name}
+                                        className="w-full h-full object-contain p-1"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-1 w-20">
+                                    {uniquePackageImages.length > 0 ? (
+                                        <>
+                                            {uniquePackageImages.map((img, idx) => (
+                                                <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
+                                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center h-20">
+                                            <ShoppingBag size={20} className="text-gray-300" />
+                                        </div>
+                                    )}
+                                </div>
+                            )
                         ) : (
                             // Single product image
                             <div className="w-16 h-16 shrink-0 flex items-center justify-center bg-gray-50 rounded">
