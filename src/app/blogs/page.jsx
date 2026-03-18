@@ -52,10 +52,28 @@ export default function BlogsPage() {
     return content.length > 100 ? content.substring(0, 100) + "..." : content;
   };
 
+  const getBlogImages = (blog) => {
+    if (Array.isArray(blog?.imageUrls) && blog.imageUrls.length > 0) {
+      return blog.imageUrls.filter(Boolean);
+    }
+
+    if (blog?.imageUrl) {
+      return [blog.imageUrl];
+    }
+
+    return [];
+  };
+
+  const getPrimaryImageUrl = (blog) => {
+    const images = getBlogImages(blog);
+    return images[0] || null;
+  };
+
   const recentBlogs = blogs.slice(0, 3);
   const featuredBlog = blogs.length > 0 ? blogs[0] : null;
   const otherBlogs = blogs.slice(1);
-  const hasFeaturedImage = Boolean(featuredBlog?.imageUrl);
+  const featuredImageUrl = getPrimaryImageUrl(featuredBlog);
+  const hasFeaturedImage = Boolean(featuredImageUrl);
 
   return (
     <>
@@ -92,14 +110,15 @@ export default function BlogsPage() {
                       {recentBlogs.map((blog) => {
                         const title = getBlogTitle(blog);
                         const content = getBlogContent(blog);
+                        const primaryImageUrl = getPrimaryImageUrl(blog);
 
                         return (
                           <Link key={`recent-${blog._id}`} href={`/blogs/${blog._id}`}>
                             <div className="cursor-pointer group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                              {blog.imageUrl && (
+                              {primaryImageUrl && (
                                 <div className="relative h-48 w-full bg-gray-200">
                                   <Image
-                                    src={blog.imageUrl}
+                                    src={primaryImageUrl}
                                     alt={title}
                                     fill
                                     className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -147,7 +166,7 @@ export default function BlogsPage() {
                           <Link href={`/blogs/${featuredBlog._id}`}>
                             <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer group">
                               <Image
-                                src={featuredBlog.imageUrl}
+                                src={featuredImageUrl}
                                 alt={title}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -188,14 +207,15 @@ export default function BlogsPage() {
                     {otherBlogs.map((blog) => {
                       const title = getBlogTitle(blog);
                       const content = getBlogContent(blog);
+                      const primaryImageUrl = getPrimaryImageUrl(blog);
 
                       return (
                         <Link key={blog._id} href={`/blogs/${blog._id}`}>
                           <div className="cursor-pointer group">
-                            {blog.imageUrl && (
+                            {primaryImageUrl && (
                               <div className="relative h-64 w-full bg-gray-200 rounded-lg overflow-hidden mb-6">
                                 <Image
-                                  src={blog.imageUrl}
+                                  src={primaryImageUrl}
                                   alt={title}
                                   fill
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -31,6 +31,8 @@ const getCartItemImagesLocal = (item) => {
     pickUrl(item?.packageId?.image) ||
     pickUrl(item?.packageImages?.[0]);
   return packageImage ? [packageImage] : [];
+  const one = pickUrl(item?.image);
+  return one ? [one] : [];
 };
 
 const CheckoutPage = () => {

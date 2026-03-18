@@ -126,8 +126,7 @@ export default function BlogsPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Author</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Publication Date</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created At</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
@@ -141,18 +140,7 @@ export default function BlogsPage() {
                     {blog.authorId?.name || "Unknown"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(blog.publicationDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                        blog.isPublished
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {blog.isPublished ? "Published" : "Draft"}
-                    </span>
+                    {new Date(blog.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <Link href={`/admin/blogs/${blog._id}/edit`}>

@@ -30,10 +30,12 @@ const isPackageItem = (item) => {
 
 const getCartItemImagesLocal = (item) => {
   const isPackage = isPackageItem(item);
+  const one = pickUrl(item?.image);
+
   if (!isPackage) {
-    const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
+<<<<<<< HEAD
   const packageImage =
     pickUrl(item?.image) ||
     pickUrl(item?.packageImage) ||
@@ -42,6 +44,33 @@ const getCartItemImagesLocal = (item) => {
     pickUrl(item?.packageImages?.[0]);
 
   return packageImage ? [packageImage] : [];
+=======
+
+  // Prefer package main image for package items
+  if (one) {
+    return [one];
+  }
+
+  let imgs = [];
+  if (Array.isArray(item?.selectedProducts)) {
+    imgs = item.selectedProducts
+      .map((sp) => {
+        const direct = pickUrl(sp?.image);
+        if (direct) return direct;
+        return getProductImageUrl(sp?.product);
+      })
+      .filter(Boolean);
+  }
+  const seen = new Set();
+  const unique = [];
+  for (const u of imgs) {
+    if (!seen.has(u)) {
+      seen.add(u);
+      unique.push(u);
+    }
+  }
+  return unique;
+>>>>>>> dev
 };
 
 const getItemAvailableStock = async (item, API_URL) => {
@@ -271,6 +300,7 @@ export default function CartPage() {
               <div className="divide-y divide-gray-100">
                 {cartItems.map((item) => {
                   const isPackage = isPackageItem(item);
+                  const hasPackageMainImage = isPackage && !!pickUrl(item?.image);
 
                   const localImgs = getCartItemImagesLocal(item);
                   const images = localImgs;
@@ -308,6 +338,33 @@ export default function CartPage() {
                             </div>
                           )}
                         </div>
+                        {isPackage && !hasPackageMainImage ? (
+                          <div className="grid grid-cols-2 gap-1 w-28">
+                            {images.length > 0 ? (
+                              <>
+                                {images.slice(0, 4).map((img, idx) => (
+                                  <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
+                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                  </div>
+                                ))}
+                              </>
+                            ) : (
+                              <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center">
+                                <ShoppingBag size={24} className="text-gray-300" />
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-20 h-24 bg-transparent overflow-hidden">
+                            {images[0] ? (
+                              <img src={images[0]} alt={item.name} className="w-full h-full object-contain" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                                <ShoppingBag size={24} className="text-gray-300" />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="grow">

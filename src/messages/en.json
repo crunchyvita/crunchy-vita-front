@@ -18,6 +18,7 @@
     "nav": {
       "home": "Home",
       "products": "Our products",
+      "freezeDriedFruits": "Freeze-dried fruit",
       "espace professionnel": "Professional space",
       "commitments": "Our commitments",
       "blog": "Blog",
@@ -31,9 +32,8 @@
     "email": "contact@crunchyvita.com",
     "phone": "+33 7 45 15 07 88",
     "address": {
-      "line1": "1460 Chemin des Terriers",
-      "line2": "Building B-04",
-      "line3": "06600 Antibes, France"
+   
+      "line3": " Antibes, France"
     },
     "nav": {
       "title": "Navigation",
@@ -210,15 +210,19 @@
       "noticeLink": "contact form",
       "companyTitle": "Company",
       "fields": {
-        "contactName": "Contact name",
-        "email": "Business email",
-        "company": "Company",
+        "contactName": "Contact name*",
+        "email": "Business email*",
+        "company": "Company*",
         "activity": "Activity",
-        "siren": "SIREN",
+        "siren": "SIREN*",
         "vat": "VAT number",
-        "address": "Address",
+        "address": "Address*",
         "website": "Company website",
+<<<<<<< HEAD
         "message": "Message..."
+=======
+        "message": "Message*"
+>>>>>>> dev
       },
       "selects": {
         "products": "Requested products",
@@ -392,6 +396,27 @@
       "lyoAlt": "Freeze-dried fruit",
       "lyoLabel": "Freeze-dried fruit",
       "slide": "Slide to compare"
+    },
+    "nutrition": {
+      "title": "Nutrition facts",
+      "subtitle": "Explore the nutritional richness of our fruits",
+      "infoHeader": "Nutritional information",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 serving",
+      "rows": {
+        "energy": "Energy",
+        "fat": "Fat",
+        "saturatedFat": "Saturated fat",
+        "carbohydrates": "Carbohydrates",
+        "sugars": "Sugars",
+        "protein": "Protein",
+        "salt": "Salt",
+        "fiber": "Dietary fiber",
+        "vitaminC": "Vitamin C",
+        "calcium": "Calcium",
+        "iron": "Iron",
+        "potassium": "Potassium"
+      }
     },
     "reviews": {
       "title": "Customer reviews",
@@ -1017,5 +1042,13 @@
     "continueShopping": "Continue shopping",
     "spinError": "Something went wrong. Please try again.",
     "codeError": "Unable to generate your code right now. Please try again."
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Failed to load content",
+      "loadFailed": "Unable to load the Freeze-drying page",
+      "notFoundTitle": "Content not found",
+      "notFoundDescription": "The page you are looking for does not exist or is not available."
+    }
   }
 }

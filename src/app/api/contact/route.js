@@ -1,6 +1,6 @@
 export async function POST(request) {
   try {
-    const { name, email, message, subject, contactType, companyName } = await request.json();
+    const { name, email, message, subject, contactType, companyName, activity, siren, tva, website } = await request.json();
 
     // Validation
     if (!name || !email || !message || !subject || !contactType) {
@@ -24,6 +24,10 @@ export async function POST(request) {
         object: subject,
         message,
         companyName: companyName || '',
+        activity: activity || null,
+        siren: siren || null,
+        tva: tva || null,
+        website: website || null,
       }),
     });
 

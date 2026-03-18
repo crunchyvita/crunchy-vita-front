@@ -17,8 +17,10 @@ import Footer from '@/components/footer';
 import Header from '@/components/header';
 import PromoBadge from '@/components/PromoBadge';
 import AddedToCartModal from '@/components/AddedToCartModal';
+import NutritionTable from '@/components/NutritionTable';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslatedProduct } from '@/lib/productTranslations';
+import { hasNutritionData } from '@/lib/nutrition';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -482,7 +484,6 @@ export default function ProductDetailPage() {
         rating: rating || undefined,
         content: comment?.trim() || undefined,
         isAnonymous,
-        displayName: null,
       });
 
       if (!data || data.error) {
@@ -524,7 +525,6 @@ export default function ProductDetailPage() {
               : { _id: user?.id, name: user?.name, photo: user?.photo },
             content: result.comment.content,
             isAnonymous: result.comment.isAnonymous,
-            displayName: result.comment.displayName,
             status: result.comment.status || 'pending',
             createdAt: result.comment.createdAt,
           };
@@ -644,6 +644,22 @@ export default function ProductDetailPage() {
   }
 
   const totalPrice = productPrice * quantity;
+  const nutritionLabels = {
+    title: t('nutrition.title'),
+    infoHeader: t('nutrition.infoHeader'),
+    per100gHeader: t('nutrition.per100gHeader'),
+    perServingFallback: t('nutrition.perServingFallback'),
+    rows: {
+      energy: t('nutrition.rows.energy'),
+      fat: t('nutrition.rows.fat'),
+      saturatedFat: t('nutrition.rows.saturatedFat'),
+      carbohydrates: t('nutrition.rows.carbohydrates'),
+      sugars: t('nutrition.rows.sugars'),
+      protein: t('nutrition.rows.protein'),
+      salt: t('nutrition.rows.salt'),
+      fiber: t('nutrition.rows.fiber'),
+    },
+  };
 
   // ✅ FIX: éviter crash si pas assez d’images
   const freshImg = productImages?.[2] ;
@@ -706,6 +722,7 @@ export default function ProductDetailPage() {
                 ))}
               </div>
             )}
+
           </div>
 
           {/* Product Details */}
@@ -858,6 +875,26 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {hasNutritionData(product.nutrition) && (
+          <div className="mt-12 border-t border-gray-200 pt-10">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
+                {t('nutrition.title')}
+              </h2>
+              <p className="text-gray-600 font-maison-neue-book">
+                {t('nutrition.subtitle')}
+              </p>
+            </div>
+            <NutritionTable
+              nutrition={product.nutrition}
+              labels={{ ...nutritionLabels, title: "" }}
+              tableMaxWidthClass="max-w-6xl"
+              hideEmptyRows
+              emptyValuePlaceholder=""
+            />
+          </div>
+        )}
 
         {/* Image Comparison Section */}
         {freshImg && lyoImg && (

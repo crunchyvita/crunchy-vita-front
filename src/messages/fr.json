@@ -18,6 +18,7 @@
     "nav": {
       "home": "Accueil",
       "products": "Nos produits",
+      "freezeDriedFruits": "Fruit lyophilise",
       "espace professionnel": "Espace professionnel",
       "commitments": "Nos engagements",
       "blog": "Blog",
@@ -29,11 +30,10 @@
   "Footer": {
     "about": "Fruits lyophilises bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.",
     "email": "contact@crunchyvita.com",
-    "phone": "+33 7 45 15 07 88",
+  
     "address": {
-      "line1": "1460 Chemin des Terriers",
-      "line2": "Batiment B-04",
-      "line3": "06600 Antibes, France"
+     
+      "line3": " Antibes, France"
     },
     "nav": {
       "title": "Navigation",
@@ -210,16 +210,24 @@
       "noticeLink": "formulaire de contact",
       "companyTitle": "Société",
       "fields": {
-        "contactName": "Nom du contact",
-        "email": "Email professionnel",
-        "company": "Société",
+        "contactName": "Nom du contact*",
+        "email": "Email professionnel*",
+        "company": "Société*",
         "activity": "Activité",
+<<<<<<< HEAD
         "siren": "SIREN",
         "siren": "SIREN",
+=======
+        "siren": "SIREN*",
+>>>>>>> dev
         "vat": "Numéro TVA",
-        "address": "Adresse",
+        "address": "Adresse*",
         "website": "Site web de société",
+<<<<<<< HEAD
         "message": "Message..."
+=======
+        "message": "Message*"
+>>>>>>> dev
       },
       "selects": {
         "products": "Produits Recherchés",
@@ -393,6 +401,27 @@
       "lyoAlt": "Fruit lyophilise",
       "lyoLabel": "Fruit Lyophilise",
       "slide": "Glissez pour comparer"
+    },
+    "nutrition": {
+      "title": "Tableau nutritionnel",
+      "subtitle": "Explorez la richesse nutritionnelle de nos fruits",
+      "infoHeader": "Infos nutritionnelles",
+      "per100gHeader": "100 g",
+      "perServingFallback": "1 portion",
+      "rows": {
+        "energy": "Energie",
+        "fat": "Matieres grasses",
+        "saturatedFat": "Dont saturees",
+        "carbohydrates": "Glucides",
+        "sugars": "Dont sucres",
+        "protein": "Proteines",
+        "salt": "Sel",
+        "fiber": "Fibres alimentaires",
+        "vitaminC": "Vitamine C",
+        "calcium": "Calcium",
+        "iron": "Fer",
+        "potassium": "Potassium"
+      }
     },
     "reviews": {
       "title": "Avis clients",
@@ -1018,5 +1047,13 @@
     "continueShopping": "Continuer mes achats",
     "spinError": "Une erreur est survenue. Veuillez reessayer.",
     "codeError": "Impossible de generer votre code. Veuillez reessayer."
+  },
+  "Lyophilisation": {
+    "errors": {
+      "fetchFailed": "Erreur lors du chargement du contenu",
+      "loadFailed": "Impossible de charger la page La lyophilisation",
+      "notFoundTitle": "Contenu non trouve",
+      "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
+    }
   }
 }

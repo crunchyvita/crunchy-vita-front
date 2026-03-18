@@ -180,7 +180,7 @@ export default function Home() {
       <HeaderHome />
 
       {/* Hero Section */}
-      <section className="pt-12 pb-20 lg:py-24 relative overflow-hidden bg-[url('/assets/images/pack.png')] bg-cover bg-center bg-no-repeat">
+      <section className="pt-12 pb-20 lg:py-24 relative overflow-hidden bg-[url('/assets/images/pack2.png')] bg-cover bg-center bg-no-repeat">
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">

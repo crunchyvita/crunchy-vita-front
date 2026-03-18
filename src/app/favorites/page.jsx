@@ -158,7 +158,6 @@ export default function FavoritesPage() {
                     <p className="text-gray-500 mt-2">{t('subtitle')}</p>
                 </div>
 
-                {/* Search removed — display favorites directly */}
 
                 <div className="flex flex-col items-center mb-12">
                     <div className="flex bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] border border-white">
@@ -187,7 +186,7 @@ export default function FavoritesPage() {
                         <span>{error}</span>
                     </div>
                 ) : !(hasFavorites || hasPackageFavorites) ? (
-                    <div className="rounded-2xl bg-white border border-slate-200 p-8 text-center">
+                    <div className="rounded-2xl    p-8 text-center">
                         <Heart className="h-10 w-10 text-[#E10C69] mx-auto mb-3" />
                         <p className="text-slate-700 font-semibold">{t('empty.title')}</p>
                         <Link href="/shop" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-3 text-white font-bold">
