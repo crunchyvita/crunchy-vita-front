@@ -6,7 +6,7 @@ import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoCodeInput from '@/components/PromoCodeInput';
-import { Trash2, ShoppingBag, ArrowLeft, MapPin, Home, Loader2, Navigation } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowLeft, MapPin, Home, Loader2, Navigation, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 
@@ -20,19 +20,62 @@ const pickUrl = (v) => {
 
 const getCartItemImagesLocal = (item) => {
   const isPackage = item.type === 'package' || !!item.packageId;
+  const one = pickUrl(item?.image);
+
   if (!isPackage) {
-    const one = pickUrl(item?.image);
     return one ? [one] : [];
   }
-  const packageImage =
-    pickUrl(item?.image) ||
+
+  if (one) {
+    return [one];
+  }
+
+  const packageMainImage =
     pickUrl(item?.packageImage) ||
     pickUrl(item?.package?.image) ||
-    pickUrl(item?.packageId?.image) ||
-    pickUrl(item?.packageImages?.[0]);
-  return packageImage ? [packageImage] : [];
-  const one = pickUrl(item?.image);
-  return one ? [one] : [];
+    pickUrl(item?.packageId?.image);
+  if (packageMainImage) {
+    return [packageMainImage];
+  }
+
+  let imgs = [];
+  if (Array.isArray(item?.packageImages)) {
+    imgs = item.packageImages.map((img) => pickUrl(img)).filter(Boolean);
+  }
+
+  if (Array.isArray(item?.selectedProducts)) {
+    imgs = [
+      ...imgs,
+      ...item.selectedProducts
+        .map((sp) => {
+          const direct = pickUrl(sp?.image);
+          if (direct) return direct;
+
+          const product = sp?.product || (typeof sp?.productId === 'object' ? sp.productId : null);
+          if (!product) return null;
+
+          return (
+            pickUrl(product?.image) ||
+            pickUrl(product?.imageUrl) ||
+            pickUrl(product?.productImage) ||
+            pickUrl(product?.media?.[0]?.url) ||
+            pickUrl(product?.media?.[0])
+          );
+        })
+        .filter(Boolean),
+    ];
+  }
+
+  const seen = new Set();
+  const unique = [];
+  for (const u of imgs) {
+    if (!seen.has(u)) {
+      seen.add(u);
+      unique.push(u);
+    }
+  }
+
+  return unique;
 };
 
 const CheckoutPage = () => {
@@ -71,7 +114,6 @@ const CheckoutPage = () => {
 
   // Promo code state
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [promoCode, setPromoCode] = useState(null);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
@@ -197,6 +239,7 @@ const CheckoutPage = () => {
     !!selectedRelay;
 
   const canConfirm = deliveryType === 'home' ? isHomeValid : isRelayValid;
+  const finalTotal = Math.max(0, Number(total || 0) - Number(promoDiscount || 0));
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -582,6 +625,14 @@ const CheckoutPage = () => {
                 {cartItems.map((item) => {
                   const imgs = getCartItemImagesLocal(item);
                   const isPkg = item.type === 'package' || !!item.packageId;
+                  const hasPackageMainImage =
+                    isPkg &&
+                    !!(
+                      pickUrl(item?.image) ||
+                      pickUrl(item?.packageImage) ||
+                      pickUrl(item?.package?.image) ||
+                      pickUrl(item?.packageId?.image)
+                    );
                   const imageUrl = imgs[0] || null;
                   const sourceProduct = item?.product || (typeof item?.productId === 'object' ? item.productId : null);
                   const translatedName = sourceProduct ? getTranslatedProduct(sourceProduct, locale).name : null;
@@ -589,8 +640,27 @@ const CheckoutPage = () => {
 
                   return (
                     <div key={item._id} className="flex gap-4 py-4 border-b border-gray-50 last:border-0">
-                      <div className="w-16 h-16 shrink-0">
-                        {imageUrl ? (
+                      <div className="w-16 h-16 shrink-0 relative">
+                        {item.isFreeItem && (
+                          <span className="absolute -top-1 -right-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm">
+                            <Gift size={12} />
+                          </span>
+                        )}
+                        {isPkg && !hasPackageMainImage ? (
+                          <div className="grid grid-cols-2 gap-1 w-full h-full">
+                            {imgs.length > 0 ? (
+                              imgs.slice(0, 4).map((img, idx) => (
+                                <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
+                                  <img src={img} alt="" className="w-full h-full object-cover" />
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-2 row-span-2 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <ShoppingBag size={16} className="text-gray-300" />
+                              </div>
+                            )}
+                          </div>
+                        ) : imageUrl ? (
                           <img
                             src={imageUrl}
                             className={`w-full h-full rounded-lg ${isPkg ? 'object-cover' : 'object-contain bg-gray-50'}`}
@@ -604,14 +674,29 @@ const CheckoutPage = () => {
                       </div>
                       <div className="grow">
                         <p className="text-sm font-bold text-[#556822] line-clamp-1">{displayName}</p>
-                        <p className="text-xs text-gray-400">
-                          {t('summary.qty')}: {item.quantity}
-                        </p>
-                        <p className="text-sm font-black text-[#E10C69]">{(item.price * item.quantity).toFixed(2)} €</p>
+                        {item.isFreeItem ? (
+                          <div className="flex flex-col gap-1">
+                            <p className="text-xs text-gray-400 line-through">
+                              {(item.price * item.quantity).toFixed(2)} €
+                            </p>
+                            <p className="text-sm font-black text-[#E10C69]">0 €</p>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-gray-400">
+                              {t('summary.qty')}: {item.quantity}
+                            </p>
+                            <p className="text-sm font-black text-[#E10C69]">
+                              {(item.price * item.quantity).toFixed(2)} €
+                            </p>
+                          </>
+                        )}
                       </div>
-                      <button onClick={() => removeFromCart(item._id)} className="text-gray-300 hover:text-red-500 transition-colors">
-                        <Trash2 size={16} />
-                      </button>
+                      {!item.isFreeItem && (
+                        <button onClick={() => removeFromCart(item._id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -624,9 +709,9 @@ const CheckoutPage = () => {
                 </h3>
                 <PromoCodeInput 
                   cartTotal={subtotal} 
+                  cartItems={cartItems}
                   onPromoApplied={(promo) => {
                     setPromoDiscount(promo.discount || 0);
-                    setPromoCode(promo.code);
                   }}
                 />
               </div>
@@ -637,19 +722,18 @@ const CheckoutPage = () => {
                   <span>{t('summary.subtotal')}</span>
                   <span className="text-gray-900">{Number(subtotal).toFixed(2)} €</span>
                 </div>
-                {promoDiscount > 0 && (
-                  <div className="flex justify-between text-green-600 font-medium">
-                    <span>{t('summary.promoCodeLabel') || 'Promo code'}</span>
-                    <span>-{Number(promoDiscount).toFixed(2)} €</span>
-                  </div>
-                )}
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
                   <span className="text-gray-900">{Number(shipping).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
-                  <span className="text-[#E10C69]">{Number(total - promoDiscount).toFixed(2)} €</span>
+                  <div className="text-right leading-tight">
+                    {promoDiscount > 0 && (
+                      <div className="text-xs font-semibold text-gray-400 line-through">{Number(total).toFixed(2)} €</div>
+                    )}
+                    <span className="text-[#E10C69]">{finalTotal.toFixed(2)} €</span>
+                  </div>
                 </div>
               </div>
 

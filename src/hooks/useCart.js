@@ -221,6 +221,9 @@ export function useCart() {
     async (itemId) => {
       if (!itemId) return false;
 
+      const removedItem = cartItems.find((item) => item._id === itemId) || null;
+      const removedWasFreeItem = removedItem?.isFreeItem === true;
+
       setCartItems((prev) => prev.filter((item) => item._id !== itemId));
       setError(null);
       optimisticQuantitiesRef.current.delete(itemId);
@@ -236,6 +239,13 @@ export function useCart() {
         const latest = pendingRemoveRef.current.get(itemId);
         if (!latest || latest.requestId !== requestId) return true;
         setCartItems(result.data.items || []);
+
+        if (removedWasFreeItem && typeof window !== 'undefined') {
+          localStorage.removeItem('appliedPromoCode');
+          window.dispatchEvent(new Event('promoCodeCleared'));
+          window.dispatchEvent(new Event('cartNeedsReload'));
+        }
+
         setError(null);
         return true;
       } catch (err) {
@@ -246,6 +256,11 @@ export function useCart() {
           message.toLowerCase().includes('cart item not found');
 
         if (isAlreadyRemoved) {
+          if (removedWasFreeItem && typeof window !== 'undefined') {
+            localStorage.removeItem('appliedPromoCode');
+            window.dispatchEvent(new Event('promoCodeCleared'));
+            window.dispatchEvent(new Event('cartNeedsReload'));
+          }
           setError(null);
           return true;
         }
@@ -259,7 +274,7 @@ export function useCart() {
         if (latest?.requestId) pendingRemoveRef.current.delete(itemId);
       }
     },
-    [loadCart]
+    [cartItems, loadCart]
   );
 
   // Update item quantity (✅ HARD BLOCK at max; no rollback visual)
@@ -435,6 +450,7 @@ export function useCart() {
 
   // Calculate totals
   const subtotal = cartItems.reduce((acc, item) => {
+    if (item?.isFreeItem === true) return acc;
     const price = item.price || 0;
     const quantity = item.quantity || 1;
     return acc + price * quantity;
