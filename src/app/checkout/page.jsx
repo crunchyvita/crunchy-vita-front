@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -9,6 +10,7 @@ import PromoCodeInput from '@/components/PromoCodeInput';
 import { Trash2, ShoppingBag, ArrowLeft, MapPin, Home, Loader2, Navigation } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslatedProduct } from '@/lib/productTranslations';
+import { paymentAPI } from '@/lib/api';
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -31,13 +33,12 @@ const getCartItemImagesLocal = (item) => {
     pickUrl(item?.packageId?.image) ||
     pickUrl(item?.packageImages?.[0]);
   return packageImage ? [packageImage] : [];
-  const one = pickUrl(item?.image);
-  return one ? [one] : [];
 };
 
 const CheckoutPage = () => {
   const t = useTranslations('Checkout');
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const { cartItems, subtotal, shipping, total, removeFromCart } = useCart();
   const brandGreen = '#556822';
 
@@ -72,6 +73,8 @@ const CheckoutPage = () => {
   // Promo code state
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
 
@@ -196,7 +199,87 @@ const CheckoutPage = () => {
     lastName.trim() &&
     !!selectedRelay;
 
-  const canConfirm = deliveryType === 'home' ? isHomeValid : isRelayValid;
+  const paymentStatus = searchParams.get('payment');
+  const returnedSessionId = searchParams.get('session_id');
+
+  const statusBanner = useMemo(() => {
+    if (paymentStatus === 'success') {
+      return {
+        tone: 'success',
+        title: t('status.successTitle'),
+        body: t('status.successBody'),
+      };
+    }
+
+    if (paymentStatus === 'cancelled') {
+      return {
+        tone: 'warning',
+        title: t('status.cancelledTitle'),
+        body: t('status.cancelledBody'),
+      };
+    }
+
+    return null;
+  }, [paymentStatus, t]);
+
+  const canConfirmBase = deliveryType === 'home' ? isHomeValid : isRelayValid;
+  const canConfirm = canConfirmBase && cartItems.length > 0 && !isCheckingOut;
+
+  const getCheckoutPayload = () => {
+    const localePrefix = locale ? `/${locale}` : '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+    const payload = {
+      customerEmail: email.trim(),
+      customerName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+      promoCode: promoCode || undefined,
+      deliveryType,
+      locale,
+      successUrl: `${origin}${localePrefix}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${origin}${localePrefix}/checkout?payment=cancelled`,
+    };
+
+    if (deliveryType === 'home') {
+      payload.shippingAddress = {
+        line1: street.trim(),
+        city: city.trim(),
+        postalCode: postalCode.trim(),
+        country: country.trim(),
+      };
+    } else {
+      payload.relayPoint = selectedRelay;
+      payload.shippingAddress = {
+        line1: selectedRelay?.street || '',
+        city: selectedRelay?.city || '',
+        postalCode: selectedRelay?.postalCode || '',
+        country: selectedRelay?.country || relayCountry || country || '',
+      };
+    }
+
+    return payload;
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!canConfirm) return;
+
+    setCheckoutError('');
+    setIsCheckingOut(true);
+
+    try {
+      const payload = getCheckoutPayload();
+      const response = await paymentAPI.createCheckoutSession(payload);
+      const checkoutUrl = response?.data?.url;
+
+      if (!checkoutUrl) {
+        throw new Error(t('errors.sessionCreateFailed'));
+      }
+
+      window.location.assign(checkoutUrl);
+    } catch (error) {
+      setCheckoutError(error?.message || t('errors.sessionCreateFailed'));
+      setIsCheckingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -213,6 +296,22 @@ const CheckoutPage = () => {
         </nav>
 
         <h1 className="text-4xl font-black text-[#556822] mb-10 font-[agrandir]">{t('title')}</h1>
+
+        {statusBanner && (
+          <div
+            className={`mb-8 rounded-xl border p-4 ${
+              statusBanner.tone === 'success'
+                ? 'bg-green-50 border-green-200 text-green-800'
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}
+          >
+            <h3 className="text-sm font-black uppercase tracking-wide">{statusBanner.title}</h3>
+            <p className="mt-1 text-sm">{statusBanner.body}</p>
+            {returnedSessionId && statusBanner.tone === 'success' ? (
+              <p className="mt-1 text-xs opacity-80">Session: {returnedSessionId}</p>
+            ) : null}
+          </div>
+        )}
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column: Forms */}
@@ -521,53 +620,12 @@ const CheckoutPage = () => {
                   <div className="w-4 h-4 rounded-full border-4 border-[#556822] bg-white"></div>
                   <span className="font-bold text-lg">{t('payment.creditCard')}</span>
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                      {t('payment.nameOnCard')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={t('payment.nameOnCardPlaceholder')}
-                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                      {t('payment.cardNumber')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={t('payment.cardNumberPlaceholder')}
-                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                        {t('payment.expiry')}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={t('payment.expiryPlaceholder')}
-                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                        {t('payment.cvc')}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={t('payment.cvcPlaceholder')}
-                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {t('payment.redirectNote')}
+                </p>
+                <p className="mt-3 text-xs uppercase tracking-wider font-bold text-[#556822]">
+                  {t('payment.poweredByStripe')}
+                </p>
               </div>
             </section>
           </div>
@@ -656,11 +714,16 @@ const CheckoutPage = () => {
 
               <button
                 disabled={!canConfirm}
+                onClick={handleConfirmOrder}
                 className="w-full mt-8 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                 style={{ backgroundColor: brandGreen }}
               >
-                {t('actions.confirmOrder')}
+                {isCheckingOut ? t('actions.redirecting') : t('actions.confirmOrder')}
               </button>
+
+              {checkoutError ? (
+                <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
+              ) : null}
 
               <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
                 {t('securityNote')}

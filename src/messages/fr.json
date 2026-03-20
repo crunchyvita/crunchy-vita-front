@@ -915,7 +915,9 @@
       "expiry": "Date d'expiration",
       "expiryPlaceholder": "MM / AA",
       "cvc": "CVC",
-      "cvcPlaceholder": "CVV"
+      "cvcPlaceholder": "CVV",
+      "redirectNote": "Apres confirmation, vous serez redirige vers Stripe pour finaliser votre paiement en toute securite.",
+      "poweredByStripe": "Paiement securise via Stripe"
     },
     "summary": {
       "title": "Resume de la commande",
@@ -928,7 +930,17 @@
       "applyPromo": "Appliquer"
     },
     "actions": {
-      "confirmOrder": "Confirmer la commande"
+      "confirmOrder": "Confirmer la commande",
+      "redirecting": "Redirection..."
+    },
+    "status": {
+      "successTitle": "Paiement recu",
+      "successBody": "Merci. Votre paiement a ete accepte et votre commande est en cours de traitement.",
+      "cancelledTitle": "Paiement annule",
+      "cancelledBody": "Aucun debit n'a ete effectue. Vous pouvez verifier votre commande et reessayer quand vous voulez."
+    },
+    "errors": {
+      "sessionCreateFailed": "Impossible de lancer le paiement securise. Veuillez reessayer."
     },
     "securityNote": "Paiement securise SSL"
   },

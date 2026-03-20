@@ -377,6 +377,15 @@ export const stockAPI = {
     }),
 };
 
+// Payment API functions
+export const paymentAPI = {
+  createCheckoutSession: async (payload) =>
+    apiRequest('/payment/checkout-session', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+};
+
 // Contact/Message API functions
 export const messageAPI = {
   list: async () => apiRequest('/contact', { method: 'GET' }),

@@ -915,7 +915,9 @@
       "expiry": "Expiry date",
       "expiryPlaceholder": "MM / YY",
       "cvc": "CVC",
-      "cvcPlaceholder": "CVV"
+      "cvcPlaceholder": "CVV",
+      "redirectNote": "After confirmation, you will be redirected to Stripe to complete your card payment securely.",
+      "poweredByStripe": "Secure checkout powered by Stripe"
     },
     "summary": {
       "title": "Order Summary",
@@ -928,7 +930,17 @@
       "applyPromo": "Apply Coupon"
     },
     "actions": {
-      "confirmOrder": "Confirm Order"
+      "confirmOrder": "Confirm Order",
+      "redirecting": "Redirecting..."
+    },
+    "status": {
+      "successTitle": "Payment received",
+      "successBody": "Thank you. Your payment was accepted and your order is now being processed.",
+      "cancelledTitle": "Payment cancelled",
+      "cancelledBody": "No charge was made. You can review your order details and try again when ready."
+    },
+    "errors": {
+      "sessionCreateFailed": "Unable to start secure checkout. Please try again."
     },
     "securityNote": "Secure SSL Encrypted Checkout"
   },
