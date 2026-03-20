@@ -306,6 +306,20 @@ const CheckoutPage = () => {
     return 'normal';
   };
 
+  const formatHomeOfferLabel = (rawCode) => {
+    const raw = String(rawCode || '').trim();
+    if (!raw) return '';
+
+    // Make transport codes readable: camelCase, snake_case and digit boundaries.
+    return raw
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/([A-Za-z])(\d)/g, '$1 $2')
+      .replace(/(\d)([A-Za-z])/g, '$1 $2')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   const getHomeOfferTransitDaysLabel = (offer) => {
     const explicitDaysCandidates = [
       offer?.transitDays,
@@ -975,6 +989,7 @@ const CheckoutPage = () => {
                               <div className="max-h-136 overflow-auto border border-gray-300 bg-white">
                                 {visibleHomeShippingOffers.map((offer) => {
                                   const code = String(offer.shippingOfferCode || offer.shippingOfferId || '');
+                                  const codeLabel = formatHomeOfferLabel(code) || code;
                                   const active = selectedHomeShippingOfferCode === code;
                                   const modeKey = classifyHomeOfferMode(offer) === 'express' ? 'express' : 'normal';
                                   const modeLabel = t(`shipping.filters.${modeKey}`);
@@ -988,22 +1003,22 @@ const CheckoutPage = () => {
                                       type="button"
                                       onClick={() => setSelectedHomeShippingOfferCode(code)}
                                       className={`w-full text-left p-4 border-b border-gray-200 transition-colors ${
-                                        active ? 'bg-white' : 'bg-white hover:bg-gray-50/50'
+                                        active ? 'bg-[#556822]/5' : 'bg-white hover:bg-gray-50/50'
                                       }`}
                                     >
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-start gap-3 min-w-0">
                                           <span
                                             className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                                              active ? 'border-black' : 'border-gray-300'
+                                              active ? 'border-[#556822]' : 'border-gray-300'
                                             }`}
                                           >
-                                            {active ? <span className="h-2.5 w-2.5 rounded-full bg-black" /> : null}
+                                            {active ? <span className="h-2.5 w-2.5 rounded-full bg-[#556822]" /> : null}
                                           </span>
 
                                           <div className="min-w-0">
                                             <div className="font-semibold text-lg leading-tight text-gray-900 truncate">
-                                              {code}
+                                                {codeLabel}
                                             </div>
 
                                             <div className="mt-1 flex items-center gap-2">
@@ -1177,17 +1192,17 @@ const CheckoutPage = () => {
                                 key={p.id}
                                 onClick={() => setSelectedRelay(p)}
                                 className={`w-full text-left p-4 border-b border-gray-200 transition-colors ${
-                                  active ? 'bg-white' : 'bg-white hover:bg-gray-50/50'
+                                  active ? 'bg-[#556822]/5' : 'bg-white hover:bg-gray-50/50'
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="flex items-start gap-3 min-w-0">
                                     <span
                                       className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                                        active ? 'border-black' : 'border-gray-300'
+                                        active ? 'border-[#556822]' : 'border-gray-300'
                                       }`}
                                     >
-                                      {active ? <span className="h-2.5 w-2.5 rounded-full bg-black" /> : null}
+                                      {active ? <span className="h-2.5 w-2.5 rounded-full bg-[#556822]" /> : null}
                                     </span>
 
                                     <div className="min-w-0">
