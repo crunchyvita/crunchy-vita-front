@@ -1,10 +1,6 @@
 'use client';
 
-<<<<<<< HEAD
-import React, { useMemo, useState } from 'react';
-=======
 import React, { useEffect, useMemo, useRef, useState } from 'react';
->>>>>>> 9aa655ade773873142f854691927a7da23327ded
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
@@ -39,11 +35,6 @@ const getCartItemImagesLocal = (item) => {
   const packageMainImage =
     pickUrl(item?.packageImage) ||
     pickUrl(item?.package?.image) ||
-<<<<<<< HEAD
-    pickUrl(item?.packageId?.image) ||
-    pickUrl(item?.packageImages?.[0]);
-  return packageImage ? [packageImage] : [];
-=======
     pickUrl(item?.packageId?.image);
   if (packageMainImage) {
     return [packageMainImage];
@@ -87,18 +78,13 @@ const getCartItemImagesLocal = (item) => {
   }
 
   return unique;
->>>>>>> 9aa655ade773873142f854691927a7da23327ded
 };
 
 const CheckoutPage = () => {
   const t = useTranslations('Checkout');
   const locale = useLocale();
-<<<<<<< HEAD
   const searchParams = useSearchParams();
-  const { cartItems, subtotal, shipping, total, removeFromCart } = useCart();
-=======
   const { cartItems, subtotal, shipping, shippingBaseFee, total, removeFromCart } = useCart();
->>>>>>> 9aa655ade773873142f854691927a7da23327ded
   const brandGreen = '#556822';
 
   // ----------------------------
@@ -133,18 +119,15 @@ const CheckoutPage = () => {
 
   // Promo code state
   const [promoDiscount, setPromoDiscount] = useState(0);
-<<<<<<< HEAD
   const [promoCode, setPromoCode] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
-=======
   const [homeShippingOffers, setHomeShippingOffers] = useState([]);
   const [homeShippingMode, setHomeShippingMode] = useState('all');
   const [selectedHomeShippingOfferCode, setSelectedHomeShippingOfferCode] = useState('');
   const [homeOffersPage, setHomeOffersPage] = useState(1);
   const [homeShippingLoading, setHomeShippingLoading] = useState(false);
   const [homeShippingError, setHomeShippingError] = useState('');
->>>>>>> 9aa655ade773873142f854691927a7da23327ded
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
@@ -309,7 +292,6 @@ const CheckoutPage = () => {
     lastName.trim() &&
     !!selectedRelay;
 
-<<<<<<< HEAD
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
 
@@ -333,9 +315,6 @@ const CheckoutPage = () => {
     return null;
   }, [paymentStatus, t]);
 
-  const canConfirmBase = deliveryType === 'home' ? isHomeValid : isRelayValid;
-  const canConfirm = canConfirmBase && cartItems.length > 0 && !isCheckingOut;
-
   const getCheckoutPayload = () => {
     const localePrefix = locale ? `/${locale}` : '';
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -344,6 +323,7 @@ const CheckoutPage = () => {
       customerEmail: email.trim(),
       customerName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       promoCode: promoCode || undefined,
+      shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
       deliveryType,
       locale,
       successUrl: `${origin}${localePrefix}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
@@ -391,7 +371,6 @@ const CheckoutPage = () => {
       setIsCheckingOut(false);
     }
   };
-=======
   const selectedHomeShippingOffer = useMemo(
     () =>
       homeShippingOffers.find(
@@ -497,10 +476,11 @@ const CheckoutPage = () => {
   const hasRealHomeQuote = Number.isFinite(Number(selectedHomeShippingOffer?.price));
   const showHomeOffersPanel = homeShippingLoading || homeShippingOffers.length > 0 || !!homeShippingError;
 
-  const canConfirm =
+  const canConfirmBase =
     deliveryType === 'home'
       ? isHomeValid && hasRealHomeQuote && !homeShippingLoading
       : isRelayValid;
+  const canConfirm = canConfirmBase && cartItems.length > 0 && !isCheckingOut;
 
   const RELAY_PAGE_SIZE = 4;
   const totalRelayPages = Math.max(1, Math.ceil(relayPoints.length / RELAY_PAGE_SIZE));
@@ -825,7 +805,6 @@ const CheckoutPage = () => {
   useEffect(() => {
     setHomeOffersPage(1);
   }, [homeShippingMode, filteredHomeShippingOffers.length]);
->>>>>>> 9aa655ade773873142f854691927a7da23327ded
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -1424,10 +1403,61 @@ const CheckoutPage = () => {
                   <div className="w-4 h-4 rounded-full border-4 border-[#556822] bg-white"></div>
                   <span className="font-bold text-lg">{t('payment.creditCard')}</span>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      {t('payment.nameOnCard')}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t('payment.nameOnCardPlaceholder')}
+                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      {t('payment.cardNumber')}
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={t('payment.cardNumberPlaceholder')}
+                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                        {t('payment.expiry')}
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={t('payment.expiryPlaceholder')}
+                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                        {t('payment.cvc')}
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder={t('payment.cvcPlaceholder')}
+                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-sm text-gray-700 leading-relaxed">
                   {t('payment.redirectNote')}
                 </p>
-                <p className="mt-3 text-xs uppercase tracking-wider font-bold text-[#556822]">
+                <p className="mt-2 text-xs uppercase tracking-wider font-bold text-[#556822]">
                   {t('payment.poweredByStripe')}
                 </p>
               </div>
@@ -1530,6 +1560,7 @@ const CheckoutPage = () => {
                   cartTotal={subtotal} 
                   cartItems={cartItems}
                   onPromoApplied={(promo) => {
+                    setPromoCode(promo?.code || null);
                     setPromoDiscount(promo.discount || 0);
                   }}
                 />

@@ -26,6 +26,18 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
   }, []);
 
   useEffect(() => {
+    if (!onPromoApplied || !appliedPromo) return;
+
+    onPromoApplied({
+      code: appliedPromo.code || null,
+      discount: Number(appliedPromo.discount || 0),
+      discountType: appliedPromo.discountType,
+      freeItem: appliedPromo.freeItem || null,
+      autoAddedItem: appliedPromo.autoAddedItem || null,
+    });
+  }, [appliedPromo, onPromoApplied]);
+
+  useEffect(() => {
     const handlePromoCodeCleared = () => {
       setAppliedPromo(null);
       setPromoCode('');
