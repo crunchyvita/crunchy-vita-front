@@ -5,7 +5,7 @@ import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
@@ -274,6 +274,8 @@ export default function CartPage() {
   }
 
   const isEmpty = cartItems.length === 0;
+  const displayedCartShipping = 0;
+  const displayedCartTotal = Number(subtotal || 0) + displayedCartShipping;
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -347,9 +349,14 @@ export default function CartPage() {
                   const atMax = maxAllowed !== null && Number(currentQty) >= Number(maxAllowed);
 
                   return (
-                    <div key={item._id} className="py-6 flex items-center gap-6">
+                    <div key={item._id} className="py-6 flex items-center gap-6 relative">
                       {/* Images */}
-                      <div className="shrink-0 flex items-center justify-center bg-transparent">
+                      <div className="shrink-0 relative">
+                        {item.isFreeItem && (
+                          <span className="absolute top-1 -right-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm">
+                            <Gift size={12} />
+                          </span>
+                        )}
                         {isPackage && !hasPackageMainImage ? (
                           <div className="grid grid-cols-2 gap-1 w-28">
                             {images.length > 0 ? (
@@ -385,69 +392,85 @@ export default function CartPage() {
 
                       <div className="grow">
                         <h3 className="font-bold text-[#556822] text-lg mb-0.5">{displayName}</h3>
-                        <p className="text-sm text-gray-500">
-                          {t('products.price')}: {Number(item.price || 0).toFixed(2)} €
-                        </p>
+                        {!item.isFreeItem && (
+                          <p className="text-sm text-gray-500">
+                            {t('products.price')}: 
+                            <span>
+                              {Number(item.price || 0).toFixed(2)} €
+                            </span>
+                          </p>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                        <button
-                          onClick={async () => {
-                            const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
-                            setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
-                            const ok = await updateQuantity(item._id, nextQty);
-                            if (!ok) {
-                              setUiQty((prev) => ({ ...prev, [item._id]: uiQty[item._id] ?? (item.quantity || 1) }));
-                            }
-                          }}
-                          className="text-gray-400 hover:text-black"
-                        >
-                          <Minus size={14} />
-                        </button>
+                      {!item.isFreeItem && (
+                        <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                          <button
+                            onClick={async () => {
+                              const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
+                              setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
+                              const ok = await updateQuantity(item._id, nextQty);
+                              if (!ok) {
+                                setUiQty((prev) => ({ ...prev, [item._id]: uiQty[item._id] ?? (item.quantity || 1) }));
+                              }
+                            }}
+                            className="text-gray-400 hover:text-black"
+                          >
+                            <Minus size={14} />
+                          </button>
 
-                        <span className="w-4 text-center font-bold text-sm">{currentQty}</span>
+                          <span className="w-4 text-center font-bold text-sm">{currentQty}</span>
 
-                        <button
-                          // ✅ SOFT BLOCK: if at max, show alert (no visual disabled state for better UX)
-                          onClick={async () => {
-                            if (atMax) {
-                              setStockAlertMessage('Insufficient stock for this product');
-                              setStockAlertOpen(true);
-                              setTimeout(() => setStockAlertOpen(false), 3000);
-                              return;
-                            }
+                          <button
+                            // ✅ SOFT BLOCK: if at max, show alert (no visual disabled state for better UX)
+                            onClick={async () => {
+                              if (atMax) {
+                                setStockAlertMessage('Insufficient stock for this product');
+                                setStockAlertOpen(true);
+                                setTimeout(() => setStockAlertOpen(false), 3000);
+                                return;
+                              }
 
-                            const now = Date.now();
-                            const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
-                            if (now < cooldownUntil) return;
-                            itemCooldownUntilRef.current.set(item._id, now + 500);
+                              const now = Date.now();
+                              const cooldownUntil = itemCooldownUntilRef.current.get(item._id) || 0;
+                              if (now < cooldownUntil) return;
+                              itemCooldownUntilRef.current.set(item._id, now + 500);
 
-                            const baseQty = uiQty[item._id] ?? (item.quantity || 1);
-                            const nextQty = Number(baseQty) + 1;
+                              const baseQty = uiQty[item._id] ?? (item.quantity || 1);
+                              const nextQty = Number(baseQty) + 1;
 
-                            // ✅ Clamp to maxAllowed (safety measure: should not be needed since hook also validates)
-                            const clampedQty = maxAllowed === null ? nextQty : Math.min(nextQty, maxAllowed);
+                              // ✅ Clamp to maxAllowed (safety measure: should not be needed since hook also validates)
+                              const clampedQty = maxAllowed === null ? nextQty : Math.min(nextQty, maxAllowed);
 
-                            // if clamp didn’t change => already at max => do nothing
-                            if (clampedQty === baseQty) return;
+                              // if clamp didn’t change => already at max => do nothing
+                              if (clampedQty === baseQty) return;
 
-                            setUiQty((prev) => ({ ...prev, [item._id]: clampedQty }));
-                            const ok = await updateQuantity(item._id, clampedQty);
-                            if (!ok) {
-                              setUiQty((prev) => ({ ...prev, [item._id]: baseQty }));
-                            }
-                          }}
-                          disabled={false}
-                          className="text-gray-400 hover:text-black"
-                          title="Increase quantity"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
+                              setUiQty((prev) => ({ ...prev, [item._id]: clampedQty }));
+                              const ok = await updateQuantity(item._id, clampedQty);
+                              if (!ok) {
+                                setUiQty((prev) => ({ ...prev, [item._id]: baseQty }));
+                              }
+                            }}
+                            disabled={false}
+                            className="text-gray-400 hover:text-black"
+                            title="Increase quantity"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      )}
 
-                      <div className="w-24 text-right font-black text-[#E10C69] text-lg">
-                        {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
-                      </div>
+                      {item.isFreeItem ? (
+                        <div className="w-24 text-right">
+                          <p className="text-xs text-gray-400 line-through">
+                            {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
+                          </p>
+                          <p className="font-black text-[#E10C69] text-lg">0 €</p>
+                        </div>
+                      ) : (
+                        <div className="w-24 text-right font-black text-[#E10C69] text-lg">
+                          {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
+                        </div>
+                      )}
 
                       <button
                         onClick={() => removeFromCart(item._id)}
@@ -473,12 +496,12 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span className="font-medium">{t('summary.shipping')}</span>
-                    <span className="font-bold text-gray-900">{Number(shipping || 0).toFixed(2)} €</span>
+                    <span className="font-bold text-gray-900">{displayedCartShipping.toFixed(2)} €</span>
                   </div>
                   <hr className="border-gray-100" />
                   <div className="flex justify-between text-lg font-black text-[#556822] pb-4">
                     <span>{t('summary.total')}</span>
-                    <span className="text-[#E10C69]">{Number(total || 0).toFixed(2)} €</span>
+                    <span className="text-[#E10C69]">{displayedCartTotal.toFixed(2)} €</span>
                   </div>
                   <Link
                     href={`/${locale}/checkout`}
