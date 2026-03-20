@@ -306,6 +306,46 @@ const CheckoutPage = () => {
     return 'normal';
   };
 
+  const getHomeOfferTransitDaysLabel = (offer) => {
+    const explicitDaysCandidates = [
+      offer?.transitDays,
+      offer?.transit_days,
+      offer?.deliveryDays,
+      offer?.delivery_days,
+      offer?.delayDays,
+      offer?.delay_days,
+    ];
+
+    const explicitDays = explicitDaysCandidates.find((v) => Number.isFinite(Number(v)) && Number(v) >= 0);
+    if (explicitDays !== undefined) {
+      const n = Math.round(Number(explicitDays));
+      if (n === 0) return t('shipping.eta.sameDay');
+      if (n === 1) return t('shipping.eta.estimatedRange', { min: 1, max: 2 });
+      return t('shipping.eta.estimatedRange', { min: Math.max(1, n - 1), max: n });
+    }
+
+    const parseIsoDate = (v) => {
+      const text = String(v || '').trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+      const d = new Date(`${text}T00:00:00Z`);
+      return Number.isNaN(d.getTime()) ? null : d;
+    };
+
+    const collectionDate = parseIsoDate(offer?.collectionDate || offer?.collection_date);
+    const deliveryDate = parseIsoDate(offer?.estimatedDeliveryDate || offer?.estimated_delivery_date);
+
+    if (collectionDate && deliveryDate) {
+      const diffDays = Math.round((deliveryDate.getTime() - collectionDate.getTime()) / (24 * 60 * 60 * 1000));
+      if (Number.isFinite(diffDays) && diffDays >= 0) {
+        if (diffDays === 0) return t('shipping.eta.sameDay');
+        if (diffDays === 1) return t('shipping.eta.estimatedRange', { min: 1, max: 2 });
+        return t('shipping.eta.estimatedRange', { min: Math.max(1, diffDays - 1), max: diffDays });
+      }
+    }
+
+    return '';
+  };
+
   const filteredHomeShippingOffers = useMemo(() => {
     if (!Array.isArray(homeShippingOffers) || homeShippingOffers.length === 0) return [];
 
@@ -870,7 +910,7 @@ const CheckoutPage = () => {
                       <div className="md:col-span-2">
                         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-bold text-gray-700">Offres de livraison domicile</span>
+                            <span className="font-bold text-gray-700">{t('shipping.homeOffersTitle')}</span>
                             <span className="font-black text-[#556822]">
                               {hasRealHomeQuote
                                 ? `${Number(selectedHomeShippingOffer.price).toFixed(2)} ${selectedHomeShippingOffer?.currency || 'EUR'}`
@@ -909,10 +949,10 @@ const CheckoutPage = () => {
                             <div className="mt-3 space-y-3">
                               <div className="flex flex-wrap gap-2 mb-2">
                                 {[
-                                  { key: 'all', label: 'Tous' },
-                                  { key: 'cheapest', label: 'Le moins cher' },
-                                  { key: 'normal', label: 'Normal' },
-                                  { key: 'express', label: 'Express' },
+                                  { key: 'all', label: t('shipping.filters.all') },
+                                  { key: 'cheapest', label: t('shipping.filters.cheapest') },
+                                  { key: 'normal', label: t('shipping.filters.normal') },
+                                  { key: 'express', label: t('shipping.filters.express') },
                                 ].map((modeOption) => {
                                   const active = homeShippingMode === modeOption.key;
                                   return (
@@ -936,7 +976,9 @@ const CheckoutPage = () => {
                                 {visibleHomeShippingOffers.map((offer) => {
                                   const code = String(offer.shippingOfferCode || offer.shippingOfferId || '');
                                   const active = selectedHomeShippingOfferCode === code;
-                                  const modeLabel = classifyHomeOfferMode(offer) === 'express' ? 'Express' : 'Normal';
+                                  const modeKey = classifyHomeOfferMode(offer) === 'express' ? 'express' : 'normal';
+                                  const modeLabel = t(`shipping.filters.${modeKey}`);
+                                  const transitDaysLabel = getHomeOfferTransitDaysLabel(offer);
                                   const carrierLabel = String(offer.carrier || '').replace(/_/g, ' ').trim() || 'carrier';
                                   const carrierLogoUrl = getCarrierLogo(offer.carrier);
 
@@ -981,6 +1023,12 @@ const CheckoutPage = () => {
                                             <div className="mt-2 inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-[11px] font-bold lowercase text-gray-700">
                                               {modeLabel}
                                             </div>
+
+                                            {transitDaysLabel ? (
+                                              <div className="mt-2 text-sm font-semibold text-gray-700">
+                                                {transitDaysLabel}
+                                              </div>
+                                            ) : null}
                                           </div>
                                         </div>
 

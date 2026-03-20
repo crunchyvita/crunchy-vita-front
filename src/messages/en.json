@@ -896,6 +896,17 @@
       "relayAddress": "Address / Postal code",
       "relayPlaceholder": "e.g. 75001 Paris",
       "search": "Search",
+      "homeOffersTitle": "Home delivery offers",
+      "filters": {
+        "all": "All",
+        "cheapest": "Cheapest",
+        "normal": "Standard",
+        "express": "Express"
+      },
+      "eta": {
+        "sameDay": "Same-day delivery",
+        "estimatedRange": "Estimated delivery: {min}-{max} days"
+      },
       "relayList": "Relay points list",
       "hoursAvailable": "Hours available",
       "relaySelected": "Selected relay",
