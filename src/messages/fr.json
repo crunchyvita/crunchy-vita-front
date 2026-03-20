@@ -868,7 +868,9 @@
     "contact": {
       "title": "Informations de contact",
       "emailLabel": "Adresse e-mail",
-      "emailPlaceholder": "email@example.com"
+      "emailPlaceholder": "email@example.com",
+      "phoneLabel": "Telephone",
+      "phonePlaceholder": "+33 6 00 00 00 00"
     },
     "shipping": {
       "title": "Details de livraison",

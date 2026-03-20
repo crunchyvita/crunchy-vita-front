@@ -103,6 +103,13 @@ const getProductAvailableStock = async (productId) => {
 
 export function useCart() {
   const [cartItems, setCartItems] = useState([]);
+  const [cartTotals, setCartTotals] = useState({
+    subtotal: 0,
+    shipping: 0,
+    shippingBaseFee: 0,
+    total: 0,
+    itemCount: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stockAlertTick, setStockAlertTick] = useState(0);
@@ -112,6 +119,17 @@ export function useCart() {
   const optimisticQuantitiesRef = useRef(new Map());
   const lastUpdateTimeRef = useRef(new Map()); // Track last successful update time per item
   const lastAddTimeRef = useRef(new Map()); // Track last successful add time per product
+
+  const applyCartData = useCallback((data = {}) => {
+    setCartItems(data.items || []);
+    setCartTotals({
+      subtotal: Number(data.subtotal || 0),
+      shipping: Number(data.shipping || 0),
+      shippingBaseFee: Number(data.shippingBaseFee || 0),
+      total: Number(data.total || 0),
+      itemCount: Number(data.itemCount || (data.items || []).length || 0),
+    });
+  }, []);
 
   // Helper function to load cart
   const loadCart = useCallback(async () => {
@@ -123,7 +141,7 @@ export function useCart() {
         setError(result.message || 'Insufficient stock for this product');
         return;
       }
-      setCartItems(result.data.items || []);
+      applyCartData(result.data || {});
       setError(null);
     } catch (err) {
       const message = getErrorMessage(err);
@@ -131,11 +149,11 @@ export function useCart() {
         console.error('Failed to load cart:', err);
       }
       setError(message);
-      setCartItems([]);
+      applyCartData({});
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyCartData]);
 
   // Load cart from API on mount
   useEffect(() => {
@@ -203,7 +221,7 @@ export function useCart() {
         return false;
       }
 
-      setCartItems(result.data.items || []);
+      applyCartData(result.data || {});
       setError(null);
       return true;
     } catch (err) {
@@ -214,7 +232,7 @@ export function useCart() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyCartData]);
 
   // Remove item from cart
   const removeFromCart = useCallback(
@@ -238,7 +256,7 @@ export function useCart() {
         const result = await cartAPI(`/items/${itemId}`, 'DELETE');
         const latest = pendingRemoveRef.current.get(itemId);
         if (!latest || latest.requestId !== requestId) return true;
-        setCartItems(result.data.items || []);
+        applyCartData(result.data || {});
 
         if (removedWasFreeItem && typeof window !== 'undefined') {
           localStorage.removeItem('appliedPromoCode');
@@ -274,7 +292,7 @@ export function useCart() {
         if (latest?.requestId) pendingRemoveRef.current.delete(itemId);
       }
     },
-    [cartItems, loadCart]
+    [cartItems, loadCart, applyCartData]
   );
 
   // Update item quantity (✅ HARD BLOCK at max; no rollback visual)
@@ -404,7 +422,7 @@ export function useCart() {
               return;
             }
 
-            setCartItems(result.data.items || []);
+            applyCartData(result.data || {});
             setError(null);
           } catch (err) {
             const message = getErrorMessage(err);
@@ -428,7 +446,7 @@ export function useCart() {
         return false;
       }
     },
-    [cartItems, removeFromCart, loadCart]
+    [cartItems, removeFromCart, loadCart, applyCartData]
   );
 
   // Clear entire cart
@@ -438,7 +456,7 @@ export function useCart() {
       setError(null);
 
       await cartAPI('/', 'DELETE');
-      setCartItems([]);
+      applyCartData({});
       setError(null);
     } catch (err) {
       console.error('Failed to clear cart:', err);
@@ -446,18 +464,12 @@ export function useCart() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyCartData]);
 
-  // Calculate totals
-  const subtotal = cartItems.reduce((acc, item) => {
-    if (item?.isFreeItem === true) return acc;
-    const price = item.price || 0;
-    const quantity = item.quantity || 1;
-    return acc + price * quantity;
-  }, 0);
-
-  const shipping = cartItems.length > 0 ? 10 : 0;
-  const total = subtotal + shipping;
+  const subtotal = cartTotals.subtotal;
+  const shipping = cartTotals.shipping;
+  const shippingBaseFee = cartTotals.shippingBaseFee;
+  const total = cartTotals.total;
 
   return {
     cartItems,
@@ -467,8 +479,9 @@ export function useCart() {
     clearCart,
     subtotal,
     shipping,
+    shippingBaseFee,
     total,
-    itemCount: cartItems.length,
+    itemCount: cartTotals.itemCount,
     isLoading,
     error,
     stockAlertTick, // keep this since CartPage listens to it

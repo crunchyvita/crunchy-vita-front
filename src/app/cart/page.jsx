@@ -274,6 +274,8 @@ export default function CartPage() {
   }
 
   const isEmpty = cartItems.length === 0;
+  const displayedCartShipping = 0;
+  const displayedCartTotal = Number(subtotal || 0) + displayedCartShipping;
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -494,12 +496,12 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span className="font-medium">{t('summary.shipping')}</span>
-                    <span className="font-bold text-gray-900">{Number(shipping || 0).toFixed(2)} €</span>
+                    <span className="font-bold text-gray-900">{displayedCartShipping.toFixed(2)} €</span>
                   </div>
                   <hr className="border-gray-100" />
                   <div className="flex justify-between text-lg font-black text-[#556822] pb-4">
                     <span>{t('summary.total')}</span>
-                    <span className="text-[#E10C69]">{Number(total || 0).toFixed(2)} €</span>
+                    <span className="text-[#E10C69]">{displayedCartTotal.toFixed(2)} €</span>
                   </div>
                   <Link
                     href={`/${locale}/checkout`}
