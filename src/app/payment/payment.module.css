@@ -1,0 +1,161 @@
+.paymentContainer {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.paymentForm {
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.paymentForm h1 {
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 24px;
+}
+
+.orderSummary {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.orderSummary h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #666;
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryRow.total {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 2px solid #ddd;
+  border-bottom: none;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+/* Stripe Payment Element styling */
+.formGroup > div {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 12px;
+  background: #fff;
+}
+
+.formGroup > div:focus-within {
+  border-color: #556822;
+  box-shadow: 0 0 0 3px rgba(85, 104, 34, 0.1);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.checkboxGroup input[type='checkbox'] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkboxGroup label {
+  margin: 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.errorMessage {
+  background-color: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border-left: 4px solid #c33;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 14px;
+  background-color: #556822;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #445218;
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.successMessage {
+  background: #eef9e6;
+  border: 2px solid #556822;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  color: #445218;
+}
+
+.successMessage h2 {
+  margin: 0 0 10px 0;
+  color: #556822;
+}
+
+.successMessage p {
+  margin: 0;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .paymentContainer {
+    margin: 20px auto;
+  }
+
+  .paymentForm {
+    padding: 20px;
+  }
+
+  .paymentForm h1 {
+    font-size: 20px;
+  }
+
+  .submitButton {
+    padding: 12px;
+    font-size: 14px;
+  }
+}

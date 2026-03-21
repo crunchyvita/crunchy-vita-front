@@ -1,0 +1,211 @@
+.successContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7f0 0%, #eef9e6 100%);
+}
+
+.successCard {
+  background: white;
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  background-color: #556822;
+  color: white;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.successCard h1 {
+  color: #556822;
+  font-size: 28px;
+  margin: 0 0 10px 0;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0 0 30px 0;
+}
+
+.orderNumber {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 25px;
+  border-left: 4px solid #556822;
+}
+
+.orderNumber label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.orderNumber span {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  font-family: monospace;
+}
+
+.orderDetails {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailRow span {
+  color: #666;
+}
+
+.detailRow strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.nextSteps {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.nextSteps h3 {
+  color: #333;
+  font-size: 16px;
+  margin: 0 0 15px 0;
+}
+
+.nextSteps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nextSteps li {
+  padding: 8px 0;
+  color: #666;
+  font-size: 14px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.nextSteps li:before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #556822;
+  font-weight: bold;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.button {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.primaryButton {
+  background-color: #556822;
+  color: white;
+}
+
+.primaryButton:hover {
+  background-color: #445218;
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: #556822;
+  border: 2px solid #556822;
+}
+
+.secondaryButton:hover {
+  background-color: #f9f9f9;
+}
+
+@media (max-width: 600px) {
+  .successContainer {
+    min-height: 60vh;
+  }
+
+  .successCard {
+    padding: 25px;
+  }
+
+  .successCard h1 {
+    font-size: 24px;
+  }
+
+  .successIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 36px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .button {
+    padding: 12px 15px;
+    font-size: 13px;
+  }
+}

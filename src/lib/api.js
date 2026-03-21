@@ -384,6 +384,11 @@ export const paymentAPI = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  createPaymentIntent: async (payload) =>
+    apiRequest('/payment/payment-intent', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 // Contact/Message API functions

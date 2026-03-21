@@ -3,6 +3,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import {
+  useStripe,
+  useElements,
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
+} from '@stripe/react-stripe-js';
+import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -80,6 +88,186 @@ const getCartItemImagesLocal = (item) => {
   return unique;
 };
 
+const PaymentForm = ({
+  locale,
+  t,
+  paymentProcessing,
+  setPaymentProcessing,
+  paymentError,
+  setPaymentError,
+  createPaymentIntent,
+  customerEmail,
+  customerPhone,
+  onPaymentFormCompleteChange,
+}) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [cardholderName, setCardholderName] = useState('');
+  const [cardCompletion, setCardCompletion] = useState({
+    number: false,
+    expiry: false,
+    cvc: false,
+  });
+
+  const cardElementStyle = {
+    style: {
+      base: {
+        fontSize: '15px',
+        color: '#32325d',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        '::placeholder': {
+          color: '#a0aec0',
+        },
+      },
+      invalid: {
+        color: '#c23d4b',
+      },
+    },
+  };
+
+  useEffect(() => {
+    onPaymentFormCompleteChange(
+      Boolean(cardCompletion.number && cardCompletion.expiry && cardCompletion.cvc && cardholderName.trim())
+    );
+  }, [cardCompletion, cardholderName, onPaymentFormCompleteChange]);
+
+  const handleSubmitPayment = async (e) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      setPaymentError('Payment system not ready. Please refresh the page.');
+      return;
+    }
+
+    setPaymentProcessing(true);
+    setPaymentError('');
+
+    try {
+      const clientSecret = await createPaymentIntent();
+      const cardElement = elements.getElement(CardNumberElement);
+
+      if (!cardElement) {
+        throw new Error('Payment form not ready. Please refresh the page.');
+      }
+
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            email: customerEmail || undefined,
+            name: cardholderName.trim() || undefined,
+            phone: customerPhone || undefined,
+          },
+        },
+      });
+
+      if (confirmError) {
+        setPaymentError(confirmError.message || 'Payment failed');
+        setPaymentProcessing(false);
+      } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+        window.location.href = `${locale ? `/${locale}` : ''}/checkout?payment=success&session_id=${paymentIntent.id}`;
+      } else {
+        setPaymentProcessing(false);
+      }
+    } catch (err) {
+      setPaymentError('Payment processing error: ' + err.message);
+      setPaymentProcessing(false);
+    }
+  };
+
+  return (
+    <form id="checkout-payment-form" onSubmit={handleSubmitPayment} className="mt-1">
+      <div className="mb-6 border border-gray-200 rounded-lg bg-white p-4">
+        <div className="text-[18px] font-semibold text-gray-900">Card</div>
+
+        <div className="mt-4 space-y-3 bg-white">
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Card information</label>
+            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+              <CardNumberElement
+                options={{
+                  ...cardElementStyle,
+                  placeholder: '1234 1234 1234 1234',
+                  showIcon: true,
+                  iconStyle: 'solid',
+                  disableLink: true,
+                }}
+                onChange={(event) => {
+                  setCardCompletion((prev) => ({ ...prev, number: Boolean(event?.complete) }));
+                  if (event?.error?.message) {
+                    setPaymentError(event.error.message);
+                  } else {
+                    setPaymentError('');
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+              <CardExpiryElement
+                options={{
+                  ...cardElementStyle,
+                  placeholder: 'MM / YY',
+                }}
+                onChange={(event) => {
+                  setCardCompletion((prev) => ({ ...prev, expiry: Boolean(event?.complete) }));
+                  if (event?.error?.message) {
+                    setPaymentError(event.error.message);
+                  } else {
+                    setPaymentError('');
+                  }
+                }}
+              />
+            </div>
+
+            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+              <CardCvcElement
+                options={{
+                  ...cardElementStyle,
+                  placeholder: 'CVC',
+                }}
+                onChange={(event) => {
+                  setCardCompletion((prev) => ({ ...prev, cvc: Boolean(event?.complete) }));
+                  if (event?.error?.message) {
+                    setPaymentError(event.error.message);
+                  } else {
+                    setPaymentError('');
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Cardholder name</label>
+            <input
+              type="text"
+              value={cardholderName}
+              onChange={(e) => setCardholderName(e.target.value)}
+              placeholder="Full name on card"
+              className="w-full rounded-md border border-gray-300 px-3 py-3 bg-white outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
+            />
+          </div>
+
+        </div>
+      </div>
+
+      {paymentError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+          <p className="font-bold">{t('errors.paymentFailed')}</p>
+          <p className="text-sm">{paymentError}</p>
+        </div>
+      )}
+
+      <p className="text-xs text-gray-500 text-center">
+        {t('securityNote')}
+      </p>
+    </form>
+  );
+};
+
 const CheckoutPage = () => {
   const t = useTranslations('Checkout');
   const locale = useLocale();
@@ -120,7 +308,7 @@ const CheckoutPage = () => {
   // Promo code state
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState(null);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isPreparingPaymentIntent, setIsPreparingPaymentIntent] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [homeShippingOffers, setHomeShippingOffers] = useState([]);
   const [homeShippingMode, setHomeShippingMode] = useState('all');
@@ -128,6 +316,11 @@ const CheckoutPage = () => {
   const [homeOffersPage, setHomeOffersPage] = useState(1);
   const [homeShippingLoading, setHomeShippingLoading] = useState(false);
   const [homeShippingError, setHomeShippingError] = useState('');
+
+  // Payment states
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+  const [isPaymentFormComplete, setIsPaymentFormComplete] = useState(false);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
@@ -318,9 +511,10 @@ const CheckoutPage = () => {
   const getCheckoutPayload = () => {
     const localePrefix = locale ? `/${locale}` : '';
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const normalizedEmail = email.trim().toLowerCase() || 'guest@crunchyvita.local';
 
     const payload = {
-      customerEmail: email.trim(),
+      customerEmail: normalizedEmail,
       customerName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       promoCode: promoCode || undefined,
       shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
@@ -350,27 +544,43 @@ const CheckoutPage = () => {
     return payload;
   };
 
-  const handleConfirmOrder = async () => {
-    if (!canConfirm) return;
-
+  const createPaymentIntent = async () => {
+    setIsPreparingPaymentIntent(true);
     setCheckoutError('');
-    setIsCheckingOut(true);
 
     try {
       const payload = getCheckoutPayload();
-      const response = await paymentAPI.createCheckoutSession(payload);
-      const checkoutUrl = response?.data?.url;
+      const response = await paymentAPI.createPaymentIntent(payload);
 
-      if (!checkoutUrl) {
-        throw new Error(t('errors.sessionCreateFailed'));
+      if (!response?.success || !response?.data?.clientSecret) {
+        throw new Error(response?.message || t('errors.sessionCreateFailed'));
       }
 
-      window.location.assign(checkoutUrl);
-    } catch (error) {
-      setCheckoutError(error?.message || t('errors.sessionCreateFailed'));
-      setIsCheckingOut(false);
+      return response.data.clientSecret;
+    } finally {
+      setIsPreparingPaymentIntent(false);
     }
   };
+
+  const handleConfirmOrder = async () => {
+    if (!canConfirm || paymentProcessing || isPreparingPaymentIntent) {
+      return;
+    }
+
+    setCheckoutError('');
+
+    if (!isPaymentFormComplete) {
+      setPaymentError(t('errors.paymentFailed'));
+      return;
+    }
+
+    const paymentForm = document.getElementById('checkout-payment-form');
+    if (paymentForm && typeof paymentForm.requestSubmit === 'function') {
+      paymentForm.requestSubmit();
+    }
+  };
+
+
   const selectedHomeShippingOffer = useMemo(
     () =>
       homeShippingOffers.find(
@@ -480,7 +690,7 @@ const CheckoutPage = () => {
     deliveryType === 'home'
       ? isHomeValid && hasRealHomeQuote && !homeShippingLoading
       : isRelayValid;
-  const canConfirm = canConfirmBase && cartItems.length > 0 && !isCheckingOut;
+  const canConfirm = canConfirmBase && cartItems.length > 0;
 
   const RELAY_PAGE_SIZE = 4;
   const totalRelayPages = Math.max(1, Math.ceil(relayPoints.length / RELAY_PAGE_SIZE));
@@ -806,8 +1016,17 @@ const CheckoutPage = () => {
     setHomeOffersPage(1);
   }, [homeShippingMode, filteredHomeShippingOffers.length]);
 
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      setIsPaymentFormComplete(false);
+      setCheckoutError('');
+      setPaymentError('');
+    }
+  }, [cartItems.length]);
+
   return (
-    <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
+    <CheckoutProvider>
+      <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -1398,68 +1617,19 @@ const CheckoutPage = () => {
             {/* Payment Section */}
             <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('payment.title')}</h2>
-              <div className="border-2 border-[#556822] rounded-xl p-6 bg-gray-50/30">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-4 h-4 rounded-full border-4 border-[#556822] bg-white"></div>
-                  <span className="font-bold text-lg">{t('payment.creditCard')}</span>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                      {t('payment.nameOnCard')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={t('payment.nameOnCardPlaceholder')}
-                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                      {t('payment.cardNumber')}
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder={t('payment.cardNumberPlaceholder')}
-                      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                        {t('payment.expiry')}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={t('payment.expiryPlaceholder')}
-                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                        {t('payment.cvc')}
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder={t('payment.cvcPlaceholder')}
-                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#556822] focus:border-transparent outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm text-gray-700 leading-relaxed">
-                  {t('payment.redirectNote')}
-                </p>
-                <p className="mt-2 text-xs uppercase tracking-wider font-bold text-[#556822]">
-                  {t('payment.poweredByStripe')}
-                </p>
+              <div className="border border-gray-200 rounded-xl p-6 bg-white">
+                <PaymentForm
+                  locale={locale}
+                  t={t}
+                  paymentProcessing={paymentProcessing}
+                  setPaymentProcessing={setPaymentProcessing}
+                  paymentError={paymentError}
+                  setPaymentError={setPaymentError}
+                  createPaymentIntent={createPaymentIntent}
+                  customerEmail={email.trim().toLowerCase()}
+                  customerPhone={phone.trim()}
+                  onPaymentFormCompleteChange={setIsPaymentFormComplete}
+                />
               </div>
             </section>
           </div>
@@ -1587,14 +1757,23 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-
               <button
-                disabled={!canConfirm}
+                type="button"
                 onClick={handleConfirmOrder}
+                disabled={
+                  !canConfirm ||
+                  paymentProcessing ||
+                  isPreparingPaymentIntent ||
+                  !isPaymentFormComplete
+                }
                 className="w-full mt-8 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                 style={{ backgroundColor: brandGreen }}
               >
-                {isCheckingOut ? t('actions.redirecting') : t('actions.confirmOrder')}
+                {paymentProcessing
+                  ? t('actions.paymentProcessing')
+                  : isPreparingPaymentIntent
+                  ? (t('actions.redirecting') || 'Preparing payment')
+                  : t('actions.confirmOrder')}
               </button>
 
               {checkoutError ? (
@@ -1610,7 +1789,8 @@ const CheckoutPage = () => {
       </main>
 
       <Footer />
-    </div>
+      </div>
+    </CheckoutProvider>
   );
 };
 

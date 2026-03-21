@@ -947,7 +947,10 @@
     },
     "actions": {
       "confirmOrder": "Confirm Order",
-      "redirecting": "Redirecting..."
+      "paymentProcessing": "Payment processing...",
+      "redirecting": "Redirecting...",
+      "pay": "Pay",
+      "back": "Back to editing"
     },
     "status": {
       "successTitle": "Payment received",
@@ -956,7 +959,8 @@
       "cancelledBody": "No charge was made. You can review your order details and try again when ready."
     },
     "errors": {
-      "sessionCreateFailed": "Unable to start secure checkout. Please try again."
+      "sessionCreateFailed": "Unable to start secure checkout. Please try again.",
+      "paymentFailed": "Payment failed"
     },
     "securityNote": "Secure SSL Encrypted Checkout"
   },
@@ -1066,6 +1070,36 @@
     "continueShopping": "Continue shopping",
     "spinError": "Something went wrong. Please try again.",
     "codeError": "Unable to generate your code right now. Please try again."
+  },
+  "Payment": {
+    "paymentForm": "Payment Information",
+    "cardholderName": "Full Name",
+    "email": "Email Address",
+    "cardDetails": "Card Details",
+    "completePayment": "Complete Payment",
+    "processing": "Processing...",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "saveCardForFutureUse": "Save this card for future purchases",
+    "paymentSuccessful": "Payment Successful",
+    "redirecting": "Redirecting to confirmation page...",
+    "orderConfirmed": "Order Confirmed!",
+    "thankYouForOrder": "Thank you for your order. A confirmation email has been sent to you.",
+    "orderNumber": "Order Number",
+    "status": "Status",
+    "confirmed": "Confirmed",
+    "totalAmount": "Total Amount",
+    "shippingType": "Shipping Type",
+    "relayPoint": "Relay Point",
+    "homeDelivery": "Home Delivery",
+    "nextSteps": "What's next?",
+    "confirmationEmailSent": "A confirmation email with order details has been sent",
+    "trackYourOrder": "Track your order status from your account",
+    "contactSupport": "Contact our support team if you have any questions",
+    "continueShopping": "Continue Shopping",
+    "viewOrder": "View Order Details"
   },
   "Lyophilisation": {
     "errors": {

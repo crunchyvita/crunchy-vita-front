@@ -947,7 +947,10 @@
     },
     "actions": {
       "confirmOrder": "Confirmer la commande",
-      "redirecting": "Redirection..."
+      "paymentProcessing": "Traitement du paiement...",
+      "redirecting": "Redirection...",
+      "pay": "Payer",
+      "back": "Retour à la modification"
     },
     "status": {
       "successTitle": "Paiement recu",
@@ -956,7 +959,8 @@
       "cancelledBody": "Aucun debit n'a ete effectue. Vous pouvez verifier votre commande et reessayer quand vous voulez."
     },
     "errors": {
-      "sessionCreateFailed": "Impossible de lancer le paiement securise. Veuillez reessayer."
+      "sessionCreateFailed": "Impossible de lancer le paiement securise. Veuillez reessayer.",
+      "paymentFailed": "Le paiement a échoué"
     },
     "securityNote": "Paiement securise SSL"
   },
@@ -1066,6 +1070,36 @@
     "continueShopping": "Continuer mes achats",
     "spinError": "Une erreur est survenue. Veuillez reessayer.",
     "codeError": "Impossible de generer votre code. Veuillez reessayer."
+  },
+  "Payment": {
+    "paymentForm": "Informations de paiement",
+    "cardholderName": "Nom complet",
+    "email": "Adresse email",
+    "cardDetails": "Détails de la carte",
+    "completePayment": "Effectuer le paiement",
+    "processing": "Traitement en cours...",
+    "orderSummary": "Résumé de la commande",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "total": "Total",
+    "saveCardForFutureUse": "Enregistrer cette carte pour les futurs achats",
+    "paymentSuccessful": "Paiement réussi",
+    "redirecting": "Redirection vers la page de confirmation...",
+    "orderConfirmed": "Commande confirmée !",
+    "thankYouForOrder": "Merci pour votre commande. Un email de confirmation vous a été envoyé.",
+    "orderNumber": "Numéro de commande",
+    "status": "Statut",
+    "confirmed": "Confirmée",
+    "totalAmount": "Montant total",
+    "shippingType": "Type de livraison",
+    "relayPoint": "Point relais",
+    "homeDelivery": "Livraison à domicile",
+    "nextSteps": "Et ensuite ?",
+    "confirmationEmailSent": "Un email de confirmation avec les détails de votre commande a été envoyé",
+    "trackYourOrder": "Suivez le statut de votre commande depuis votre compte",
+    "contactSupport": "Contactez notre équipe d'assistance si vous avez des questions",
+    "continueShopping": "Continuer mes achats",
+    "viewOrder": "Voir les détails de la commande"
   },
   "Lyophilisation": {
     "errors": {
