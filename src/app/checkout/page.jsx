@@ -287,6 +287,18 @@ const CheckoutPage = () => {
     }
   }, [user, authLoading, router]);
 
+  // Pre-populate email from authenticated user
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+    if (user?.name) {
+      const parts = user.name.split(' ');
+      if (parts[0]) setFirstName(parts[0]);
+      if (parts[1]) setLastName(parts.slice(1).join(' '));
+    }
+  }, [user]);
+
   // ----------------------------
   // Form states
   // ----------------------------
@@ -487,12 +499,14 @@ const CheckoutPage = () => {
 
   const isHomeValid =
     email.trim() &&
+    phone.trim() &&
     firstName.trim() &&
     lastName.trim() &&
     isHomeAddressValid;
 
   const isRelayValid =
     email.trim() &&
+    phone.trim() &&
     firstName.trim() &&
     lastName.trim() &&
     !!selectedRelay;
@@ -523,14 +537,14 @@ const CheckoutPage = () => {
   const getCheckoutPayload = () => {
     const localePrefix = locale ? `/${locale}` : '';
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const normalizedEmail = email.trim().toLowerCase() || 'guest@crunchyvita.local';
+    const normalizedEmail = email.trim().toLowerCase();
 
     const payload = {
       customerEmail: normalizedEmail,
       customerName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       customerFirstName: firstName.trim(),
       customerLastName: lastName.trim(),
-      customerPhone: phone.trim() || undefined,
+      customerPhone: phone.trim(),
       promoCode: promoCode || undefined,
       shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
       deliveryType,
@@ -1087,26 +1101,28 @@ const CheckoutPage = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                    {t('contact.emailLabel')}
+                    {t('contact.emailLabel')} <span aria-hidden="true">*</span>
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('contact.emailPlaceholder')}
+                    required
                     className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                    {t('contact.phoneLabel') || 'Telephone'}
+                    {(t('contact.phoneLabel') || 'Telephone')} <span aria-hidden="true">*</span>
                   </label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
+                    required
                     className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
                   />
                 </div>
