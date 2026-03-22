@@ -29,7 +29,8 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 // ✅ Top-level items (NOT grouped)
 const TOP_ITEMS = [
@@ -60,7 +61,8 @@ const NAV_GROUPS = [
   {
     title: "Customers",
     items: [
-      { label: "Customers", href: "/admin/customers", icon: Users },
+      { label: "Clients", href: "/admin/customers", icon: Users },
+      { label: "Administrators", href: "/admin/administrators", icon: ShieldCheck },
       { label: "Contact", href: "/admin/contact", icon: MessageSquare },
     ],
   },
@@ -80,6 +82,24 @@ const NAV_GROUPS = [
 export default function AdminSideBarMenu() {
   const pathname = usePathname();
   const { isSidebarOpen, closeSidebar } = useAdminLayout();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "SUPERADMIN";
+  const navGroups = useMemo(
+    () =>
+      NAV_GROUPS.map((group) => {
+        if (group.title !== "Customers") {
+          return group;
+        }
+
+        return {
+          ...group,
+          items: group.items.filter(
+            (item) => isSuperAdmin || item.href !== "/admin/administrators"
+          ),
+        };
+      }),
+    [isSuperAdmin]
+  );
 
   const [openGroups, setOpenGroups] = useState({});
 
@@ -87,13 +107,13 @@ export default function AdminSideBarMenu() {
   useEffect(() => {
     setOpenGroups((prev) => {
       const newState = { ...prev };
-      NAV_GROUPS.forEach((group) => {
+      navGroups.forEach((group) => {
         const hasActiveChild = group.items.some((item) => pathname === item.href);
         if (hasActiveChild) newState[group.title] = true;
       });
       return newState;
     });
-  }, [pathname]);
+  }, [pathname, navGroups]);
 
   const toggleGroup = (title) => {
     setOpenGroups((prev) => ({
@@ -157,7 +177,7 @@ export default function AdminSideBarMenu() {
           
 
             {/* ✅ GROUPS */}
-            {NAV_GROUPS.map((group) => {
+            {navGroups.map((group) => {
               const isOpen = openGroups[group.title];
               const hasActiveChild = group.items.some((item) => pathname === item.href);
 

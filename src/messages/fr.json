@@ -1045,6 +1045,12 @@
         "registerFailed": "Inscription échouée",
         "genericRegisterError": "Une erreur est survenue lors de l'inscription"
       }
+    },
+    "deactivated": {
+      "title": "Votre compte est désactivé",
+      "description": "Ce compte est actuellement inactif, l'accès a donc été restreint. Si vous pensez qu'il s'agit d'une erreur, contactez notre support pour le réactiver.",
+      "contactSupport": "Contacter le support",
+      "backToLogin": "Retour à la connexion"
     }
   },
   "Roulette": {

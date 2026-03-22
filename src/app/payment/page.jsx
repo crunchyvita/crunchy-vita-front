@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import styles from './payment.module.css';
 
 const PaymentPage = () => {

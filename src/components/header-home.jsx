@@ -122,10 +122,10 @@ export default function HeaderHome() {
 
             {isAuthenticated ? (
               <Link
-                href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/shop'}
+                href={user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? '/admin/dashboard' : '/shop'}
                 className="px-6 py-2 bg-[#556822] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm"
               >
-                {user?.role === 'ADMIN' ? t('dashboard') : t('order')}
+                {user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? t('dashboard') : t('order')}
               </Link>
             ) : (
               <Link
@@ -180,11 +180,11 @@ export default function HeaderHome() {
             <div className="px-4 pt-2">
               {isAuthenticated ? (
                 <Link
-                  href={user?.role === 'ADMIN' ? '/admin/dashboard' : '/shop'}
+                  href={user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? '/admin/dashboard' : '/shop'}
                   className="block w-full px-6 py-2 bg-[#556822] hover:bg-[#556822] text-white font-bold rounded-lg transition-colors text-sm text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {user?.role === 'ADMIN' ? t('dashboard') : t('order')}
+                  {user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? t('dashboard') : t('order')}
                 </Link>
               ) : (
                 <Link

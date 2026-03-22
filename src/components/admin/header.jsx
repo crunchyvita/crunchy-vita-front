@@ -54,7 +54,7 @@ export default function AdminHeader() {
   });
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'ADMIN') {
+    if (isAuthenticated && (user?.role === 'ADMIN' || user?.role === 'SUPERADMIN')) {
       // Initial fetch
       fetchMessages();
       fetchNotifications();

@@ -527,3 +527,59 @@ export const blogAPI = {
   // Delete blog (admin only)
   delete: async (id) => apiRequest(`/blogs/${id}`, { method: "DELETE" }),
 };
+
+// SuperAdmin administrator management API functions
+export const adminManagementAPI = {
+  listAdmins: async () => apiRequest('/users/admins', { method: 'GET' }),
+
+  promoteClientByEmail: async (email) =>
+    apiRequest('/users/admins/promote', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  createAdmin: async (payload) =>
+    apiRequest('/users/admins', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  updateAdmin: async (id, payload) =>
+    apiRequest(`/users/admins/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  resetAdminPassword: async (id, password) =>
+    apiRequest(`/users/admins/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ password }),
+    }),
+
+  updateAdminStatus: async (id, isActive) =>
+    apiRequest(`/users/admins/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    }),
+
+  deleteAdmin: async (id) =>
+    apiRequest(`/users/admins/${id}`, {
+      method: 'DELETE',
+    }),
+
+  downgradeAdmin: async (id) =>
+    apiRequest(`/users/admins/${id}/downgrade`, {
+      method: 'PUT',
+    }),
+
+  listClients: async () => apiRequest('/users/clients', { method: 'GET' }),
+
+  searchClients: async (query) =>
+    apiRequest(`/users/clients/search?query=${encodeURIComponent(query)}`, { method: 'GET' }),
+
+  updateClientStatus: async (id, isActive) =>
+    apiRequest(`/users/clients/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    }),
+};

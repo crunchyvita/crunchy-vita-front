@@ -67,7 +67,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col ">
       <Header />
       
-      <main className="grow bg-white py-20">
+      <main id="contact-section" className="grow bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl">
             <h1 className="mb-4 text-center text-4xl font-bold text-gray-900 font-[agrandir]">

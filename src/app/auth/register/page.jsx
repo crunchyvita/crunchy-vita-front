@@ -15,26 +15,21 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register, user, isAuthenticated } = useAuth();
+  const { register, user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const t = useTranslations('Auth');
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (!authLoading && isAuthenticated && user) {
       redirectBasedOnRole(user.role);
     }
-  }, [isAuthenticated, user, router]);
+  }, [authLoading, isAuthenticated, user, router]);
 
   const redirectBasedOnRole = (role) => {
-    if (role === 'ADMIN') {
+    if (role === 'ADMIN' || role === 'SUPERADMIN') {
       router.push('/admin/dashboard');
     } else if (role === 'CLIENT') {
-      // ✅ Redirect to production URL in production, localhost in dev
-      if (process.env.NODE_ENV === 'production') {
-        window.location.href = 'https://www.crunchyvita.com/shop';
-      } else {
-        router.push('/shop');
-      }
+      router.push('/shop');
     }
   };
 

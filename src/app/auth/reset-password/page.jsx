@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter, Link } from '@/navigation';
 import usePasswordReset from '@/hooks/usePasswordReset';
-import Link from 'next/link';
 import { Lock, Eye, EyeOff, Leaf, Loader2, CheckCircle2, AlertCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 function ResetPasswordForm() {

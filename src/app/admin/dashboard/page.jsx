@@ -27,7 +27,7 @@ function AdminDashboard() {
   const [messageToDelete, setMessageToDelete] = useState(null);
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'ADMIN') {
+    if (isAuthenticated && (user?.role === 'ADMIN' || user?.role === 'SUPERADMIN')) {
       fetchMessages();
       const interval = setInterval(() => {
         fetchMessages();
@@ -133,7 +133,7 @@ function AdminDashboard() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'SUPERADMIN']}>
       <div className="min-h-screen bg-slate-50 flex flex-col w-full font-sans text-slate-900">
         <AdminHeader />
         {/* MAIN CONTENT */}

@@ -6,7 +6,7 @@ import { AdminLayoutProvider } from "@/context/AdminLayoutContext";
 
 export default function AdminLayout({ children }) {
   return (
-    <ProtectedRoute allowedRoles={["ADMIN"]}>
+    <ProtectedRoute allowedRoles={["ADMIN", "SUPERADMIN"]}>
       <AdminLayoutProvider>
         <div className="flex min-h-screen bg-white">
           <AdminSideBarMenu />

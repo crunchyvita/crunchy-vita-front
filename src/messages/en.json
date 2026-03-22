@@ -1045,6 +1045,12 @@
         "registerFailed": "Registration failed",
         "genericRegisterError": "An error occurred during registration"
       }
+    },
+    "deactivated": {
+      "title": "Your Account Is Deactivated",
+      "description": "This account is currently inactive, so access has been restricted. If you think this is a mistake, please contact support to reactivate your account.",
+      "contactSupport": "Contact Support",
+      "backToLogin": "Back To Login"
     }
   },
   "Roulette": {
