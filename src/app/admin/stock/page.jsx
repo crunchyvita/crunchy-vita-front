@@ -155,13 +155,14 @@ export default function StockPage() {
                             <Edit2 className="h-4 w-4" />
                             Edit Stock
                           </Link>
-                          <button
+                          <Link
+                            href={`/admin/stock/mouvment/${stock._id}`}
                             className="flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors w-full text-left border-t border-slate-100"
                             onClick={() => setOpenMenu(null)}
                           >
                             <AlertCircle className="h-4 w-4" />
                             View History
-                          </button>
+                          </Link>
                         </div>
                       )}
                     </td>

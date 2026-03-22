@@ -1107,6 +1107,68 @@
     "continueShopping": "Continuer mes achats",
     "viewOrder": "Voir les détails de la commande"
   },
+  "CheckoutSuccess": {
+    "title": "Confirmation de commande",
+    "successIcon": "Commande confirmée",
+    "successTitle": "Nous avons bien reçu votre commande !",
+    "successSubtitle": "Votre commande #{invoiceNumber} est confirmée et sera préparée pour l'expédition.",
+    "items": "Articles",
+    "itemsSubtitle": "Récapitulatif de votre panier",
+    "quantity": "Qté",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "discount": "Remise",
+    "total": "Total",
+    "shippingAddress": "Adresse de livraison",
+    "paymentInfo": "Informations de paiement",
+    "paymentMethod": "Carte bancaire",
+    "continueShopping": "Continuer mes achats",
+    "viewOrder": "Voir la commande",
+    "missingReference": "Référence de paiement manquante.",
+    "loadingError": "Impossible de charger la commande."
+  },
+  "Orders": {
+    "breadcrumb": {
+      "shop": "Boutique",
+      "orders": "Commandes"
+    },
+    "title": "Mes commandes",
+    "description": "Suivez vos commandes récentes et accédez au détail de chaque commande.",
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "empty": "Aucune commande pour le moment.",
+    "list": {
+      "orderLabel": "Commande",
+      "status": {
+        "pending": "En attente",
+        "awaiting_delivery": "En préparation",
+        "delivered": "Livrée",
+        "returned": "Retournée",
+        "refunded": "Remboursée"
+      },
+      "viewProduct": "Voir produit",
+      "viewOrder": "Voir la commande"
+    }
+  },
+  "OrderDetail": {
+    "breadcrumb": {
+      "shop": "Boutique",
+      "orders": "Commandes",
+      "detail": "Détail"
+    },
+    "loading": "Chargement…",
+    "notFound": "Commande introuvable",
+    "backLink": "Retour aux commandes",
+    "title": "Commande #{invoiceNumber}",
+    "itemsSection": "Articles",
+    "shippingSection": "Livraison",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "discount": "Remise",
+    "total": "Total",
+    "status": "Statut : {status}",
+    "allOrders": "← Toutes les commandes"
+  },
   "Lyophilisation": {
     "errors": {
       "fetchFailed": "Erreur lors du chargement du contenu",

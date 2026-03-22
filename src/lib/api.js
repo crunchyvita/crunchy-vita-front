@@ -337,6 +337,9 @@ export const stockAPI = {
   // Get all stocks with product info
   list: async () => apiRequest("/stocks", { method: "GET" }),
 
+  getMovements: async (stockId) =>
+    apiRequest(`/stocks/${stockId}/movements`, { method: "GET" }),
+
   // Get stock for a specific product
   getByProductId: async (productId) =>
     apiRequest(`/products/${productId}/stock`, { method: "GET" }),
@@ -389,6 +392,35 @@ export const paymentAPI = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  getOrderDetails: async (id, kind = "payment_intent") => {
+    const q = new URLSearchParams();
+    if (kind === "session") {
+      q.set("session_id", id);
+    } else {
+      q.set("payment_intent", id);
+    }
+    return apiRequest(`/payment/order-details?${q.toString()}`, { method: "GET" });
+  },
+};
+
+export const orderAPI = {
+  listMine: async () => apiRequest('/orders/my', { method: 'GET' }),
+  getMine: async (id) => apiRequest(`/orders/my/${id}`, { method: 'GET' }),
+  listAdmin: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.status) q.set('status', params.status);
+    if (params.search) q.set('search', params.search);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/orders/admin${suffix}`, { method: 'GET' });
+  },
+  updateAdminStatus: async (id, status) =>
+    apiRequest(`/orders/admin/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
+  getAdminById: async (id) => apiRequest(`/orders/admin/${id}`, { method: 'GET' }),
+  getAdminDashboardStats: async () =>
+    apiRequest('/orders/admin/dashboard-stats', { method: 'GET' }),
 };
 
 // Contact/Message API functions
