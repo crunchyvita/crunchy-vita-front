@@ -516,9 +516,18 @@ const CheckoutPage = () => {
     const payload = {
       customerEmail: normalizedEmail,
       customerName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+      customerFirstName: firstName.trim(),
+      customerLastName: lastName.trim(),
+      customerPhone: phone.trim() || undefined,
       promoCode: promoCode || undefined,
       shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
       deliveryType,
+      shippingOfferCode:
+        selectedHomeShippingOffer?.shippingOfferCode ||
+        (deliveryType === 'relay' ? selectedRelay?.matchedRelayOfferCode || selectedRelay?.shippingOfferCode : undefined),
+      shippingOfferId:
+        selectedHomeShippingOffer?.shippingOfferId ||
+        (deliveryType === 'relay' ? selectedRelay?.shippingOfferId : undefined),
       locale,
       successUrl: `${origin}${localePrefix}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${origin}${localePrefix}/checkout?payment=cancelled`,
