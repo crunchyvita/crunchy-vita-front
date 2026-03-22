@@ -222,6 +222,14 @@ export default function AdminHeader() {
         console.error('[Notification Click] Missing productId for stock alert');
       }
       setShowNotificationsDropdown(false);
+    } else if (notification?.type === 'new_order') {
+      const oid = notification?.relatedId;
+      if (oid) {
+        router.push(`/admin/orders?order=${oid}`);
+      } else {
+        router.push('/admin/orders');
+      }
+      setShowNotificationsDropdown(false);
     } else {
       // For other notifications, just mark as read and close dropdown
       setShowNotificationsDropdown(false);

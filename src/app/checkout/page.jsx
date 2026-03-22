@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import {
   useStripe,
   useElements,
@@ -12,6 +13,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import PromoCodeInput from '@/components/PromoCodeInput';
@@ -165,7 +167,7 @@ const PaymentForm = ({
         setPaymentError(confirmError.message || 'Payment failed');
         setPaymentProcessing(false);
       } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
-        window.location.href = `${locale ? `/${locale}` : ''}/checkout?payment=success&session_id=${paymentIntent.id}`;
+        window.location.href = `${locale ? `/${locale}` : ''}/checkout/succes?payment_intent=${encodeURIComponent(paymentIntent.id)}`;
       } else {
         setPaymentProcessing(false);
       }
@@ -269,11 +271,21 @@ const PaymentForm = ({
 };
 
 const CheckoutPage = () => {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const t = useTranslations('Checkout');
   const locale = useLocale();
   const searchParams = useSearchParams();
   const { cartItems, subtotal, shipping, shippingBaseFee, total, removeFromCart } = useCart();
   const brandGreen = '#556822';
+
+  // Redirect non-authenticated guests to login
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth check to complete
+    if (!user) {
+      router.push('/auth/login');
+    }
+  }, [user, authLoading, router]);
 
   // ----------------------------
   // Form states
@@ -529,7 +541,7 @@ const CheckoutPage = () => {
         selectedHomeShippingOffer?.shippingOfferId ||
         (deliveryType === 'relay' ? selectedRelay?.shippingOfferId : undefined),
       locale,
-      successUrl: `${origin}${localePrefix}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      successUrl: `${origin}${localePrefix}/checkout/succes?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${origin}${localePrefix}/checkout?payment=cancelled`,
     };
 

@@ -1101,6 +1101,68 @@
     "continueShopping": "Continue Shopping",
     "viewOrder": "View Order Details"
   },
+  "CheckoutSuccess": {
+    "title": "Order Confirmation",
+    "successIcon": "Order confirmed",
+    "successTitle": "We received your order!",
+    "successSubtitle": "Your order #{invoiceNumber} is confirmed and will be prepared for shipment.",
+    "items": "Items",
+    "itemsSubtitle": "Order summary",
+    "quantity": "Qty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "discount": "Discount",
+    "total": "Total",
+    "shippingAddress": "Shipping address",
+    "paymentInfo": "Payment info",
+    "paymentMethod": "Credit Card",
+    "continueShopping": "Continue shopping",
+    "viewOrder": "View order",
+    "missingReference": "Missing payment reference.",
+    "loadingError": "Unable to load order."
+  },
+  "Orders": {
+    "breadcrumb": {
+      "shop": "Shop",
+      "orders": "Orders"
+    },
+    "title": "My Orders",
+    "description": "Track your recent orders and access the details of each order.",
+    "loading": "Loading…",
+    "error": "Error",
+    "empty": "No orders yet.",
+    "list": {
+      "orderLabel": "Order",
+      "status": {
+        "pending": "Pending",
+        "awaiting_delivery": "Preparing",
+        "delivered": "Delivered",
+        "returned": "Returned",
+        "refunded": "Refunded"
+      },
+      "viewProduct": "View product",
+      "viewOrder": "View order"
+    }
+  },
+  "OrderDetail": {
+    "breadcrumb": {
+      "shop": "Shop",
+      "orders": "Orders",
+      "detail": "Detail"
+    },
+    "loading": "Loading…",
+    "notFound": "Order not found",
+    "backLink": "Back to orders",
+    "title": "Order #{invoiceNumber}",
+    "itemsSection": "Items",
+    "shippingSection": "Shipping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "discount": "Discount",
+    "total": "Total",
+    "status": "Status: {status}",
+    "allOrders": "← All orders"
+  },
   "Lyophilisation": {
     "errors": {
       "fetchFailed": "Failed to load content",

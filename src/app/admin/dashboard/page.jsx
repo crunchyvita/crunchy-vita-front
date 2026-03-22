@@ -10,7 +10,7 @@ import {
   CheckCircle, Trash2, Reply, LayoutDashboard, 
   Box, ShoppingCart, LogOut, AlertTriangle, X, Clock, CheckCircle2, Building2
 } from 'lucide-react';
-import { notificationAPI, messageAPI } from '@/lib/api';
+import { notificationAPI, messageAPI, orderAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
 function AdminDashboard() {
@@ -25,6 +25,7 @@ function AdminDashboard() {
   
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
+  const [dashStats, setDashStats] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'ADMIN') {
@@ -34,6 +35,18 @@ function AdminDashboard() {
       }, 10000);
       return () => clearInterval(interval);
     }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'ADMIN') return;
+    (async () => {
+      try {
+        const res = await orderAPI.getAdminDashboardStats();
+        if (res?.success) setDashStats(res.data);
+      } catch {
+        setDashStats(null);
+      }
+    })();
   }, [isAuthenticated, user]);
 
   const fetchMessages = async () => {
@@ -139,6 +152,81 @@ function AdminDashboard() {
         {/* MAIN CONTENT */}
         <main className="flex-1 w-full p-6 lg:p-8">
           <div className="w-full space-y-8">
+            {dashStats && (
+              <section>
+                <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Ventes (commandes réelles)</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">CA aujourd&apos;hui</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">
+                      {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
+                        dashStats.todaySales || 0
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">{dashStats.todayOrders || 0} commandes</p>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">CA total</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">
+                      {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
+                        dashStats.totalSales || 0
+                      )}
+                    </p>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">Commandes</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalOrders || 0}</p>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">Clients (emails)</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalCustomers || 0}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-slate-900">Top produits (quantités vendues)</h3>
+                      <button
+                        type="button"
+                        onClick={() => router.push('/admin/orders')}
+                        className="text-xs font-semibold text-[#556622] hover:underline"
+                      >
+                        Commandes →
+                      </button>
+                    </div>
+                    <ul className="space-y-2">
+                      {(dashStats.traffic || []).map((row) => (
+                        <li key={row.productId} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-700 truncate pr-2">{row.name}</span>
+                          <span className="font-mono font-semibold text-slate-900 shrink-0">{row.totalQty}</span>
+                        </li>
+                      ))}
+                      {(!dashStats.traffic || dashStats.traffic.length === 0) && (
+                        <li className="text-slate-400 text-sm">Pas encore de données</li>
+                      )}
+                    </ul>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <h3 className="font-bold text-slate-900 mb-3">Commandes récentes</h3>
+                    <ul className="space-y-2">
+                      {(dashStats.recentOrders || []).map((o) => (
+                        <li key={o._id} className="flex flex-wrap items-center justify-between gap-2 text-sm border-b border-slate-50 pb-2 last:border-0">
+                          <span className="font-mono text-slate-800">#{o.invoiceNumber}</span>
+                          <span className="text-slate-600 truncate max-w-[140px]">{o.customerName || o.customerEmail}</span>
+                          <span className="font-semibold text-slate-900">
+                            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
+                              o.totalAmount || 0
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            )}
+
             <section>
               <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Actions Rapides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
