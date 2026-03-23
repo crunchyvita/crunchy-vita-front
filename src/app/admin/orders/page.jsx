@@ -29,7 +29,7 @@ const badge = (status) => {
 };
 
 function AdminOrdersInner() {
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const searchParams = useSearchParams();
   const highlight = searchParams.get('order');
 
@@ -353,7 +353,7 @@ function AdminOrdersInner() {
 
 export default function AdminOrdersPage() {
   return (
-    <ProtectedRoute allowedRoles={['ADMIN']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'SUPERADMIN']}>
       <AdminOrdersInner />
     </ProtectedRoute>
   );

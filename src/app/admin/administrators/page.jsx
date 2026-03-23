@@ -12,6 +12,7 @@ const INITIAL_CREATE_FORM = {
 };
 
 function AdministratorManagementPageContent() {
+  const PAGE_SIZE = 6;
   const [admins, setAdmins] = useState([]);
   const [allClients, setAllClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,7 @@ function AdministratorManagementPageContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [adminToDelete, setAdminToDelete] = useState(null);
   const [isDeletingAdmin, setIsDeletingAdmin] = useState(false);
+  const [page, setPage] = useState(1);
 
   const loadAdmins = async () => {
     setLoading(true);
@@ -32,6 +34,7 @@ function AdministratorManagementPageContent() {
       const response = await adminManagementAPI.listAdmins();
       const list = response?.data || [];
       setAdmins(list);
+      setPage(1);
     } catch (err) {
       setError(err.message || "Failed to load administrators");
     } finally {
@@ -141,6 +144,11 @@ function AdministratorManagementPageContent() {
     setShowSuggestions(false);
   };
 
+  const totalPages = Math.max(1, Math.ceil(admins.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const paginatedAdmins = admins.slice(start, start + PAGE_SIZE);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <AdminHeader />
@@ -249,31 +257,16 @@ function AdministratorManagementPageContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {admins.map((admin) => (
+                  {paginatedAdmins.map((admin) => (
                     <tr key={admin.id} className="align-top text-slate-700">
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={admin.name || ""}
-                          readOnly
-                          className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        {admin.name || "-"}
                       </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="email"
-                          value={admin.email || ""}
-                          readOnly
-                          className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
+                      <td className="px-4 py-3 text-slate-700">
+                        {admin.email || "-"}
                       </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={admin.role || ""}
-                          readOnly
-                          className="w-full max-w-[160px] rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
+                      <td className="px-4 py-3 text-slate-700">
+                        {admin.role || "ADMIN"}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -317,6 +310,32 @@ function AdministratorManagementPageContent() {
             </div>
           )}
         </section>
+
+        {!loading && admins.length > 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-500">
+              Page {safePage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
       </main>
 
       <DeleteConfirmationModal

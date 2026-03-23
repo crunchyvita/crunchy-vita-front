@@ -8,11 +8,13 @@ import { adminManagementAPI } from "@/lib/api";
 import { Users, RefreshCw, Power } from "lucide-react";
 
 function ClientsManagementPageContent() {
+  const PAGE_SIZE = 6;
   const { user } = useAuth();
   const canManageClientStatus = user?.role === "SUPERADMIN" || user?.role === "ADMIN";
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
 
   const loadClients = async () => {
     setLoading(true);
@@ -21,6 +23,7 @@ function ClientsManagementPageContent() {
     try {
       const response = await adminManagementAPI.listClients();
       setClients(response?.data || []);
+      setPage(1);
     } catch (err) {
       setError(err.message || "Failed to load clients");
     } finally {
@@ -44,6 +47,11 @@ function ClientsManagementPageContent() {
       setError(err.message || "Failed to update client status");
     }
   };
+
+  const totalPages = Math.max(1, Math.ceil(clients.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const paginatedClients = clients.slice(start, start + PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -90,7 +98,6 @@ function ClientsManagementPageContent() {
                   <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">Email</th>
-                    <th className="px-4 py-3 font-medium">Role</th>
                     <th className="px-4 py-3 font-medium">Status</th>
                     {canManageClientStatus ? (
                       <th className="px-4 py-3 font-medium text-right">Actions</th>
@@ -98,31 +105,13 @@ function ClientsManagementPageContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {clients.map((client) => (
+                  {paginatedClients.map((client) => (
                     <tr key={client.id} className="align-top text-slate-700">
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={client.name || ""}
-                          readOnly
-                          className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        {client.name || "-"}
                       </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="email"
-                          value={client.email || ""}
-                          readOnly
-                          className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={client.role || "CLIENT"}
-                          readOnly
-                          className="w-full max-w-[140px] rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none"
-                        />
+                      <td className="px-4 py-3 text-slate-700">
+                        {client.email || "-"}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -160,6 +149,32 @@ function ClientsManagementPageContent() {
             </div>
           )}
         </section>
+
+        {!loading && clients.length > 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-500">
+              Page {safePage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
       </main>
     </div>
   );

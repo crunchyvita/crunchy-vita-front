@@ -186,7 +186,7 @@ function AdminOrderDetailInner() {
 
 export default function AdminOrderDetailPage() {
 	return (
-		<ProtectedRoute allowedRoles={["ADMIN"]}>
+		<ProtectedRoute allowedRoles={["ADMIN", "SUPERADMIN"]}>
 			<AdminOrderDetailInner />
 		</ProtectedRoute>
 	);

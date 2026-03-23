@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import AdminHeader from '@/components/admin/header';
@@ -52,6 +52,9 @@ function StockMovementInner() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const MOVEMENTS_PER_PAGE = 8;
 
   useEffect(() => {
     if (!id) return;
@@ -68,14 +71,35 @@ function StockMovementInner() {
     })();
   }, [id]);
 
-  const movements = [...(data?.movements || [])].sort(
-    (a, b) => new Date(b.date || 0) - new Date(a.date || 0)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [id]);
+
+  const movements = useMemo(
+    () =>
+      [...(data?.movements || [])].sort(
+        (a, b) => new Date(b.date || 0) - new Date(a.date || 0)
+      ),
+    [data?.movements]
   );
+
+  const totalPages = Math.max(1, Math.ceil(movements.length / MOVEMENTS_PER_PAGE));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const startIndex = (currentPage - 1) * MOVEMENTS_PER_PAGE;
+  const paginatedMovements = movements.slice(startIndex, startIndex + MOVEMENTS_PER_PAGE);
+  const startDisplay = movements.length === 0 ? 0 : startIndex + 1;
+  const endDisplay = movements.length === 0 ? 0 : Math.min(startIndex + MOVEMENTS_PER_PAGE, movements.length);
 
   return (
     <>
       <AdminHeader />
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="space-y-6 p-6 lg:p-8">
         <Link
           href="/admin/stock"
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#556822]"
@@ -116,11 +140,37 @@ function StockMovementInner() {
                       </td>
                     </tr>
                   ) : (
-                    movements.map((m, i) => <MovementRow key={i} m={m} />)
+                    paginatedMovements.map((m, i) => <MovementRow key={`${m._id || m.date || i}-${i}`} m={m} />)
                   )}
                 </tbody>
               </table>
             </div>
+
+            {movements.length > 0 && (
+              <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
+                <p>
+                  Affichage de {startDisplay} à {endDisplay} sur {movements.length} mouvements
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Précédent
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -130,7 +180,7 @@ function StockMovementInner() {
 
 export default function StockMovementPage() {
   return (
-    <ProtectedRoute allowedRoles={['ADMIN']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'SUPERADMIN']}>
       <StockMovementInner />
     </ProtectedRoute>
   );
