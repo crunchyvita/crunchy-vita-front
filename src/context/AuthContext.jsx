@@ -213,7 +213,22 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     clearSession();
-    router.push('/auth/login');
+
+    // Use a hard redirect fallback to avoid SPA routing races.
+    if (typeof window !== 'undefined') {
+      try {
+        router.replace('/');
+      } finally {
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            window.location.assign('/');
+          }
+        }, 0);
+      }
+      return;
+    }
+
+    router.replace('/');
   };
 
   const setUserData = (userData, token) => {

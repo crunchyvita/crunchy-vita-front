@@ -39,7 +39,7 @@ function AdminDashboard() {
   }, [isAuthenticated, user]);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'ADMIN') return;
+    if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPERADMIN')) return;
     (async () => {
       try {
         const res = await orderAPI.getAdminDashboardStats();
