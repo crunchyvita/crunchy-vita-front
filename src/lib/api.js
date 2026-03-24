@@ -419,6 +419,13 @@ export const orderAPI = {
       body: JSON.stringify({ status }),
     }),
   getAdminById: async (id) => apiRequest(`/orders/admin/${id}`, { method: 'GET' }),
+  getAdminShippingOffers: async (id) =>
+    apiRequest(`/orders/admin/${id}/shipping-offers`, { method: 'GET' }),
+  selectAdminShippingOffer: async (id, payload) =>
+    apiRequest(`/orders/admin/${id}/shipping-offer`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
   getAdminDashboardStats: async () =>
     apiRequest('/orders/admin/dashboard-stats', { method: 'GET' }),
 };

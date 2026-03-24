@@ -57,6 +57,7 @@ function AdminOrderDetailInner() {
 		return items.reduce((sum, line) => sum + Math.max(1, Number(line?.quantity || 1)), 0);
 	}, [order]);
 
+
 	return (
 		<>
 			<AdminHeader />
@@ -174,6 +175,14 @@ function AdminOrderDetailInner() {
 											Open tracking link
 										</a>
 									) : null}
+									<div className="mt-4 pt-4 border-t border-slate-100">
+										<Link
+											href={`/admin/orders/${order._id}/shipping-offers`}
+											className="inline-flex rounded-md bg-[#556822] px-3 py-2 text-xs font-semibold text-white hover:bg-[#44591a]"
+										>
+											Edit / Choose Shipping Offer
+										</Link>
+									</div>
 								</div>
 							</div>
 						</div>

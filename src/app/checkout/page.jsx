@@ -21,6 +21,7 @@ import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navi
 import Link from 'next/link';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
+import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -315,6 +316,7 @@ const CheckoutPage = () => {
 
   // Delivery type: home | relay
   const [deliveryType, setDeliveryType] = useState('home'); // "home" | "relay"
+  const [expressDelivery, setExpressDelivery] = useState(false);
 
   // Relay search + selection
   const [relayCountry, setRelayCountry] = useState('');
@@ -340,6 +342,16 @@ const CheckoutPage = () => {
   const [homeOffersPage, setHomeOffersPage] = useState(1);
   const [homeShippingLoading, setHomeShippingLoading] = useState(false);
   const [homeShippingError, setHomeShippingError] = useState('');
+  const [shippingSettings, setShippingSettings] = useState({
+    relay: { freeThreshold: 40, belowThresholdPrice: 4.9 },
+    home: {
+      freeThreshold: 60,
+      reducedThreshold: 40,
+      belowReducedPrice: 7.9,
+      betweenReducedAndFreePrice: 4.9,
+    },
+    express: { enabled: true, addonPrice: 9.9 },
+  });
 
   // Payment states
   const [paymentProcessing, setPaymentProcessing] = useState(false);
@@ -348,6 +360,24 @@ const CheckoutPage = () => {
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetch(`${apiBase}/settings`, { credentials: 'include' });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data?.success && data?.data?.shippingSettings) {
+          setShippingSettings((prev) => ({
+            ...prev,
+            ...data.data.shippingSettings,
+          }));
+        }
+      } catch (_) {
+        // Keep defaults if settings endpoint is unavailable.
+      }
+    })();
+  }, [apiBase]);
 
   const buildShippingUrls = (base, suffix) => {
     const normalizedBase = String(base || '').trim().replace(/\/+$/, '');
@@ -511,6 +541,9 @@ const CheckoutPage = () => {
     lastName.trim() &&
     !!selectedRelay;
 
+  const isShippingReady =
+    deliveryType === 'home' ? Boolean(isHomeAddressValid) : Boolean(selectedRelay);
+
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
 
@@ -547,13 +580,9 @@ const CheckoutPage = () => {
       customerPhone: phone.trim(),
       promoCode: promoCode || undefined,
       shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
+      express:
+        deliveryType === 'home' && expressDelivery && shippingSettings?.express?.enabled ? true : false,
       deliveryType,
-      shippingOfferCode:
-        selectedHomeShippingOffer?.shippingOfferCode ||
-        (deliveryType === 'relay' ? selectedRelay?.matchedRelayOfferCode || selectedRelay?.shippingOfferCode : undefined),
-      shippingOfferId:
-        selectedHomeShippingOffer?.shippingOfferId ||
-        (deliveryType === 'relay' ? selectedRelay?.shippingOfferId : undefined),
       locale,
       successUrl: `${origin}${localePrefix}/checkout/succes?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${origin}${localePrefix}/checkout?payment=cancelled`,
@@ -625,16 +654,6 @@ const CheckoutPage = () => {
       ) || null,
     [homeShippingOffers, selectedHomeShippingOfferCode]
   );
-
-  const classifyHomeOfferMode = (offer) => {
-    const carrier = String(offer?.carrier || '').toUpperCase();
-    const code = String(offer?.shippingOfferCode || '').toUpperCase();
-    const id = String(offer?.shippingOfferId || '').toUpperCase();
-    const text = `${carrier} ${code} ${id}`;
-
-    if (/EXPRESS|PRIORITY|PREMIUM|13|12H|SAVER/.test(text)) return 'express';
-    return 'normal';
-  };
 
   const formatHomeOfferLabel = (rawCode) => {
     const raw = String(rawCode || '').trim();
@@ -718,12 +737,12 @@ const CheckoutPage = () => {
   const homeOffersEndIndex = Math.min(homeOffersStartIndex + HOME_OFFERS_PAGE_SIZE, filteredHomeShippingOffers.length);
   const visibleHomeShippingOffers = filteredHomeShippingOffers.slice(homeOffersStartIndex, homeOffersEndIndex);
 
-  const hasRealHomeQuote = Number.isFinite(Number(selectedHomeShippingOffer?.price));
-  const showHomeOffersPanel = homeShippingLoading || homeShippingOffers.length > 0 || !!homeShippingError;
+  const hasRealHomeQuote = true;
+  const showHomeOffersPanel = false;
 
   const canConfirmBase =
     deliveryType === 'home'
-      ? isHomeValid && hasRealHomeQuote && !homeShippingLoading
+      ? isHomeValid
       : isRelayValid;
   const canConfirm = canConfirmBase && cartItems.length > 0;
 
@@ -743,86 +762,12 @@ const CheckoutPage = () => {
     return c ? c.toLowerCase() : '';
   };
 
-  const getCarrierLogo = (carrier) => {
-    const c = String(carrier || '')
-      .toUpperCase()
-      .trim()
-      .replace(/[_\s-]/g, '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-    
-    const logoMap = {
-      'MONR': '/assets/shipping/mondialrelay.png',
-      'MONDIALRELAY': '/assets/shipping/mondialrelay.png',
-      'POFR': '/assets/shipping/colissimo.png',
-      'COLISSIMO': '/assets/shipping/colissimo.png',
-      'UPSE': '/assets/shipping/ups.png',
-      'UPS': '/assets/shipping/ups.png',
-      'CHRP': '/assets/shipping/chronopost.png',
-      'CHRONOPOST': '/assets/shipping/chronopost.png',
-      'FEDEX': '/assets/shipping/fedex.png',
-      'TNT': '/assets/shipping/tntexpress.png',
-      'TNTEXPRESS': '/assets/shipping/tntexpress.png',
-      'SODEX': '/assets/shipping/sodexo.png',
-      'SODEXO': '/assets/shipping/sodexo.png',
-      'SODEXI': '/assets/shipping/sodexo.png',
-      'COLISPRIVE': '/assets/shipping/colisprive.png',
-      'COLISEPRIVE': '/assets/shipping/colisprive.png',
-      'CPRIVE': '/assets/shipping/colisprive.png',
-      'RELAISCOLIS': '/assets/shipping/relaiscolis.jpg',
-      'RELAIS': '/assets/shipping/relaiscolis.jpg',
-      'COLIS': '/assets/shipping/colisprive.png',
-    };
-    return logoMap[c] || null;
-  };
-
-  const getRelayPriceLabel = (point) => {
-    const priceCandidates = [
-      point?.price,
-      point?.raw?.price,
-      point?.raw?.price?.value,
-      point?.raw?.deliveryPrice,
-      point?.raw?.deliveryPrice?.value,
-      point?.raw?.deliveryPriceExclTax,
-      point?.raw?.deliveryPriceExclTax?.value,
-      point?.raw?.deliveryPriceInclTax,
-      point?.raw?.deliveryPriceInclTax?.value,
-      point?.raw?.parcelPoint?.price,
-      point?.raw?.parcelPoint?.price?.value,
-      point?.raw?.parcelpoint?.price,
-      point?.raw?.parcelpoint?.price?.value,
-    ];
-
-    const rawPrice = priceCandidates.find((v) => Number.isFinite(Number(v)));
-    const fallbackBaseFee = Number(shippingBaseFee);
-    const fallbackShippingPrice = Number(shipping);
-
-    if (rawPrice === undefined) {
-      if (Number.isFinite(fallbackBaseFee)) {
-        if (fallbackBaseFee <= 0) return 'Gratuit';
-        return `${fallbackBaseFee.toFixed(2)} EUR`;
-      }
-      if (Number.isFinite(fallbackShippingPrice)) {
-        if (fallbackShippingPrice <= 0) return 'Gratuit';
-        return `${fallbackShippingPrice.toFixed(2)} EUR`;
-      }
-      return 'Tarif indisponible';
-    }
-
-    const price = Number(rawPrice);
-    if (price === 0) return 'Gratuit';
-
-    const currency =
-      point?.currency ||
-      point?.raw?.currency ||
-      point?.raw?.price?.currency ||
-      point?.raw?.deliveryPrice?.currency ||
-      point?.raw?.deliveryPriceExclTax?.currency ||
-      point?.raw?.deliveryPriceInclTax?.currency ||
-      'EUR';
-
-    const symbol = String(currency).toUpperCase() === 'EUR' ? 'EUR' : String(currency).toUpperCase();
-    return `${price.toFixed(2)} ${symbol}`;
+  const getRelayPriceLabel = () => {
+    const relayFreeThreshold = Number(shippingSettings?.relay?.freeThreshold ?? 40);
+    const relayBelowPrice = Number(shippingSettings?.relay?.belowThresholdPrice ?? 4.9);
+    const subtotalValue = Number(subtotal || 0);
+    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
+    return `${relayBelowPrice.toFixed(2)} EUR`;
   };
 
   const getRelayNumericPrice = (point) => {
@@ -860,11 +805,30 @@ const CheckoutPage = () => {
   }, [selectedRelay, shippingBaseFee, shipping]);
 
   const displayedShipping = useMemo(() => {
-    if (deliveryType === 'home') {
-      return hasRealHomeQuote ? Number(selectedHomeShippingOffer.price) : 0;
+    if (!isShippingReady) return 0;
+
+    const subtotalValue = Number(subtotal || 0);
+    if (deliveryType === 'relay') {
+      const relayFreeThreshold = Number(shippingSettings?.relay?.freeThreshold ?? 40);
+      const relayBelowPrice = Number(shippingSettings?.relay?.belowThresholdPrice ?? 4.9);
+      return subtotalValue >= relayFreeThreshold ? 0 : relayBelowPrice;
     }
-    return selectedRelayShippingPrice;
-  }, [deliveryType, hasRealHomeQuote, selectedHomeShippingOffer?.price, selectedRelayShippingPrice]);
+
+    const homeFreeThreshold = Number(shippingSettings?.home?.freeThreshold ?? 60);
+    const homeReducedThreshold = Number(shippingSettings?.home?.reducedThreshold ?? 40);
+    const homeLowPrice = Number(shippingSettings?.home?.belowReducedPrice ?? 7.9);
+    const homeMidPrice = Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9);
+    const base =
+      subtotalValue >= homeFreeThreshold
+        ? 0
+        : subtotalValue >= homeReducedThreshold
+          ? homeMidPrice
+          : homeLowPrice;
+    if (expressDelivery && shippingSettings?.express?.enabled) {
+      return Number(shippingSettings?.express?.addonPrice ?? 9.9);
+    }
+    return base;
+  }, [deliveryType, expressDelivery, isShippingReady, shippingSettings, subtotal]);
 
   const displayedTotal = useMemo(() => {
     return Number(subtotal || 0) + Number(displayedShipping || 0);
@@ -906,112 +870,12 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (deliveryType !== 'home') {
-      setHomeShippingOffers([]);
-      setSelectedHomeShippingOfferCode('');
-      setHomeShippingLoading(false);
-      setHomeShippingError('');
-      return;
-    }
-
-    if (!isHomeAddressValid) {
-      setHomeShippingOffers([]);
-      setSelectedHomeShippingOfferCode('');
-      setHomeShippingLoading(false);
-      setHomeShippingError('');
-      return;
-    }
-
-    if (!apiBase) {
-      setHomeShippingOffers([]);
-      setSelectedHomeShippingOfferCode('');
-      setHomeShippingError('NEXT_PUBLIC_API_URL is missing');
-      setHomeShippingLoading(false);
-      return;
-    }
-
-    const requestId = quoteRequestRef.current + 1;
-    quoteRequestRef.current = requestId;
-
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        setHomeShippingLoading(true);
-        setHomeShippingError('');
-
-        const headers = { 'Content-Type': 'application/json' };
-        if (typeof window !== 'undefined') {
-          const token = localStorage.getItem('token');
-          if (token) {
-            headers.Authorization = `Bearer ${token}`;
-          }
-        }
-
-        const response = await fetchShippingWithFallback('home-offers', {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          signal: controller.signal,
-          body: JSON.stringify({
-            subtotal: Number(subtotal || 0),
-            toAddress: {
-              firstName: firstName?.trim() || 'Client',
-              lastName: lastName?.trim() || 'Client',
-              email: email?.trim() || 'client@example.com',
-              phone: phone?.trim() || undefined,
-              street,
-              city,
-              postalCode,
-              country,
-              addressType: 'RESIDENTIAL',
-            },
-          }),
-        });
-
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data?.error || data?.message || 'Failed to load home shipping offers');
-        }
-
-        if (quoteRequestRef.current !== requestId) return;
-
-        const offers = Array.isArray(data?.offers) ? data.offers : [];
-        if (offers.length === 0) {
-          throw new Error('No home shipping offer available for this address');
-        }
-
-        setHomeShippingOffers(offers);
-        setHomeOffersPage(1);
-        setSelectedHomeShippingOfferCode((current) => {
-          if (
-            current &&
-            offers.some(
-              (offer) => String(offer.shippingOfferCode || offer.shippingOfferId || '') === String(current)
-            )
-          ) {
-            return current;
-          }
-          return String(offers[0]?.shippingOfferCode || offers[0]?.shippingOfferId || '');
-        });
-        setHomeShippingError('');
-      } catch (err) {
-        if (controller.signal.aborted) return;
-        if (quoteRequestRef.current !== requestId) return;
-        setHomeShippingOffers([]);
-        setHomeOffersPage(1);
-        setSelectedHomeShippingOfferCode('');
-        setHomeShippingError(err?.message || 'Failed to estimate home shipping');
-      } finally {
-        if (quoteRequestRef.current === requestId) {
-          setHomeShippingLoading(false);
-        }
-      }
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
+    // Front office no longer selects Boxtal offers; admin picks offer in back office.
+    setHomeShippingOffers([]);
+    setSelectedHomeShippingOfferCode('');
+    setHomeShippingLoading(false);
+    setHomeShippingError('');
+    return undefined;
   }, [
     deliveryType,
     isHomeAddressValid,
@@ -1173,6 +1037,7 @@ const CheckoutPage = () => {
                     type="button"
                     onClick={() => {
                       setDeliveryType('relay');
+                      setExpressDelivery(false);
                       setRelayError('');
                       setGeoError('');
                     }}
@@ -1649,6 +1514,43 @@ const CheckoutPage = () => {
                   </div>
                 )}
               </div>
+
+              {deliveryType === 'home' && isHomeAddressValid && (
+                <div className="mt-6 space-y-4">
+                  {shippingSettings?.express?.enabled && (
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-4">
+                      <input
+                        type="checkbox"
+                        checked={expressDelivery}
+                        onChange={(e) => setExpressDelivery(e.target.checked)}
+                        className="mt-1 h-4 w-4 rounded border-slate-300 text-[#556822] focus:ring-[#556822]"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{t('shipping.expressCheckboxLabel')}</p>
+                        <p className="text-xs text-slate-500 mt-1">{t('shipping.expressCheckboxHint')}</p>
+                      </div>
+                    </label>
+                  )}
+
+                  <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#556822]">
+                          {t('shipping.appliedFeesTitle')}
+                        </p>
+                        <p className="text-sm text-slate-700 mt-1">
+                          {expressDelivery && shippingSettings?.express?.enabled
+                            ? t('shipping.methodExpress')
+                            : t('shipping.homeDeliveryStandard')}
+                        </p>
+                      </div>
+                      <p className="text-lg font-black text-[#556822]">
+                        {Number(displayedShipping || 0).toFixed(2)} EUR
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Payment Section */}
@@ -1781,7 +1683,7 @@ const CheckoutPage = () => {
                 </div>
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
-                  <span className="text-gray-900">{Number(displayedShipping).toFixed(2)} €</span>
+                  <span className="text-gray-900">{Number(isShippingReady ? displayedShipping : 0).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
@@ -1816,6 +1718,22 @@ const CheckoutPage = () => {
               {checkoutError ? (
                 <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
               ) : null}
+
+              <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-left">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('shipping.infoCardTitle')}</p>
+                <p className="mt-2 text-sm text-slate-700">
+                  {t('shipping.infoRelay', {
+                    threshold: Number(shippingSettings?.relay?.freeThreshold ?? 40).toFixed(0),
+                  })}
+                </p>
+                <p className="mt-1 text-sm text-slate-700">
+                  {t('shipping.infoHome', {
+                    reducedPrice: Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9).toFixed(2),
+                    reducedThreshold: Number(shippingSettings?.home?.reducedThreshold ?? 40).toFixed(0),
+                    freeThreshold: Number(shippingSettings?.home?.freeThreshold ?? 60).toFixed(0),
+                  })}
+                </p>
+              </div>
 
               <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
                 {t('securityNote')}
