@@ -41,13 +41,20 @@ const formatCurrency = (value) =>
 
 const formatNumber = (value) => new Intl.NumberFormat('en-US').format(Number(value || 0));
 
+const formatStockValue = (row) => {
+  const stock = Number(row?.stockRemaining || 0);
+  const isPackageProduct = /package/i.test(String(row?.name || ''));
+  if (isPackageProduct && stock === 0) return '-';
+  return formatNumber(stock);
+};
+
 const formatDateInput = (value) => {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '';
   return d.toISOString().slice(0, 10);
 };
 
-const changeClass = (value) => (Number(value || 0) >= 0 ? 'text-[#556822]' : 'text-[#E10C69]');
+const changeClass = (value) => (Number(value || 0) >= 0 ? 'text-[#556822]' : 'text-[#EA580C]');
 
 function KpiCard({ icon: Icon, title, value, changePct }) {
   return (
@@ -74,7 +81,7 @@ export default function SalesReportPage() {
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
-  const [quickRange, setQuickRange] = useState('last30');
+  const [quickRange, setQuickRange] = useState('month');
 
   const [filters, setFilters] = useState({
     from: '',
@@ -90,16 +97,16 @@ export default function SalesReportPage() {
   const [overview, setOverview] = useState(null);
 
   useEffect(() => {
-    if (quickRange === 'custom') return;
-
     const today = new Date();
     const from = new Date(today);
     from.setHours(0, 0, 0, 0);
 
-    if (quickRange === 'last7') {
-      from.setDate(today.getDate() - 6);
+    if (quickRange === 'day') {
+      from.setDate(today.getDate() - 1);
+    } else if (quickRange === 'year') {
+      from.setFullYear(today.getFullYear() - 1);
     } else {
-      from.setDate(today.getDate() - 29);
+      from.setMonth(today.getMonth() - 1);
     }
 
     setFilters((prev) => ({
@@ -233,13 +240,14 @@ export default function SalesReportPage() {
 
   const productsFlowData = useMemo(() => {
     const rows = Array.isArray(products?.rows) ? products.rows : [];
-    const topRows = rows
+    const sortedRows = rows
       .filter((row) => Number(row?.salesCount || 0) > 0)
-      .sort((a, b) => Number(b?.salesCount || 0) - Number(a?.salesCount || 0))
-      .slice(0, 5);
+      .sort((a, b) => Number(b?.salesCount || 0) - Number(a?.salesCount || 0));
 
-    const remainingQty = rows
-      .slice(5)
+    const topRows = sortedRows.slice(0, 3);
+
+    const remainingQty = sortedRows
+      .slice(3)
       .reduce((sum, row) => sum + Number(row?.salesCount || 0), 0);
 
     const labels = topRows.map((row) => row?.name || 'Product');
@@ -260,11 +268,26 @@ export default function SalesReportPage() {
       datasets: [
         {
           data,
-          backgroundColor: ['#556822', '#E10C69', '#556822', '#E10C69', '#556822', '#E10C69'],
+          backgroundColor: ['#F8C27A', '#F29A3E', '#EE7A00', '#E05F00'],
         },
       ],
     };
   }, [products]);
+
+  const productsDoughnutOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '0%',
+      elements: {
+        arc: {
+          borderWidth: 0,
+          borderColor: 'transparent',
+        },
+      },
+    }),
+    []
+  );
 
   const productsSummaryStats = useMemo(() => {
     const rows = Array.isArray(products?.rows) ? products.rows : [];
@@ -281,46 +304,10 @@ export default function SalesReportPage() {
     };
   }, [products]);
 
-  const topProductInsight = useMemo(() => {
-    const rows = Array.isArray(products?.rows) ? products.rows : [];
-    if (!rows.length || !productsSummaryStats.totalRevenue) return 'No dominant product insight available yet.';
+  
 
-    const best = rows.reduce((prev, cur) => (Number(cur?.revenue || 0) > Number(prev?.revenue || 0) ? cur : prev), rows[0]);
-    const share = (Number(best?.revenue || 0) / Math.max(1, Number(productsSummaryStats.totalRevenue || 0))) * 100;
-    return `${best?.name || 'Top product'} generated ${share.toFixed(1)}% of total revenue.`;
-  }, [products, productsSummaryStats.totalRevenue]);
 
-  const orderStatusData = useMemo(() => {
-    const flow = orders?.summary?.normalizedFlow || {
-      pending: 0,
-      paid: 0,
-      shipped: 0,
-      delivered: 0,
-      cancelled: 0,
-    };
 
-    return {
-      labels: ['Pending', 'Paid', 'Delivered', 'Cancelled'],
-      datasets: [
-        {
-          data: [flow.pending, flow.paid, flow.delivered, flow.cancelled],
-          backgroundColor: ['#556822', '#E10C69', '#556822', '#E10C69'],
-        },
-      ],
-    };
-  }, [orders]);
-
-  const orderMetrics = useMemo(() => {
-    const flow = orders?.summary?.normalizedFlow || {};
-    const totalOrders = Number(orders?.summary?.totalOrders || 0);
-    const cancelled = Number(flow.cancelled || 0);
-    const cancellationRate = totalOrders > 0 ? (cancelled / totalOrders) * 100 : 0;
-
-    return {
-      totalCompletedOrders: Number(orders?.summary?.totalCompletedOrders || 0),
-      cancellationRate,
-    };
-  }, [orders]);
 
   const downloadBlob = async (url, filename) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -400,59 +387,37 @@ export default function SalesReportPage() {
               <button
                 type="button"
                 onClick={handleExportPdf}
-                className="inline-flex items-center gap-2 rounded-xl border border-[#E10C69]/40 bg-[#E10C69] px-3 py-2 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#EA580C]/40 bg-[#EA580C] px-3 py-2 text-sm font-semibold text-white"
               >
                 <Download className="h-4 w-4" /> Export PDF
               </button>
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-7">
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             <select
               value={quickRange}
               onChange={(e) => setQuickRange(e.target.value)}
               className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm"
             >
-              <option value="last7">Last 7 days</option>
-              <option value="last30">Last month</option>
-              <option value="custom">Custom</option>
+              <option value="day">Day</option>
+              <option value="month">Month</option>
+              <option value="year">Year</option>
             </select>
             <input type="date" value={filters.from} onChange={(e) => handleFilter('from', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
             <input type="date" value={filters.to} onChange={(e) => handleFilter('to', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
-            <select value={filters.categoryId} onChange={(e) => handleFilter('categoryId', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm">
-              <option value="all">All categories</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>{c.name}</option>
-              ))}
-            </select>
-            <select value={filters.paymentMethod} onChange={(e) => handleFilter('paymentMethod', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm">
-              <option value="all">All payments</option>
-              <option value="stripe">Stripe</option>
-              <option value="card">Card</option>
-            </select>
-            <select value={filters.granularity} onChange={(e) => handleFilter('granularity', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm">
-              <option value="daily">Daily</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="w-full rounded-lg border border-[#556822]/25 py-2 pl-9 pr-3 text-sm" />
-            </div>
+           
+           
+            
           </div>
         </section>
 
-        {error ? <div className="rounded-xl border border-[#E10C69]/20 bg-[#E10C69]/10 px-4 py-3 text-sm text-[#E10C69]">{error}</div> : null}
+        {error ? <div className="rounded-xl border border-[#EA580C]/20 bg-[#EA580C]/10 px-4 py-3 text-sm text-[#EA580C]">{error}</div> : null}
         {loading ? <div className={cardClass}>Loading sales report...</div> : null}
 
         {!loading ? (
           <>
-            <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <KpiCard icon={DollarSign} title="Total Revenue" value={formatCurrency(kpis.totalRevenue)} changePct={kpis.monthlyChange} />
-              <KpiCard icon={ShoppingCart} title="Total Orders" value={formatNumber(kpis.totalOrders)} changePct={kpis.monthlyChange} />
-              <KpiCard icon={Package} title="Products Sold" value={formatNumber(kpis.productsSold)} changePct={kpis.monthlyChange} />
-              <KpiCard icon={CreditCard} title="Average Order Value" value={formatCurrency(kpis.avgOrderValue)} changePct={kpis.monthlyChange} />
-            </section>
+           
 
             <section className={cardClass}>
               <h2 className="mb-3 text-lg font-bold text-slate-800">Sales Trends</h2>
@@ -469,7 +434,7 @@ export default function SalesReportPage() {
               <div className={cardClass}>
                 <h2 className="mb-3 text-lg font-bold text-slate-800">Top Products by Sales</h2>
                 <div className="h-72">
-                  <Doughnut data={productsFlowData} options={{ responsive: true, maintainAspectRatio: false }} />
+                  <Doughnut data={productsFlowData} options={productsDoughnutOptions} />
                 </div>
               </div>
 
@@ -483,7 +448,7 @@ export default function SalesReportPage() {
                         <th className="py-2">Quantity sold</th>
                         <th className="py-2">Revenue</th>
                         <th className="py-2">Stock</th>
-                        <th className="py-2">Status</th>
+                       
                       </tr>
                     </thead>
                     <tbody>
@@ -492,12 +457,8 @@ export default function SalesReportPage() {
                           <td className="py-2 font-medium text-slate-800">{row.name}</td>
                           <td className="py-2">{formatNumber(row.salesCount)}</td>
                           <td className="py-2">{formatCurrency(row.revenue)}</td>
-                          <td className={`py-2 ${row.isLowStock ? 'text-[#E10C69]' : 'text-slate-700'}`}>{formatNumber(row.stockRemaining)}</td>
-                          <td className="py-2">
-                            {row.isTopSeller ? <span className="mr-2 rounded-full bg-[#556822]/10 px-2 py-1 text-xs font-semibold text-[#556822]">🔥 Best seller</span> : null}
-                            {row.isLowStock ? <span className="rounded-full bg-[#E10C69]/10 px-2 py-1 text-xs font-semibold text-[#E10C69]">⚠️ Low stock</span> : null}
-                            {Number(row.salesCount || 0) === 0 ? <span className="ml-2 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">❌ 0 sales</span> : null}
-                          </td>
+                          <td className={`py-2 ${row.isLowStock ? 'text-[#EA580C]' : 'text-slate-700'}`}>{formatStockValue(row)}</td>
+                    
                         </tr>
                       ))}
                     </tbody>
