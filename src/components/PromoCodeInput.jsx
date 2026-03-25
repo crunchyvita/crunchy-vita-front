@@ -11,6 +11,17 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+  const translatePromoErrorMessage = (message) => {
+    const raw = String(message || '').trim();
+    const normalized = raw.toLowerCase();
+
+    if (normalized.includes('already used') || normalized.includes('already been used')) {
+      return 'Vous avez deja utilise ce code promo';
+    }
+
+    return raw;
+  };
+
   // Load promo from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -104,7 +115,7 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
         }
         setPromoCode('');
       } else {
-        setError(result.message);
+        setError(translatePromoErrorMessage(result.message));
 
         const normalizedMessage = String(result?.message || '').toLowerCase();
         const isAlreadyUsedError =
