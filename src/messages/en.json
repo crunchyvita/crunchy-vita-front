@@ -1005,6 +1005,11 @@
       "quantityUpdated": "Quantity updated"
     }
   },
+  "AddedToCartModal": {
+    "addedToCart": "Added to cart",
+    "quantityLabel": "Qty",
+    "viewCart": "View cart"
+  },
   "Auth": {
     "common": {
       "back": "Back",

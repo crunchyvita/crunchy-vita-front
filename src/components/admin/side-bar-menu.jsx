@@ -70,7 +70,7 @@ const NAV_GROUPS = [
     title: "Content & Marketing",
     items: [
       { label: "Blog", href: "/admin/blogs", icon: FileText },
-      { label: "Marketing", href: "/admin/marketing", icon: ShieldCheck },
+    
     ],
   },
   {

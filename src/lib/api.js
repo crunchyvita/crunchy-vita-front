@@ -622,3 +622,114 @@ export const adminManagementAPI = {
       body: JSON.stringify({ isActive }),
     }),
 };
+
+export const reportAPI = {
+  getOverview: async () => apiRequest('/reports/admin/overview', { method: 'GET' }),
+
+  getSales: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.categoryId) q.set('categoryId', params.categoryId);
+    if (params.paymentMethod) q.set('paymentMethod', params.paymentMethod);
+    if (params.granularity) q.set('granularity', params.granularity);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/sales${suffix}`, { method: 'GET' });
+  },
+
+  getProducts: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.categoryId) q.set('categoryId', params.categoryId);
+    if (params.paymentMethod) q.set('paymentMethod', params.paymentMethod);
+    if (params.search) q.set('search', params.search);
+    if (params.page) q.set('page', String(params.page));
+    if (params.pageSize) q.set('pageSize', String(params.pageSize));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/products${suffix}`, { method: 'GET' });
+  },
+
+  getCustomers: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.search) q.set('search', params.search);
+    if (params.page) q.set('page', String(params.page));
+    if (params.pageSize) q.set('pageSize', String(params.pageSize));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/customers${suffix}`, { method: 'GET' });
+  },
+
+  getOrders: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.categoryId) q.set('categoryId', params.categoryId);
+    if (params.paymentMethod) q.set('paymentMethod', params.paymentMethod);
+    if (params.status) q.set('status', params.status);
+    if (params.search) q.set('search', params.search);
+    if (params.page) q.set('page', String(params.page));
+    if (params.pageSize) q.set('pageSize', String(params.pageSize));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/orders${suffix}`, { method: 'GET' });
+  },
+
+  getPromotions: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/promotions${suffix}`, { method: 'GET' });
+  },
+
+  getLogistics: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/logistics${suffix}`, { method: 'GET' });
+  },
+
+  getInventory: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/reports/admin/inventory${suffix}`, { method: 'GET' });
+  },
+
+  exportCsvUrl: (dataset = 'orders', params = {}) => {
+    const q = new URLSearchParams();
+    q.set('dataset', dataset);
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.categoryId) q.set('categoryId', params.categoryId);
+    if (params.paymentMethod) q.set('paymentMethod', params.paymentMethod);
+    if (params.search) q.set('search', params.search);
+    if (params.status) q.set('status', params.status);
+
+    const baseApi = API_URL.replace(/\/$/, '');
+    return `${baseApi}/reports/admin/export?${q.toString()}`;
+  },
+
+  summaryUrl: () => {
+    const baseApi = API_URL.replace(/\/$/, '');
+    return `${baseApi}/reports/admin/export/summary`;
+  },
+
+  pdfUrl: (params = {}) => {
+    const q = new URLSearchParams();
+    q.set('dataset', 'pdf');
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    if (params.categoryId) q.set('categoryId', params.categoryId);
+    if (params.paymentMethod) q.set('paymentMethod', params.paymentMethod);
+    if (params.status) q.set('status', params.status);
+    if (params.search) q.set('search', params.search);
+
+    const baseApi = API_URL.replace(/\/$/, '');
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return `${baseApi}/reports/admin/export${suffix}`;
+  },
+};

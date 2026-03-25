@@ -122,33 +122,7 @@ export default function Footer() {
         {/* Divider */}
         <div className="border-t border-slate-700 my-12" />
 
-        {/* Newsletter Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold text-[#E10C69] mb-2">{t('newsletter.title')}</h3>
-          <p className="text-gray-900 text-sm mb-6">{t('newsletter.description')}</p>
-          
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md">
-            <input
-              type="email"
-              placeholder={t('newsletter.placeholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 px-4 py-3 rounded-full bg-[#fcfaf8] text-slate-900 placeholder-slate-500 border border-slate-700 focus:border-green-500 focus:outline-none transition text-sm"
-              required
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-[#E10C69] hover:bg-[#EF8EB8] text-white font-bold rounded-full transition-colors text-sm whitespace-nowrap disabled:opacity-50"
-            >
-              {loading ? t('newsletter.loading') : t('newsletter.submit')}
-            </button>
-          </form>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-slate-700" />
-
+     
         {/* Copyright */}
         <div className="pt-8 text-center">
           <p className="text-[#E10C69] text-xs">© {t('copyright')}</p>

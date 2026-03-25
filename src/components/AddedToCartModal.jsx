@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { X, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 const pickUrl = (value) => {
   if (!value || value === 'undefined') return null;
@@ -14,6 +14,7 @@ const pickUrl = (value) => {
 
 export default function AddedToCartModal({ isOpen, onClose, product, quantity }) {
   const locale = useLocale();
+  const t = useTranslations('AddedToCartModal');
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -68,7 +69,7 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
         <div className="flex items-center justify-between p-3 border-b border-gray-100">
           <div className="flex items-center gap-2 text-[#556822]">
             <CheckCircle2 size={16} />
-            <span className="font-bold text-[10px] uppercase tracking-widest">Added to cart</span>
+            <span className="font-bold text-[10px] uppercase tracking-widest">{t('addedToCart')}</span>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors">
             <X size={18} />
@@ -121,7 +122,7 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
               {product.name}
             </h3>
             <p className="text-xs text-gray-500 mb-1">
-              Qty: <span className="font-bold text-gray-900">{quantity}</span>
+              {t('quantityLabel')}: <span className="font-bold text-gray-900">{quantity}</span>
             </p>
             {product.price && (
               <p className="text-xs font-bold text-[#E10C69]">
@@ -138,7 +139,7 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
             style={{ backgroundColor: '#556822' }}
             className="w-full text-white py-2.5 rounded-full font-black text-center text-[13px] tracking-widest hover:opacity-90 transition-opacity"
           >
-            View Cart
+            {t('viewCart')}
           </Link>
         </div>
       </div>

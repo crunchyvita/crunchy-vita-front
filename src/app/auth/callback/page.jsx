@@ -91,7 +91,7 @@ function AuthCallbackContent() {
         // Persist token as soon as possible for subsequent requests.
         localStorage.setItem('token', token);
 
-        // Provisional auth state: prevents immediate ProtectedRoute bounce while profile resolves.
+        // Use callback role immediately to avoid misrouting while /auth/me is still resolving.
         if (roleParam) {
           setUserData(
             {
@@ -102,6 +102,11 @@ function AuthCallbackContent() {
             },
             token
           );
+
+          const callbackTarget = resolveTargetPath(roleParam);
+          console.log('[Auth] Redirect target from callback role:', callbackTarget, 'role:', roleParam);
+          redirectNow(callbackTarget, hardTimeout);
+          return;
         }
 
         // Legacy path: older backend callback may still provide user payload.
