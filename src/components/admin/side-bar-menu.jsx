@@ -27,7 +27,7 @@ import {
   Tag,
   ChevronDown,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -75,15 +75,36 @@ const NAV_GROUPS = [
   },
   {
     title: "Analytics",
-    items: [{ label: "Reports", href: "/admin/reports", icon: BarChart3 }],
+    items: [
+      { label: "Sales Report", href: "/admin/reports/sales", icon: BarChart3 },
+      { label: "Client Report", href: "/admin/reports/clients", icon: BarChart3 },
+    ],
   },
 ];
 
 export default function AdminSideBarMenu() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isSidebarOpen, closeSidebar } = useAdminLayout();
   const { user } = useAuth();
   const isSuperAdmin = user?.role === "SUPERADMIN";
+  const currentQuery = searchParams?.toString() || "";
+
+  const isMenuItemActive = (href) => {
+    const [targetPath, targetQuery = ""] = String(href || "").split("?");
+
+    if (pathname !== targetPath) return false;
+    if (!targetQuery) return true;
+
+    const current = new URLSearchParams(currentQuery);
+    const target = new URLSearchParams(targetQuery);
+
+    for (const [key, value] of target.entries()) {
+      if (current.get(key) !== value) return false;
+    }
+
+    return true;
+  };
   const navGroups = useMemo(
     () =>
       NAV_GROUPS.map((group) => {
@@ -108,12 +129,12 @@ export default function AdminSideBarMenu() {
     setOpenGroups((prev) => {
       const newState = { ...prev };
       navGroups.forEach((group) => {
-        const hasActiveChild = group.items.some((item) => pathname === item.href);
+        const hasActiveChild = group.items.some((item) => isMenuItemActive(item.href));
         if (hasActiveChild) newState[group.title] = true;
       });
       return newState;
     });
-  }, [pathname, navGroups]);
+  }, [pathname, currentQuery, navGroups]);
 
   const toggleGroup = (title) => {
     setOpenGroups((prev) => ({
@@ -164,7 +185,7 @@ export default function AdminSideBarMenu() {
                   <SidebarMenuButton
                     href={item.href}
                     icon={item.icon}
-                    isActive={pathname === item.href}
+                    isActive={isMenuItemActive(item.href)}
                     onClick={handleItemClick}
                     className="w-full px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-500"
                   >
@@ -179,7 +200,7 @@ export default function AdminSideBarMenu() {
             {/* ✅ GROUPS */}
             {navGroups.map((group) => {
               const isOpen = openGroups[group.title];
-              const hasActiveChild = group.items.some((item) => pathname === item.href);
+              const hasActiveChild = group.items.some((item) => isMenuItemActive(item.href));
 
               return (
                 <div key={group.title} className="mb-2">
@@ -213,7 +234,7 @@ export default function AdminSideBarMenu() {
                           <SidebarMenuButton
                             href={item.href}
                             icon={item.icon}
-                            isActive={pathname === item.href}
+                            isActive={isMenuItemActive(item.href)}
                             onClick={handleItemClick}
                             className="w-full"
                           >

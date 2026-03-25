@@ -720,7 +720,7 @@ export const reportAPI = {
 
   pdfUrl: (params = {}) => {
     const q = new URLSearchParams();
-    q.set('dataset', 'pdf');
+    if (params.reportType) q.set('reportType', params.reportType);
     if (params.from) q.set('from', params.from);
     if (params.to) q.set('to', params.to);
     if (params.categoryId) q.set('categoryId', params.categoryId);
@@ -730,6 +730,6 @@ export const reportAPI = {
 
     const baseApi = API_URL.replace(/\/$/, '');
     const suffix = q.toString() ? `?${q.toString()}` : '';
-    return `${baseApi}/reports/admin/export${suffix}`;
+    return `${baseApi}/reports/admin/export/pdf${suffix}`;
   },
 };
