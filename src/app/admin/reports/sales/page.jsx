@@ -13,10 +13,10 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { DollarSign, ShoppingCart, Package, CreditCard, Download, Search, RefreshCw } from 'lucide-react';
+import { Line, Doughnut } from 'react-chartjs-2';
+import { Download, RefreshCw } from 'lucide-react';
 import AdminHeader from '@/components/admin/header';
-import { categoryAPI, reportAPI } from '@/lib/api';
+import { reportAPI } from '@/lib/api';
 
 ChartJS.register(
   CategoryScale,
@@ -79,15 +79,11 @@ function KpiCard({ icon: Icon, title, value, changePct }) {
 export default function SalesReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [categories, setCategories] = useState([]);
-  const [search, setSearch] = useState('');
-  const [quickRange, setQuickRange] = useState('month');
+  const [quickRange, setQuickRange] = useState('week');
 
   const [filters, setFilters] = useState({
     from: '',
     to: '',
-    categoryId: 'all',
-    paymentMethod: 'all',
     granularity: 'daily',
   });
 
@@ -99,20 +95,33 @@ export default function SalesReportPage() {
   useEffect(() => {
     const today = new Date();
     const from = new Date(today);
+    const to = new Date(today);
+
     from.setHours(0, 0, 0, 0);
+    to.setHours(23, 59, 59, 999);
+
+    let granularity = 'daily';
 
     if (quickRange === 'day') {
-      from.setDate(today.getDate() - 1);
-    } else if (quickRange === 'year') {
-      from.setFullYear(today.getFullYear() - 1);
+      granularity = 'hourly';
+    } else if (quickRange === 'week') {
+      granularity = 'daily';
+      const day = from.getDay();
+      const daysSinceMonday = (day + 6) % 7;
+      from.setDate(from.getDate() - daysSinceMonday);
+    } else if (quickRange === 'month') {
+      granularity = 'weekly';
+      from.setDate(1);
     } else {
-      from.setMonth(today.getMonth() - 1);
+      granularity = 'monthly';
+      from.setMonth(0, 1);
     }
 
     setFilters((prev) => ({
       ...prev,
       from: formatDateInput(from),
-      to: formatDateInput(today),
+      to: formatDateInput(to),
+      granularity,
     }));
   }, [quickRange]);
 
@@ -120,26 +129,10 @@ export default function SalesReportPage() {
     () => ({
       from: filters.from || undefined,
       to: filters.to || undefined,
-      categoryId: filters.categoryId !== 'all' ? filters.categoryId : undefined,
-      paymentMethod: filters.paymentMethod !== 'all' ? filters.paymentMethod : undefined,
       granularity: filters.granularity,
     }),
     [filters]
   );
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await categoryAPI.list();
-        const list = Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : [];
-        setCategories(list);
-      } catch {
-        setCategories([]);
-      }
-    };
-
-    loadCategories();
-  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -150,8 +143,8 @@ export default function SalesReportPage() {
         const [overviewRes, salesRes, productsRes, ordersRes] = await Promise.all([
           reportAPI.getOverview(),
           reportAPI.getSales(queryFilters),
-          reportAPI.getProducts({ ...queryFilters, page: 1, pageSize: 100, search: search || undefined }),
-          reportAPI.getOrders({ ...queryFilters, status: 'all', page: 1, pageSize: 20, search: search || undefined }),
+          reportAPI.getProducts({ ...queryFilters, page: 1, pageSize: 100 }),
+          reportAPI.getOrders({ ...queryFilters, status: 'all', page: 1, pageSize: 20 }),
         ]);
 
         setOverview(overviewRes?.data || null);
@@ -166,11 +159,7 @@ export default function SalesReportPage() {
     };
 
     load();
-  }, [queryFilters, search]);
-
-  const handleFilter = (name, value) => {
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  };
+  }, [queryFilters]);
 
   const kpis = useMemo(() => {
     const monthlyChange = Number(overview?.sales?.monthly?.changePct ?? 12);
@@ -188,13 +177,63 @@ export default function SalesReportPage() {
     };
   }, [overview, sales, products, orders]);
 
+  const trendSeries = useMemo(() => {
+    const points = Array.isArray(sales?.points) ? sales.points : [];
+
+    if (quickRange === 'day') {
+      const labels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+      const map = new Map(points.map((p) => [String(p.label || '').slice(-5), Number(p.revenue || 0)]));
+      return {
+        labels,
+        data: labels.map((label) => map.get(label) || 0),
+      };
+    }
+
+    if (quickRange === 'week') {
+      const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const totals = Array(7).fill(0);
+
+      points.forEach((p) => {
+        const date = new Date(p.label);
+        if (Number.isNaN(date.getTime())) return;
+        const mondayFirstIndex = (date.getDay() + 6) % 7;
+        totals[mondayFirstIndex] += Number(p.revenue || 0);
+      });
+
+      return { labels, data: totals };
+    }
+
+    if (quickRange === 'month') {
+      return {
+        labels: points.map((_, idx) => `Week ${idx + 1}`),
+        data: points.map((p) => Number(p.revenue || 0)),
+      };
+    }
+
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const totals = Array(12).fill(0);
+
+    points.forEach((p) => {
+      const parts = String(p.label || '').split('-');
+      const monthIndex = Number(parts[1]) - 1;
+      if (monthIndex >= 0 && monthIndex < 12) {
+        totals[monthIndex] += Number(p.revenue || 0);
+      }
+    });
+
+    return {
+      labels: monthLabels,
+      data: totals,
+    };
+  }, [sales, quickRange]);
+
   const salesLineData = useMemo(
     () => ({
-      labels: (sales?.points || []).map((p) => p.label),
+      labels: trendSeries.labels,
       datasets: [
         {
           label: 'Revenue',
-          data: (sales?.points || []).map((p) => Number(p.revenue || 0)),
+          data: trendSeries.data,
           borderColor: '#556822',
           backgroundColor: 'rgba(85, 104, 34, 0.18)',
           fill: true,
@@ -202,37 +241,17 @@ export default function SalesReportPage() {
         },
       ],
     }),
-    [sales]
+    [trendSeries]
   );
 
-  const revenueVsOrdersData = useMemo(
-    () => ({
-      labels: (sales?.points || []).map((p) => p.label),
-      datasets: [
-        {
-          label: 'Revenue',
-          data: (sales?.points || []).map((p) => Number(p.revenue || 0)),
-          backgroundColor: 'rgba(85, 104, 34, 0.85)',
-          yAxisID: 'y',
-        },
-        {
-          label: 'Orders',
-          data: (sales?.points || []).map((p) => Number(p.orders || 0)),
-          backgroundColor: 'rgba(225, 12, 105, 0.8)',
-          yAxisID: 'y1',
-        },
-      ],
-    }),
-    [sales]
-  );
-
-  const revenueVsOrdersOptions = useMemo(
+  const salesLineOptions = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true },
-        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } },
+      plugins: {
+        legend: {
+          display: false,
+        },
       },
     }),
     []
@@ -342,9 +361,6 @@ export default function SalesReportPage() {
     q.set('format', format);
     if (queryFilters.from) q.set('from', queryFilters.from);
     if (queryFilters.to) q.set('to', queryFilters.to);
-    if (queryFilters.categoryId) q.set('categoryId', queryFilters.categoryId);
-    if (queryFilters.paymentMethod) q.set('paymentMethod', queryFilters.paymentMethod);
-    if (search) q.set('search', search);
 
     const extension = format === 'xlsx' ? 'xlsx' : 'csv';
     await downloadBlob(`${cleanBase}/reports/admin/export?${q.toString()}`, `sales-report.${extension}`);
@@ -355,9 +371,6 @@ export default function SalesReportPage() {
       reportType: 'sales',
       from: queryFilters.from,
       to: queryFilters.to,
-      categoryId: queryFilters.categoryId,
-      paymentMethod: queryFilters.paymentMethod,
-      search: search || undefined,
     });
     await downloadBlob(url, 'sales-report.pdf');
   };
@@ -369,7 +382,17 @@ export default function SalesReportPage() {
         <section className="rounded-2xl border border-[#556822]/20 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-extrabold text-slate-900">Sales Report</h1>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={quickRange}
+                onChange={(e) => setQuickRange(e.target.value)}
+                className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm"
+              >
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
@@ -393,23 +416,6 @@ export default function SalesReportPage() {
               </button>
             </div>
           </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <select
-              value={quickRange}
-              onChange={(e) => setQuickRange(e.target.value)}
-              className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm"
-            >
-              <option value="day">Day</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
-            <input type="date" value={filters.from} onChange={(e) => handleFilter('from', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
-            <input type="date" value={filters.to} onChange={(e) => handleFilter('to', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
-           
-           
-            
-          </div>
         </section>
 
         {error ? <div className="rounded-xl border border-[#EA580C]/20 bg-[#EA580C]/10 px-4 py-3 text-sm text-[#EA580C]">{error}</div> : null}
@@ -422,7 +428,7 @@ export default function SalesReportPage() {
             <section className={cardClass}>
               <h2 className="mb-3 text-lg font-bold text-slate-800">Sales Trends</h2>
               <div className="h-72">
-                <Line data={salesLineData} options={{ responsive: true, maintainAspectRatio: false }} />
+                <Line data={salesLineData} options={salesLineOptions} />
               </div>
               <div className="mt-3 text-sm text-slate-600">
                 <p>Best sales day: {sales?.summary?.bestSalesDay?.day || 'N/A'} ({formatCurrency(sales?.summary?.bestSalesDay?.revenue || 0)})</p>

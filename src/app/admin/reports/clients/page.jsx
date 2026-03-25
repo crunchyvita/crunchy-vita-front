@@ -57,7 +57,7 @@ const formatDate = (value) => {
 export default function ClientsReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [quickRange, setQuickRange] = useState('last30');
+  const [quickRange, setQuickRange] = useState('week');
 
   const [filters, setFilters] = useState({
     from: '',
@@ -69,20 +69,27 @@ export default function ClientsReportPage() {
   useEffect(() => {
     const today = new Date();
     const from = new Date(today);
+    const to = new Date(today);
+
     from.setHours(0, 0, 0, 0);
+    to.setHours(23, 59, 59, 999);
 
     if (quickRange === 'day') {
-      from.setDate(today.getDate());
+      from.setDate(to.getDate());
+    } else if (quickRange === 'week') {
+      const day = from.getDay();
+      const daysSinceMonday = (day + 6) % 7;
+      from.setDate(from.getDate() - daysSinceMonday);
     } else if (quickRange === 'month') {
-      from.setMonth(today.getMonth() - 1);
+      from.setDate(1);
     } else {
-      from.setFullYear(today.getFullYear() - 1);
+      from.setMonth(0, 1);
     }
 
     setFilters((prev) => ({
       ...prev,
       from: formatDateInput(from),
-      to: formatDateInput(today),
+      to: formatDateInput(to),
     }));
   }, [quickRange]);
 
@@ -145,8 +152,21 @@ export default function ClientsReportPage() {
 
   const topCustomers = useMemo(() => {
     const rows = Array.isArray(customers?.rows) ? customers.rows : [];
-    return [...rows].sort((a, b) => Number(b?.totalSpent || 0) - Number(a?.totalSpent || 0)).slice(0, 10);
+    return [...rows].sort((a, b) => Number(b?.totalSpent || 0) - Number(a?.totalSpent || 0)).slice(0, 5);
   }, [customers]);
+
+  const topCustomersBarOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    }),
+    []
+  );
 
   const downloadBlob = async (url, filename) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -202,7 +222,17 @@ export default function ClientsReportPage() {
         <section className="rounded-2xl border border-[#556822]/20 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-extrabold text-slate-900">Clients Report</h1>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={quickRange}
+                onChange={(e) => setQuickRange(e.target.value)}
+                className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm"
+              >
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
@@ -226,20 +256,6 @@ export default function ClientsReportPage() {
               </button>
             </div>
           </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <select
-              value={quickRange}
-              onChange={(e) => setQuickRange(e.target.value)}
-              className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm"
-            >
-              <option value="day">Day</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
-            <input type="date" value={filters.from} onChange={(e) => handleFilter('from', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
-            <input type="date" value={filters.to} onChange={(e) => handleFilter('to', e.target.value)} className="rounded-lg border border-[#556822]/25 px-3 py-2 text-sm" />
-          </div>
         </section>
 
         {error ? <div className="rounded-xl border border-[#EA580C]/20 bg-[#EA580C]/10 px-4 py-3 text-sm text-[#EA580C]">{error}</div> : null}
@@ -252,7 +268,7 @@ export default function ClientsReportPage() {
             <section className={cardClass}>
               <h2 className="mb-3 text-lg font-bold text-slate-800">Customer Growth</h2>
               <div className="h-72">
-                <Bar data={topCustomersBarData} options={{ responsive: true, maintainAspectRatio: false }} />
+                <Bar data={topCustomersBarData} options={topCustomersBarOptions} />
               </div>
             </section>
 
