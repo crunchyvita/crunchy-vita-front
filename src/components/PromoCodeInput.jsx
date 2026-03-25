@@ -105,6 +105,16 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
         setPromoCode('');
       } else {
         setError(result.message);
+
+        const normalizedMessage = String(result?.message || '').toLowerCase();
+        const isAlreadyUsedError =
+          normalizedMessage.includes('already been used')
+          || normalizedMessage.includes('deja utilise')
+          || normalizedMessage.includes('déjà utilisé');
+
+        if (isAlreadyUsedError) {
+          setPromoCode('');
+        }
       }
     } catch (err) {
       setError('Erreur lors de la validation du code promo');
