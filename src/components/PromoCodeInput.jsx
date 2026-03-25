@@ -77,6 +77,7 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
           code: promoCode,
           cartTotal: parseFloat(cartTotal),
           cartItems: Array.isArray(cartItems) ? cartItems : [],
+          consumeOnValidate: true,
         }),
       });
 
