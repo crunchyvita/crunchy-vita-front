@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@/navigation";
 import Image from "next/image";
-import HeaderHome from "@/components/header";
+import HeaderAndBreadcrumbs from "@/components/HeaderAndBreadcrumbs";
 import Footer from "@/components/footer";
 import { ArrowRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -77,7 +77,7 @@ export default function BlogsPage() {
 
   return (
     <>
-      <HeaderHome />
+      <HeaderAndBreadcrumbs />
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
         <section className="bg-white py-16 border-b border-gray-200">

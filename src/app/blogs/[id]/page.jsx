@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import HeaderHome from "@/components/header";
+import HeaderAndBreadcrumbs from "@/components/HeaderAndBreadcrumbs";
 import Footer from "@/components/footer";
 import { AlertCircle } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { useBreadcrumbOverride } from "@/context/BreadcrumbContext";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -16,6 +17,7 @@ export default function BlogDetailPage() {
 
   const t = useTranslations("BlogDetail");
   const locale = useLocale();
+  const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -72,10 +74,15 @@ export default function BlogDetailPage() {
   const blogImages = getBlogImages(blog);
   const activeImageUrl = blogImages[activeImageIndex] || blogImages[0] || null;
 
+  useEffect(() => {
+    if (title) setLastLabel(title);
+    return () => clearLastLabel();
+  }, [title, setLastLabel, clearLastLabel]);
+
   if (loading) {
     return (
       <>
-        <HeaderHome />
+        <HeaderAndBreadcrumbs />
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
         </div>
@@ -87,7 +94,7 @@ export default function BlogDetailPage() {
   if (error || !blog) {
     return (
       <>
-        <HeaderHome />
+        <HeaderAndBreadcrumbs />
         <div className="min-h-screen bg-white py-20">
           <div className="container mx-auto px-6">
             <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3 max-w-2xl mx-auto">
@@ -110,7 +117,7 @@ export default function BlogDetailPage() {
 
   return (
     <>
-      <HeaderHome />
+      <HeaderAndBreadcrumbs />
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-6 py-12">
           <article className="max-w-4xl mx-auto">

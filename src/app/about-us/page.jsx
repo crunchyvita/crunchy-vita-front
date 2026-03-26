@@ -1,6 +1,6 @@
 'use client';
 
-import HeaderHome from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import '../fonts.css'; // Ensure the font styles are applied globally
 import { useTranslations } from 'next-intl';
@@ -10,7 +10,7 @@ export default function AboutUs() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <HeaderHome />
+      <HeaderAndBreadcrumbs />
       
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">

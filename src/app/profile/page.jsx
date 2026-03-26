@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/navigation";
-import Header from "@/components/header";
+import HeaderAndBreadcrumbs from "@/components/HeaderAndBreadcrumbs";
 import Footer from "@/components/footer";import PromoBadge from '@/components/PromoBadge';import { User, Camera, Save, Lock, Mail, AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -193,7 +193,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Header />
+      <HeaderAndBreadcrumbs />
       <main className="min-h-screen bg-slate-50 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           

@@ -14,11 +14,10 @@ import {
 import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/context/AuthContext';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoCodeInput from '@/components/PromoCodeInput';
 import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navigation, Gift } from 'lucide-react';
-import Link from 'next/link';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
@@ -926,18 +925,9 @@ const CheckoutPage = () => {
   return (
     <CheckoutProvider>
       <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
-      <Header />
+      <HeaderAndBreadcrumbs />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
-        <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2">
-          <Link href={`/${locale}/cart`} className="hover:text-[#556822] transition-colors flex items-center gap-1">
-            <ArrowLeft size={14} /> {t('breadcrumb.backToCart')}
-          </Link>
-          <span className="text-gray-300">/</span>
-          <span className="text-black font-bold">{t('breadcrumb.current')}</span>
-        </nav>
-
         <h1 className="text-4xl font-black text-[#556822] mb-10 font-[agrandir]">{t('title')}</h1>
 
         {statusBanner && (

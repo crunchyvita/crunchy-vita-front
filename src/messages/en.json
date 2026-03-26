@@ -14,6 +14,33 @@
     "logout": "Log out",
     "signIn": "Sign in"
   },
+  "Breadcrumbs": {
+    "ariaLabel": "Breadcrumb",
+    "home": "Home",
+    "shop": "Shop",
+    "packages": "Packages",
+    "product": "Product",
+    "package": "Package",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "orderSuccess": "Order confirmed",
+    "contact": "Contact",
+    "blog": "Blog",
+    "article": "Article",
+    "profile": "Account",
+    "orders": "My orders",
+    "orderDetail": "Order",
+    "favorites": "Wishlist",
+    "professional": "Professional space",
+    "about": "About us",
+    "cgv": "Terms of sale",
+    "cgu": "Terms of use",
+    "legalNotice": "Legal notice",
+    "privacy": "Privacy policy",
+    "shippingPolicy": "Shipping policy",
+    "returnPolicy": "Returns policy",
+    "detail": "Details"
+  },
   "HeaderHome": {
     "nav": {
       "home": "Home",
@@ -1008,7 +1035,9 @@
   "AddedToCartModal": {
     "addedToCart": "Added to cart",
     "quantityLabel": "Qty",
-    "viewCart": "View cart"
+    "viewCart": "View cart",
+    "close": "Close",
+    "lineTotal": "{amount} €"
   },
   "Auth": {
     "common": {
@@ -1151,6 +1180,16 @@
     },
     "title": "My Orders",
     "description": "Track your recent orders and access the details of each order.",
+    "orderWord": "order",
+    "ordersWord": "orders",
+    "countFiltered": "{filtered} / {total}",
+    "searchPlaceholder": "Search by order ID or product name…",
+    "noSearchResults": "No orders match your search.",
+    "dateLabel": "Date",
+    "totalAmountLabel": "Total",
+    "statusLabel": "Status",
+    "prevPage": "Previous",
+    "nextPage": "Next",
     "loading": "Loading…",
     "error": "Error",
     "empty": "No orders yet.",
@@ -1184,7 +1223,7 @@
     "discount": "Discount",
     "total": "Total",
     "status": "Status: {status}",
-    "allOrders": "← All orders"
+    "allOrders": " All orders"
   },
   "Lyophilisation": {
     "errors": {

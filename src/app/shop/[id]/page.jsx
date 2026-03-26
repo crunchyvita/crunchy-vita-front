@@ -14,13 +14,14 @@ import { reviewAPI } from '@/lib/api';
 import { usePackStorage } from '@/hooks/usePackStorage';
 import { useCart } from '@/hooks/useCart';
 import Footer from '@/components/footer';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import PromoBadge from '@/components/PromoBadge';
 import AddedToCartModal from '@/components/AddedToCartModal';
 import NutritionTable from '@/components/NutritionTable';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { hasNutritionData } from '@/lib/nutrition';
+import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -42,6 +43,7 @@ export default function ProductDetailPage() {
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
+  const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   // ✅ IMPORTANT: error doit être remis à null avant chaque fetch
   const [error, setError] = useState(null);
@@ -76,6 +78,11 @@ export default function ProductDetailPage() {
   const [isDragging, setIsDragging] = useState(false);
 
   const { savePackConfig, loadPackConfig, isStorageReady } = usePackStorage(searchParams.packageId);
+
+  useEffect(() => {
+    if (productName) setLastLabel(productName);
+    return () => clearLastLabel();
+  }, [productName, setLastLabel, clearLastLabel]);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -603,7 +610,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <HeaderAndBreadcrumbs />
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <div className="space-y-4">
@@ -667,24 +674,11 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <HeaderAndBreadcrumbs />
 
       <PromoBadge />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 font-maison-neue-book">
-          <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            {t('breadcrumb.shop')}
-          </button>
-          <span>/</span>
-          <button onClick={() => router.push('/shop')} className="hover:text-[#469165] font-maison-neue-bold">
-            {t('breadcrumb.allProducts')}
-          </button>
-          <span>/</span>
-          <span className="text-gray-900 font-maison-neue-bold">{productName}</span>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Gallery */}
           <div className="space-y-4">

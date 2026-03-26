@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { 
   User,
@@ -65,7 +65,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen flex flex-col ">
-      <Header />
+      <HeaderAndBreadcrumbs />
       
       <main id="contact-section" className="grow bg-white py-20">
         <div className="container mx-auto px-6">

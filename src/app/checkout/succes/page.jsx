@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { paymentAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -111,7 +111,7 @@ export default function CheckoutSuccessPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fdfdfd]">
-      <Header />
+      <HeaderAndBreadcrumbs />
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12">
         
         {loading && (

@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle, Gift } from 'lucide-react';
@@ -262,7 +262,7 @@ export default function CartPage() {
   if (!hasInitialLoad && isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <HeaderAndBreadcrumbs />
         <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-8">
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#556822]"></div>
@@ -279,12 +279,10 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
-      <Header />
+      <HeaderAndBreadcrumbs />
       <PromoBadge />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8">
-        <nav className="text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 break-words">{t('breadcrumb')}</nav>
-
         {stockAlertOpen && (
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />

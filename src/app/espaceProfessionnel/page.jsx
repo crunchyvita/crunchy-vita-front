@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import { useLocale, useTranslations } from 'next-intl';
 import { categoryAPI, productAPI } from '@/lib/api';
 import { Search, ChevronDown, Check, FileText, Mail, Leaf, Truck, ShieldCheck, Factory, Coffee, ShoppingBasket, Activity } from 'lucide-react';
@@ -182,7 +182,7 @@ const CrunchyVita = () => {
   return (
     <div className="min-h-screen bg-[#f9f7f2] font-sans text-gray-800">
       {/* Navigation */}
-      <Header />
+      <HeaderAndBreadcrumbs />
 
       {/* Hero Section */}
       <header className="relative h-125 w-full bg-gray-900 overflow-hidden">

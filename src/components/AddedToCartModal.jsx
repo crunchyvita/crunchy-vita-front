@@ -71,7 +71,12 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
             <CheckCircle2 size={16} />
             <span className="font-bold text-[10px] uppercase tracking-widest">{t('addedToCart')}</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-black transition-colors"
+            aria-label={t('close')}
+          >
             <X size={18} />
           </button>
         </div>
@@ -124,11 +129,13 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
             <p className="text-xs text-gray-500 mb-1">
               {t('quantityLabel')}: <span className="font-bold text-gray-900">{quantity}</span>
             </p>
-            {product.price && (
+            {product.price ? (
               <p className="text-xs font-bold text-[#E10C69]">
-                {(Number(product.price) * Number(quantity)).toFixed(2)} €
+                {t('lineTotal', {
+                  amount: (Number(product.price) * Number(quantity)).toFixed(2),
+                })}
               </p>
-            )}
+            ) : null}
           </div>
         </div>
 

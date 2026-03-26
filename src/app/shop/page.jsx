@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProductDetailModal from '@/components/detailProduct';
 import AddedToCartModal from '@/components/AddedToCartModal';
 import Footer from '@/components/footer';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import PromoBadge from '@/components/PromoBadge';
 import { useLocale, useTranslations } from 'next-intl';
 import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
@@ -622,7 +622,7 @@ function ClientShop() {
 
   return (
     <div className="min-h-screen bg-[#F5F3ED] font-[Maison Neue]">
-      <Header />
+      <HeaderAndBreadcrumbs />
       <PromoBadge />
 
       <main className="max-w-7xl mx-auto px-6 py-16 font-[Agrandir]">

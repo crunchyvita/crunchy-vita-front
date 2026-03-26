@@ -14,6 +14,33 @@
     "logout": "Se deconnecter",
     "signIn": "Se connecter"
   },
+  "Breadcrumbs": {
+    "ariaLabel": "Fil d'Ariane",
+    "home": "Accueil",
+    "shop": "Boutique",
+    "packages": "coffrets",
+    "product": "Produit",
+    "package": "Coffret",
+    "cart": "Panier",
+    "checkout": "Paiement",
+    "orderSuccess": "Commande confirmée",
+    "contact": "Contact",
+    "blog": "Blog",
+    "article": "Article",
+    "profile": "Mon compte",
+    "orders": "Mes commandes",
+    "orderDetail": "Commande",
+    "favorites": "Favoris",
+    "professional": "Espace professionnel",
+    "about": "À propos",
+    "cgv": "CGV",
+    "cgu": "CGU",
+    "legalNotice": "Mentions légales",
+    "privacy": "Confidentialité",
+    "shippingPolicy": "Livraison",
+    "returnPolicy": "Retours",
+    "detail": "Détails"
+  },
   "HeaderHome": {
     "nav": {
       "home": "Accueil",
@@ -1008,7 +1035,9 @@
   "AddedToCartModal": {
     "addedToCart": "Ajouté au panier",
     "quantityLabel": "Qté",
-    "viewCart": "Voir le panier"
+    "viewCart": "Voir le panier",
+    "close": "Fermer",
+    "lineTotal": "{amount} €"
   },
   "Auth": {
     "common": {
@@ -1151,6 +1180,16 @@
     },
     "title": "Mes commandes",
     "description": "Suivez vos commandes récentes et accédez au détail de chaque commande.",
+    "orderWord": "commande",
+    "ordersWord": "commandes",
+    "countFiltered": "{filtered} / {total}",
+    "searchPlaceholder": "Rechercher par n° de commande ou nom de produit…",
+    "noSearchResults": "Aucune commande ne correspond à votre recherche.",
+    "dateLabel": "Date",
+    "totalAmountLabel": "Montant total",
+    "statusLabel": "Statut",
+    "prevPage": "Précédent",
+    "nextPage": "Suivant",
     "loading": "Chargement…",
     "error": "Erreur",
     "empty": "Aucune commande pour le moment.",
@@ -1184,7 +1223,7 @@
     "discount": "Remise",
     "total": "Total",
     "status": "Statut : {status}",
-    "allOrders": "← Toutes les commandes"
+    "allOrders": "Toutes les commandes"
   },
   "Lyophilisation": {
     "errors": {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useRouter } from '@/navigation';
 import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Star } from 'lucide-react';
-import Header from '@/components/header';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
 import { useAuth } from '@/context/AuthContext';
@@ -147,7 +147,7 @@ export default function FavoritesPage() {
 
     return (
         <div className="min-h-screen bg-[#F5F3ED] font-[Maison Neue]">
-            <Header />
+            <HeaderAndBreadcrumbs />
             <PromoBadge />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -189,9 +189,7 @@ export default function FavoritesPage() {
                     <div className="rounded-2xl    p-8 text-center">
                         <Heart className="h-10 w-10 text-[#E10C69] mx-auto mb-3" />
                         <p className="text-slate-700 font-semibold">{t('empty.title')}</p>
-                        <Link href="/shop" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E10C69] px-6 py-3 text-white font-bold">
-                            {t('empty.cta')}
-                        </Link>
+                        
                     </div>
                 ) : (
                     <div className="space-y-10">

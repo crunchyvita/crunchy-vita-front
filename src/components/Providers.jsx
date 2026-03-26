@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AuthProvider } from '@/context/AuthContext';
+import { BreadcrumbProvider } from '@/context/BreadcrumbContext';
 
 export function Providers({ children }) {
   useEffect(() => {
@@ -23,6 +24,10 @@ export function Providers({ children }) {
     };
   }, []);
 
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      <BreadcrumbProvider>{children}</BreadcrumbProvider>
+    </AuthProvider>
+  );
 }
 

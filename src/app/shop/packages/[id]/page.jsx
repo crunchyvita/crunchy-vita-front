@@ -16,7 +16,7 @@ import {
   Star,
   RotateCcw,
 } from "lucide-react";
-import Header from "@/components/header";
+import HeaderAndBreadcrumbs from "@/components/HeaderAndBreadcrumbs";
 import Footer from "@/components/footer";
 import PromoBadge from "@/components/PromoBadge";
 import AddedToCartModal from "@/components/AddedToCartModal";
@@ -25,6 +25,7 @@ import { usePackStorage } from "@/hooks/usePackStorage";
 import { useCart } from "@/hooks/useCart";
 import { useLocale, useTranslations } from "next-intl";
 import { getTranslatedPackage, getTranslatedProduct } from "@/lib/productTranslations";
+import { useBreadcrumbOverride } from "@/context/BreadcrumbContext";
 
 // --- BRAND COLOR PALETTE ---
 const COLORS = {
@@ -141,6 +142,14 @@ export default function PackageCustomizationPage() {
     () => getTranslatedPackage(packageData, locale),
     [packageData, locale]
   );
+
+  const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
+  const packageDisplayName = translatedPackage?.name || packageData?.name || "";
+
+  useEffect(() => {
+    if (packageDisplayName) setLastLabel(packageDisplayName);
+    return () => clearLastLabel();
+  }, [packageDisplayName, setLastLabel, clearLastLabel]);
 
   // Initialize pack storage hook
   const { savePackConfig, loadPackConfig, clearPackConfig, isStorageReady } =
@@ -505,20 +514,12 @@ export default function PackageCustomizationPage() {
   if (packageData?.packageType === "FIXED") {
     return (
       <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
-        <Header />
+        <HeaderAndBreadcrumbs />
         <PromoBadge />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => router.back()}
-                style={{ color: COLORS.grass }}
-                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
-              >
-                <ArrowLeft size={16} /> {t("backToShop")}
-              </button>
-            </div>
+         
 
             <h1 className="text-4xl font-black font-[agrandir] text-gray-900 uppercase">
               {t("title")} <span style={{ color: COLORS.grass }}>{translatedPackage.name}</span>
@@ -697,7 +698,7 @@ export default function PackageCustomizationPage() {
   // ===================== CUSTOM PACKAGE UI =====================
   return (
     <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
-      <Header />
+      <HeaderAndBreadcrumbs />
       <PromoBadge />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

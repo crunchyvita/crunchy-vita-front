@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import Header from '@/components/header';
+import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
+import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
 function formatMoney(amount, currency = 'eur') {
   const cur = (currency || 'eur').toUpperCase();
@@ -27,6 +29,7 @@ function OrderDetailContent() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   useEffect(() => {
     if (!id) return;
@@ -43,11 +46,29 @@ function OrderDetailContent() {
     })();
   }, [id, t]);
 
+  useEffect(() => {
+    if (order?.invoiceNumber) setLastLabel(`#${String(order.invoiceNumber)}`);
+    else clearLastLabel();
+    return () => clearLastLabel();
+  }, [order?.invoiceNumber, setLastLabel, clearLastLabel]);
+
+  const shellClass = 'min-h-screen flex flex-col bg-gray-50 font-[Maison_Neue]';
+  const mainClass =
+    'flex-1 max-w-3xl mx-auto w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8';
+
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#fafafa]">
-        <Header />
-        <main className="flex-1 max-w-3xl mx-auto px-4 py-16 text-slate-500">{t('loading')}</main>
+      <div className={shellClass}>
+        <HeaderAndBreadcrumbs />
+        <main className={mainClass}>
+          <div className="bg-white rounded-lg shadow-sm p-8 sm:p-12 flex flex-col items-center justify-center text-gray-500">
+            <div
+              className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-[#556822] mb-4"
+              aria-hidden
+            />
+            <p>{t('loading')}</p>
+          </div>
+        </main>
         <Footer />
       </div>
     );
@@ -55,13 +76,19 @@ function OrderDetailContent() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#fafafa]">
-        <Header />
-        <main className="flex-1 max-w-3xl mx-auto px-4 py-16">
-          <p className="text-red-600">{error || t('notFound')}</p>
-          <Link href="/orders" className="text-[#556822] font-semibold mt-4 inline-block">
-            {t('backLink')}
-          </Link>
+      <div className={shellClass}>
+        <HeaderAndBreadcrumbs />
+        <main className={mainClass}>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 sm:p-8">
+            <p className="text-red-600 text-sm">{error || t('notFound')}</p>
+            <Link
+              href="/orders"
+              className="inline-flex items-center gap-2 mt-6 rounded-md border border-gray-200 text-[#556822] px-4 py-3 text-sm font-bold hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft size={18} />
+              {t('backLink')}
+            </Link>
+          </div>
         </main>
         <Footer />
       </div>
@@ -71,84 +98,105 @@ function OrderDetailContent() {
   const addr = order.shippingAddress;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafafa]">
-      <Header />
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-10">
-        <nav className="text-sm text-slate-500 mb-4">
-          <Link href="/shop" className="hover:text-[#556822]">
-            {t('breadcrumb.shop')}
-          </Link>
-          <span className="mx-2">/</span>
-          <Link href="/orders" className="hover:text-[#556822]">
-            {t('breadcrumb.orders')}
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-slate-800">{t('breadcrumb.detail')}</span>
-        </nav>
+    <div className={shellClass}>
+      <HeaderAndBreadcrumbs />
+      <main className={mainClass}>
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 min-w-0 space-y-6 sm:space-y-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#556822] font-[agrandir] leading-tight">
+              {t('title', { invoiceNumber: order.invoiceNumber })}
+            </h1>
+            <p className="text-sm text-gray-500 mt-2">
+              {order.createdAt ? new Date(order.createdAt).toLocaleString('fr-FR') : ''}
+            </p>
+          </div>
 
-        <h1 className="text-2xl font-bold text-slate-900">{t('title', { invoiceNumber: order.invoiceNumber })}</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          {order.createdAt
-            ? new Date(order.createdAt).toLocaleString('fr-FR')
-            : ''}
-        </p>
+          <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">
+              {t('itemsSection')}
+            </h2>
+            <ul className="divide-y divide-gray-100">
+              {(order.items || []).map((line, i) => (
+                <li key={i} className="flex gap-3 sm:gap-4 py-4 first:pt-0 items-start">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-md bg-gray-50 overflow-hidden border border-gray-100 shrink-0">
+                    {line.imageUrl ? (
+                      <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <ShoppingBag size={22} className="text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{line.name || '—'}</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">× {line.quantity}</p>
+                  </div>
+                  <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums shrink-0">
+                    {formatMoney(line.lineTotal, order.currency)}
+                  </p>
+                </li>
+              ))}
+            </ul>
 
-        <div className="mt-8 bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-          <h2 className="font-semibold text-slate-900">{t('itemsSection')}</h2>
-          <ul className="divide-y divide-slate-100">
-            {(order.items || []).map((line, i) => (
-              <li key={i} className="flex gap-3 py-3">
-                <div className="h-16 w-16 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                  {line.imageUrl ? (
-                    <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
-                  ) : null}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">{line.name || '—'}</p>
-                  <p className="text-sm text-slate-500">× {line.quantity}</p>
-                </div>
-                <p className="font-semibold tabular-nums">{formatMoney(line.lineTotal, order.currency)}</p>
-              </li>
-            ))}
-          </ul>
-          <div className="border-t border-slate-100 pt-4 space-y-1 text-sm">
-            <div className="flex justify-between text-slate-600">
-              <span>{t('subtotal')}</span>
-              <span>{formatMoney(order.subtotalAmount, order.currency)}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>{t('shipping')}</span>
-              <span>{formatMoney(order.shippingAmount, order.currency)}</span>
-            </div>
-            {order.discountAmount > 0 && (
-              <div className="flex justify-between text-emerald-700">
-                <span>{t('discount')}</span>
-                <span>−{formatMoney(order.discountAmount, order.currency)}</span>
+            <div className="border-t border-gray-100 pt-4 mt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span className="font-medium">{t('subtotal')}</span>
+                <span className="font-bold text-gray-900 tabular-nums">
+                  {formatMoney(order.subtotalAmount, order.currency)}
+                </span>
               </div>
-            )}
-            <div className="flex justify-between text-lg font-bold text-slate-900 pt-2">
-              <span>{t('total')}</span>
-              <span>{formatMoney(order.totalAmount, order.currency)}</span>
+              <div className="flex justify-between text-gray-600">
+                <span className="font-medium">{t('shipping')}</span>
+                <span className="font-bold text-gray-900 tabular-nums">
+                  {formatMoney(order.shippingAmount, order.currency)}
+                </span>
+              </div>
+              {order.discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-700">
+                  <span className="font-medium">{t('discount')}</span>
+                  <span className="font-bold tabular-nums">
+                    −{formatMoney(order.discountAmount, order.currency)}
+                  </span>
+                </div>
+              )}
+              <hr className="border-gray-100 my-3" />
+              <div className="flex justify-between text-lg font-black font-[agrandir]">
+                <span className="text-[#556822]">{t('total')}</span>
+                <span className="text-[#E10C69] tabular-nums">
+                  {formatMoney(order.totalAmount, order.currency)}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 bg-white rounded-2xl border border-slate-200 p-6">
-          <h2 className="font-semibold text-slate-900 mb-2">{t('shippingSection')}</h2>
-          {addr && (
-            <p className="text-slate-600 text-sm leading-relaxed">
-              {[addr.line1, addr.line2].filter(Boolean).join(', ')}
-              <br />
-              {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
-              {addr.country ? <><br />{addr.country}</> : null}
-            </p>
-          )}
-          <p className="text-sm text-slate-500 mt-2">{t('status', { status: order.status })}</p>
-        </div>
+          <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-3 sm:mb-4 font-[agrandir]">
+              {t('shippingSection')}
+            </h2>
+            {addr ? (
+              <p className="text-gray-600 text-sm leading-relaxed font-[Maison_Neue]">
+                {[addr.line1, addr.line2].filter(Boolean).join(', ')}
+                <br />
+                {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
+                {addr.country ? (
+                  <>
+                    <br />
+                    {addr.country}
+                  </>
+                ) : null}
+              </p>
+            ) : null}
+            <p className="text-sm text-gray-500 mt-3">{t('status', { status: order.status })}</p>
+          </div>
 
-        <Link href="/orders" className="inline-block mt-6 text-[#556822] font-semibold">
-          {t('allOrders')}
-        </Link>
+          <Link
+            href="/orders"
+            className="inline-flex items-center gap-2 w-full sm:w-auto justify-center rounded-md border border-gray-200 bg-white text-[#556822] px-6 py-3 text-sm font-bold hover:bg-gray-50 transition-colors"
+          >
+            <ArrowLeft size={18} />
+            {t('allOrders')}
+          </Link>
+        </div>
       </main>
       <Footer />
     </div>
