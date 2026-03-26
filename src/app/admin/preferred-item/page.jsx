@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2, Toggle2, Loader2, Save, Package as PackageIcon } from 'lucide-react';
+import AdminHeader from '@/components/admin/header';
 
 // Neutral gray gradient placeholders for items without images
 const PLACEHOLDER_GRADIENTS = [
@@ -218,13 +219,18 @@ export default function PreferredItemAdminPage() {
   const selectedItemData = items.find(item => item._id === selectedItem);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-white border-b border-gray-200 px-8 py-8">
-        <div className="max-w-7xl mx-auto flex items-start justify-between gap-6">
+    <div className="min-h-screen bg-slate-50">
+      <AdminHeader />
+      <div className="space-y-6 p-6 lg:p-8">
+        {/* Header Section */}
+        <div className="w-full">
+        <div className="flex items-start justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-black text-gray-900 mb-2">Preferred Item Management</h1>
-            <p className="text-gray-600 text-lg">Configure which product or package to feature as preferred</p>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
+              Preferred Item
+              
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">Configure which product or package to feature as preferred</p>
           </div>
           
           {/* Best Seller Toggle in Header */}
@@ -233,7 +239,7 @@ export default function PreferredItemAdminPage() {
               onClick={handleToggleBestSeller}
               disabled={loading}
               className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                isBestSellerEnabled ? 'bg-green-500' : 'bg-gray-300'
+                isBestSellerEnabled ? 'bg-[#556822]' : 'bg-slate-200'
               } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span
@@ -250,16 +256,16 @@ export default function PreferredItemAdminPage() {
       </div>
 
       {/* Alert Messages */}
-      <div className="max-w-7xl mx-auto px-8 pt-8">
+      <div>
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700">
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700">
             <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3 text-green-700">
+          <div className="p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3 text-green-700">
             <CheckCircle2 size={20} />
             <span>{success}</span>
           </div>
@@ -267,8 +273,8 @@ export default function PreferredItemAdminPage() {
       </div>
 
       {/* Main Content */}
-      <div className="px-8 py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
+        <div className="space-y-8">
           {/* Products Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
@@ -464,10 +470,10 @@ export default function PreferredItemAdminPage() {
                 disabled={loading || !selectedItem}
                 className="flex-1 flex items-center justify-center gap-2 text-white font-bold py-4 px-8 rounded-lg transition-colors disabled:cursor-not-allowed text-lg shadow-lg"
                 style={{
-                  backgroundColor: loading || !selectedItem ? '#cccccc' : '#556622'
+                  backgroundColor: loading || !selectedItem ? '#cccccc' : '#556822'
                 }}
                 onMouseEnter={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 10px 25px rgba(85, 102, 34, 0.3)')}
-                onMouseLeave={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)')}
+                onMouseLeave={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#556822', e.target.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)')}
                 title={!selectedItem ? 'Please select an item first' : ''}
               >
                 {loading ? (
@@ -487,6 +493,7 @@ export default function PreferredItemAdminPage() {
 
         </div>
       </div>
+    </div>
     </div>
   );
 }

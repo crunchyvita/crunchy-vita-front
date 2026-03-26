@@ -6,9 +6,13 @@ export default function DeleteConfirmationModal({
   onConfirm,
   title = "Delete Item",
   itemName,
+  confirmMessage,
   warningMessage,
   description = "This action cannot be undone.",
   isDeleting = false,
+  actionVerb = "delete",
+  confirmButtonLabel = "Delete",
+  confirmLoadingLabel = "Deleting...",
 }) {
   if (!isOpen) return null;
 
@@ -21,12 +25,16 @@ export default function DeleteConfirmationModal({
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-            <p className="mt-1 text-sm text-slate-600">
-              Are you sure you want to delete{" "}
-              {itemName && (
-                <span className="font-semibold text-slate-900">"{itemName}"</span>
-              )}?
-            </p>
+            {confirmMessage ? (
+              <p className="mt-1 text-sm text-slate-600">{confirmMessage}</p>
+            ) : (
+              <p className="mt-1 text-sm text-slate-600">
+                Are you sure you want to {actionVerb}{" "}
+                {itemName && (
+                  <span className="font-semibold text-slate-900">"{itemName}"</span>
+                )}?
+              </p>
+            )}
             {warningMessage && (
               <p className="mt-2 text-sm text-amber-700">
                 ⚠️ {warningMessage}
@@ -56,12 +64,12 @@ export default function DeleteConfirmationModal({
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Deleting...
+                {confirmLoadingLabel}
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4" />
-                Delete
+                {confirmButtonLabel}
               </>
             )}
           </button>

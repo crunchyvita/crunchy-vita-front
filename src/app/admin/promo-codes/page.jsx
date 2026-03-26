@@ -1,9 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import { AlertCircle, CheckCircle2, Plus, Trash2, Edit2, MoreVertical } from 'lucide-react';
+import {
+  Search,
+  Edit2,
+  AlertCircle,
+  Package,
+  AlertTriangle,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  MoreVertical,
+} from 'lucide-react';
 import Link from 'next/link';
+import AdminHeader from '@/components/admin/header';
 
 export default function PromoCodesPage() {
   const [promoCodes, setPromoCodes] = useState([]);
@@ -15,6 +26,9 @@ export default function PromoCodesPage() {
   const [selectedCode, setSelectedCode] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [search, setSearch] = useState('');
+  const PAGE_SIZE = 5;
+  const [page, setPage] = useState(1);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -71,16 +85,16 @@ export default function PromoCodesPage() {
 
       const result = await response.json();
       if (result.success) {
-        setSuccess('✅ Promo code deleted!');
+        setSuccess(' Promo code deleted!');
         setShowDeleteModal(false);
         setSelectedCode(null);
         fetchPromoCodes();
         fetchStats();
       } else {
-        setError(`❌ ${result.message}`);
+        setError(` ${result.message}`);
       }
     } catch (err) {
-      setError(`❌ ${err.message}`);
+      setError(` ${err.message}`);
     } finally {
       setDeleting(false);
     }
@@ -98,160 +112,252 @@ export default function PromoCodesPage() {
     return `${day} ${month}, ${year}`;
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-black text-gray-900 mb-2">Promo Codes</h1>
-              <p className="text-gray-600 text-lg">Manage promo codes and discounts</p>
-            </div>
-            <Link
-              href="/admin/promo-codes/create"
-              className="flex items-center gap-2 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-              style={{backgroundColor: '#556622'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
-            >
-              <Plus size={20} />
-              New Code
-            </Link>
-          </div>
-        </div>
-      </div>
+  const filteredPromoCodes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return promoCodes;
 
-      <div className="max-w-7xl mx-auto px-8 py-8">
+    return promoCodes.filter((code) => {
+      const name = String(code?.name || '').toLowerCase();
+      const codeValue = String(code?.code || '').toLowerCase();
+      const discountType = String(code?.discountType || '').toLowerCase();
+      return name.includes(q) || codeValue.includes(q) || discountType.includes(q);
+    });
+  }, [promoCodes, search]);
+
+  useEffect(() => {
+    // When search changes, restart pagination so the user doesn't get an empty page.
+    setPage(1);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPromoCodes.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const paginatedPromoCodes = filteredPromoCodes.slice(startIndex, startIndex + PAGE_SIZE);
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <AdminHeader />
+      <div className="space-y-6 p-6 lg:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
+              Promo Codes
+             
+            </div>
+            <p className="text-sm text-slate-500">Manage promo codes and discounts</p>
+          </div>
+          <Link
+            href="/admin/promo-codes/create"
+            className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition"
+            style={{ backgroundColor: '#556622' }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = '#3d4617')}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = '#556622')}
+          >
+            <Plus size={18} />
+            New Code
+          </Link>
+        </div>
+
+        <div className="space-y-6">
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Total Codes</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalCodes}</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                <Package size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Total Codes</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.totalCodes}</p>
+              </div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Active</p>
-              <p className="text-3xl font-bold text-green-600">{stats.activeCodes}</p>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Active</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.activeCodes}</p>
+              </div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Expired</p>
-              <p className="text-3xl font-bold text-red-600">{stats.expiredCodes}</p>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Expired</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.expiredCodes}</p>
+              </div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-600 text-sm mb-2">Usages</p>
-              <p className="text-3xl font-bold text-blue-600">{stats.totalUsages}</p>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Usages</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.totalUsages}</p>
+              </div>
             </div>
           </div>
         )}
-
-        {/* Alerts */}
-        {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-        {success && (
-          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3 text-green-700">
-            <CheckCircle2 size={20} />
-            <span>{success}</span>
-          </div>
-        )}
-
         {/* Promo Codes Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
-          {loading ? (
-            <div className="p-8 text-center text-gray-600">
-              Loading...
-            </div>
-          ) : promoCodes.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-600 mb-4">No promo code created.</p>
-            
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-100 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Promotion</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Discount</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Usages</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Expiration</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Status</th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {promoCodes.map(code => (
-                  <tr key={code._id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">{code.name || '-'}</td>
-                    <td className="px-6 py-4 text-gray-700">
-                      {code.discountType === 'PERCENTAGE'
-                        ? `${code.discountValue}%`
-                        : code.discountType === 'FREE_ITEM'
-                        ? (code.freeItemType === 'PACKAGE' ? 'Free package' : 'Free product')
-                        : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">
-                      {code.usageCount}/{code.usageLimit || '∞'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">
-                      <span className={isExpired(code.expirationDate) ? 'text-red-600 font-bold' : ''}>
-                        {formatFrenchDate(code.expirationDate)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        code.isActive && !isExpired(code.expirationDate)
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {code.isActive && !isExpired(code.expirationDate) ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="relative inline-block">
-                        <button
-                          onClick={() => setOpenDropdown(openDropdown === code._id ? null : code._id)}
-                          className="inline-flex items-center rounded-md p-1 text-slate-600 transition hover:bg-slate-100"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
+          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-4 flex w-full items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-600">
+            <Search className="h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by promotion or code..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+            />
+          </div>
 
-                        {openDropdown === code._id && (
-                          <div className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-slate-200 bg-white shadow-lg">
-                            <Link
-                              href={`/admin/promo-codes/${code._id}`}
-                              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
-                              onClick={() => setOpenDropdown(null)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                              Edit
-                            </Link>
-                            <button
-                              onClick={() => {
-                                setSelectedCode(code);
-                                setShowDeleteModal(true);
-                                setOpenDropdown(null);
-                              }}
-                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {error ? (
+            <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-3">
+              <AlertCircle size={20} />
+              <span>{error}</span>
             </div>
-          )}
+          ) : null}
+
+          {success ? (
+            <div className="mb-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-700 flex items-center gap-3">
+              <CheckCircle2 size={20} />
+              <span>{success}</span>
+            </div>
+          ) : null}
+
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="py-10 text-center text-sm text-slate-500">Loading promo codes...</div>
+            ) : filteredPromoCodes.length === 0 ? (
+              <div className="p-10 text-center text-sm text-slate-500">
+                {promoCodes.length === 0 ? 'No promo code created.' : 'No promo codes found for your search.'}
+              </div>
+            ) : (
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-500">
+                    <th className="px-3 py-3 font-medium">Promotion</th>
+                    <th className="px-3 py-3 font-medium">Discount</th>
+                    <th className="px-3 py-3 font-medium text-center">Usages</th>
+                    <th className="px-3 py-3 font-medium text-center">Expiration</th>
+                    <th className="px-3 py-3 font-medium text-center">Status</th>
+                    <th className="px-3 py-3 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {paginatedPromoCodes.map((code) => {
+                    const expired = isExpired(code.expirationDate);
+                    const active = Boolean(code.isActive) && !expired;
+                    return (
+                      <tr
+                        key={code._id}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        <td className="px-3 py-4 font-medium text-slate-900">
+                          {code.name || '-'}
+                        </td>
+                        <td className="px-3 py-4 text-slate-700">
+                          {code.discountType === 'PERCENTAGE'
+                            ? `${code.discountValue}%`
+                            : code.discountType === 'FREE_ITEM'
+                            ? code.freeItemType === 'PACKAGE'
+                              ? 'Free package'
+                              : 'Free product'
+                            : '-'}
+                        </td>
+                        <td className="px-3 py-4 text-center text-slate-500">
+                          {code.usageCount}/{code.usageLimit || '∞'}
+                        </td>
+                        <td className="px-3 py-4 text-center text-slate-700">
+                          <span className={expired ? 'text-red-600 font-bold' : 'text-slate-700 font-medium'}>
+                            {formatFrenchDate(code.expirationDate)}
+                          </span>
+                        </td>
+                        <td className="px-3 py-4 text-center">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                              active
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {active ? (
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            ) : (
+                              <AlertCircle className="h-3.5 w-3.5" />
+                            )}
+                            {active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-4 text-right relative">
+                          <button
+                            onClick={() => setOpenDropdown(openDropdown === code._id ? null : code._id)}
+                            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+
+                          {openDropdown === code._id && (
+                            <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                              <Link
+                                href={`/admin/promo-codes/${code._id}`}
+                                className="flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors w-full text-left"
+                                onClick={() => setOpenDropdown(null)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                                Edit
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  setSelectedCode(code);
+                                  setShowDeleteModal(true);
+                                  setOpenDropdown(null);
+                                }}
+                                className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
+
+        {/* Pagination (outside the list/table card, like Stock page) */}
+        {!loading && filteredPromoCodes.length > 0 ? (
+          <div className="flex items-center justify-between text-sm text-slate-500 mt-4">
+            <p>
+              Page {safePage} of {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <DeleteConfirmationModal
@@ -267,5 +373,7 @@ export default function PromoCodesPage() {
         isDeleting={deleting}
       />
     </div>
+    </div>
+    
   );
 }
