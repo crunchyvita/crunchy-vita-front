@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 import { useLocale, useTranslations } from 'next-intl';
 import { categoryAPI, productAPI } from '@/lib/api';
 import { Search, ChevronDown, Check, FileText, Mail, Leaf, Truck, ShieldCheck, Factory, Coffee, ShoppingBasket, Activity } from 'lucide-react';
@@ -16,6 +17,7 @@ const CrunchyVita = () => {
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [quoteForm, setQuoteForm] = useState({
+    contactName: '',
     email: '',
     company: '',
     activity: '',
@@ -143,7 +145,7 @@ const CrunchyVita = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: quoteForm.company.trim(),
+          name: quoteForm.contactName.trim() || quoteForm.company.trim(),
           email: quoteForm.email.trim(),
           message: quoteForm.message.trim(),
           subject: t('form.quoteSubject'),
@@ -164,6 +166,7 @@ const CrunchyVita = () => {
 
       setQuoteSuccess(t('form.success'));
       setQuoteForm({
+        contactName: '',
         email: '',
         company: '',
         activity: '',
@@ -182,7 +185,7 @@ const CrunchyVita = () => {
   return (
     <div className="min-h-screen bg-[#f9f7f2] font-sans text-gray-800">
       {/* Navigation */}
-      <HeaderAndBreadcrumbs />
+      <Header />
 
       {/* Hero Section */}
       <header className="relative h-125 w-full bg-gray-900 overflow-hidden">
@@ -398,20 +401,86 @@ const CrunchyVita = () => {
 
         <div className="bg-white p-8 rounded-lg shadow-lg">
           <h3 className="font-bold text-gray-800 mb-6">{t('form.companyTitle')}</h3>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input type="text required" placeholder={t('form.fields.company')} className="border p-3 rounded text-sm w-full bg-gray-50" />
-            <input type="text" placeholder={t('form.fields.activity')} className="border p-3 rounded text-sm w-full bg-gray-50" />
+          <form onSubmit={handleQuoteSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {quoteError ? (
+              <div className="md:col-span-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {quoteError}
+              </div>
+            ) : null}
+            {quoteSuccess ? (
+              <div className="md:col-span-2 p-4 bg-green-50 border border-green-300 rounded-lg text-green-700 text-sm">
+                {quoteSuccess}
+              </div>
+            ) : null}
 
-            <input type="text required" placeholder={t('form.fields.siren')} className="border p-3 rounded text-sm w-full bg-gray-50" />
-            <input type="text" placeholder={t('form.fields.vat')} className="border p-3 rounded text-sm w-full bg-gray-50" />
-
-            <input type="text" placeholder={t('form.fields.address')} className="border p-3 rounded text-sm w-full bg-gray-50" />
-            <input type="url" placeholder={t('form.fields.website')} className="border p-3 rounded text-sm w-full bg-gray-50" />
-
+            <input
+              type="text"
+              name="contactName"
+              required
+              value={quoteForm.contactName}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.contactName')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              value={quoteForm.email}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.email')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="text"
+              name="company"
+              required
+              value={quoteForm.company}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.company')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="text"
+              name="activity"
+              value={quoteForm.activity}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.activity')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="text"
+              name="siren"
+              required
+              value={quoteForm.siren}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.siren')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="text"
+              name="vat"
+              value={quoteForm.vat}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.vat')}
+              className="border p-3 rounded text-sm w-full bg-gray-50"
+            />
+            <input
+              type="url"
+              name="website"
+              value={quoteForm.website}
+              onChange={handleQuoteChange}
+              placeholder={t('form.fields.website')}
+              className="border p-3 rounded text-sm w-full bg-gray-50 md:col-span-2"
+            />
             <textarea
+              name="message"
+              required
+              value={quoteForm.message}
+              onChange={handleQuoteChange}
               placeholder={t('form.fields.message')}
               className="md:col-span-2 border p-3 rounded text-sm w-full bg-gray-50 min-h-[120px]"
-            />         
+            />
 
             <div className="md:col-span-2 flex justify-center mt-4">
               <button
@@ -425,9 +494,8 @@ const CrunchyVita = () => {
           </form>
         </div>
       </section>
-      
-      {/* Footer Decoration */}
-      <div className="h-16 bg-linear-to-t from-gray-200 to-transparent"></div>
+
+      <Footer />
     </div>
   );
 };
