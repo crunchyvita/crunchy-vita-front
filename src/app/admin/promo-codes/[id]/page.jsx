@@ -266,7 +266,6 @@ export default function PromoCodeDetailPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Type de Réduction</label>
                   <label className="text-sm font-bold text-slate-700">Discount Type</label>
                   <select
                     name="discountType"
@@ -321,6 +320,18 @@ export default function PromoCodeDetailPage() {
                     </select>
                   </div>
                 )}
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Minimum Purchase (€)</label>
+                  <input
+                    type="number"
+                    name="minPurchaseAmount"
+                    step="0.01"
+                    value={formData.minPurchaseAmount}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Usage Limit</label>

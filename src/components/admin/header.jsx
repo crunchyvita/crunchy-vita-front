@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Bell, MessageSquare, ChevronDown, LogOut, User, LayoutDashboard, Trash2, Building2, AlertCircle, Mail, Menu, FileText, Settings } from "lucide-react";
 import { notificationAPI, reviewAPI } from "@/lib/api";
