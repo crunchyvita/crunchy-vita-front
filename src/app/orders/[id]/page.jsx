@@ -104,7 +104,7 @@ function OrderDetailContent() {
                   ) : null}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">{line.name}</p>
+                  <p className="font-medium">{line.name || '—'}</p>
                   <p className="text-sm text-slate-500">× {line.quantity}</p>
                 </div>
                 <p className="font-semibold tabular-nums">{formatMoney(line.lineTotal, order.currency)}</p>

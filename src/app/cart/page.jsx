@@ -263,7 +263,7 @@ export default function CartPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-8">
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#556822]"></div>
           </div>
@@ -282,8 +282,8 @@ export default function CartPage() {
       <Header />
       <PromoBadge />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <nav className="text-sm text-gray-500 mb-8">{t('breadcrumb')}</nav>
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8">
+        <nav className="text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 break-words">{t('breadcrumb')}</nav>
 
         {stockAlertOpen && (
           <Alert variant="destructive" className="mb-6">
@@ -293,11 +293,11 @@ export default function CartPage() {
           </Alert>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="grow bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-black text-[#556822] font-[agrandir]">{t('title')}</h1>
-              <span className="text-gray-500 text-sm">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+          <div className="grow bg-white rounded-lg shadow-sm p-4 sm:p-6 min-w-0">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center mb-6">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#556822] font-[agrandir] leading-tight">{t('title')}</h1>
+              <span className="text-gray-500 text-xs sm:text-sm shrink-0">
                 {isEmpty ? t('emptyTitle') : `${cartItems.length} ${cartItems.length === 1 ? t('item') : t('items')}`}
               </span>
             </div>
@@ -314,7 +314,7 @@ export default function CartPage() {
                 </Link>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div>
                 {cartItems.map((item) => {
                   const isPackage = isPackageItem(item);
                   const hasPackageMainImage =
@@ -349,62 +349,80 @@ export default function CartPage() {
                   const atMax = maxAllowed !== null && Number(currentQty) >= Number(maxAllowed);
 
                   return (
-                    <div key={item._id} className="py-6 flex items-center gap-6 relative">
-                      {/* Images */}
-                      <div className="shrink-0 relative">
-                        {item.isFreeItem && (
-                          <span className="absolute top-1 -right-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm">
-                            <Gift size={12} />
-                          </span>
-                        )}
-                        {isPackage && !hasPackageMainImage ? (
-                          <div className="grid grid-cols-2 gap-1 w-28">
-                            {images.length > 0 ? (
-                              <>
-                                {images.slice(0, 4).map((img, idx) => (
-                                  <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center">
-                                <ShoppingBag size={24} className="text-gray-300" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="w-20 h-24 bg-transparent overflow-hidden">
-                            {images[0] ? (
-                              <img
-                                src={images[0]}
-                                alt={displayName}
-                                className={`w-full h-full ${isPackage ? 'object-cover' : 'object-contain'}`}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
-                                <ShoppingBag size={24} className="text-gray-300" />
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grow">
-                        <h3 className="font-bold text-[#556822] text-lg mb-0.5">{displayName}</h3>
-                        {!item.isFreeItem && (
-                          <p className="text-sm text-gray-500">
-                            {t('products.price')}: 
-                            <span>
-                              {Number(item.price || 0).toFixed(2)} €
+                    <div
+                      key={item._id}
+                      className="py-5 sm:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4 md:gap-6 relative border-b border-gray-100 last:border-b-0"
+                    >
+                      {/* Top row (mobile): image + details + delete */}
+                      <div className="flex items-start gap-3 sm:gap-4 w-full min-w-0 sm:w-auto sm:flex-1 sm:items-center">
+                        {/* Images */}
+                        <div className="shrink-0 relative">
+                          {item.isFreeItem && (
+                            <span className="absolute top-1 -right-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm">
+                              <Gift size={12} />
                             </span>
-                          </p>
-                        )}
+                          )}
+                          {isPackage && !hasPackageMainImage ? (
+                            <div className="grid grid-cols-2 gap-1 w-[4.5rem] sm:w-28">
+                              {images.length > 0 ? (
+                                <>
+                                  {images.slice(0, 4).map((img, idx) => (
+                                    <div key={idx} className="bg-gray-50 overflow-hidden rounded-sm aspect-square">
+                                      <img src={img} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                  ))}
+                                </>
+                              ) : (
+                                <div className="col-span-2 row-span-2 bg-gray-100 rounded-md flex items-center justify-center min-h-[4.5rem] sm:min-h-0">
+                                  <ShoppingBag size={20} className="text-gray-300 sm:w-6 sm:h-6" />
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="w-16 h-20 sm:w-20 sm:h-24 bg-transparent overflow-hidden rounded-md">
+                              {images[0] ? (
+                                <img
+                                  src={images[0]}
+                                  alt={displayName}
+                                  className={`w-full h-full ${isPackage ? 'object-cover' : 'object-contain'}`}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                                  <ShoppingBag size={20} className="text-gray-300 sm:w-6 sm:h-6" />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grow min-w-0 pr-1 sm:pr-2">
+                          <h3 className="font-bold text-[#556822] text-base sm:text-lg mb-0.5 break-words hyphens-auto">
+                            {displayName}
+                          </h3>
+                          {!item.isFreeItem && (
+                            <p className="text-xs sm:text-sm text-gray-500">
+                              {t('products.price')}:
+                              <span className="whitespace-nowrap"> {Number(item.price || 0).toFixed(2)} €</span>
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item._id)}
+                          className="p-2 text-gray-300 hover:text-red-500 transition-colors shrink-0 sm:hidden touch-manipulation"
+                          aria-label={t('actions.remove') || 'Remove'}
+                        >
+                          <Trash2 size={20} />
+                        </button>
                       </div>
 
+                      {/* Bottom row (mobile): qty + line total; inline from sm */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end sm:gap-3 sm:flex-nowrap sm:shrink-0 w-full sm:w-auto">
                       {!item.isFreeItem && (
-                        <div className="flex items-center gap-3 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                        <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 px-2.5 sm:px-3 py-1 rounded-full border border-gray-100 touch-manipulation">
                           <button
+                            type="button"
                             onClick={async () => {
                               const nextQty = Math.max(1, (uiQty[item._id] ?? (item.quantity || 1)) - 1);
                               setUiQty((prev) => ({ ...prev, [item._id]: nextQty }));
@@ -413,14 +431,15 @@ export default function CartPage() {
                                 setUiQty((prev) => ({ ...prev, [item._id]: uiQty[item._id] ?? (item.quantity || 1) }));
                               }
                             }}
-                            className="text-gray-400 hover:text-black"
+                            className="text-gray-400 hover:text-black p-0.5 min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                           >
                             <Minus size={14} />
                           </button>
 
-                          <span className="w-4 text-center font-bold text-sm">{currentQty}</span>
+                          <span className="min-w-[1.5rem] text-center font-bold text-sm tabular-nums">{currentQty}</span>
 
                           <button
+                            type="button"
                             // ✅ SOFT BLOCK: if at max, show alert (no visual disabled state for better UX)
                             onClick={async () => {
                               if (atMax) {
@@ -451,7 +470,7 @@ export default function CartPage() {
                               }
                             }}
                             disabled={false}
-                            className="text-gray-400 hover:text-black"
+                            className="text-gray-400 hover:text-black p-0.5 min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                             title="Increase quantity"
                           >
                             <Plus size={14} />
@@ -460,24 +479,27 @@ export default function CartPage() {
                       )}
 
                       {item.isFreeItem ? (
-                        <div className="w-24 text-right">
+                        <div className="text-right sm:w-24 sm:shrink-0">
                           <p className="text-xs text-gray-400 line-through">
                             {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
                           </p>
-                          <p className="font-black text-[#E10C69] text-lg">0 €</p>
+                          <p className="font-black text-[#E10C69] text-base sm:text-lg">0 €</p>
                         </div>
                       ) : (
-                        <div className="w-24 text-right font-black text-[#E10C69] text-lg">
+                        <div className="text-right font-black text-[#E10C69] text-base sm:text-lg sm:w-24 sm:shrink-0 tabular-nums">
                           {(Number(item.price || 0) * Number(currentQty || 0)).toFixed(2)} €
                         </div>
                       )}
 
                       <button
+                        type="button"
                         onClick={() => removeFromCart(item._id)}
-                        className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                        className="hidden sm:block p-2 text-gray-300 hover:text-red-500 transition-colors shrink-0 touch-manipulation"
+                        aria-label={t('actions.remove') || 'Remove'}
                       >
                         <Trash2 size={20} />
                       </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -485,9 +507,9 @@ export default function CartPage() {
             )}
           </div>
 
-          <aside className="lg:w-80">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('summary.title')}</h2>
+          <aside className="w-full lg:w-80 shrink-0">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:sticky lg:top-20 xl:top-24">
+              <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('summary.title')}</h2>
               {!isEmpty && (
                 <div className="space-y-4">
                   <div className="flex justify-between text-gray-600">

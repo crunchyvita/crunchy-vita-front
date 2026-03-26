@@ -3,18 +3,140 @@
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import AdminHeader from '@/components/admin/header';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { 
-  Mail, Package, Users, MessageSquare,
-  CheckCircle, Trash2, Reply, LayoutDashboard, 
-  Box, ShoppingCart, LogOut, AlertTriangle, X, Clock, CheckCircle2, Building2, Eye
-} from 'lucide-react';
-import { notificationAPI, messageAPI, orderAPI } from '@/lib/api';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import { Trash2, Reply, AlertTriangle, X, Clock, Building2, Eye } from 'lucide-react';
+import { messageAPI, orderAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+const SALES_TREND_TABS = [
+  { key: '12m', label: '12 Months' },
+  { key: '6m', label: '6 Months' },
+  { key: '30d', label: '30 Days' },
+  { key: '7d', label: '7 Days' },
+];
+
+function salesTrendSubtitle(range) {
+  switch (range) {
+    case '7d':
+      return 'Daily revenue — last 7 days';
+    case '30d':
+      return 'Daily revenue — last 30 days';
+    case '6m':
+      return 'Monthly revenue — last 6 months';
+    case '12m':
+      return 'Monthly revenue — last 12 months';
+    default:
+      return 'Revenue trend';
+  }
+}
+
+function StatInsight({ changePct, suffix, emptyHint = 'No prior week data' }) {
+  if (changePct == null || !Number.isFinite(changePct)) {
+    return <p className="text-xs text-slate-400 mt-1">{emptyHint}</p>;
+  }
+  const capped = Math.max(-100, Math.min(100, Number(changePct)));
+  const up = capped > 0;
+  const flat = capped === 0;
+  const color = flat ? 'text-slate-500' : up ? 'text-emerald-600' : 'text-rose-600';
+  const arrow = flat ? '—' : up ? '↑' : '↓';
+  return (
+    <p className={`text-xs font-semibold mt-1 flex items-center gap-1 flex-wrap ${color}`}>
+      <span>{arrow}</span>
+      <span>{flat ? '0' : Math.abs(capped)}%</span>
+      {suffix ? <span className="font-normal text-slate-500">{suffix}</span> : null}
+    </p>
+  );
+}
+
+function SalesTrendChart({ trend }) {
+  const data = useMemo(() => {
+    const points = Array.isArray(trend) ? trend : [];
+    return {
+      labels: points.map((p) => p.label),
+      datasets: [
+        {
+          label: 'Revenue',
+          data: points.map((p) => Number(p.revenue) || 0),
+          borderColor: '#556622',
+          backgroundColor: 'rgba(85, 104, 34, 0.1)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [trend]);
+
+  const options = useMemo(() => {
+    const n = Array.isArray(trend) ? trend.length : 0;
+    const maxTicksLimit = n <= 8 ? n : n <= 16 ? 12 : n <= 32 ? 14 : 12;
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) =>
+              new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+                Number(ctx.raw) || 0
+              ),
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(15, 23, 42, 0.06)' },
+          ticks: {
+            callback: (value) => `€${Number(value).toLocaleString('en-US')}`,
+          },
+        },
+      },
+    };
+  }, [trend]);
+
+  return (
+    <div className="h-64 w-full min-h-[16rem]">
+      <Line data={data} options={options} />
+    </div>
+  );
+}
+
 function AdminDashboard() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messages, setMessages] = useState([]);
@@ -26,7 +148,8 @@ function AdminDashboard() {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
   const [dashStats, setDashStats] = useState(null);
-  const [trafficRange, setTrafficRange] = useState('7d');
+  const [salesTrendRange, setSalesTrendRange] = useState('12m');
+  const [trafficPeriod, setTrafficPeriod] = useState('week');
 
   useEffect(() => {
     if (isAuthenticated && (user?.role === 'ADMIN' || user?.role === 'SUPERADMIN')) {
@@ -42,13 +165,13 @@ function AdminDashboard() {
     if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPERADMIN')) return;
     (async () => {
       try {
-        const res = await orderAPI.getAdminDashboardStats();
+        const res = await orderAPI.getAdminDashboardStats({ trend: salesTrendRange });
         if (res?.success) setDashStats(res.data);
       } catch {
         setDashStats(null);
       }
     })();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, salesTrendRange]);
 
   const fetchMessages = async () => {
     try {
@@ -181,19 +304,25 @@ function AdminDashboard() {
       .slice(0, 6);
   }, [dashStats]);
 
+  /** Top products by units sold; backend uses rolling windows matching the select (7d / 30d from now). */
   const trafficRows = useMemo(() => {
-    const rows = trafficRange === '30d'
-      ? (Array.isArray(dashStats?.bestSellers30d) ? dashStats.bestSellers30d : [])
-      : (Array.isArray(dashStats?.bestSellers7d) ? dashStats.bestSellers7d : []);
-    const fallbackRows = Array.isArray(dashStats?.traffic) ? dashStats.traffic : [];
-    const sourceRows = rows.length > 0 ? rows : fallbackRows;
-    const top = sourceRows.slice(0, 5);
+    const rows =
+      trafficPeriod === 'month'
+        ? Array.isArray(dashStats?.bestSellers30d)
+          ? dashStats.bestSellers30d
+          : []
+        : Array.isArray(dashStats?.bestSellers7d)
+          ? dashStats.bestSellers7d
+          : [];
+    const top = rows.slice(0, 5);
     const maxQty = Math.max(1, ...top.map((r) => Number(r.totalQty || 0)));
     return top.map((r) => ({
       ...r,
       ratio: Math.max(8, Math.round((Number(r.totalQty || 0) / maxQty) * 100)),
     }));
-  }, [dashStats, trafficRange]);
+  }, [dashStats, trafficPeriod]);
+
+  const activeTrendRange = dashStats?.salesTrendRange || salesTrendRange;
 
   const getOrderTotalItems = (order) => {
     const items = Array.isArray(order?.items) ? order.items : [];
@@ -211,13 +340,18 @@ function AdminDashboard() {
               <section>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-500 uppercase">Today's Sale</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase">Today&apos;s Sale</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
                         dashStats.todaySales || 0
                       )}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">{dashStats.todayOrders || 0} orders</p>
+                    <p className="text-xs text-slate-400 mt-1">{dashStats.todayOrders || 0} orders today</p>
+                    <StatInsight
+                      changePct={dashStats.todaySalesVsYesterdayPct}
+                      suffix="vs yesterday"
+                      emptyHint="No sales today or yesterday"
+                    />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-semibold text-slate-500 uppercase">Total Sales</p>
@@ -226,41 +360,101 @@ function AdminDashboard() {
                         dashStats.totalSales || 0
                       )}
                     </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Previous 7 days:{' '}
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+                        dashStats.weekOverWeek?.revenue?.previous ?? 0
+                      )}
+                    </p>
+                    <StatInsight
+                      changePct={dashStats.weekOverWeek?.revenue?.changePct}
+                      suffix="vs last 7 days"
+                    />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-semibold text-slate-500 uppercase">Total Orders</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalOrders || 0}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Previous 7 days: {dashStats.weekOverWeek?.orders?.previous ?? 0} orders
+                    </p>
+                    <StatInsight
+                      changePct={dashStats.weekOverWeek?.orders?.changePct}
+                      suffix="vs last  7 days"
+                    />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-semibold text-slate-500 uppercase">Total Customers</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalCustomers || 0}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Previous 7 days: {dashStats.weekOverWeek?.customers?.previous ?? 0} buyers
+                    </p>
+                    <StatInsight
+                      changePct={dashStats.weekOverWeek?.customers?.changePct}
+                      suffix="vs last 7 days"
+                    />
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-slate-900">Traffic Sources</h3>
-                      <div className="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50">
-                        <button
-                          type="button"
-                          onClick={() => setTrafficRange('7d')}
-                          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                            trafficRange === '7d' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                          }`}
-                        >
-                          Last 7 Days
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTrafficRange('30d')}
-                          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                            trafficRange === '30d' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                          }`}
-                        >
-                          Last Month
-                        </button>
+                <div className="mt-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
+                  <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+                      <div>
+                        <h3 className="font-bold text-slate-900">Sales trend</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">{salesTrendSubtitle(activeTrendRange)}</p>
                       </div>
+                      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sales trend period">
+                        {SALES_TREND_TABS.map(({ key, label }) => {
+                          const selected = salesTrendRange === key;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              role="tab"
+                              aria-selected={selected}
+                              onClick={() => setSalesTrendRange(key)}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+                                selected
+                                  ? 'border-slate-300 bg-slate-50 text-slate-900'
+                                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {Array.isArray(dashStats.salesTrend) && dashStats.salesTrend.length > 0 ? (
+                      <SalesTrendChart trend={dashStats.salesTrend} />
+                    ) : (
+                      <p className="text-sm text-slate-400 py-12 text-center">No sales data for this period</p>
+                    )}
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-4">
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-900">Traffic Sources</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Top products by units sold (rolling period)
+                        </p>
+                      </div>
+                      <label className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                        <span className="sr-only">Period for product ranking</span>
+                        <select
+                          value={trafficPeriod}
+                          onChange={(e) => setTrafficPeriod(e.target.value)}
+                          className="text-xs font-semibold text-slate-800 border border-slate-200 rounded-lg bg-white px-2.5 py-1.5 pr-7 appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-[#556622]/25 focus:border-[#556622]"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'right 0.5rem center',
+                          }}
+                        >
+                          <option value="week">Last 7 days</option>
+                          <option value="month">Last 30 days</option>
+                        </select>
+                      </label>
                     </div>
                     <ul className="space-y-3">
                       {trafficRows.map((row) => (
@@ -341,7 +535,15 @@ function AdminDashboard() {
                   </div>
 
                   <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                    <h3 className="font-bold text-slate-900 mb-3">Recent Customers</h3>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <h3 className="font-bold text-slate-900">Recent Customers</h3>
+                      <Link
+                        href="/admin/customers"
+                        className="text-xs font-semibold text-[#556622] hover:underline shrink-0"
+                      >
+                        See all customers
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {recentCustomers.map((c) => (
                         <li key={c.key} className="flex items-center justify-between gap-3">
@@ -369,24 +571,6 @@ function AdminDashboard() {
                 </div>
               </section>
             )}
-
-            <section>
-              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <QuickLinkCard icon={<Package className="text-blue-600" />} title="Products" desc="Catalog" onClick={() => router.push('/admin/products')} />
-                <QuickLinkCard icon={<Box className="text-orange-600" />} title="Stock" desc="Inventory" onClick={() => router.push('/admin/stock')} />
-                <QuickLinkCard icon={<Mail className="text-green-600" />} title="Contacts" desc="Messages" onClick={() => router.push('/admin/contact')} />
-                <QuickLinkCard icon={<ShoppingCart className="text-purple-600" />} title="Orders" desc="Sales" onClick={() => router.push('/admin/orders')} />
-              </div>
-            </section>
-
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 flex flex-col items-center justify-center text-center">
-                <div className="bg-blue-50 p-4 rounded-full mb-4">
-                  <LayoutDashboard className="h-12 w-12 text-blue-200" />
-                </div>
-                <h3 className="text-lg font-bold">Welcome, {user?.name}</h3>
-                <p className="text-slate-500 max-w-sm">Manage your Crunchy Vita shop with ease.</p>
-            </div>
           </div>
         </main>
 
@@ -510,18 +694,6 @@ function AdminDashboard() {
         )}
       </div>
     </ProtectedRoute>
-  );
-}
-
-function QuickLinkCard({ icon, title, desc, onClick }) {
-  return (
-    <button onClick={onClick} className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all text-left group">
-      <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-blue-50 transition-colors text-xl">{icon}</div>
-      <div>
-        <p className="text-sm font-bold text-slate-900">{title}</p>
-        <p className="text-xs text-slate-500">{desc}</p>
-      </div>
-    </button>
   );
 }
 

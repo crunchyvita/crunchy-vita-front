@@ -222,6 +222,7 @@ export function useCart() {
       }
 
       applyCartData(result.data || {});
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('cartUpdated'));
       setError(null);
       return true;
     } catch (err) {
@@ -257,6 +258,7 @@ export function useCart() {
         const latest = pendingRemoveRef.current.get(itemId);
         if (!latest || latest.requestId !== requestId) return true;
         applyCartData(result.data || {});
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('cartUpdated'));
 
         if (removedWasFreeItem && typeof window !== 'undefined') {
           localStorage.removeItem('appliedPromoCode');
@@ -423,6 +425,7 @@ export function useCart() {
             }
 
             applyCartData(result.data || {});
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('cartUpdated'));
             setError(null);
           } catch (err) {
             const message = getErrorMessage(err);
@@ -457,6 +460,7 @@ export function useCart() {
 
       await cartAPI('/', 'DELETE');
       applyCartData({});
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('cartUpdated'));
       setError(null);
     } catch (err) {
       console.error('Failed to clear cart:', err);
@@ -477,6 +481,7 @@ export function useCart() {
     removeFromCart,
     updateQuantity,
     clearCart,
+    loadCart,
     subtotal,
     shipping,
     shippingBaseFee,

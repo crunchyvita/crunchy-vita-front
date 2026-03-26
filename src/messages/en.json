@@ -1137,6 +1137,8 @@
     "shippingAddress": "Shipping address",
     "paymentInfo": "Payment info",
     "paymentMethod": "Credit Card",
+    "cardEnding": "Card ending in {last4}",
+    "paymentFallback": "Bank card",
     "continueShopping": "Continue shopping",
     "viewOrder": "View order",
     "missingReference": "Missing payment reference.",

@@ -410,6 +410,8 @@ export const orderAPI = {
     const q = new URLSearchParams();
     if (params.status) q.set('status', params.status);
     if (params.search) q.set('search', params.search);
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.limit != null) q.set('limit', String(params.limit));
     const suffix = q.toString() ? `?${q.toString()}` : '';
     return apiRequest(`/orders/admin${suffix}`, { method: 'GET' });
   },
@@ -426,8 +428,24 @@ export const orderAPI = {
       method: 'PUT',
       body: JSON.stringify(payload),
     }),
-  getAdminDashboardStats: async () =>
-    apiRequest('/orders/admin/dashboard-stats', { method: 'GET' }),
+  validateAdminShippingOffer: async (id) =>
+    apiRequest(`/orders/admin/${id}/shipping-offer/validate`, { method: 'POST' }),
+  getAdminDashboardStats: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.trend) q.set('trend', String(params.trend));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/orders/admin/dashboard-stats${suffix}`, { method: 'GET' });
+  },
+};
+
+export const paymentAdminAPI = {
+  listSessions: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.limit != null) q.set('limit', String(params.limit));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/payment/admin/sessions${suffix}`, { method: 'GET' });
+  },
 };
 
 // Contact/Message API functions

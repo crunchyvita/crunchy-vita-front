@@ -16,6 +16,21 @@ const statusStyle = {
   refunded: { dot: 'bg-blue-500', label: 'refunded' },
 };
 
+function idToShopSegment(id) {
+  if (id == null) return null;
+  if (typeof id === 'string') return id;
+  if (typeof id === 'object' && id._id != null) return String(id._id);
+  return String(id);
+}
+
+function shopHrefForLine(line) {
+  const pid = idToShopSegment(line?.productId);
+  const pkid = idToShopSegment(line?.packageId);
+  if (pid) return `/shop/${pid}`;
+  if (pkid) return `/shop/packages/${pkid}`;
+  return '/shop';
+}
+
 function formatMoney(amount, currency = 'eur') {
   const cur = (currency || 'eur').toUpperCase();
   try {
@@ -61,7 +76,9 @@ function OrdersContent() {
     const query = searchQuery.toLowerCase();
     const matchesOrderId = order.invoiceNumber?.toString().toLowerCase().includes(query);
     const matchesProduct = (order.items || []).some((item) =>
-      item.name?.toLowerCase().includes(query)
+      String(item.name || '')
+        .toLowerCase()
+        .includes(query)
     );
     return matchesOrderId || matchesProduct;
   });
@@ -180,11 +197,13 @@ function OrdersContent() {
                           ) : null}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 truncate">{line.name}</p>
-                          <p className="text-sm text-slate-500">{formatMoney(line.lineTotal, order.currency)}</p>
+                          <p className="font-medium text-slate-900 truncate">{line.name || '—'}</p>
+                          <p className="text-sm text-slate-500">
+                            {formatMoney(line.lineTotal, order.currency)}
+                          </p>
                         </div>
                         <Link
-                          href={line.productId ? `/shop/${line.productId}` : '/shop'}
+                          href={shopHrefForLine(line)}
                           className="text-xs font-semibold text-[#556822] hover:underline shrink-0"
                         >
                           {t('list.viewProduct')}

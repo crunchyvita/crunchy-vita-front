@@ -19,6 +19,24 @@ function formatMoney(amount, currency = "eur") {
 	}
 }
 
+function lineDisplayName(line) {
+	const n = String(line?.name || "").trim();
+	if (n) return n;
+	const p = line?.productId;
+	const k = line?.packageId;
+	if (p && typeof p === "object" && p.name) return p.name;
+	if (k && typeof k === "object" && k.name) return k.name;
+	return "—";
+}
+
+function lineUnitPrice(line) {
+	const up = Number(line?.unitPrice);
+	if (Number.isFinite(up) && up > 0) return up;
+	const q = Math.max(1, Number(line?.quantity || 1));
+	const lt = Number(line?.lineTotal || 0);
+	return q > 0 ? lt / q : 0;
+}
+
 function AdminOrderDetailInner() {
 	const params = useParams();
 	const id = params?.id;
@@ -56,7 +74,6 @@ function AdminOrderDetailInner() {
 		const items = Array.isArray(order?.items) ? order.items : [];
 		return items.reduce((sum, line) => sum + Math.max(1, Number(line?.quantity || 1)), 0);
 	}, [order]);
-
 
 	return (
 		<>
@@ -96,7 +113,7 @@ function AdminOrderDetailInner() {
 									<table className="min-w-full text-sm">
 										<thead>
 											<tr className="border-b border-slate-200 text-left text-slate-500">
-												<th className="px-3 py-2 font-medium">Name</th>
+												<th className="px-3 py-2 font-medium">Product</th>
 												<th className="px-3 py-2 font-medium">Qty</th>
 												<th className="px-3 py-2 font-medium">Unit price</th>
 												<th className="px-3 py-2 font-medium text-right">Line total</th>
@@ -105,9 +122,9 @@ function AdminOrderDetailInner() {
 										<tbody className="divide-y divide-slate-100 text-slate-700">
 											{(order.items || []).map((line, idx) => (
 												<tr key={idx}>
-													<td className="px-3 py-3">{line?.name || "-"}</td>
+													<td className="px-3 py-3">{lineDisplayName(line)}</td>
 													<td className="px-3 py-3">{line?.quantity || 1}</td>
-													<td className="px-3 py-3">{formatMoney(line?.unitPrice, order?.currency)}</td>
+													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), order?.currency)}</td>
 													<td className="px-3 py-3 text-right font-medium">
 														{formatMoney(line?.lineTotal, order?.currency)}
 													</td>
@@ -143,6 +160,10 @@ function AdminOrderDetailInner() {
 									<p className="text-sm text-slate-700"><span className="font-medium">Name:</span> {order.customerName || "-"}</p>
 									<p className="text-sm text-slate-700"><span className="font-medium">Email:</span> {order.customerEmail || "-"}</p>
 									<p className="text-sm text-slate-700"><span className="font-medium">Phone:</span> {order.customerPhone || "-"}</p>
+									<p className="text-sm text-slate-700 mt-2 font-mono break-all">
+										<span className="font-medium font-sans">Payment intent:</span>{" "}
+										{order.paymentIntentId || "—"}
+									</p>
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -150,7 +171,7 @@ function AdminOrderDetailInner() {
 									<p className="text-sm text-slate-700"><span className="font-medium">Delivery type:</span> {order.deliveryType || "-"}</p>
 									{shippingAddress ? (
 										<div className="mt-2 text-sm text-slate-700 leading-relaxed">
-											<p>{[shippingAddress.line1, shippingAddress.line2].filter(Boolean).join(", ") || "-"}</p>
+											<p>{shippingAddress.line1 || "-"}</p>
 											<p>{[shippingAddress.postalCode, shippingAddress.city].filter(Boolean).join(" ") || "-"}</p>
 											<p>{shippingAddress.country || "-"}</p>
 										</div>
@@ -160,29 +181,28 @@ function AdminOrderDetailInner() {
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-									<h3 className="text-sm font-semibold text-slate-900 mb-3">Boxtal</h3>
-									<p className="text-sm text-slate-700"><span className="font-medium">Offer code:</span> {boxtal?.shippingOfferCode || "-"}</p>
-									<p className="text-sm text-slate-700"><span className="font-medium">Offer id:</span> {boxtal?.shippingOfferId || "-"}</p>
-									<p className="text-sm text-slate-700"><span className="font-medium">Reference:</span> {boxtalShipment?.reference || "-"}</p>
-									<p className="text-sm text-slate-700"><span className="font-medium">Tracking:</span> {boxtalShipment?.trackingNumber || "-"}</p>
+									<h3 className="text-sm font-semibold text-slate-900 mb-3">Shipment (Boxtal)</h3>
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">Offer:</span> {boxtal?.shippingOfferCode || "—"}
+									</p>
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">Boxtal ref:</span>{" "}
+										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || "—"}
+									</p>
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">Carrier tracking:</span>{" "}
+										{boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || "—"}
+									</p>
 									{boxtalShipment?.trackingUrl ? (
 										<a
 											href={boxtalShipment.trackingUrl}
 											target="_blank"
 											rel="noreferrer"
-											className="text-sm text-[#556822] hover:underline"
+											className="text-sm text-[#556822] hover:underline inline-block mt-2"
 										>
-											Open tracking link
+											Tracking link
 										</a>
 									) : null}
-									<div className="mt-4 pt-4 border-t border-slate-100">
-										<Link
-											href={`/admin/orders/${order._id}/shipping-offers`}
-											className="inline-flex rounded-md bg-[#556822] px-3 py-2 text-xs font-semibold text-white hover:bg-[#44591a]"
-										>
-											Edit / Choose Shipping Offer
-										</Link>
-									</div>
 								</div>
 							</div>
 						</div>

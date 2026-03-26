@@ -29,7 +29,7 @@ const toNumberOrFallback = (value, fallback = 0) => {
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
-    emailNotifications: { contactMessages: true, stockAlerts: false },
+    emailNotifications: { contactMessages: true, stockAlerts: false, newOrders: true },
     features: { rouletteEnabled: false },
     professionalSpace: { productFormats: '1kg, 2kg, 10kg' },
     promoBadge: {
@@ -68,6 +68,7 @@ export default function AdminSettingsPage() {
             emailNotifications: {
               contactMessages: data.data.emailNotifications?.contactMessages ?? true,
               stockAlerts: data.data.emailNotifications?.stockAlerts ?? false,
+              newOrders: data.data.emailNotifications?.newOrders !== false,
             },
             features: {
               rouletteEnabled: data.data.features?.rouletteEnabled ?? false,
@@ -344,7 +345,8 @@ export default function AdminSettingsPage() {
           <div className="divide-y divide-slate-100">
             {[
               { id: 'contactMessages', label: 'Contact Messages', desc: 'Email alerts for new contact form submissions', cat: 'emailNotifications' },
-              { id: 'stockAlerts', label: 'Stock Alerts', desc: 'Email alerts when product stock is running low', cat: 'emailNotifications' }
+              { id: 'stockAlerts', label: 'Stock Alerts', desc: 'Email alerts when product stock is running low', cat: 'emailNotifications' },
+              { id: 'newOrders', label: 'New orders', desc: 'Email admins when a payment succeeds and an order is created', cat: 'emailNotifications' }
             ].map((item) => (
               <div key={item.id} className="flex items-center justify-between py-4">
                 <div>

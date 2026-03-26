@@ -37,6 +37,14 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer = null;
+
+    const syncCartFromServer = () => {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(new Event('cartNeedsReload'));
+      window.dispatchEvent(new Event('cartUpdated'));
+    };
+
     (async () => {
       if (!lookupId) {
         setLoading(false);
@@ -47,6 +55,11 @@ export default function CheckoutSuccessPage() {
         const res = await paymentAPI.getOrderDetails(lookupId, sessionId ? 'session' : 'payment_intent');
         if (!cancelled && res?.success) {
           setData(res.data);
+          // Server cart is cleared when payment finalizes; refresh every useCart() (header badge, etc.)
+          syncCartFromServer();
+          retryTimer = window.setTimeout(() => {
+            if (!cancelled) syncCartFromServer();
+          }, 1500);
         } else if (!cancelled) {
           setError(res?.message || t('loadingError'));
         }
@@ -56,7 +69,11 @@ export default function CheckoutSuccessPage() {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+      if (retryTimer != null) window.clearTimeout(retryTimer);
+    };
   }, [lookupId, sessionId, t]);
 
   const items = useMemo(() => data?.items || [], [data]);
@@ -68,14 +85,29 @@ export default function CheckoutSuccessPage() {
   const total = data?.totalAmount ?? 0;
   const currency = data?.currency || 'eur';
 
-  const shipName = [data?.customerFirstName, data?.customerLastName]
-    .filter(Boolean).join(' ').trim() || data?.customerName || '—';
+  const shipName = String(data?.customerName || '').trim() || '—';
 
   const addr = data?.shippingAddress;
   const paymentSummary = String(data?.paymentMethodSummary || '').trim();
-  const cardMatch = paymentSummary.match(/([A-Za-z0-9]+)\s*\*{3,4}\s*(\d{4})/);
-  const cardBrand = cardMatch ? String(cardMatch[1]).toUpperCase() : null;
-  const cardLast4 = cardMatch ? cardMatch[2] : null;
+
+  const { cardBrand, cardLast4 } = useMemo(() => {
+    const summary = String(data?.paymentMethodSummary || '').trim();
+    const fromApiBrand = data?.paymentCardBrand ? String(data.paymentCardBrand).trim() : '';
+    const fromApiLast4 = data?.paymentCardLast4 ? String(data.paymentCardLast4).trim() : '';
+
+    let last4 =
+      (fromApiLast4 && /^\d{4}$/.test(fromApiLast4) ? fromApiLast4 : null) ||
+      (summary.match(/(\d{4})\s*$/)?.[1] ?? null);
+
+    let brand = fromApiBrand || null;
+    if (!brand && summary && last4) {
+      const head = summary.slice(0, Math.max(0, summary.lastIndexOf(last4))).trim();
+      const cleaned = head.replace(/[\s·*•.…]+$/g, '').trim();
+      if (cleaned && !/^\d+$/.test(cleaned)) brand = cleaned.toUpperCase();
+    }
+
+    return { cardBrand: brand, cardLast4: last4 };
+  }, [data]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fdfdfd]">
@@ -174,7 +206,7 @@ export default function CheckoutSuccessPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-900">{line.name}</p>
+                      <p className="font-semibold text-slate-900">{line.name || '—'}</p>
                       <p className="text-sm text-slate-500">{t('quantity')} {line.quantity}</p>
                     </div>
                     <p className="font-bold text-slate-900 tabular-nums text-right">
@@ -229,16 +261,20 @@ export default function CheckoutSuccessPage() {
               </div>
 
               <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">{t('paymentInfo')}</h3>
-                <div className="space-y-1 leading-relaxed">
-                  <p className="text-[15px] font-medium text-slate-700">{t('paymentMethod')}</p>
-                  {cardBrand ? (
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 mb-5">
+                  {t('paymentInfo')}
+                </h3>
+                <div className="space-y-1.5 text-[15px] font-normal text-slate-500 leading-relaxed">
+                  <p>{t('paymentMethod')}</p>
+                  {cardLast4 ? (
                     <>
-                      <p className="text-[15px] font-medium text-slate-600">{cardBrand}</p>
-                      <p className="text-[30px] font-medium text-slate-500 tracking-wide">*** {cardLast4}</p>
+                      {cardBrand ? <p className="uppercase tracking-wide">{cardBrand}</p> : null}
+                      <p className="tabular-nums">
+                        *** {cardLast4}
+                      </p>
                     </>
                   ) : (
-                    <p className="text-[15px] font-medium text-slate-600">{paymentSummary || 'Carte bancaire'}</p>
+                    <p>{paymentSummary || t('paymentFallback')}</p>
                   )}
                 </div>
               </div>

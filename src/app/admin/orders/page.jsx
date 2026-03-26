@@ -1,29 +1,45 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
-import { Search, MoreVertical, Eye, Pencil } from 'lucide-react';
+import { Search, MoreVertical, Eye, Pencil, Truck } from 'lucide-react';
+
+const ORDER_STATUS_LABEL = {
+  pending: 'Pending',
+  awaiting_delivery: 'Awaiting delivery',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+  returned: 'Returned',
+  refunded: 'Refunded',
+  cancelled: 'Cancelled',
+};
+
+const formatOrderStatus = (status) => ORDER_STATUS_LABEL[status] || status || '—';
 
 const TABS = [
-  { id: 'all', label: 'Toutes' },
-  { id: 'delivered', label: 'Livrées' },
-  { id: 'pending', label: 'En attente' },
-  { id: 'awaiting_delivery', label: 'En préparation' },
-  { id: 'returned', label: 'Retours' },
-  { id: 'refunded', label: 'Remboursées' },
+  { id: 'all', label: 'All' },
+  { id: 'delivered', label: 'Delivered' },
+  { id: 'shipped', label: 'Shipped' },
+  { id: 'pending', label: 'Pending' },
+  { id: 'awaiting_delivery', label: 'Awaiting delivery' },
+  { id: 'returned', label: 'Returned' },
+  { id: 'refunded', label: 'Refunded' },
+  { id: 'cancelled', label: 'Cancelled' },
 ];
 
 const badge = (status) => {
   const map = {
     delivered: 'bg-emerald-100 text-emerald-800',
+    shipped: 'bg-sky-100 text-sky-800',
     awaiting_delivery: 'bg-lime-100 text-lime-800',
     pending: 'bg-amber-100 text-amber-800',
     returned: 'bg-red-100 text-red-800',
     refunded: 'bg-blue-100 text-blue-800',
+    cancelled: 'bg-slate-200 text-slate-700',
   };
   return map[status] || 'bg-slate-100 text-slate-700';
 };
@@ -36,6 +52,7 @@ function AdminOrdersInner() {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [orders, setOrders] = useState([]);
+  const [listTotal, setListTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(null);
@@ -51,11 +68,15 @@ function AdminOrdersInner() {
       const res = await orderAPI.listAdmin({
         status: tab === 'all' ? undefined : tab,
         search: search.trim() || undefined,
+        page,
+        limit: PAGE_SIZE,
       });
-      if (res?.success) setOrders(res.data || []);
-      else setError(res?.message || 'Erreur');
+      if (res?.success) {
+        setOrders(res.data || []);
+        setListTotal(Number(res.total) || 0);
+      } else setError(res?.message || 'Error');
     } catch (e) {
-      setError(e.message || 'Erreur');
+      setError(e.message || 'Error');
     } finally {
       setLoading(false);
     }
@@ -64,42 +85,18 @@ function AdminOrdersInner() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
+  }, [tab, page]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [tab, search]);
-
-  const filtered = useMemo(() => {
-    if (!search.trim()) return orders;
-    const q = search.trim().toLowerCase();
-    return orders.filter(
-      (o) =>
-        (o.invoiceNumber || '').toLowerCase().includes(q) ||
-        (o.customerName || '').toLowerCase().includes(q) ||
-        (o.customerEmail || '').toLowerCase().includes(q)
-    );
-  }, [orders, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
-
-  const paginatedOrders = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
+  const totalPages = Math.max(1, Math.ceil(listTotal / PAGE_SIZE));
 
   const statusOptions = [
-    { value: 'pending', label: 'pending' },
-    { value: 'awaiting_delivery', label: 'awaiting_delivery' },
-    { value: 'delivered', label: 'delivered' },
-    { value: 'returned', label: 'returned' },
-    { value: 'refunded', label: 'refunded' },
+    { value: 'pending', label: ORDER_STATUS_LABEL.pending },
+    { value: 'awaiting_delivery', label: ORDER_STATUS_LABEL.awaiting_delivery },
+    { value: 'shipped', label: ORDER_STATUS_LABEL.shipped },
+    { value: 'delivered', label: ORDER_STATUS_LABEL.delivered },
+    { value: 'returned', label: ORDER_STATUS_LABEL.returned },
+    { value: 'refunded', label: ORDER_STATUS_LABEL.refunded },
+    { value: 'cancelled', label: ORDER_STATUS_LABEL.cancelled },
   ];
 
   const changeStatus = async (id, status) => {
@@ -108,7 +105,7 @@ function AdminOrdersInner() {
       await orderAPI.updateAdminStatus(id, status);
       await load();
     } catch (e) {
-      setError(e.message || 'Mise à jour impossible');
+      setError(e.message || 'Update failed');
     } finally {
       setUpdating(null);
     }
@@ -135,10 +132,10 @@ function AdminOrdersInner() {
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
               Orders
               <span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-                {orders.length} Orders
+                {listTotal} order{listTotal !== 1 ? 's' : ''}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Keep track of order status </p>
+            <p className="text-sm text-slate-500">Keep track of order status</p>
           </div>
         </div>
 
@@ -148,7 +145,10 @@ function AdminOrdersInner() {
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTab(t.id)}
+                onClick={() => {
+                  setTab(t.id);
+                  setPage(1);
+                }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   tab === t.id
                     ? 'bg-[#556622] text-white'
@@ -167,7 +167,11 @@ function AdminOrdersInner() {
               placeholder="Search by invoice, customer, email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && load()}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return;
+                if (page === 1) void load();
+                else setPage(1);
+              }}
             />
           </div>
 
@@ -186,12 +190,13 @@ function AdminOrdersInner() {
                     <th className="px-3 py-3 font-medium">Customer</th>
                     <th className="px-3 py-3 font-medium">Date</th>
                     <th className="px-3 py-3 font-medium">Status</th>
+                    <th className="px-3 py-3 font-medium text-right">Items</th>
                     <th className="px-3 py-3 font-medium text-right">Amount</th>
                     <th className="px-3 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {paginatedOrders.map((o) => (
+                  {orders.map((o) => (
                     <tr
                       key={o._id}
                       className={
@@ -205,7 +210,7 @@ function AdminOrdersInner() {
                       </td>
                       <td className="px-3 py-4 text-slate-600 whitespace-nowrap">
                         {o.createdAt
-                          ? new Date(o.createdAt).toLocaleString('fr-FR', {
+                          ? new Date(o.createdAt).toLocaleString('en-GB', {
                               dateStyle: 'medium',
                               timeStyle: 'short',
                             })
@@ -217,11 +222,14 @@ function AdminOrdersInner() {
                             o.status
                           )}`}
                         >
-                          {o.status}
+                          {formatOrderStatus(o.status)}
                         </span>
                       </td>
+                      <td className="px-3 py-4 text-right tabular-nums text-slate-700">
+                        {typeof o.totalItemCount === 'number' ? o.totalItemCount : '—'}
+                      </td>
                       <td className="px-3 py-4 text-right font-semibold text-slate-900 tabular-nums">
-                        {new Intl.NumberFormat('fr-FR', {
+                        {new Intl.NumberFormat('en-GB', {
                           style: 'currency',
                           currency: (o.currency || 'eur').toUpperCase(),
                         }).format(Number(o.totalAmount) || 0)}
@@ -239,22 +247,32 @@ function AdminOrdersInner() {
                         </button>
 
                         {menuOpenFor === o._id && (
-                          <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                          <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
                             <Link
                               href={`/admin/orders/${o._id}`}
                               className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                               onClick={() => setMenuOpenFor(null)}
                             >
                               <Eye className="h-4 w-4" />
-                              View Details
+                              View details
                             </Link>
+                            {!o.shippingOfferLocked ? (
+                              <Link
+                                href={`/admin/orders/${o._id}/shipping-offers`}
+                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100"
+                                onClick={() => setMenuOpenFor(null)}
+                              >
+                                <Truck className="h-4 w-4" />
+                                Edit shipping offer
+                              </Link>
+                            ) : null}
                             <button
                               type="button"
                               className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-t border-slate-100 transition-colors"
                               onClick={() => openEditModal(o)}
                             >
                               <Pencil className="h-4 w-4" />
-                              Edit Status
+                              Edit status
                             </button>
                           </div>
                         )}
@@ -266,15 +284,15 @@ function AdminOrdersInner() {
             )}
           </div>
 
-          {!loading && filtered.length === 0 && (
+          {!loading && orders.length === 0 && (
             <div className="py-20 text-center text-sm text-slate-500">No orders found</div>
           )}
         </div>
 
-        {!loading && filtered.length > 0 && (
+        {!loading && listTotal > 0 && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-slate-500">
-              Page {page} of {totalPages}
+              Page {page} of {totalPages} 
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -301,17 +319,17 @@ function AdminOrdersInner() {
           <div className="fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
             <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-slate-200">
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-slate-900">Modifier statut</h3>
+                <h3 className="text-lg font-bold text-slate-900">Edit status</h3>
                 <button
                   type="button"
                   className="text-sm text-slate-500 hover:text-slate-700"
                   onClick={() => setEditOrder(null)}
                 >
-                  Fermer
+                  Close
                 </button>
               </div>
               <div className="p-6 space-y-4">
-                <p className="text-sm text-slate-600">Commande #{editOrder.invoiceNumber}</p>
+                <p className="text-sm text-slate-600">Order #{editOrder.invoiceNumber}</p>
                 <select
                   className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white"
                   value={nextStatus}
@@ -331,7 +349,7 @@ function AdminOrdersInner() {
                     className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700"
                     onClick={() => setEditOrder(null)}
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="button"
@@ -339,7 +357,7 @@ function AdminOrdersInner() {
                     onClick={submitEditStatus}
                     disabled={updating === editOrder._id}
                   >
-                    Enregistrer
+                    Save
                   </button>
                 </div>
               </div>

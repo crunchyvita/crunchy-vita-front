@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useRouter, usePathname } from '@/navigation';
 import { LogOut, ShoppingCart, Heart, User, Package, Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/hooks/useCart';
 import { useTranslations, useLocale } from 'next-intl';
 import '../app/fonts.css';
 
@@ -21,7 +22,25 @@ export default function Header() {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations('Header');
-  
+  const { cartItems, loadCart } = useCart();
+
+  const cartUnitCount = useMemo(
+    () =>
+      (Array.isArray(cartItems) ? cartItems : []).reduce(
+        (sum, item) => sum + Math.max(1, Number(item?.quantity) || 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  useEffect(() => {
+    const sync = () => {
+      void loadCart();
+    };
+    window.addEventListener('cartUpdated', sync);
+    return () => window.removeEventListener('cartUpdated', sync);
+  }, [loadCart]);
+
   // State for User Dropdown
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -51,14 +70,14 @@ export default function Header() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-30">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 min-h-14 sm:min-h-16 flex items-center justify-between gap-2">
         
         {/* Logo Section */}
         <button 
           onClick={() => router.push('/')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0 min-w-0"
         >
-          <img src="/assets/images/logo.png" alt="Logo" className="h-16 w-auto" />
+          <img src="/assets/images/logo.png" alt="Logo" className="h-11 w-auto sm:h-16 max-h-14 sm:max-h-none object-contain object-left" />
         </button>
 
         {/* Desktop Navigation */}
@@ -70,27 +89,47 @@ export default function Header() {
           ))}
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <button onClick={() => router.push('/orders')} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" title={t('orders')}>
-            <Package size={20} className="text-gray-700" />
-          </button>
-
-          <button onClick={() => router.push('/cart')} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" title={t('cart')}>
-            <ShoppingCart size={20} className="text-gray-700" />
+        {/* Right Section — compact on small screens so icons stay usable */}
+        <div className="flex items-center justify-end gap-0.5 sm:gap-2 md:gap-4 shrink min-w-0">
+          <button
+            type="button"
+            onClick={() => router.push('/orders')}
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors relative shrink-0 touch-manipulation"
+            title={t('orders')}
+            aria-label={t('orders')}
+          >
+            <Package size={18} className="text-gray-700 sm:w-5 sm:h-5" strokeWidth={2} />
           </button>
 
           <button
-            onClick={() => router.push('/favorites')}
-            className="hidden sm:flex p-2 hover:bg-gray-100 rounded-full transition-colors relative"
-            title={t('wishlist')}
+            type="button"
+            onClick={() => router.push('/cart')}
+            className="relative p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0 touch-manipulation"
+            title={t('cart')}
+            aria-label={cartUnitCount > 0 ? `${t('cart')} (${cartUnitCount})` : t('cart')}
           >
-            <Heart size={20} className="text-gray-700" />
+            <ShoppingCart size={18} className="text-gray-700 sm:w-5 sm:h-5" strokeWidth={2} />
+            {cartUnitCount > 0 ? (
+              <span className="absolute -top-0.5 -right-0.5 flex h-[1.05rem] min-w-[1.05rem] sm:h-[1.125rem] sm:min-w-[1.125rem] items-center justify-center rounded-full bg-red-500 px-0.5 sm:px-1 text-[9px] sm:text-[10px] font-bold tabular-nums leading-none text-white shadow-sm ring-2 ring-white">
+                {cartUnitCount > 99 ? '99+' : cartUnitCount}
+              </span>
+            ) : null}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push('/favorites')}
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors relative shrink-0 touch-manipulation"
+            title={t('wishlist')}
+            aria-label={t('wishlist')}
+          >
+            <Heart size={18} className="text-gray-700 sm:w-5 sm:h-5" strokeWidth={2} />
           </button>
 
           {/* LANGUAGE SWITCHER - DROPDOWN LIST WITH IMAGES */}
-          <div className="relative hidden sm:block" ref={langRef}>
+          <div className="relative hidden sm:block shrink-0" ref={langRef}>
             <button 
+              type="button"
               onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
               className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 transition-all hover:bg-gray-50 hover:border-gray-300"
             >
@@ -134,10 +173,15 @@ export default function Header() {
 
           {/* User Profile */}
           {user ? (
-            <div className="relative" ref={dropdownRef}>
-              <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center gap-2 border-l border-gray-200 pl-2 sm:pl-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                  {user?.photo ? <img src={user.photo} className="w-full h-full object-cover" /> : <User size={20} />}
+            <div className="relative shrink-0" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center gap-1 sm:gap-2 border-l border-gray-200 pl-1.5 sm:pl-4 touch-manipulation"
+                aria-expanded={showDropdown}
+              >
+                <div className="w-7 h-7 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                  {user?.photo ? <img src={user.photo} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />}
                 </div>
               </button>
 
