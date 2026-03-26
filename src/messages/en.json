@@ -41,6 +41,11 @@
     "returnPolicy": "Returns policy",
     "detail": "Details"
   },
+  "PromoBadge": {
+    "title": "Free shipping!",
+    "description": "From {relay} of purchases for pickup points and {home} for home delivery",
+    "cta": "Enjoy it"
+  },
   "HeaderHome": {
     "nav": {
       "home": "Home",

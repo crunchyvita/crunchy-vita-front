@@ -41,6 +41,11 @@
     "returnPolicy": "Retours",
     "detail": "Détails"
   },
+  "PromoBadge": {
+    "title": "Livraison offerte !",
+    "description": "Dès {relay} d'achats en point relais et {home} à domicile",
+    "cta": "Profitez-en"
+  },
   "HeaderHome": {
     "nav": {
       "home": "Accueil",

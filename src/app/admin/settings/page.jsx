@@ -32,9 +32,6 @@ export default function AdminSettingsPage() {
     emailNotifications: { contactMessages: true, stockAlerts: false, newOrders: true },
     features: { rouletteEnabled: false },
     professionalSpace: { productFormats: '1kg, 2kg, 10kg' },
-    promoBadge: {
-      highlightedValue: '40 €',
-    },
     shippingSettings: {
       marginMultiplier: 1,
       relay: { freeThreshold: 40, belowThresholdPrice: 4.9 },
@@ -49,7 +46,6 @@ export default function AdminSettingsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [savingFormats, setSavingFormats] = useState(false);
-  const [savingPromoBadge, setSavingPromoBadge] = useState(false);
   const [savingShippingSettings, setSavingShippingSettings] = useState(false);
 
   useEffect(() => { fetchSettings(); }, []);
@@ -75,9 +71,6 @@ export default function AdminSettingsPage() {
             },
             professionalSpace: {
               productFormats: data.data.professionalSpace?.productFormats ?? '1kg, 2kg, 10kg',
-            },
-            promoBadge: {
-              highlightedValue: data.data.promoBadge?.highlightedValue ?? '40 €',
             },
             shippingSettings: {
               marginMultiplier: data.data.shippingSettings?.marginMultiplier ?? 1,
@@ -199,58 +192,6 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handlePromoBadgeSave = async () => {
-    try {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        toast.error('Non authentifié');
-        return;
-      }
-
-      setSavingPromoBadge(true);
-
-      const response = await fetch(`${API_URL}/settings`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          promoBadge: {
-            highlightedValue: settings.promoBadge.highlightedValue,
-          },
-        }),
-      });
-
-      const responseData = await response.json().catch(() => null);
-
-      if (response.ok && responseData?.success) {
-        const savedValue =
-          responseData?.data?.promoBadge?.highlightedValue
-          ?? settings.promoBadge.highlightedValue;
-
-        setSettings((prev) => ({
-          ...prev,
-          promoBadge: {
-            ...prev.promoBadge,
-            highlightedValue: savedValue,
-          },
-        }));
-
-        toast.success('Promo badge enregistré');
-      } else {
-        toast.error('Erreur lors de la sauvegarde du promo badge');
-      }
-    } catch (error) {
-      console.error('Error saving promo badge settings:', error);
-      toast.error('Erreur lors de la sauvegarde du promo badge');
-    } finally {
-      setSavingPromoBadge(false);
-    }
-  };
-
   const handleShippingSettingsSave = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -300,7 +241,6 @@ export default function AdminSettingsPage() {
         setSettings((prev) => ({
           ...prev,
           shippingSettings: data?.data?.shippingSettings ?? prev.shippingSettings,
-          promoBadge: data?.data?.promoBadge ?? prev.promoBadge,
         }));
         toast.success('Frais de livraison enregistrés');
       } else {
@@ -446,49 +386,9 @@ export default function AdminSettingsPage() {
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="border-b border-slate-200 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Promo Badge</h2>
-            <p className="mt-1 text-xs text-slate-500">Update only the highlighted amount shown in the floating delivery promo badge.</p>
-          </div>
-
-          <div className="py-4 space-y-3">
-            <label htmlFor="promoBadgeHighlightedValue" className="text-sm font-medium text-slate-900">
-              Highlighted value
-            </label>
-            <input
-              id="promoBadgeHighlightedValue"
-              type="text"
-              value={settings.promoBadge.highlightedValue}
-              onChange={(e) => {
-                setSettings((prev) => ({
-                  ...prev,
-                  promoBadge: {
-                    ...prev.promoBadge,
-                    highlightedValue: e.target.value,
-                  },
-                }));
-              }}
-              placeholder="40 €"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20"
-            />
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handlePromoBadgeSave}
-                disabled={savingPromoBadge}
-                className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {savingPromoBadge ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="border-b border-slate-200 pb-3">
             <h2 className="text-sm font-semibold text-slate-900">Shipping Settings</h2>
             <p className="mt-1 text-xs text-slate-500">
-              Configure checkout pricing rules shown in front office. Prices are TTC.
+              Configure checkout pricing rules shown in front office. Prices are tax-inclusive.
             </p>
           </div>
 
@@ -499,24 +399,24 @@ export default function AdminSettingsPage() {
 
               <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Point relais</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Pickup point</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
-                    <li>{formatEuro(settings.shippingSettings.relay.belowThresholdPrice)} - panier &lt; {settings.shippingSettings.relay.freeThreshold} €</li>
-                    <li>GRATUIT - des {settings.shippingSettings.relay.freeThreshold} €</li>
+                    <li>{formatEuro(settings.shippingSettings.relay.belowThresholdPrice)} - cart &lt; {settings.shippingSettings.relay.freeThreshold} €</li>
+                    <li>FREE - from {settings.shippingSettings.relay.freeThreshold} €</li>
                   </ul>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Livraison domicile</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Home delivery</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
-                    <li>{formatEuro(settings.shippingSettings.home.belowReducedPrice)} - panier &lt; {settings.shippingSettings.home.reducedThreshold} €</li>
-                    <li>{formatEuro(settings.shippingSettings.home.betweenReducedAndFreePrice)} - {toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0)} € a {Math.max(toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0), toNumberOrFallback(settings.shippingSettings.home.freeThreshold, 0) - 1)} €</li>
-                    <li>GRATUIT - des {settings.shippingSettings.home.freeThreshold} €</li>
+                    <li>{formatEuro(settings.shippingSettings.home.belowReducedPrice)} - cart &lt; {settings.shippingSettings.home.reducedThreshold} €</li>
+                    <li>{formatEuro(settings.shippingSettings.home.betweenReducedAndFreePrice)} - {toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0)} € to {Math.max(toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0), toNumberOrFallback(settings.shippingSettings.home.freeThreshold, 0) - 1)} €</li>
+                    <li>FREE - from {settings.shippingSettings.home.freeThreshold} €</li>
                   </ul>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Express (option)</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Express delivery</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
                     <li>{formatEuro(settings.shippingSettings.express.addonPrice)}</li>
                   </ul>
@@ -525,7 +425,7 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Point Relais</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pickup Point</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-slate-700 mb-1 block">Free shipping from cart amount (EUR)</label>
@@ -577,7 +477,7 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Livraison Domicile</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Home Delivery</h3>
               <p className="text-xs text-slate-500">Rule: below reduced threshold = low tier, between thresholds = mid tier, from free threshold = free.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
@@ -676,11 +576,11 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Express Add-on</h3>
-              <p className="text-xs text-slate-500">Optional extra fee added to the selected delivery mode.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Express Delivery</h3>
+              <p className="text-xs text-slate-500">This is the full customer price for express delivery.</p>
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Express add-on fee (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Express delivery price (EUR)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -702,8 +602,17 @@ export default function AdminSettingsPage() {
                     placeholder="9.90"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Boxtal Quotes</h3>
+              <p className="text-xs text-slate-500">
+                Applied only to back-office Boxtal quote calculations.
+              </p>
+              <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Boxtal margin multiplier (back office quotes)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Boxtal margin multiplier</label>
                   <input
                     type="number"
                     step="0.01"
