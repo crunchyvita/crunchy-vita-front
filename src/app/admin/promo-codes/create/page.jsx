@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, CheckCircle2, Loader2, ArrowLeft, Info, ShieldCheck, Ticket, PlusCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { AlertTriangle, CheckCircle2, Loader2, ArrowLeft, Info, ShieldCheck, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
 
 export default function CreatePromoCodePage() {
+  const t = useTranslations('admin.promoCodesForm');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -89,7 +91,7 @@ export default function CreatePromoCodePage() {
       const result = await response.json();
 
       if (result.success) {
-        setSuccess('✅ Promo code created successfully!');
+        setSuccess(t('successCreate'));
         setTimeout(() => router.push('/admin/promo-codes'), 1500);
       } else {
         setError(result.message);
@@ -105,8 +107,6 @@ export default function CreatePromoCodePage() {
     <>
       <AdminHeader />
       <div className="space-y-6 p-6 lg:p-8 bg-slate-50 min-h-screen">
-        
-        {/* --- TOP NAVIGATION --- */}
         <div className="flex items-center justify-between">
           <div>
             <Link
@@ -114,15 +114,14 @@ export default function CreatePromoCodePage() {
               className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors mb-2"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              Back to promo codes
+              {t('back')}
             </Link>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-              Create a new promo code
+              {t('titleCreate')}
             </h1>
           </div>
         </div>
 
-        {/* Feedback messages */}
         {success && (
           <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
             <CheckCircle2 size={20} />
@@ -137,47 +136,46 @@ export default function CreatePromoCodePage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Configuration Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
                   <Ticket size={18} className="text-blue-500" />
-                  Code Details
+                  {t('codeDetails')}
                 </h3>
               </div>
-              
+
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Promotion Name *</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('promotionNameRequired')}</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Spring Wheel 15%"
+                      placeholder={t('namePlaceholder')}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Discount Type</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('discountType')}</label>
                     <select
                       name="discountType"
                       value={formData.discountType}
                       onChange={handleInputChange}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
                     >
-                      <option value="PERCENTAGE">Percentage (%)</option>
-                      <option value="FREE_ITEM">Free Product/Package</option>
+                      <option value="PERCENTAGE">{t('optionPercentage')}</option>
+                      <option value="FREE_ITEM">{t('optionFreeItem')}</option>
                     </select>
                   </div>
 
                   {formData.discountType === 'PERCENTAGE' ? (
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Value (%) *</label>
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('valuePercent')}</label>
                       <input
                         type="number"
                         name="discountValue"
@@ -190,22 +188,22 @@ export default function CreatePromoCodePage() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Gift Type</label>
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('giftType')}</label>
                       <select
                         name="freeItemType"
                         value={formData.freeItemType}
                         onChange={handleInputChange}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                       >
-                        <option value="PRODUCT">Product</option>
-                        <option value="PACKAGE">Package</option>
+                        <option value="PRODUCT">{t('optionProduct')}</option>
+                        <option value="PACKAGE">{t('optionPackage')}</option>
                       </select>
                     </div>
                   )}
 
                   {formData.discountType === 'FREE_ITEM' && (
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Free Item *</label>
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('freeItem')}</label>
                       <select
                         name={formData.freeItemType === 'PRODUCT' ? 'freeProduct' : 'freePackage'}
                         value={formData.freeItemType === 'PRODUCT' ? formData.freeProduct : formData.freePackage}
@@ -213,7 +211,7 @@ export default function CreatePromoCodePage() {
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                         required
                       >
-                        <option value="">Choose an item...</option>
+                        <option value="">{t('chooseItem')}</option>
                         {(formData.freeItemType === 'PRODUCT' ? products : packages).map((item) => (
                           <option key={item._id} value={item._id}>{item.name}</option>
                         ))}
@@ -222,7 +220,7 @@ export default function CreatePromoCodePage() {
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Minimum Purchase ( € )</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('minPurchase')}</label>
                     <input
                       type="number"
                       name="minPurchaseAmount"
@@ -234,11 +232,11 @@ export default function CreatePromoCodePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Usage Limit</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('usageLimit')}</label>
                     <input
                       type="number"
                       name="usageLimit"
-                      placeholder="Unlimited"
+                      placeholder={t('unlimitedPlaceholder')}
                       value={formData.usageLimit}
                       onChange={handleInputChange}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
@@ -246,7 +244,7 @@ export default function CreatePromoCodePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Expiration Date *</label>
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">{t('expirationRequired')}</label>
                     <input
                       type="date"
                       name="expirationDate"
@@ -259,35 +257,32 @@ export default function CreatePromoCodePage() {
                 </div>
               </div>
 
-              {/* Info Box */}
               <div className="p-6 bg-blue-50 border-t border-blue-100 flex gap-4">
                 <div className="h-12 w-12 shrink-0 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                   <Info size={24} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-blue-900 text-base mb-1">Information</h4>
+                  <h4 className="font-bold text-blue-900 text-base mb-1">{t('infoTitle')}</h4>
                   <p className="text-blue-700/80 text-sm leading-relaxed">
-                    Promo codes are unique. Make sure this code is not already used by another campaign.
-                    Codes expire at 11:59 PM on the selected date.
+                    {t('infoBody')}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Side Settings (Sidebar style like Stock) */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="text-slate-400" size={24} />
-                <h3 className="font-bold text-slate-800 text-lg">Status </h3>
+                <h3 className="font-bold text-slate-800 text-lg">{t('statusTitle')}</h3>
               </div>
 
               <div className="space-y-3">
                 <label className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition-all group">
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-700">Active Code</span>
-                    <span className="text-xs text-slate-400">Usable immediately</span>
+                    <span className="text-sm font-bold text-slate-700">{t('activeCode')}</span>
+                    <span className="text-xs text-slate-400">{t('activeCodeHint')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -300,8 +295,8 @@ export default function CreatePromoCodePage() {
 
                 <label className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition-all group">
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-700">Roulette Eligible</span>
-                    <span className="text-xs text-slate-400">Add to roulette rewards</span>
+                    <span className="text-sm font-bold text-slate-700">{t('rouletteEligible')}</span>
+                    <span className="text-xs text-slate-400">{t('rouletteHint')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -318,25 +313,25 @@ export default function CreatePromoCodePage() {
                   onClick={handleSubmit}
                   disabled={loading}
                   className="w-full text-white py-4 rounded-lg font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-                  style={{backgroundColor: '#556622'}}
+                  style={{ backgroundColor: '#556622' }}
                   onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#3d4617')}
                   onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#556622')}
                 >
                   {loading ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
-                      Creating...
+                      {t('creating')}
                     </>
                   ) : (
-                    'Create promo code'
+                    t('createButton')
                   )}
                 </button>
-                
+
                 <Link
                   href="/admin/promo-codes"
                   className="block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-lg font-semibold text-sm transition-all"
                 >
-                  Cancel
+                  {t('cancel')}
                 </Link>
               </div>
             </div>

@@ -5,8 +5,11 @@ import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { categoryAPI } from "@/lib/api";
 import { FolderTree, Plus, Search, Trash2, Loader2, Pencil, Check, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function CategoriesPage() {
+  const tx = useTranslations("admin.categories");
+  const tcom = useTranslations("admin.common");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -27,7 +30,7 @@ export default function CategoriesPage() {
       const list = Array.isArray(res) ? res : res?.data || [];
       setCategories(list);
     } catch (err) {
-      setError(err?.message || "Failed to load categories");
+      setError(err?.message || tx("loadError"));
     } finally {
       setLoading(false);
     }
@@ -57,7 +60,7 @@ export default function CategoriesPage() {
       setName("");
       await loadCategories();
     } catch (err) {
-      setError(err?.message || "Failed to create category");
+      setError(err?.message || tx("createError"));
     } finally {
       setSubmitting(false);
     }
@@ -84,7 +87,7 @@ export default function CategoriesPage() {
       setCategories((prev) => prev.filter((cat) => cat._id !== id));
       closeDeleteModal();
     } catch (err) {
-      setError(err?.message || "Failed to delete category");
+      setError(err?.message || tx("deleteError"));
     } finally {
       setDeletingId("");
     }
@@ -124,7 +127,7 @@ export default function CategoriesPage() {
       );
       cancelEdit();
     } catch (err) {
-      setError(err?.message || "Failed to update category");
+      setError(err?.message || tx("updateError"));
       setSavingEdit(false);
     }
   };
@@ -136,12 +139,12 @@ export default function CategoriesPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Categories
+              {tx("title")}
               <span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
                 {categories.length}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Manage product categories</p>
+            <p className="text-sm text-slate-500">{tx("subtitle")}</p>
           </div>
         </div>
 
@@ -151,7 +154,7 @@ export default function CategoriesPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="New category name"
+              placeholder={tx("newPlaceholder")}
               className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
             />
             <button
@@ -161,7 +164,7 @@ export default function CategoriesPage() {
               style={{ backgroundColor: "#556622" }}
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              Add Category
+              {tx("add")}
             </button>
           </form>
 
@@ -169,7 +172,7 @@ export default function CategoriesPage() {
             <Search className="h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search category"
+              placeholder={tx("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -181,19 +184,19 @@ export default function CategoriesPage() {
           ) : null}
 
           {loading ? (
-            <div className="py-10 text-center text-sm text-slate-500">Loading categories...</div>
+            <div className="py-10 text-center text-sm text-slate-500">{tx("loading")}</div>
           ) : filteredCategories.length === 0 ? (
             <div className="py-16 text-center text-slate-400">
               <FolderTree className="mx-auto h-10 w-10" />
-              <p className="mt-2 text-sm font-semibold">No categories found</p>
+              <p className="mt-2 text-sm font-semibold">{tx("empty")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="px-3 py-2 font-medium">Name</th>
-                    <th className="px-3 py-2 font-medium">Linked products</th>
+                    <th className="px-3 py-2 font-medium">{tcom("name")}</th>
+                    <th className="px-3 py-2 font-medium">{tx("linkedProducts")}</th>
                     <th className="px-3 py-2"></th>
                   </tr>
                 </thead>
@@ -224,7 +227,7 @@ export default function CategoriesPage() {
                                 className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
                               >
                                 {savingEdit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                                Save
+                                {tcom("save")}
                               </button>
                               <button
                                 type="button"
@@ -233,7 +236,7 @@ export default function CategoriesPage() {
                                 className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                               >
                                 <X className="h-3.5 w-3.5" />
-                                Cancel
+                                {tcom("cancel")}
                               </button>
                             </>
                           ) : (
@@ -243,7 +246,7 @@ export default function CategoriesPage() {
                               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                             >
                               <Pencil className="h-3.5 w-3.5" />
-                              Edit
+                              {tx("edit")}
                             </button>
                           )}
                           <button
@@ -257,7 +260,7 @@ export default function CategoriesPage() {
                             ) : (
                               <Trash2 className="h-3.5 w-3.5" />
                             )}
-                            Delete
+                            {tcom("delete")}
                           </button>
                         </div>
                       </td>
@@ -274,14 +277,15 @@ export default function CategoriesPage() {
         isOpen={!!categoryToDelete}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
-        title="Delete Category"
+        title={tx("deleteTitle")}
         itemName={categoryToDelete?.name}
         warningMessage={
           categoryToDelete?.products?.length > 0
-            ? `This category is linked to ${categoryToDelete.products.length} product${categoryToDelete.products.length > 1 ? "s" : ""}. It will be removed from all products.`
+            ? tx("deleteWarning", { count: categoryToDelete.products.length })
             : null
         }
         isDeleting={!!deletingId}
+        cancelButtonLabel={tcom("cancel")}
       />
     </>
   );

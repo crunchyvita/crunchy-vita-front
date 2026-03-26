@@ -19,10 +19,12 @@ import {
   Type
 } from "lucide-react";
 import { productAPI, categoryAPI } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import TagInput from "@/components/TagInput";
 import { createEmptyNutrition, NUTRITION_ROWS } from "@/lib/nutrition";
 
 export default function CreateProductPage() {
+  const tp = useTranslations("admin.productsForm");
   const router = useRouter();
 
   // States
@@ -178,7 +180,7 @@ export default function CreateProductPage() {
       // Immediate redirect to the new product page
       router.push(`/admin/products/${result.data._id}?created=true`);
     } catch (err) {
-      setError(err?.message || "Failed to create product");
+      setError(err?.message || tp("createFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -192,9 +194,9 @@ export default function CreateProductPage() {
         <div className="space-y-1">
           <Link href="/admin/products" className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Catalog
+            {tp("backCatalog")}
           </Link>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Create New Product</h1>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{tp("title")}</h1>
         </div>
         
         <div className="flex items-center gap-4">
@@ -203,7 +205,7 @@ export default function CreateProductPage() {
             onClick={() => router.back()}
             className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 transition-all"
           >
-            Cancel
+            {tp("cancel")}
           </button>
           <button
             onClick={handleSubmit}
@@ -216,12 +218,12 @@ export default function CreateProductPage() {
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
+                {tp("creating")}
               </>
             ) : (
               <>
                 <Plus className="h-4 w-4" />
-                Save & Publish
+                {tp("savePublish")}
               </>
             )}
           </button>
@@ -239,31 +241,31 @@ export default function CreateProductPage() {
             <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
               <div className="p-3 bg-slate-900 text-white rounded-2xl"><Type size={24}/></div>
               <div>
-                <h3 className="font-black text-xl text-slate-900">Product Content</h3>
-                <p className="text-sm text-slate-500">Define the core information of your item</p>
+                <h3 className="font-black text-xl text-slate-900">{tp("sectionProductContent")}</h3>
+                <p className="text-sm text-slate-500">{tp("sectionProductContentDesc")}</p>
               </div>
             </div>
             
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Product Title *</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("labelTitle")} {tp("required")}</label>
                 <input
                   type="text"
                   required
                   value={form.name}
                   onChange={handleChange("name")}
-                  placeholder="Enter product name..."
+                  placeholder={tp("placeholderName")}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-bold text-black placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-0 transition-all outline-none"
                 />
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Full Description</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("labelDescription")}</label>
                 <textarea
                   rows={8}
                   value={form.description}
                   onChange={handleChange("description")}
-                  placeholder="Describe your product features, materials, and benefits..."
+                  placeholder={tp("placeholderDescription")}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-medium text-black placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white transition-all outline-none"
                 />
               </div>
@@ -275,10 +277,10 @@ export default function CreateProductPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
               <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><DollarSign size={20}/></div>
-                <h3 className="font-black text-lg text-slate-900">Pricing *</h3>
+                <h3 className="font-black text-lg text-slate-900">{tp("pricingTitle")} {tp("required")}</h3>
               </div>
               <div className="relative">
-                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-black font-black text-lg">$ </span>
+                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-black font-black text-lg">{tp("currencyHint")} </span>
                 <input
                   type="number"
                   min="0"
@@ -295,7 +297,7 @@ export default function CreateProductPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
               <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="p-2 bg-amber-100 text-amber-700 rounded-xl"><ShieldCheck size={20}/></div>
-                <h3 className="font-black text-lg text-slate-900">Stock Alert *</h3>
+                <h3 className="font-black text-lg text-slate-900">{tp("stockTitle")} {tp("required")}</h3>
               </div>
               <input
                 type="number"
@@ -312,12 +314,12 @@ export default function CreateProductPage() {
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="p-2 bg-slate-100 text-slate-700 rounded-xl"><AlertTriangle size={20}/></div>
-              <h3 className="font-black text-lg text-slate-900">Dimensions & Weight</h3>
+              <h3 className="font-black text-lg text-slate-900">{tp("dimensionsTitle")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Width(cm) *</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("width")} {tp("required")}</label>
                 <input
                   type="number"
                   required
@@ -331,7 +333,7 @@ export default function CreateProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Height(cm) *</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("height")} {tp("required")}</label>
                 <input
                   type="number"
                   min="0"
@@ -345,7 +347,7 @@ export default function CreateProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Depth(cm) *</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("depth")} {tp("required")}</label>
                 <input
                   type="number"
                   min="0"
@@ -359,7 +361,7 @@ export default function CreateProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Weight(kg) *</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("weight")} {tp("required")}</label>
                 <input
                   type="number"
                   min="0"
@@ -378,13 +380,13 @@ export default function CreateProductPage() {
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="p-2 bg-fuchsia-100 text-fuchsia-700 rounded-xl"><Info size={20}/></div>
               <div>
-                <h3 className="font-black text-lg text-slate-900">Tableau nutritionnel</h3>
-                <p className="text-sm text-slate-500">Renseignez les valeurs pour 100 g et pour une portion.</p>
+                <h3 className="font-black text-lg text-slate-900">{tp("nutritionTitle")}</h3>
+                <p className="text-sm text-slate-500">{tp("nutritionDesc")}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Libelle portion</label>
+              <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("servingLabel")}</label>
               <input
                 type="text"
                 value={form.nutrition.servingLabel}
@@ -397,7 +399,7 @@ export default function CreateProductPage() {
                     },
                   }))
                 }
-                placeholder="16 g"
+                placeholder={tp("servingPlaceholder")}
                 className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-medium text-black placeholder:text-slate-400 focus:border-[#556822] focus:bg-white outline-none transition-all"
               />
             </div>
@@ -405,8 +407,8 @@ export default function CreateProductPage() {
             <div className="overflow-x-auto">
               <div className="space-y-3" style={{ minWidth: "760px" }}>
                 <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-3">
-                  <div className="rounded-2xl bg-slate-900 px-5 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">Infos nutritionnelles</div>
-                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>100 g</div>
+                  <div className="rounded-2xl bg-slate-900 px-5 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">{tp("nutritionGridLabel")}</div>
+                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>{tp("per100g")}</div>
                   <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>
                     {form.nutrition.servingLabel}
                   </div>
@@ -415,7 +417,7 @@ export default function CreateProductPage() {
                 {NUTRITION_ROWS.map((row) => (
                   <div key={row.key} className="grid grid-cols-[1.3fr_1fr_1fr] gap-3">
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900">
-                      {row.label}
+                      {tp(`nutritionRows.${row.key}`)}
                     </div>
                     <input
                       type="text"
@@ -442,9 +444,9 @@ export default function CreateProductPage() {
             <div className="flex items-center justify-between border-b border-slate-100 pb-5">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-purple-100 text-purple-700 rounded-2xl"><ImageIcon size={24}/></div>
-                <h3 className="font-black text-xl text-slate-900">Visual Media</h3>
+                <h3 className="font-black text-xl text-slate-900">{tp("visualMedia")}</h3>
               </div>
-              <span className="text-xs font-bold text-slate-400">{files.length} images uploaded</span>
+              <span className="text-xs font-bold text-slate-400">{tp("imagesUploaded", { count: files.length })}</span>
             </div>
 
             <div className="space-y-6">
@@ -462,8 +464,8 @@ export default function CreateProductPage() {
                 <div className="h-16 w-16 rounded-2xl bg-white text-emerald-600 flex items-center justify-center mb-4 shadow-md group-hover:rotate-12 transition-transform">
                   <Upload size={28} />
                 </div>
-                <span className="text-lg font-black text-slate-900">Drag and drop product images</span>
-                <span className="text-sm text-slate-500 mt-2 font-medium">PNG, JPG or WebP (Max 10MB per file)</span>
+                <span className="text-lg font-black text-slate-900">{tp("dragDrop")}</span>
+                <span className="text-sm text-slate-500 mt-2 font-medium">{tp("fileTypes")}</span>
                 <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
               </label>
 
@@ -471,7 +473,7 @@ export default function CreateProductPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                   {previews.map((url, idx) => (
                     <div key={idx} className="group relative aspect-square rounded-3xl overflow-hidden border-4 border-white shadow-lg">
-                      <img src={url} alt="Preview" className="h-full w-full object-cover" />
+                      <img src={url} alt={tp("previewAlt")} className="h-full w-full object-cover" />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
                           type="button"
@@ -506,11 +508,11 @@ export default function CreateProductPage() {
         {/* --- RIGHT SIDEBAR (1/4 of screen) --- */}
         <div className="space-y-8">
           <div className="bg-slate-900 rounded-3xl p-8 shadow-2xl space-y-10">
-            <h3 className="font-black text-white text-xs uppercase tracking-[0.3em] border-b border-white/10 pb-4">Classification</h3>
+            <h3 className="font-black text-white text-xs uppercase tracking-[0.3em] border-b border-white/10 pb-4">{tp("classification")}</h3>
 
             {/* Category */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Product Category</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("categoryLabel")}</label>
               <div className="relative" ref={autocompleteRef}>
                 <input
                   type="text"
@@ -528,7 +530,7 @@ export default function CreateProductPage() {
                       setShowSuggestions(false);
                     }
                   }}
-                  placeholder="Start typing..."
+                  placeholder={tp("categoryPlaceholder")}
                   className="w-full rounded-xl bg-white/5 border border-white/10 px-5 py-3.5 text-sm font-bold text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-emerald-500 outline-none transition-all"
                 />
                 {showSuggestions && categoryInput && suggestions.length > 0 && (
@@ -565,7 +567,7 @@ export default function CreateProductPage() {
                         type="button"
                         onClick={() => removeCategorySelection(cat.id)}
                         className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
-                        aria-label={`Remove ${cat.name}`}
+                        aria-label={tp('removeCategoryAria', { name: cat.name })}
                       >
                         <X size={12} />
                       </button>
@@ -577,16 +579,16 @@ export default function CreateProductPage() {
 
             {/* Tags */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Discovery Tags</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("tagsLabel")}</label>
               <TagInput
                 value={form.tags}
                 onChange={(tags) => setForm((prev) => ({ ...prev, tags }))}
-                placeholder="SEO Keywords..."
+                placeholder={tp("tagsPlaceholder")}
               />
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Shop Visibility</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("visibilityLabel")}</label>
               <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -599,7 +601,7 @@ export default function CreateProductPage() {
                   }
                   className="h-4 w-4 accent-emerald-500"
                 />
-                <span className="text-sm font-bold text-white">Add this product to Shop</span>
+                <span className="text-sm font-bold text-white">{tp("showInShop")}</span>
               </label>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2, Toggle2, Loader2, Save, Package as PackageIcon } from 'lucide-react';
 import AdminHeader from '@/components/admin/header';
+import { useTranslations } from 'next-intl';
 
 // Neutral gray gradient placeholders for items without images
 const PLACEHOLDER_GRADIENTS = [
@@ -14,6 +15,7 @@ const PLACEHOLDER_GRADIENTS = [
 ];
 
 export default function PreferredItemAdminPage() {
+  const tp = useTranslations('admin.preferredItem');
   const [items, setItems] = useState([]);
   const [preferredItem, setPreferredItem] = useState(null);
   const [selectedItem, setSelectedItem] = useState('');
@@ -39,7 +41,7 @@ export default function PreferredItemAdminPage() {
           setItems(result.data);
         }
       } catch (err) {
-        setError('Failed to fetch items');
+        setError(tp('fetchError'));
       }
     };
 
@@ -67,7 +69,7 @@ export default function PreferredItemAdminPage() {
       // Validate: if best seller is disabled, require manual selection
       if (!isBestSellerEnabled) {
         if (!selectedItem || selectedItem === '') {
-          setError('Please select an item when Best Seller is disabled');
+          setError(tp('selectWhenManual'));
           return;
         }
       }
@@ -81,7 +83,7 @@ export default function PreferredItemAdminPage() {
 
       // Validate item was found
       if (!isBestSellerEnabled && !selectedItemObj) {
-        setError('Selected item not found in list');
+        setError(tp('notInList'));
         setLoading(false);
         return;
       }
@@ -112,7 +114,7 @@ export default function PreferredItemAdminPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('HTTP Error:', response.status, errorText);
-        setError(`Server Error (${response.status}): ${errorText || 'Unknown error'}`);
+        setError(tp('serverError', { status: response.status, detail: errorText || '—' }));
         setLoading(false);
         return;
       }
@@ -121,17 +123,17 @@ export default function PreferredItemAdminPage() {
       console.log('Response data:', result);
       
       if (result.success) {
-        setSuccess('Preferred item updated successfully!');
+        setSuccess(tp('updateSuccess'));
         setPreferredItem(result.data);
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        const errorMsg = result.message || 'Failed to update preferred item';
-        setError(' ' + errorMsg);
+        const errorMsg = result.message || tp('updateFailed');
+        setError(errorMsg);
         console.error('Error response:', result);
       }
     } catch (err) {
-      const errorMsg = err.message || 'Error saving preferred item';
-      setError( errorMsg);
+      const errorMsg = err.message || tp('saveError');
+      setError(errorMsg);
       console.error('Catch error:', err);
     } finally {
       setLoading(false);
@@ -185,7 +187,7 @@ export default function PreferredItemAdminPage() {
       if (!saveResponse.ok) {
         const errorText = await saveResponse.text();
         console.error('Toggle Best Seller - Error response:', errorText);
-        setError(`Erreur ${saveResponse.status}: ${errorText}`);
+        setError(tp('errorWithStatus', { status: saveResponse.status, detail: errorText }));
         setIsBestSellerEnabled(!newBestSellerState); // Revert on error
         setLoading(false);
         return;
@@ -194,7 +196,7 @@ export default function PreferredItemAdminPage() {
       const saveResult = await saveResponse.json();
       console.log('Toggle Best Seller - Success result:', saveResult);
       if (saveResult.success) {
-        setSuccess(`Best seller ${newBestSellerState ? 'activé' : 'désactivé'} avec succès!`);
+        setSuccess(newBestSellerState ? tp('toggleSuccessOn') : tp('toggleSuccessOff'));
         setTimeout(() => setSuccess(''), 3000);
         
         // Fetch the updated preferred item (with best-seller if enabled)
@@ -205,11 +207,11 @@ export default function PreferredItemAdminPage() {
           setSelectedItem(prefResult.data.itemId || '');
         }
       } else {
-        setError(saveResult.message || 'Échec de la mise à jour');
+        setError(saveResult.message || tp('toggleFailed'));
         setIsBestSellerEnabled(!newBestSellerState); // Revert on error
       }
     } catch (err) {
-      setError('Erreur lors du basculement du best seller');
+      setError(tp('toggleError'));
       setIsBestSellerEnabled(!isBestSellerEnabled); // Revert on error
     } finally {
       setLoading(false);
@@ -227,10 +229,10 @@ export default function PreferredItemAdminPage() {
         <div className="flex items-start justify-between gap-6">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Preferred Item
+              {tp('title')}
               
             </h1>
-            <p className="mt-1 text-sm text-slate-500">Configure which product or package to feature as preferred</p>
+            <p className="mt-1 text-sm text-slate-500">{tp('subtitle')}</p>
           </div>
           
           {/* Best Seller Toggle in Header */}
@@ -249,7 +251,7 @@ export default function PreferredItemAdminPage() {
               />
             </button>
             <p className="text-xs text-gray-600 font-semibold max-w-xs text-right">
-              {isBestSellerEnabled ? ' Auto Best Seller' : 'Manual Selection'}
+              {isBestSellerEnabled ? tp('modeAuto') : tp('modeManual')}
             </p>
           </div>
         </div>
@@ -278,7 +280,7 @@ export default function PreferredItemAdminPage() {
           {/* Products Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-              Products
+              {tp('productsSection')}
               {isBestSellerEnabled && (
                 <span className="text-sm font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
             
@@ -311,7 +313,7 @@ export default function PreferredItemAdminPage() {
                   {/* Best Seller Badge */}
                   {isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id) && (
                     <div className="absolute top-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 flex items-center gap-1">
-                     best seller
+                     {tp('badgeBestSeller')}
                     </div>
                   )}
                   
@@ -350,7 +352,7 @@ export default function PreferredItemAdminPage() {
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2">
                       <p className="text-white font-bold text-xs line-clamp-2">{item.name}</p>
-                      <p className="text-gray-200 text-xs">Product</p>
+                      <p className="text-gray-200 text-xs">{tp('typeProduct')}</p>
                     </div>
                   </div>
                   
@@ -371,7 +373,7 @@ export default function PreferredItemAdminPage() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
 
-              Packages
+              {tp('packagesSection')}
               {isBestSellerEnabled && (
                 <span className="text-sm font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
                 
@@ -404,7 +406,7 @@ export default function PreferredItemAdminPage() {
                   {/* Best Seller Badge */}
                   {isBestSellerEnabled && preferredItem && (item._id === preferredItem.itemId || item._id === preferredItem._id) && (
                     <div className="absolute top-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 flex items-center gap-1">
-                      <span>⭐</span> BEST SELLER
+                      <span>⭐</span> {tp('badgeBestSellerStar')}
                     </div>
                   )}
                   
@@ -443,7 +445,7 @@ export default function PreferredItemAdminPage() {
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2">
                       <p className="text-white font-bold text-xs line-clamp-2">{item.name}</p>
-                      <p className="text-gray-200 text-xs">Package</p>
+                      <p className="text-gray-200 text-xs">{tp('typePackage')}</p>
                     </div>
                   </div>
                   
@@ -474,17 +476,17 @@ export default function PreferredItemAdminPage() {
                 }}
                 onMouseEnter={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 10px 25px rgba(85, 102, 34, 0.3)')}
                 onMouseLeave={(e) => (loading || !selectedItem) || (e.target.style.backgroundColor = '#556822', e.target.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)')}
-                title={!selectedItem ? 'Please select an item first' : ''}
+                title={!selectedItem ? tp('selectFirst') : ''}
               >
                 {loading ? (
                   <>
                     <Loader2 size={20} className="animate-spin" />
-                    Enregistrement...
+                    {tp('saving')}
                   </>
                 ) : (
                   <>
                     <Save size={20} />
-                    Enregistrer la Sélection
+                    {tp('saveSelection')}
                   </>
                 )}
               </button>

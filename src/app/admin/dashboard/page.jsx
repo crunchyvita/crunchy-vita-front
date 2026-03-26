@@ -21,6 +21,7 @@ import { Line } from 'react-chartjs-2';
 import { Trash2, Reply, AlertTriangle, X, Clock, Building2, Eye } from 'lucide-react';
 import { messageAPI, orderAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { useLocale, useTranslations } from 'next-intl';
 
 ChartJS.register(
   CategoryScale,
@@ -33,29 +34,22 @@ ChartJS.register(
   Filler
 );
 
-const SALES_TREND_TABS = [
-  { key: '12m', label: '12 Months' },
-  { key: '6m', label: '6 Months' },
-  { key: '30d', label: '30 Days' },
-  { key: '7d', label: '7 Days' },
-];
-
-function salesTrendSubtitle(range) {
+function salesTrendSubtitle(range, t) {
   switch (range) {
     case '7d':
-      return 'Daily revenue — last 7 days';
+      return t('salesTrend.sub7d');
     case '30d':
-      return 'Daily revenue — last 30 days';
+      return t('salesTrend.sub30d');
     case '6m':
-      return 'Monthly revenue — last 6 months';
+      return t('salesTrend.sub6m');
     case '12m':
-      return 'Monthly revenue — last 12 months';
+      return t('salesTrend.sub12m');
     default:
-      return 'Revenue trend';
+      return t('salesTrend.subDefault');
   }
 }
 
-function StatInsight({ changePct, suffix, emptyHint = 'No prior week data' }) {
+function StatInsight({ changePct, suffix, emptyHint }) {
   if (changePct == null || !Number.isFinite(changePct)) {
     return <p className="text-xs text-slate-400 mt-1">{emptyHint}</p>;
   }
@@ -73,14 +67,14 @@ function StatInsight({ changePct, suffix, emptyHint = 'No prior week data' }) {
   );
 }
 
-function SalesTrendChart({ trend }) {
+function SalesTrendChart({ trend, chartLabel, numberLocale = 'en-US' }) {
   const data = useMemo(() => {
     const points = Array.isArray(trend) ? trend : [];
     return {
       labels: points.map((p) => p.label),
       datasets: [
         {
-          label: 'Revenue',
+          label: chartLabel,
           data: points.map((p) => Number(p.revenue) || 0),
           borderColor: '#556622',
           backgroundColor: 'rgba(85, 104, 34, 0.1)',
@@ -92,7 +86,7 @@ function SalesTrendChart({ trend }) {
         },
       ],
     };
-  }, [trend]);
+  }, [trend, chartLabel]);
 
   const options = useMemo(() => {
     const n = Array.isArray(trend) ? trend.length : 0;
@@ -106,7 +100,7 @@ function SalesTrendChart({ trend }) {
         tooltip: {
           callbacks: {
             label: (ctx) =>
-              new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+              new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(
                 Number(ctx.raw) || 0
               ),
           },
@@ -121,12 +115,12 @@ function SalesTrendChart({ trend }) {
           beginAtZero: true,
           grid: { color: 'rgba(15, 23, 42, 0.06)' },
           ticks: {
-            callback: (value) => `€${Number(value).toLocaleString('en-US')}`,
+            callback: (value) => `€${Number(value).toLocaleString(numberLocale)}`,
           },
         },
       },
     };
-  }, [trend]);
+  }, [trend, numberLocale]);
 
   return (
     <div className="h-64 w-full min-h-[16rem]">
@@ -138,6 +132,20 @@ function SalesTrendChart({ trend }) {
 function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const td = useTranslations('admin.dashboard');
+  const tcom = useTranslations('admin.common');
+  const locale = useLocale();
+  const numberLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
+
+  const salesTrendTabs = useMemo(
+    () => [
+      { key: '12m', label: td('salesTrend.tab12m') },
+      { key: '6m', label: td('salesTrend.tab6m') },
+      { key: '30d', label: td('salesTrend.tab30d') },
+      { key: '7d', label: td('salesTrend.tab7d') },
+    ],
+    [td]
+  );
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messages, setMessages] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -207,8 +215,7 @@ function AdminDashboard() {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    // Changed locale to en-US
-    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    return date.toLocaleDateString(numberLocale, { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const handleMarkAsRead = async (id) => {
@@ -240,12 +247,12 @@ function AdminDashboard() {
         replyText.trim()
       );
       
-      toast.success("Reply sent");
+      toast.success(td('toast.replySent'));
       setReplyText('');
       fetchMessages();
       setSelectedMessage(null);
     } catch (error) { 
-      toast.error("Send error");
+      toast.error(td('toast.sendError'));
       console.error(error);
     } finally { setSendingReply(false); }
   };
@@ -263,9 +270,9 @@ function AdminDashboard() {
       if (selectedMessage?._id === messageToDelete) setSelectedMessage(null);
       setDeleteAlertOpen(false);
       setMessageToDelete(null);
-      toast.success("Message deleted");
+      toast.success(td('toast.messageDeleted'));
     } catch (error) {
-      toast.error("Error during deletion");
+      toast.error(td('toast.deleteError'));
       setDeleteAlertOpen(false);
     }
   };
@@ -277,7 +284,7 @@ function AdminDashboard() {
     for (const order of orders) {
       const userInfo = order?.userId && typeof order.userId === 'object' ? order.userId : null;
       const customerEmail = userInfo?.email || order?.customerEmail || null;
-      const customerName = userInfo?.name || order?.customerName || customerEmail || 'Customer';
+      const customerName = userInfo?.name || order?.customerName || customerEmail || td('customerFallback');
       const key = String(userInfo?._id || customerEmail || order?._id || Math.random());
 
       if (!grouped.has(key)) {
@@ -302,7 +309,7 @@ function AdminDashboard() {
     return Array.from(grouped.values())
       .sort((a, b) => b.lastOrderAt - a.lastOrderAt)
       .slice(0, 6);
-  }, [dashStats]);
+  }, [dashStats, td]);
 
   /** Top products by units sold; backend uses rolling windows matching the select (7d / 30d from now). */
   const trafficRows = useMemo(() => {
@@ -340,57 +347,61 @@ function AdminDashboard() {
               <section>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-500 uppercase">Today&apos;s Sale</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase">{td('stats.todaySale')}</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+                      {new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(
                         dashStats.todaySales || 0
                       )}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">{dashStats.todayOrders || 0} orders today</p>
+                    <p className="text-xs text-slate-400 mt-1">{td('stats.ordersToday', { count: dashStats.todayOrders || 0 })}</p>
                     <StatInsight
                       changePct={dashStats.todaySalesVsYesterdayPct}
-                      suffix="vs yesterday"
-                      emptyHint="No sales today or yesterday"
+                      suffix={td('insight.vsYesterday')}
+                      emptyHint={td('insight.emptyNoSales')}
                     />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-500 uppercase">Total Sales</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase">{td('stats.totalSales')}</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+                      {new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(
                         dashStats.totalSales || 0
                       )}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Previous 7 days:{' '}
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
-                        dashStats.weekOverWeek?.revenue?.previous ?? 0
-                      )}
+                      {td('stats.prev7d', {
+                        amount: new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(
+                          dashStats.weekOverWeek?.revenue?.previous ?? 0
+                        ),
+                      })}
                     </p>
                     <StatInsight
                       changePct={dashStats.weekOverWeek?.revenue?.changePct}
-                      suffix="vs last 7 days"
+                      suffix={td('insight.vsLast7Days')}
+                      emptyHint={td('insight.emptyPrior')}
                     />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-500 uppercase">Total Orders</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase">{td('stats.totalOrders')}</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalOrders || 0}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Previous 7 days: {dashStats.weekOverWeek?.orders?.previous ?? 0} orders
+                      {td('stats.prev7dOrders', { count: dashStats.weekOverWeek?.orders?.previous ?? 0 })}
                     </p>
                     <StatInsight
                       changePct={dashStats.weekOverWeek?.orders?.changePct}
-                      suffix="vs last  7 days"
+                      suffix={td('insight.vsLast7DaysOrders')}
+                      emptyHint={td('insight.emptyPrior')}
                     />
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-500 uppercase">Total Customers</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase">{td('stats.totalCustomers')}</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalCustomers || 0}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Previous 7 days: {dashStats.weekOverWeek?.customers?.previous ?? 0} buyers
+                      {td('stats.prev7dBuyers', { count: dashStats.weekOverWeek?.customers?.previous ?? 0 })}
                     </p>
                     <StatInsight
                       changePct={dashStats.weekOverWeek?.customers?.changePct}
-                      suffix="vs last 7 days"
+                      suffix={td('insight.vsLast7DaysCustomers')}
+                      emptyHint={td('insight.emptyPrior')}
                     />
                   </div>
                 </div>
@@ -399,11 +410,11 @@ function AdminDashboard() {
                   <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
                       <div>
-                        <h3 className="font-bold text-slate-900">Sales trend</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">{salesTrendSubtitle(activeTrendRange)}</p>
+                        <h3 className="font-bold text-slate-900">{td('salesTrend.title')}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">{salesTrendSubtitle(activeTrendRange, td)}</p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sales trend period">
-                        {SALES_TREND_TABS.map(({ key, label }) => {
+                      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label={td('salesTrend.ariaTabs')}>
+                        {salesTrendTabs.map(({ key, label }) => {
                           const selected = salesTrendRange === key;
                           return (
                             <button
@@ -425,22 +436,26 @@ function AdminDashboard() {
                       </div>
                     </div>
                     {Array.isArray(dashStats.salesTrend) && dashStats.salesTrend.length > 0 ? (
-                      <SalesTrendChart trend={dashStats.salesTrend} />
+                      <SalesTrendChart
+                        trend={dashStats.salesTrend}
+                        chartLabel={td('salesTrend.chartLabel')}
+                        numberLocale={numberLocale}
+                      />
                     ) : (
-                      <p className="text-sm text-slate-400 py-12 text-center">No sales data for this period</p>
+                      <p className="text-sm text-slate-400 py-12 text-center">{td('salesTrend.noData')}</p>
                     )}
                   </div>
 
                   <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-4">
                       <div className="min-w-0">
-                        <h3 className="font-bold text-slate-900">Traffic Sources</h3>
+                        <h3 className="font-bold text-slate-900">{td('traffic.title')}</h3>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          Top products by units sold (rolling period)
+                          {td('traffic.subtitle')}
                         </p>
                       </div>
                       <label className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                        <span className="sr-only">Period for product ranking</span>
+                        <span className="sr-only">{td('traffic.periodLabel')}</span>
                         <select
                           value={trafficPeriod}
                           onChange={(e) => setTrafficPeriod(e.target.value)}
@@ -451,8 +466,8 @@ function AdminDashboard() {
                             backgroundPosition: 'right 0.5rem center',
                           }}
                         >
-                          <option value="week">Last 7 days</option>
-                          <option value="month">Last 30 days</option>
+                          <option value="week">{td('traffic.week')}</option>
+                          <option value="month">{td('traffic.month')}</option>
                         </select>
                       </label>
                     </div>
@@ -461,14 +476,14 @@ function AdminDashboard() {
                         <li key={String(row.productId)}>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-slate-700 truncate pr-2">{row.name}</span>
-                            <span className="font-medium text-slate-500">{Number(row.totalQty || 0).toLocaleString('en-US')}</span>
+                            <span className="font-medium text-slate-500">{Number(row.totalQty || 0).toLocaleString(numberLocale)}</span>
                           </div>
                           <div className="mt-1 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                             <div className="h-full bg-[#556622]" style={{ width: `${row.ratio}%` }} />
                           </div>
                         </li>
                       ))}
-                      {trafficRows.length === 0 && <li className="text-slate-400 text-sm">No data yet</li>}
+                      {trafficRows.length === 0 && <li className="text-slate-400 text-sm">{td('traffic.noData')}</li>}
                     </ul>
                   </div>
                 </div>
@@ -476,13 +491,13 @@ function AdminDashboard() {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-4">
                   <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-slate-900">Recent Orders</h3>
+                      <h3 className="font-bold text-slate-900">{td('recentOrders.title')}</h3>
                       <button
                         type="button"
                         onClick={() => router.push('/admin/orders')}
                         className="text-xs font-semibold text-[#556622] hover:underline"
                       >
-                        See all orders
+                        {td('recentOrders.seeAll')}
                       </button>
                     </div>
 
@@ -490,16 +505,16 @@ function AdminDashboard() {
                       <table className="min-w-full text-sm">
                         <thead>
                           <tr className="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b border-slate-100">
-                            <th className="py-2 pr-3">Customer</th>
-                            <th className="py-2 pr-3">Total Amount</th>
-                            <th className="py-2 pr-3">Date</th>
-                            <th className="py-2 pr-3">Total Item</th>
+                            <th className="py-2 pr-3">{td('recentOrders.colCustomer')}</th>
+                            <th className="py-2 pr-3">{td('recentOrders.colTotal')}</th>
+                            <th className="py-2 pr-3">{td('recentOrders.colDate')}</th>
+                            <th className="py-2 pr-3">{td('recentOrders.colItems')}</th>
                           </tr>
                         </thead>
                         <tbody>
                           {(dashStats.recentOrders || []).slice(0, 5).map((o) => {
                             const userInfo = o?.userId && typeof o.userId === 'object' ? o.userId : null;
-                            const customerName = userInfo?.name || o.customerName || 'Customer';
+                            const customerName = userInfo?.name || o.customerName || td('customerFallback');
                             const customerEmail = userInfo?.email || o.customerEmail || '-';
                             return (
                               <tr key={o._id} className="border-b border-slate-50 last:border-0">
@@ -510,7 +525,7 @@ function AdminDashboard() {
                                   </div>
                                 </td>
                                 <td className="py-3 pr-3 font-semibold text-slate-900">
-                                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(
+                                  {new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(
                                     o.totalAmount || 0
                                   )}
                                 </td>
@@ -521,7 +536,7 @@ function AdminDashboard() {
                                     type="button"
                                     onClick={() => router.push(`/admin/orders/${o._id}`)}
                                     className="inline-flex items-center justify-center h-8 w-8 rounded-md  text-slate-600 hover:bg-slate-50"
-                                    aria-label={`View order ${o.invoiceNumber}`}
+                                    aria-label={td('recentOrders.viewAria', { invoice: o.invoiceNumber ?? '' })}
                                   >
                                     <Eye size={16} />
                                   </button>
@@ -536,12 +551,12 @@ function AdminDashboard() {
 
                   <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-3 gap-2">
-                      <h3 className="font-bold text-slate-900">Recent Customers</h3>
+                      <h3 className="font-bold text-slate-900">{td('recentCustomers.title')}</h3>
                       <Link
                         href="/admin/customers"
                         className="text-xs font-semibold text-[#556622] hover:underline shrink-0"
                       >
-                        See all customers
+                        {td('recentCustomers.seeAll')}
                       </Link>
                     </div>
                     <ul className="space-y-3">
@@ -561,11 +576,11 @@ function AdminDashboard() {
                             </div>
                           </div>
                           <p className="text-sm font-semibold text-slate-900 shrink-0">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(c.totalAmount || 0)}
+                            {new Intl.NumberFormat(numberLocale, { style: 'currency', currency: 'EUR' }).format(c.totalAmount || 0)}
                           </p>
                         </li>
                       ))}
-                      {recentCustomers.length === 0 && <li className="text-slate-400 text-sm">No customers yet</li>}
+                      {recentCustomers.length === 0 && <li className="text-slate-400 text-sm">{td('recentCustomers.noData')}</li>}
                     </ul>
                   </div>
                 </div>
@@ -579,7 +594,7 @@ function AdminDashboard() {
           <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-100" onClick={() => setSelectedMessage(null)}>
             <div className="bg-white rounded-[1.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
               <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Message Details</span>
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{td('messageModal.title')}</span>
                 <button onClick={() => setSelectedMessage(null)} className="p-1.5 hover:bg-slate-200 rounded-full transition-colors">
                   <X size={18} className="text-slate-400" />
                 </button>
@@ -604,7 +619,7 @@ function AdminDashboard() {
                   </div>
                   {selectedMessage.status === 'replied' && (
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20">
-                      Replied
+                      {td('messageModal.replied')}
                     </span>
                   )}
                 </div>
@@ -612,13 +627,13 @@ function AdminDashboard() {
                 <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
                   <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
                   <div className="mt-3 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
-                    <Clock size={12}/> Received on {formatDate(selectedMessage.createdAt)}
+                    <Clock size={12}/> {td('messageModal.receivedOn', { date: formatDate(selectedMessage.createdAt) })}
                   </div>
                 </div>
 
                 {selectedMessage.status === 'replied' && selectedMessage.replyMessage && (
                   <div className="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100">
-                    <span className="text-[10px] font-black text-emerald-600 uppercase mb-2 block tracking-wider">Your Reply</span>
+                    <span className="text-[10px] font-black text-emerald-600 uppercase mb-2 block tracking-wider">{td('messageModal.yourReply')}</span>
                     <p className="text-slate-700 text-sm leading-relaxed">{selectedMessage.replyMessage}</p>
                   </div>
                 )}
@@ -626,13 +641,13 @@ function AdminDashboard() {
                 {selectedMessage.status !== 'replied' && (
                   <div className="space-y-3">
                     <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase px-1">
-                      <Reply size={14} className="text-blue-600" /> Quick Reply
+                      <Reply size={14} className="text-blue-600" /> {td('messageModal.quickReply')}
                     </label>
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-30 text-sm text-slate-700 resize-none"
-                      placeholder="Write your response..."
+                      placeholder={td('messageModal.placeholder')}
                     />
                     <div className="flex gap-2 pt-2">
                       <button
@@ -643,7 +658,7 @@ function AdminDashboard() {
                         onMouseLeave={(e) => !sendingReply && (e.target.style.backgroundColor = '#556622')}
                         disabled={sendingReply || !replyText.trim()}
                       >
-                        {sendingReply ? 'Sending...' : 'Send Reply'}
+                        {sendingReply ? td('messageModal.sending') : td('messageModal.send')}
                       </button>
                     </div>
                   </div>
@@ -654,7 +669,7 @@ function AdminDashboard() {
                     onClick={() => handleDeleteClick(selectedMessage._id)}
                     className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 hover:text-red-700 uppercase transition-colors"
                    >
-                    <Trash2 size={14} /> Delete this message
+                    <Trash2 size={14} /> {td('messageModal.deleteMessage')}
                    </button>
                 </div>
               </div>
@@ -670,9 +685,9 @@ function AdminDashboard() {
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-4">
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">Delete message?</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">{td('deleteMessage.title')}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  This action is permanent. This contact's data will be permanently erased.
+                  {td('deleteMessage.body')}
                 </p>
               </div>
               <div className="flex border-t border-slate-100">
@@ -680,13 +695,13 @@ function AdminDashboard() {
                   onClick={() => setDeleteAlertOpen(false)}
                   className="flex-1 px-4 py-4 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors border-r border-slate-100"
                 >
-                  Cancel
+                  {tcom('cancel')}
                 </button>
                 <button 
                   onClick={confirmDelete}
                   className="flex-1 px-4 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors tracking-tight"
                 >
-                  Delete
+                  {tcom('delete')}
                 </button>
               </div>
             </div>

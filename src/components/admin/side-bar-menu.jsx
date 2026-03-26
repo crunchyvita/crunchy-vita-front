@@ -31,58 +31,55 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 
-// ✅ Top-level items (NOT grouped)
 const TOP_ITEMS = [
-  { label: "Overview", href: "/admin/dashboard", icon: Home },
-  { label: " Online Shop", href: "/shop", icon: ShoppingCart },
+  { labelKey: "overview", href: "/admin/dashboard", icon: Home },
+  { labelKey: "onlineShop", href: "/shop", icon: ShoppingCart },
 ];
 
-// ✅ Grouped items (collapsible)
 const NAV_GROUPS = [
   {
-    title: "Catalog",
+    titleKey: "catalog",
     items: [
-      { label: "Products", href: "/admin/products", icon: Boxes },
-      { label: "Categories", href: "/admin/categories", icon: Tag },
-      { label: "Packages", href: "/admin/package", icon: Package },
-      { label: "Stock", href: "/admin/stock", icon: ShoppingCart },
-      { label: "Preferred Item", href: "/admin/preferred-item", icon: Heart },
+      { labelKey: "products", href: "/admin/products", icon: Boxes },
+      { labelKey: "categories", href: "/admin/categories", icon: Tag },
+      { labelKey: "packages", href: "/admin/package", icon: Package },
+      { labelKey: "stock", href: "/admin/stock", icon: ShoppingCart },
+      { labelKey: "preferredItem", href: "/admin/preferred-item", icon: Heart },
     ],
   },
   {
-    title: "Sales",
+    titleKey: "sales",
     items: [
-      { label: "Orders", href: "/admin/orders", icon: CreditCard },
-      { label: "Checkout", href: "/admin/checkout", icon: CreditCard },
-      { label: "Promotions", href: "/admin/promo-codes", icon: ArrowUpDown },
+      { labelKey: "orders", href: "/admin/orders", icon: CreditCard },
+      { labelKey: "checkout", href: "/admin/checkout", icon: CreditCard },
+      { labelKey: "promotions", href: "/admin/promo-codes", icon: ArrowUpDown },
     ],
   },
   {
-    title: "Customers",
+    titleKey: "customers",
     items: [
-      { label: "Clients", href: "/admin/customers", icon: Users },
-      { label: "Administrators", href: "/admin/administrators", icon: ShieldCheck },
-      { label: "Contact", href: "/admin/contact", icon: MessageSquare },
+      { labelKey: "clients", href: "/admin/customers", icon: Users },
+      { labelKey: "administrators", href: "/admin/administrators", icon: ShieldCheck },
+      { labelKey: "contact", href: "/admin/contact", icon: MessageSquare },
     ],
   },
   {
-    title: "Content & Marketing",
-    items: [
-      { label: "Blog", href: "/admin/blogs", icon: FileText },
-    
-    ],
+    titleKey: "contentMarketing",
+    items: [{ labelKey: "blog", href: "/admin/blogs", icon: FileText }],
   },
   {
-    title: "Analytics",
+    titleKey: "analytics",
     items: [
-      { label: "Sales Report", href: "/admin/reports/sales", icon: BarChart3 },
-      { label: "Client Report", href: "/admin/reports/clients", icon: BarChart3 },
+      { labelKey: "salesReport", href: "/admin/reports/sales", icon: BarChart3 },
+      { labelKey: "clientReport", href: "/admin/reports/clients", icon: BarChart3 },
     ],
   },
 ];
 
 export default function AdminSideBarMenu() {
+  const t = useTranslations("admin.sidebar");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isSidebarOpen, closeSidebar } = useAdminLayout();
@@ -92,26 +89,20 @@ export default function AdminSideBarMenu() {
 
   const isMenuItemActive = (href) => {
     const [targetPath, targetQuery = ""] = String(href || "").split("?");
-
     if (pathname !== targetPath) return false;
     if (!targetQuery) return true;
-
     const current = new URLSearchParams(currentQuery);
     const target = new URLSearchParams(targetQuery);
-
     for (const [key, value] of target.entries()) {
       if (current.get(key) !== value) return false;
     }
-
     return true;
   };
+
   const navGroups = useMemo(
     () =>
       NAV_GROUPS.map((group) => {
-        if (group.title !== "Customers") {
-          return group;
-        }
-
+        if (group.titleKey !== "customers") return group;
         return {
           ...group,
           items: group.items.filter(
@@ -124,22 +115,21 @@ export default function AdminSideBarMenu() {
 
   const [openGroups, setOpenGroups] = useState({});
 
-  // ✅ Keep groups open when navigating to a page inside them
   useEffect(() => {
     setOpenGroups((prev) => {
       const newState = { ...prev };
       navGroups.forEach((group) => {
         const hasActiveChild = group.items.some((item) => isMenuItemActive(item.href));
-        if (hasActiveChild) newState[group.title] = true;
+        if (hasActiveChild) newState[group.titleKey] = true;
       });
       return newState;
     });
   }, [pathname, currentQuery, navGroups]);
 
-  const toggleGroup = (title) => {
+  const toggleGroup = (titleKey) => {
     setOpenGroups((prev) => ({
       ...prev,
-      [title]: !prev[title],
+      [titleKey]: !prev[titleKey],
     }));
   };
 
@@ -147,7 +137,6 @@ export default function AdminSideBarMenu() {
 
   return (
     <>
-      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity md:hidden"
@@ -161,24 +150,19 @@ export default function AdminSideBarMenu() {
           isSidebarOpen ? "translate-x-0 shadow-xl md:shadow-none" : "-translate-x-full"
         }`}
       >
-        {/* Header */}
         <SidebarHeader className="flex flex-shrink-0 items-center justify-between px-5 py-4 border-b border-slate-200">
-          <p className="text-lg font-bold text-slate-800 tracking-tight">
-            Crunchy Vita
-          </p>
+          <p className="text-lg font-bold text-slate-800 tracking-tight">{t("brand")}</p>
           <button
             onClick={closeSidebar}
-            aria-label="Close sidebar"
+            aria-label={t("closeSidebar")}
             className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </SidebarHeader>
 
-        {/* Scrollable Content */}
         <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300 px-2 py-4">
           <SidebarMenu>
-            {/* ✅ TOP ITEMS (no group) */}
             <div className="mb-3 ">
               {TOP_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.href}>
@@ -189,24 +173,21 @@ export default function AdminSideBarMenu() {
                     onClick={handleItemClick}
                     className="w-full px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-500"
                   >
-                    {item.label}
+                    {t(`top.${item.labelKey}`)}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </div>
 
-          
-
-            {/* ✅ GROUPS */}
             {navGroups.map((group) => {
-              const isOpen = openGroups[group.title];
+              const title = t(`groups.${group.titleKey}`);
+              const isOpen = openGroups[group.titleKey];
               const hasActiveChild = group.items.some((item) => isMenuItemActive(item.href));
 
               return (
-                <div key={group.title} className="mb-2">
-                  {/* Group header */}
+                <div key={group.titleKey} className="mb-2">
                   <button
-                    onClick={() => toggleGroup(group.title)}
+                    onClick={() => toggleGroup(group.titleKey)}
                     aria-expanded={isOpen}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
                       hasActiveChild
@@ -214,7 +195,7 @@ export default function AdminSideBarMenu() {
                         : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    {group.title}
+                    {title}
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 ${
                         isOpen ? "rotate-180 text-slate-700" : "text-slate-400"
@@ -222,7 +203,6 @@ export default function AdminSideBarMenu() {
                     />
                   </button>
 
-                  {/* Collapsible items */}
                   <div
                     className={`grid transition-all duration-200 ease-in-out ${
                       isOpen ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
@@ -238,7 +218,7 @@ export default function AdminSideBarMenu() {
                             onClick={handleItemClick}
                             className="w-full"
                           >
-                            {item.label}
+                            {t(`items.${item.labelKey}`)}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
@@ -248,7 +228,6 @@ export default function AdminSideBarMenu() {
               );
             })}
 
-            {/* Mobile extras */}
             <div className="md:hidden mt-4 pt-4 border-t border-slate-200">
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -257,7 +236,7 @@ export default function AdminSideBarMenu() {
                   isActive={pathname === "/profile"}
                   onClick={handleItemClick}
                 >
-                  Profile
+                  {t("profile")}
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -268,7 +247,7 @@ export default function AdminSideBarMenu() {
                   onClick={handleItemClick}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
-                  Logout
+                  {t("logout")}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </div>

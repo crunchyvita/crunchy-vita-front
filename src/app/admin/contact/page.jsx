@@ -6,6 +6,7 @@ import { messageAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import AdminHeader from '@/components/admin/header';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   MailOpen,
   Trash2,
@@ -62,6 +63,8 @@ function MessageDetail({
   onDelete,
   onReply,
 }) {
+  const ti = useTranslations('admin.inbox');
+  const locale = useLocale();
   const replyInputRef = useRef(null);
 
   useEffect(() => {
@@ -74,7 +77,7 @@ function MessageDetail({
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/30">
         <MailOpen size={48} className="mb-4 opacity-20" />
-        <p className="font-medium text-sm">Sélectionnez un message pour le lire</p>
+        <p className="font-medium text-sm">{ti('selectMessage')}</p>
       </div>
     );
   }
@@ -88,7 +91,7 @@ function MessageDetail({
             <button
               onClick={onBack}
               className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-              aria-label="Retour"
+              aria-label={ti('backAria')}
             >
               <ArrowLeft size={18} />
             </button>
@@ -124,10 +127,10 @@ function MessageDetail({
             </div>
             <div className="min-w-0">
               <h2 className="text-xl md:text-2xl font-bold text-slate-900 break-words">
-                {selectedMessage.object || 'Demande de contact'}
+                {selectedMessage.object || ti('defaultSubject')}
               </h2>
               <p className="text-sm text-slate-500 flex items-center gap-2">
-                De: <span className="font-semibold text-slate-700">{selectedMessage.name}</span>
+                {ti('from')} <span className="font-semibold text-slate-700">{selectedMessage.name}</span>
               </p>
             </div>
           </div>
@@ -142,30 +145,30 @@ function MessageDetail({
           {selectedMessage.type === 'devis' && (selectedMessage.activity || selectedMessage.siren || selectedMessage.tva || selectedMessage.website) && (
             <div className="mb-8 md:mb-10 bg-orange-50 border border-orange-100 rounded-2xl p-4 md:p-6">
               <h3 className="text-xs font-bold uppercase tracking-widest text-orange-600 mb-4">
-                Informations société
+                {ti('companyInfo')}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {selectedMessage.activity && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Activité</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{ti('activity')}</p>
                     <p className="text-sm font-medium text-slate-800">{selectedMessage.activity}</p>
                   </div>
                 )}
                 {selectedMessage.siren && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">SIREN</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{ti('siren')}</p>
                     <p className="text-sm font-medium text-slate-800">{selectedMessage.siren}</p>
                   </div>
                 )}
                 {selectedMessage.tva && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Numéro TVA</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{ti('vatNumber')}</p>
                     <p className="text-sm font-medium text-slate-800">{selectedMessage.tva}</p>
                   </div>
                 )}
                 {selectedMessage.website && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Site web</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{ti('website')}</p>
                     <a
                       href={selectedMessage.website.startsWith('http') ? selectedMessage.website : `https://${selectedMessage.website}`}
                       target="_blank"
@@ -209,7 +212,7 @@ function MessageDetail({
                           selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
                         }`}
                       >
-                        {selectedMessage.type === 'devis' ? 'DEVIS' : 'PRO'}
+                        {selectedMessage.type === 'devis' ? ti('badgeQuote') : ti('badgePro')}
                       </span>
                     </div>
                   </div>
@@ -226,7 +229,7 @@ function MessageDetail({
                         selectedMessage.type === 'devis' ? 'text-orange-700' : 'text-purple-600'
                       }`}
                     >
-                      {selectedMessage.type === 'devis' ? 'Demande de devis' : 'Contact professionnel'}
+                      {selectedMessage.type === 'devis' ? ti('quoteRequest') : ti('proContact')}
                     </p>
                   </div>
                 </div>
@@ -244,13 +247,13 @@ function MessageDetail({
                             </p>
                             {selectedMessage.repliedAt && (
                               <p className="text-xs text-slate-500">
-                                {new Date(selectedMessage.repliedAt).toLocaleDateString('fr-FR', {
+                                {new Date(selectedMessage.repliedAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                                   day: '2-digit',
                                   month: 'long',
                                   year: 'numeric',
                                 })}{' '}
-                                à{' '}
-                                {new Date(selectedMessage.repliedAt).toLocaleTimeString('fr-FR', {
+                                {ti('atTime')}{' '}
+                                {new Date(selectedMessage.repliedAt).toLocaleTimeString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                                   hour: '2-digit',
                                   minute: '2-digit',
                                 })}
@@ -266,7 +269,7 @@ function MessageDetail({
                       </div>
                       <div className="mt-3 md:ml-11 flex items-center gap-2">
                         <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                        <span className="text-xs text-slate-500">Message archivé - Non modifiable</span>
+                        <span className="text-xs text-slate-500">{ti('archivedReadonly')}</span>
                       </div>
                     </div>
                   </div>
@@ -278,7 +281,7 @@ function MessageDetail({
           {!selectedMessage.replyMessage && (
             <div className="border-t border-slate-200 pt-6 md:pt-8">
               <div className="flex items-center gap-2 mb-4 text-sm font-bold text-slate-900">
-                <Reply size={18} className="text-blue-600" /> Répondre à ce message
+                <Reply size={18} className="text-blue-600" /> {ti('replyToMessage')}
               </div>
 
               {['professionnel', 'devis'].includes(selectedMessage.type) && selectedMessage.companyName && (
@@ -307,7 +310,7 @@ function MessageDetail({
                           selectedMessage.type === 'devis' ? 'text-orange-600' : 'text-purple-600'
                         }`}
                       >
-                        {selectedMessage.type === 'devis' ? 'DEVIS' : 'PRO'}
+                        {selectedMessage.type === 'devis' ? ti('badgeQuote') : ti('badgePro')}
                       </span>
                     </div>
                   </div>
@@ -324,7 +327,7 @@ function MessageDetail({
                         selectedMessage.type === 'devis' ? 'text-orange-700' : 'text-purple-600'
                       }`}
                     >
-                      {selectedMessage.type === 'devis' ? 'Demande de devis' : 'Contact professionnel'}
+                      {selectedMessage.type === 'devis' ? ti('quoteRequest') : ti('proContact')}
                     </p>
                   </div>
                 </div>
@@ -335,7 +338,7 @@ function MessageDetail({
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all min-h-37.5 text-sm"
-                placeholder="Votre message..."
+                placeholder={ti('replyPlaceholder')}
               />
 
               <div className="mt-4 flex justify-end">
@@ -347,11 +350,11 @@ function MessageDetail({
                   {sending ? (
                     <>
                       <RefreshCw className="animate-spin" size={16} />
-                      Envoi en cours...
+                      {ti('sendingReply')}
                     </>
                   ) : (
                     <>
-                      Envoyer la réponse <Send size={16} />
+                      {ti('sendReplyCta')} <Send size={16} />
                     </>
                   )}
                 </button>
@@ -365,6 +368,8 @@ function MessageDetail({
 }
 
 export default function ContactMessagesPage() {
+  const ti = useTranslations('admin.inbox');
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -512,7 +517,7 @@ export default function ContactMessagesPage() {
           <div className="p-4 border-b border-slate-200 bg-white space-y-4">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Inbox size={20} className="text-blue-600" /> Inbox
+                <Inbox size={20} className="text-blue-600" /> {ti('inboxTitle')}
               </h1>
               <button
                 onClick={fetchMessages}
@@ -526,7 +531,7 @@ export default function ContactMessagesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 type="text"
-                placeholder="Rechercher..."
+                placeholder={ti('searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -543,7 +548,7 @@ export default function ContactMessagesPage() {
                     filter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  {f === 'all' ? 'Tous' : f === 'new' ? 'Nouveaux' : 'Répondus'}
+                  {f === 'all' ? ti('filterAll') : f === 'new' ? ti('filterNew') : ti('filterReplied')}
                 </button>
               ))}
             </div>
@@ -552,7 +557,7 @@ export default function ContactMessagesPage() {
           {/* Scrollable Area */}
           <div className="flex-1 overflow-y-auto">
             {filteredMessages.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-sm">Aucun message trouvé</div>
+              <div className="p-8 text-center text-slate-400 text-sm">{ti('noMessages')}</div>
             ) : (
               filteredMessages.map((msg) => (
                 <div
@@ -573,7 +578,7 @@ export default function ContactMessagesPage() {
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="text-[10px] text-slate-400 font-medium">
-                        {new Date(msg.createdAt).toLocaleDateString('fr-FR', {
+                        {new Date(msg.createdAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                           day: 'numeric',
                           month: 'short',
                           year: 'numeric',
@@ -585,7 +590,7 @@ export default function ContactMessagesPage() {
                           handleDelete(msg._id);
                         }}
                         className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                        title="Supprimer"
+                        title={ti('deleteTooltip')}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -593,9 +598,9 @@ export default function ContactMessagesPage() {
                   </div>
 
                   <p className="text-xs text-slate-500 line-clamp-1">
-                    Objet :{' '}
+                    {ti('subjectPrefix')}{' '}
                     <span className="text-xs text-blue-600 font-semibold truncate mb-1">
-                      {msg.object || 'Sans objet'}
+                      {msg.object || ti('noSubject')}
                     </span>
                   </p>
                   <p className="text-xs text-slate-500 line-clamp-1">{msg.message}</p>
@@ -609,7 +614,7 @@ export default function ContactMessagesPage() {
                             : 'bg-purple-50 border-purple-200 text-purple-700'
                         }`}
                       >
-                        <Building2 size={12} /> {msg.type === 'devis' ? 'Devis' : 'Pro'}
+                        <Building2 size={12} /> {msg.type === 'devis' ? ti('badgeDevis') : ti('badgeTypePro')}
                       </span>
                     </div>
                   )}
@@ -654,8 +659,8 @@ export default function ContactMessagesPage() {
           isOpen={deleteAlertOpen}
           onClose={() => setDeleteAlertOpen(false)}
           onConfirm={confirmDelete}
-          title="Supprimer le message ?"
-          description="Cette action est définitive. Les données de ce contact seront définitivement effacées."
+          title={ti('deleteTitle')}
+          description={ti('deleteDescription')}
           isDeleting={false}
         />
       </div>

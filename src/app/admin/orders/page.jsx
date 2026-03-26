@@ -1,35 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
 import { Search, MoreVertical, Eye, Truck } from 'lucide-react';
-
-const ORDER_STATUS_LABEL = {
-  pending: 'Pending',
-  awaiting_delivery: 'Awaiting delivery',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  returned: 'Returned',
-  refunded: 'Refunded',
-  cancelled: 'Cancelled',
-};
-
-const formatOrderStatus = (status) => ORDER_STATUS_LABEL[status] || status || '—';
-
-const TABS = [
-  { id: 'all', label: 'All' },
-  { id: 'delivered', label: 'Delivered' },
-  { id: 'shipped', label: 'Shipped' },
-  { id: 'pending', label: 'Pending' },
-  { id: 'awaiting_delivery', label: 'Awaiting delivery' },
-  { id: 'returned', label: 'Returned' },
-  { id: 'refunded', label: 'Refunded' },
-  { id: 'cancelled', label: 'Cancelled' },
-];
+import { useLocale, useTranslations } from 'next-intl';
 
 const badge = (status) => {
   const map = {
@@ -46,7 +24,39 @@ const badge = (status) => {
 
 function AdminOrdersInner() {
   const PAGE_SIZE = 5;
+  const t = useTranslations('admin.orders');
+  const tcom = useTranslations('admin.common');
+  const locale = useLocale();
   const searchParams = useSearchParams();
+
+  const ORDER_STATUS_LABEL = useMemo(
+    () => ({
+      pending: t('status.pending'),
+      awaiting_delivery: t('status.awaiting_delivery'),
+      shipped: t('status.shipped'),
+      delivered: t('status.delivered'),
+      returned: t('status.returned'),
+      refunded: t('status.refunded'),
+      cancelled: t('status.cancelled'),
+    }),
+    [t]
+  );
+
+  const formatOrderStatus = (status) => ORDER_STATUS_LABEL[status] || status || '—';
+
+  const TABS = useMemo(
+    () => [
+      { id: 'all', label: t('tabs.all') },
+      { id: 'delivered', label: t('tabs.delivered') },
+      { id: 'shipped', label: t('tabs.shipped') },
+      { id: 'pending', label: t('tabs.pending') },
+      { id: 'awaiting_delivery', label: t('tabs.awaiting_delivery') },
+      { id: 'returned', label: t('tabs.returned') },
+      { id: 'refunded', label: t('tabs.refunded') },
+      { id: 'cancelled', label: t('tabs.cancelled') },
+    ],
+    [t]
+  );
   const highlight = searchParams.get('order');
 
   const [tab, setTab] = useState('all');
@@ -71,9 +81,9 @@ function AdminOrdersInner() {
       if (res?.success) {
         setOrders(res.data || []);
         setListTotal(Number(res.total) || 0);
-      } else setError(res?.message || 'Error');
+      } else setError(res?.message || tcom('error'));
     } catch (e) {
-      setError(e.message || 'Error');
+      setError(e.message || tcom('error'));
     } finally {
       setLoading(false);
     }
@@ -93,12 +103,12 @@ function AdminOrdersInner() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Orders
+              {t('title')}
               <span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-                {listTotal} order{listTotal !== 1 ? 's' : ''}
+                {tcom('ordersCount', { count: listTotal })}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Keep track of order status</p>
+            <p className="text-sm text-slate-500">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -127,7 +137,7 @@ function AdminOrdersInner() {
             <Search className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
             <input
               className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-              placeholder="Search by invoice, customer, email..."
+              placeholder={t('searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -144,17 +154,17 @@ function AdminOrdersInner() {
 
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="py-10 text-center text-sm text-slate-500">Loading orders...</div>
+              <div className="py-10 text-center text-sm text-slate-500">{t('loading')}</div>
             ) : (
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="px-3 py-3 font-medium">Invoice</th>
-                    <th className="px-3 py-3 font-medium">Customer</th>
-                    <th className="px-3 py-3 font-medium">Date</th>
-                    <th className="px-3 py-3 font-medium">Status</th>
-                    <th className="px-3 py-3 font-medium text-right">Items</th>
-                    <th className="px-3 py-3 font-medium text-right">Amount</th>
+                    <th className="px-3 py-3 font-medium">{t('invoice')}</th>
+                    <th className="px-3 py-3 font-medium">{tcom('customer')}</th>
+                    <th className="px-3 py-3 font-medium">{tcom('date')}</th>
+                    <th className="px-3 py-3 font-medium">{tcom('status')}</th>
+                    <th className="px-3 py-3 font-medium text-right">{t('items')}</th>
+                    <th className="px-3 py-3 font-medium text-right">{t('amount')}</th>
                     <th className="px-3 py-3"></th>
                   </tr>
                 </thead>
@@ -173,7 +183,7 @@ function AdminOrdersInner() {
                       </td>
                       <td className="px-3 py-4 text-slate-600 whitespace-nowrap">
                         {o.createdAt
-                          ? new Date(o.createdAt).toLocaleString('en-GB', {
+                          ? new Date(o.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
                               dateStyle: 'medium',
                               timeStyle: 'short',
                             })
@@ -192,7 +202,7 @@ function AdminOrdersInner() {
                         {typeof o.totalItemCount === 'number' ? o.totalItemCount : '—'}
                       </td>
                       <td className="px-3 py-4 text-right font-semibold text-slate-900 tabular-nums">
-                        {new Intl.NumberFormat('en-GB', {
+                        {new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
                           style: 'currency',
                           currency: (o.currency || 'eur').toUpperCase(),
                         }).format(Number(o.totalAmount) || 0)}
@@ -204,7 +214,7 @@ function AdminOrdersInner() {
                           onClick={() =>
                             setMenuOpenFor((current) => (current === o._id ? null : o._id))
                           }
-                          aria-label="Actions"
+                          aria-label={t('actionsAria')}
                         >
                           <MoreVertical className="h-4 w-4" />
                         </button>
@@ -217,7 +227,7 @@ function AdminOrdersInner() {
                               onClick={() => setMenuOpenFor(null)}
                             >
                               <Eye className="h-4 w-4" />
-                              View details
+                              {t('viewDetails')}
                             </Link>
                             {!o.shippingOfferLocked ? (
                               <Link
@@ -226,7 +236,7 @@ function AdminOrdersInner() {
                                 onClick={() => setMenuOpenFor(null)}
                               >
                                 <Truck className="h-4 w-4" />
-                                Edit shipping offer
+                                {t('editShipping')}
                               </Link>
                             ) : null}
                           </div>
@@ -240,14 +250,14 @@ function AdminOrdersInner() {
           </div>
 
           {!loading && orders.length === 0 && (
-            <div className="py-20 text-center text-sm text-slate-500">No orders found</div>
+            <div className="py-20 text-center text-sm text-slate-500">{t('empty')}</div>
           )}
         </div>
 
         {!loading && listTotal > 0 && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-slate-500">
-              Page {page} of {totalPages} 
+              {tcom('pageOf', { page, total: totalPages })}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -256,7 +266,7 @@ function AdminOrdersInner() {
                 disabled={page <= 1}
                 className="px-3 py-1.5 rounded-md border border-slate-200 text-sm text-slate-700 disabled:opacity-50"
               >
-                Previous
+                {tcom('previous')}
               </button>
               <button
                 type="button"
@@ -264,7 +274,7 @@ function AdminOrdersInner() {
                 disabled={page >= totalPages}
                 className="px-3 py-1.5 rounded-md border border-slate-200 text-sm text-slate-700 disabled:opacity-50"
               >
-                Next
+                {tcom('next')}
               </button>
             </div>
           </div>

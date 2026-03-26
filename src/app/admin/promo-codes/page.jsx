@@ -15,8 +15,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function PromoCodesPage() {
+  const tp = useTranslations('admin.promoCodes');
+  const tcom = useTranslations('admin.common');
+  const locale = useLocale();
   const [promoCodes, setPromoCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,7 +55,7 @@ export default function PromoCodesPage() {
       }
     } catch (err) {
       console.error('Error fetching promo codes:', err);
-      setError('Error loading promo codes');
+      setError(tp('loadError'));
     } finally {
       setLoading(false);
     }
@@ -85,7 +89,7 @@ export default function PromoCodesPage() {
 
       const result = await response.json();
       if (result.success) {
-        setSuccess(' Promo code deleted!');
+        setSuccess(tp('deleteSuccess'));
         setShowDeleteModal(false);
         setSelectedCode(null);
         fetchPromoCodes();
@@ -102,14 +106,14 @@ export default function PromoCodesPage() {
 
   const isExpired = (date) => new Date(date) < new Date();
 
-  const formatFrenchDate = (dateString) => {
+  const formatPromoDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    const months = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month}, ${year}`;
+    return date.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   const filteredPromoCodes = useMemo(() => {
@@ -141,10 +145,9 @@ export default function PromoCodesPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Promo Codes
-             
+              {tp('title')}
             </div>
-            <p className="text-sm text-slate-500">Manage promo codes and discounts</p>
+            <p className="text-sm text-slate-500">{tp('subtitle')}</p>
           </div>
           <Link
             href="/admin/promo-codes/create"
@@ -154,7 +157,7 @@ export default function PromoCodesPage() {
             onMouseLeave={(e) => (e.target.style.backgroundColor = '#556622')}
           >
             <Plus size={18} />
-            New Code
+            {tp('newCode')}
           </Link>
         </div>
 
@@ -167,7 +170,7 @@ export default function PromoCodesPage() {
                 <Package size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total Codes</p>
+                <p className="text-sm text-slate-500 font-medium">{tp('statTotal')}</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.totalCodes}</p>
               </div>
             </div>
@@ -176,7 +179,7 @@ export default function PromoCodesPage() {
                 <CheckCircle2 size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Active</p>
+                <p className="text-sm text-slate-500 font-medium">{tp('statActive')}</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.activeCodes}</p>
               </div>
             </div>
@@ -185,7 +188,7 @@ export default function PromoCodesPage() {
                 <AlertCircle size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Expired</p>
+                <p className="text-sm text-slate-500 font-medium">{tp('statExpired')}</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.expiredCodes}</p>
               </div>
             </div>
@@ -194,7 +197,7 @@ export default function PromoCodesPage() {
                 <AlertTriangle size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Usages</p>
+                <p className="text-sm text-slate-500 font-medium">{tp('statUsages')}</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.totalUsages}</p>
               </div>
             </div>
@@ -206,7 +209,7 @@ export default function PromoCodesPage() {
             <Search className="h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by promotion or code..."
+              placeholder={tp('searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -229,21 +232,21 @@ export default function PromoCodesPage() {
 
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="py-10 text-center text-sm text-slate-500">Loading promo codes...</div>
+              <div className="py-10 text-center text-sm text-slate-500">{tp('loading')}</div>
             ) : filteredPromoCodes.length === 0 ? (
               <div className="p-10 text-center text-sm text-slate-500">
-                {promoCodes.length === 0 ? 'No promo code created.' : 'No promo codes found for your search.'}
+                {promoCodes.length === 0 ? tp('emptyNone') : tp('emptySearch')}
               </div>
             ) : (
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="px-3 py-3 font-medium">Promotion</th>
-                    <th className="px-3 py-3 font-medium">Discount</th>
-                    <th className="px-3 py-3 font-medium text-center">Usages</th>
-                    <th className="px-3 py-3 font-medium text-center">Expiration</th>
-                    <th className="px-3 py-3 font-medium text-center">Status</th>
-                    <th className="px-3 py-3 font-medium text-right">Actions</th>
+                    <th className="px-3 py-3 font-medium">{tp('colPromotion')}</th>
+                    <th className="px-3 py-3 font-medium">{tp('colDiscount')}</th>
+                    <th className="px-3 py-3 font-medium text-center">{tp('colUsages')}</th>
+                    <th className="px-3 py-3 font-medium text-center">{tp('colExpiration')}</th>
+                    <th className="px-3 py-3 font-medium text-center">{tp('colStatus')}</th>
+                    <th className="px-3 py-3 font-medium text-right">{tp('colActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -263,8 +266,8 @@ export default function PromoCodesPage() {
                             ? `${code.discountValue}%`
                             : code.discountType === 'FREE_ITEM'
                             ? code.freeItemType === 'PACKAGE'
-                              ? 'Free package'
-                              : 'Free product'
+                              ? tp('discountFreePackage')
+                              : tp('discountFreeProduct')
                             : '-'}
                         </td>
                         <td className="px-3 py-4 text-center text-slate-500">
@@ -272,7 +275,7 @@ export default function PromoCodesPage() {
                         </td>
                         <td className="px-3 py-4 text-center text-slate-700">
                           <span className={expired ? 'text-red-600 font-bold' : 'text-slate-700 font-medium'}>
-                            {formatFrenchDate(code.expirationDate)}
+                            {formatPromoDate(code.expirationDate)}
                           </span>
                         </td>
                         <td className="px-3 py-4 text-center">
@@ -288,7 +291,7 @@ export default function PromoCodesPage() {
                             ) : (
                               <AlertCircle className="h-3.5 w-3.5" />
                             )}
-                            {active ? 'Active' : 'Inactive'}
+                            {active ? tp('statusActive') : tp('statusInactive')}
                           </span>
                         </td>
                         <td className="px-3 py-4 text-right relative">
@@ -307,7 +310,7 @@ export default function PromoCodesPage() {
                                 onClick={() => setOpenDropdown(null)}
                               >
                                 <Edit2 className="h-4 w-4" />
-                                Edit
+                                {tp('edit')}
                               </Link>
                               <button
                                 onClick={() => {
@@ -318,7 +321,7 @@ export default function PromoCodesPage() {
                                 className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                               >
                                 <Trash2 className="h-4 w-4" />
-                                Delete
+                                {tp('delete')}
                               </button>
                             </div>
                           )}
@@ -336,7 +339,7 @@ export default function PromoCodesPage() {
         {!loading && filteredPromoCodes.length > 0 ? (
           <div className="flex items-center justify-between text-sm text-slate-500 mt-4">
             <p>
-              Page {safePage} of {totalPages}
+              {tcom('pageOf', { page: safePage, total: totalPages })}
             </p>
             <div className="flex gap-2">
               <button
@@ -345,7 +348,7 @@ export default function PromoCodesPage() {
                 disabled={safePage <= 1}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
               >
-                Previous
+                {tcom('previous')}
               </button>
               <button
                 type="button"
@@ -353,7 +356,7 @@ export default function PromoCodesPage() {
                 disabled={safePage >= totalPages}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
               >
-                Next
+                {tcom('next')}
               </button>
             </div>
           </div>
@@ -367,9 +370,9 @@ export default function PromoCodesPage() {
           setSelectedCode(null);
         }}
         onConfirm={handleDelete}
-        title="Delete this promo code?"
+        title={tp('deleteTitle')}
         itemName={selectedCode?.name || selectedCode?.code}
-        description="This action cannot be undone. All data associated with this code will be deleted."
+        description={tp('deleteDescription')}
         isDeleting={deleting}
       />
     </div>

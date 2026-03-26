@@ -7,10 +7,11 @@ import AdminHeader from "@/components/admin/header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { orderAPI } from "@/lib/api";
 import { ArrowLeft } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
-function formatMoney(amount, currency = "eur") {
+function formatMoney(amount, currency = "eur", localeTag = "fr-FR") {
 	try {
-		return new Intl.NumberFormat("fr-FR", {
+		return new Intl.NumberFormat(localeTag, {
 			style: "currency",
 			currency: String(currency || "eur").toUpperCase(),
 		}).format(Number(amount) || 0);
@@ -19,14 +20,14 @@ function formatMoney(amount, currency = "eur") {
 	}
 }
 
-function lineDisplayName(line) {
+function lineDisplayName(line, dash) {
 	const n = String(line?.name || "").trim();
 	if (n) return n;
 	const p = line?.productId;
 	const k = line?.packageId;
 	if (p && typeof p === "object" && p.name) return p.name;
 	if (k && typeof k === "object" && k.name) return k.name;
-	return "—";
+	return dash;
 }
 
 function lineUnitPrice(line) {
@@ -38,6 +39,9 @@ function lineUnitPrice(line) {
 }
 
 function AdminOrderDetailInner() {
+	const od = useTranslations("admin.orderDetail");
+	const locale = useLocale();
+	const numberLocale = locale === "fr" ? "fr-FR" : "en-US";
 	const params = useParams();
 	const id = params?.id;
 
@@ -56,10 +60,10 @@ function AdminOrderDetailInner() {
 				if (res?.success) {
 					setOrder(res.data || null);
 				} else {
-					setError(res?.message || "Unable to load order details");
+					setError(res?.message || od("loadError"));
 				}
 			} catch (e) {
-				setError(e.message || "Unable to load order details");
+				setError(e.message || od("loadError"));
 			} finally {
 				setLoading(false);
 			}
@@ -84,10 +88,10 @@ function AdminOrderDetailInner() {
 					className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#556822]"
 				>
 					<ArrowLeft className="h-4 w-4" />
-					Back to orders
+					{od("back")}
 				</Link>
 
-				{loading && <div className="text-sm text-slate-500">Loading order details...</div>}
+				{loading && <div className="text-sm text-slate-500">{od("loading")}</div>}
 				{!loading && error && (
 					<div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
 				)}
@@ -97,36 +101,40 @@ function AdminOrderDetailInner() {
 						<div className="flex items-center justify-between">
 							<div>
 								<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-									Order #{order.invoiceNumber || "-"}
+									{od("invoice", { invoice: order.invoiceNumber || "-" })}
 									<span className="rounded-full bg-blue-100 px-2 text-xs font-medium text-blue-700">
-										{itemCount} Items
+										{od("itemsBadge", { count: itemCount })}
 									</span>
 								</div>
-								<p className="text-sm text-slate-500">Created at {order.createdAt ? new Date(order.createdAt).toLocaleString("fr-FR") : "-"}</p>
+								<p className="text-sm text-slate-500">
+									{od("createdAt", {
+										datetime: order.createdAt ? new Date(order.createdAt).toLocaleString(numberLocale) : "-",
+									})}
+								</p>
 							</div>
 						</div>
 
 						<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 							<div className="lg:col-span-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-								<h3 className="text-sm font-semibold text-slate-900 mb-3">Order items</h3>
+								<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("orderItems")}</h3>
 								<div className="overflow-x-auto">
 									<table className="min-w-full text-sm">
 										<thead>
 											<tr className="border-b border-slate-200 text-left text-slate-500">
-												<th className="px-3 py-2 font-medium">Product</th>
-												<th className="px-3 py-2 font-medium">Qty</th>
-												<th className="px-3 py-2 font-medium">Unit price</th>
-												<th className="px-3 py-2 font-medium text-right">Line total</th>
+												<th className="px-3 py-2 font-medium">{od("colProduct")}</th>
+												<th className="px-3 py-2 font-medium">{od("colQty")}</th>
+												<th className="px-3 py-2 font-medium">{od("colUnitPrice")}</th>
+												<th className="px-3 py-2 font-medium text-right">{od("colLineTotal")}</th>
 											</tr>
 										</thead>
 										<tbody className="divide-y divide-slate-100 text-slate-700">
 											{(order.items || []).map((line, idx) => (
 												<tr key={idx}>
-													<td className="px-3 py-3">{lineDisplayName(line)}</td>
+													<td className="px-3 py-3">{lineDisplayName(line, od("lineFallback"))}</td>
 													<td className="px-3 py-3">{line?.quantity || 1}</td>
-													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), order?.currency)}</td>
+													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), order?.currency, numberLocale)}</td>
 													<td className="px-3 py-3 text-right font-medium">
-														{formatMoney(line?.lineTotal, order?.currency)}
+														{formatMoney(line?.lineTotal, order?.currency, numberLocale)}
 													</td>
 												</tr>
 											))}
@@ -136,39 +144,39 @@ function AdminOrderDetailInner() {
 
 								<div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm">
 									<div className="flex justify-between text-slate-600">
-										<span>Subtotal</span>
-										<span>{formatMoney(order.subtotalAmount, order.currency)}</span>
+										<span>{od("subtotal")}</span>
+										<span>{formatMoney(order.subtotalAmount, order.currency, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
-										<span>Shipping</span>
-										<span>{formatMoney(order.shippingAmount, order.currency)}</span>
+										<span>{od("shipping")}</span>
+										<span>{formatMoney(order.shippingAmount, order.currency, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
-										<span>Discount</span>
-										<span>{formatMoney(order.discountAmount, order.currency)}</span>
+										<span>{od("discount")}</span>
+										<span>{formatMoney(order.discountAmount, order.currency, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-900 font-semibold pt-2 border-t border-slate-100">
-										<span>Total</span>
-										<span>{formatMoney(order.totalAmount, order.currency)}</span>
+										<span>{od("total")}</span>
+										<span>{formatMoney(order.totalAmount, order.currency, numberLocale)}</span>
 									</div>
 								</div>
 							</div>
 
 							<div className="space-y-6">
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-									<h3 className="text-sm font-semibold text-slate-900 mb-3">Customer</h3>
-									<p className="text-sm text-slate-700"><span className="font-medium">Name:</span> {order.customerName || "-"}</p>
-									<p className="text-sm text-slate-700"><span className="font-medium">Email:</span> {order.customerEmail || "-"}</p>
-									<p className="text-sm text-slate-700"><span className="font-medium">Phone:</span> {order.customerPhone || "-"}</p>
+									<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("customer")}</h3>
+									<p className="text-sm text-slate-700"><span className="font-medium">{od("name")}</span> {order.customerName || "-"}</p>
+									<p className="text-sm text-slate-700"><span className="font-medium">{od("email")}</span> {order.customerEmail || "-"}</p>
+									<p className="text-sm text-slate-700"><span className="font-medium">{od("phone")}</span> {order.customerPhone || "-"}</p>
 									<p className="text-sm text-slate-700 mt-2 font-mono break-all">
-										<span className="font-medium font-sans">Payment intent:</span>{" "}
-										{order.paymentIntentId || "—"}
+										<span className="font-medium font-sans">{od("paymentIntent")}</span>{" "}
+										{order.paymentIntentId || od("lineFallback")}
 									</p>
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-									<h3 className="text-sm font-semibold text-slate-900 mb-3">Shipping</h3>
-									<p className="text-sm text-slate-700"><span className="font-medium">Delivery type:</span> {order.deliveryType || "-"}</p>
+									<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("shippingTitle")}</h3>
+									<p className="text-sm text-slate-700"><span className="font-medium">{od("deliveryType")}</span> {order.deliveryType || "-"}</p>
 									{shippingAddress ? (
 										<div className="mt-2 text-sm text-slate-700 leading-relaxed">
 											<p>{shippingAddress.line1 || "-"}</p>
@@ -176,22 +184,22 @@ function AdminOrderDetailInner() {
 											<p>{shippingAddress.country || "-"}</p>
 										</div>
 									) : (
-										<p className="text-sm text-slate-500">No shipping address</p>
+										<p className="text-sm text-slate-500">{od("noAddress")}</p>
 									)}
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-									<h3 className="text-sm font-semibold text-slate-900 mb-3">Shipment (Boxtal)</h3>
+									<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("boxtal")}</h3>
 									<p className="text-sm text-slate-700">
-										<span className="font-medium">Offer:</span> {boxtal?.shippingOfferCode || "—"}
+										<span className="font-medium">{od("offer")}</span> {boxtal?.shippingOfferCode || od("lineFallback")}
 									</p>
 									<p className="text-sm text-slate-700">
-										<span className="font-medium">Boxtal ref:</span>{" "}
-										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || "—"}
+										<span className="font-medium">{od("boxtalRef")}</span>{" "}
+										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
 									</p>
 									<p className="text-sm text-slate-700">
-										<span className="font-medium">Carrier tracking:</span>{" "}
-										{boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || "—"}
+										<span className="font-medium">{od("carrierTracking")}</span>{" "}
+										{boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
 									</p>
 									{boxtalShipment?.trackingUrl ? (
 										<a
@@ -200,7 +208,7 @@ function AdminOrderDetailInner() {
 											rel="noreferrer"
 											className="text-sm text-[#556822] hover:underline inline-block mt-2"
 										>
-											Tracking link
+											{od("trackingLink")}
 										</a>
 									) : null}
 								</div>

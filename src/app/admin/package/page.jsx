@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import { useLocale, useTranslations } from "next-intl";
 import {
 	MoreVertical,
 	Plus,
@@ -16,17 +17,18 @@ import {
 	Eye,
 } from "lucide-react";
 
-function formatDate(dateString) {
-	if (!dateString) return "-";
-	const date = new Date(dateString);
-	const months = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-	const day = date.getDate();
-	const month = months[date.getMonth()];
-	const year = date.getFullYear();
-	return `${day} ${month}, ${year}`;
-}
-
 export default function PackagesPage() {
+	const tp = useTranslations("admin.packages");
+	const locale = useLocale();
+	const formatDate = (dateString) => {
+		if (!dateString) return "-";
+		const date = new Date(dateString);
+		return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+		});
+	};
 	const [packages, setPackages] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -40,11 +42,11 @@ export default function PackagesPage() {
 			setError("");
 			try {
 				const response = await fetch("/api/packages");
-				if (!response.ok) throw new Error("Failed to load packages");
+				if (!response.ok) throw new Error(tp("loadError"));
 				const result = await response.json();
 				setPackages(result.data || []);
 			} catch (err) {
-				setError(err.message || "Failed to load packages");
+				setError(err.message || tp("loadError"));
 			} finally {
 				setLoading(false);
 			}
@@ -72,14 +74,14 @@ export default function PackagesPage() {
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.message || "Failed to delete package");
+				throw new Error(errorData.message || tp("deleteError"));
 			}
 			
 			setPackages(packages.filter((p) => p._id !== id));
 			setDeleteConfirm(null);
 			setError(""); // Clear any previous errors
 		} catch (err) {
-			setError(err.message || "Failed to delete package");
+			setError(err.message || tp("deleteError"));
 		}
 	};
 
@@ -105,13 +107,13 @@ export default function PackagesPage() {
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.message || "Failed to update package");
+				throw new Error(errorData.message || tp("updateError"));
 			}
 			
 			const updated = await response.json();
 			setPackages(packages.map((p) => (p._id === pkg._id ? updated.data : p)));
 		} catch (err) {
-			setError(err.message || "Failed to update package");
+			setError(err.message || tp("updateError"));
 		}
 	};
 
@@ -122,12 +124,12 @@ export default function PackagesPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-						Packages
+						{tp("title")}
 						<span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-							{packages.length} Packages
+							{tp("countBadge", { count: packages.length })}
 						</span>
 					</div>
-					<p className="text-sm text-slate-500">Manage promotional packages</p>
+					<p className="text-sm text-slate-500">{tp("subtitle")}</p>
 				</div>
 
 				<div className="flex items-center gap-3">
@@ -139,7 +141,7 @@ export default function PackagesPage() {
 						onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
 					>
 						<Plus className="h-4 w-4" />
-						Create Package
+						{tp("create")}
 					</Link>
 				</div>
 			</div>
@@ -149,7 +151,7 @@ export default function PackagesPage() {
 					<Search className="h-4 w-4 text-slate-400" />
 					<input
 						type="text"
-						placeholder="Search packages..."
+						placeholder={tp("searchPlaceholder")}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -163,7 +165,7 @@ export default function PackagesPage() {
 				)}
 
 				{loading ? (
-					<div className="py-10 text-center text-sm text-slate-500">Loading packages...</div>
+					<div className="py-10 text-center text-sm text-slate-500">{tp("loading")}</div>
 				) : filteredPackages.length === 0 ? (
 					<table className="min-w-full">
 						<tbody>
@@ -171,7 +173,7 @@ export default function PackagesPage() {
 								<td colSpan={7} className="py-20 text-center">
 									<div className="flex flex-col items-center gap-2">
 										<Box className="h-10 w-10 text-slate-200" />
-										<p className="font-bold text-slate-400">No packages found</p>
+										<p className="font-bold text-slate-400">{tp("empty")}</p>
 									</div>
 								</td>
 							</tr>
@@ -183,25 +185,25 @@ export default function PackagesPage() {
 							<thead>
 								<tr className="border-b border-slate-200 bg-slate-50">
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Package Name
+										{tp("colName")}
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Type
+										{tp("colType")}
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Products
+										{tp("colProducts")}
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Discount
+										{tp("colDiscount")}
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Status
+										{tp("colStatus")}
 									</th>
 									<th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-										Created
+										{tp("colCreated")}
 									</th>
 									<th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-										Actions
+										{tp("colActions")}
 									</th>
 								</tr>
 							</thead>
@@ -223,18 +225,18 @@ export default function PackagesPage() {
 										</td>
 										<td className="px-4 py-3 text-sm text-slate-600">
 											<span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${(pkg.packageType || "CUSTOM") === "FIXED" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
-												{(pkg.packageType || "CUSTOM") === "FIXED" ? "Fixed" : "Custom"}
+												{(pkg.packageType || "CUSTOM") === "FIXED" ? tp("typeFixed") : tp("typeCustom")}
 											</span>
 										</td>
 
 										<td className="px-4 py-3 text-sm text-slate-600">
 											{pkg.packageType === "FIXED" ? (
 												<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
-													{pkg.products?.length || 0} items
+													{tp("itemsCount", { count: pkg.products?.length || 0 })}
 												</span>
 											) : (
 												<span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-													{pkg.maxProducts} products
+													{tp("productsCount", { count: pkg.maxProducts })}
 												</span>
 											)}
 										</td>
@@ -250,7 +252,7 @@ export default function PackagesPage() {
 														: "bg-slate-100 text-slate-700 hover:bg-slate-200"
 												}`}
 											>
-												{pkg.isActive ? "Active" : "Inactive"}
+												{pkg.isActive ? tp("active") : tp("inactive")}
 											</button>
 										</td>
 										<td className="px-4 py-3 text-sm text-slate-600">
@@ -276,14 +278,14 @@ export default function PackagesPage() {
 															className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
 														>
 															<Eye className="h-4 w-4" />
-															View Details
+															{tp("viewDetails")}
 														</Link>
 														<Link
 															href={`/admin/package/${pkg._id}/edit`}
 															className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
 														>
 															<Edit2 className="h-4 w-4" />
-															Edit
+															{tp("edit")}
 														</Link>
 														<button
 															onClick={() => {
@@ -293,7 +295,7 @@ export default function PackagesPage() {
 															className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50"
 														>
 															<Trash2 className="h-4 w-4" />
-															Delete
+															{tp("delete")}
 														</button>
 													</div>
 												)}
@@ -311,7 +313,7 @@ export default function PackagesPage() {
 				isOpen={!!deleteConfirm}
 				onClose={() => setDeleteConfirm(null)}
 				onConfirm={() => handleDelete(deleteConfirm)}
-				title="Delete Package"
+				title={tp("deleteTitle")}
 				itemName={packages.find(p => p._id === deleteConfirm)?.name}
 				isDeleting={false}
 			/>

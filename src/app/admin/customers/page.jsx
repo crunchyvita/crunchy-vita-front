@@ -6,9 +6,13 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { adminManagementAPI } from "@/lib/api";
 import { Users, RefreshCw, Power, Search, Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 function ClientsManagementPageContent() {
   const PAGE_SIZE = 5;
+  const tc = useTranslations("admin.customers");
+  const tcom = useTranslations("admin.common");
+  const locale = useLocale();
   const { user } = useAuth();
   const canManageClientStatus = user?.role === "SUPERADMIN" || user?.role === "ADMIN";
   
@@ -27,7 +31,7 @@ function ClientsManagementPageContent() {
       const list = response?.data || [];
       setClients(list);
     } catch (err) {
-      setError(err.message || "Failed to load clients");
+      setError(err.message || tc("loadError"));
     } finally {
       setLoading(false);
     }
@@ -60,7 +64,7 @@ function ClientsManagementPageContent() {
         prev.map((c) => (c.id === clientId ? { ...c, isActive: newStatus } : c))
       );
     } catch (err) {
-      setError(err.message || "Failed to update client status");
+      setError(err.message || tc("updateError"));
     } finally {
       setUpdatingId(null);
     }
@@ -75,11 +79,11 @@ function ClientsManagementPageContent() {
     if (!dateString) return "-";
     const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return "-";
-    const months = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month}, ${year}`;
+    return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
@@ -89,12 +93,12 @@ function ClientsManagementPageContent() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Clients
+              {tc("title")}
               <span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-                {clients.length} Clients
+                {tcom("clientsCount", { count: clients.length })}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Keep track of customer accounts</p>
+            <p className="text-sm text-slate-500">{tc("subtitle")}</p>
           </div>
         </div>
 
@@ -103,7 +107,7 @@ function ClientsManagementPageContent() {
             <Search className="h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search"
+              placeholder={tcom("search")}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -122,13 +126,13 @@ function ClientsManagementPageContent() {
           {loading ? (
             <div className="py-20 text-center text-sm text-slate-500 flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-slate-200" />
-              Loading clients...
+              {tc("loading")}
             </div>
           ) : filteredClients.length === 0 ? (
             <div className="py-20 text-center">
               <div className="flex flex-col items-center gap-2">
                 <Users className="h-10 w-10 text-slate-200" />
-                <p className="font-bold text-slate-400">Aucun client trouvé</p>
+                <p className="font-bold text-slate-400">{tc("empty")}</p>
               </div>
             </div>
           ) : (
@@ -136,10 +140,10 @@ function ClientsManagementPageContent() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="px-3 py-2 font-medium">Name</th>
-                    <th className="px-3 py-2 font-medium">Created</th>
-                    <th className="px-3 py-2 font-medium">Status</th>
-                    {canManageClientStatus && <th className="px-3 py-2 text-right font-medium">Actions</th>}
+                    <th className="px-3 py-2 font-medium">{tcom("name")}</th>
+                    <th className="px-3 py-2 font-medium">{tcom("created")}</th>
+                    <th className="px-3 py-2 font-medium">{tcom("status")}</th>
+                    {canManageClientStatus && <th className="px-3 py-2 text-right font-medium">{tcom("actions")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -160,7 +164,7 @@ function ClientsManagementPageContent() {
                               : "bg-slate-100 text-slate-600"
                           }`}
                         >
-                          {client.isActive !== false ? "Actif" : "Inactif"}
+                          {client.isActive !== false ? tcom("active") : tcom("inactive")}
                         </span>
                       </td>
                       {canManageClientStatus && (
@@ -180,7 +184,7 @@ function ClientsManagementPageContent() {
                             ) : (
                               <Power className="h-3.5 w-3.5" />
                             )}
-                            {client.isActive !== false ? "Désactiver" : "Activer"}
+                            {client.isActive !== false ? tc("deactivate") : tc("activate")}
                           </button>
                         </td>
                       )}
@@ -194,21 +198,21 @@ function ClientsManagementPageContent() {
 
         {!loading && filteredClients.length > 0 && (
           <div className="flex items-center justify-between text-sm text-slate-500">
-            <p>Page {safePage} of {totalPages}</p>
+            <p>{tcom("pageOf", { page: safePage, total: totalPages })}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage <= 1}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
               >
-                Previous
+                {tcom("previous")}
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage >= totalPages}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
               >
-                Next
+                {tcom("next")}
               </button>
             </div>
           </div>

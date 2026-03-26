@@ -5,8 +5,11 @@ import Link from "next/link";
 import { stockAPI } from "@/lib/api";
 import AdminHeader from "@/components/admin/header";
 import { Search, Edit2, AlertCircle, Package, AlertTriangle, CheckCircle2, MoreVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function StockPage() {
+  const ts = useTranslations("admin.stock");
+  const tcom = useTranslations("admin.common");
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,7 +23,7 @@ export default function StockPage() {
         const res = await stockAPI.list();
         setStocks(res.data || []);
       } catch (err) {
-        setError(err.message || "Failed to load stocks");
+        setError(err.message || ts("loadError"));
       } finally {
         setLoading(false);
       }
@@ -48,12 +51,12 @@ export default function StockPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-            Inventory Control
+            {ts("title")}
             <span className="rounded-full bg-blue-100 px-2 text-xs font-medium text-blue-700">
-              {stocks.length} Items
+              {tcom("itemsCount", { count: stocks.length })}
             </span>
           </div>
-          <p className="text-sm text-slate-500">Manage and track your product stock levels in real-time.</p>
+          <p className="text-sm text-slate-500">{ts("subtitle")}</p>
         </div>
       </div>
 
@@ -61,15 +64,15 @@ export default function StockPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><Package size={24} /></div>
-          <div><p className="text-sm text-slate-500 font-medium">Total Products</p><p className="text-2xl font-bold text-slate-900">{stats.total}</p></div>
+          <div><p className="text-sm text-slate-500 font-medium">{ts("totalProducts")}</p><p className="text-2xl font-bold text-slate-900">{stats.total}</p></div>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-amber-50 text-amber-600 rounded-lg"><AlertTriangle size={24} /></div>
-          <div><p className="text-sm text-slate-500 font-medium">Low Stock Alert</p><p className="text-2xl font-bold text-slate-900">{stats.low}</p></div>
+          <div><p className="text-sm text-slate-500 font-medium">{ts("lowStock")}</p><p className="text-2xl font-bold text-slate-900">{stats.low}</p></div>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-red-50 text-red-600 rounded-lg"><AlertCircle size={24} /></div>
-          <div><p className="text-sm text-slate-500 font-medium">Out of Stock</p><p className="text-2xl font-bold text-slate-900">{stats.out}</p></div>
+          <div><p className="text-sm text-slate-500 font-medium">{ts("outOfStock")}</p><p className="text-2xl font-bold text-slate-900">{stats.out}</p></div>
         </div>
       </div>
 
@@ -78,7 +81,7 @@ export default function StockPage() {
         <div className="mb-4 flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-600 max-w-sm">
           <Search className="h-4 w-4 text-slate-400" />
           <input
-            placeholder="Search by product name..."
+            placeholder={ts("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -93,16 +96,16 @@ export default function StockPage() {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="py-10 text-center text-sm text-slate-500">Loading inventory...</div>
+            <div className="py-10 text-center text-sm text-slate-500">{ts("loading")}</div>
           ) : (
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-left text-slate-500">
-                  <th className="px-3 py-3 font-medium">Product Name</th>
-                  <th className="px-3 py-3 font-medium text-center">Available Quantity</th>
-                  <th className="px-3 py-3 font-medium text-center">Reserved</th>
-                  <th className="px-3 py-3 font-medium text-center">Threshold</th>
-                  <th className="px-3 py-3 font-medium text-center">Status</th>
+                  <th className="px-3 py-3 font-medium">{ts("productName")}</th>
+                  <th className="px-3 py-3 font-medium text-center">{ts("availableQty")}</th>
+                  <th className="px-3 py-3 font-medium text-center">{ts("reserved")}</th>
+                  <th className="px-3 py-3 font-medium text-center">{ts("threshold")}</th>
+                  <th className="px-3 py-3 font-medium text-center">{tcom("status")}</th>
                   <th className="px-3 py-3"></th>
                 </tr>
               </thead>
@@ -123,15 +126,15 @@ export default function StockPage() {
                       <div className="flex justify-center">
                         {stock.quantity <= 0 ? (
                           <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                            Out of Stock
+                            {ts("statusOut")}
                           </span>
                         ) : stock.isLowStock ? (
                           <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                            <AlertCircle className="h-3 w-3" /> Limited Stock
+                            <AlertCircle className="h-3 w-3" /> {ts("statusLimited")}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                            <CheckCircle2 className="h-3 w-3" /> In Stock
+                            <CheckCircle2 className="h-3 w-3" /> {ts("statusIn")}
                           </span>
                         )}
                       </div>
@@ -153,7 +156,7 @@ export default function StockPage() {
                             onClick={() => setOpenMenu(null)}
                           >
                             <Edit2 className="h-4 w-4" />
-                            Edit Stock
+                            {ts("editStock")}
                           </Link>
                           <Link
                             href={`/admin/stock/mouvment/${stock._id}`}
@@ -161,7 +164,7 @@ export default function StockPage() {
                             onClick={() => setOpenMenu(null)}
                           >
                             <AlertCircle className="h-4 w-4" />
-                            View History
+                            {ts("viewHistory")}
                           </Link>
                         </div>
                       )}
@@ -176,10 +179,10 @@ export default function StockPage() {
 
       {/* Pagination Placeholder to match Product Page */}
       <div className="flex items-center justify-between text-sm text-slate-500">
-        <p>Showing {filteredStocks.length} products</p>
+        <p>{ts("showing", { count: filteredStocks.length })}</p>
         <div className="flex gap-2">
-          <button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">Previous</button>
-          <button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">Next</button>
+          <button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">{tcom("previous")}</button>
+          <button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">{tcom("next")}</button>
         </div>
       </div>
     </div>

@@ -3,13 +3,10 @@
 import { useState, useEffect } from 'react';
 import AdminHeader from '@/components/admin/header';
 import { toast } from 'sonner';
+import { useLocale, useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-const formatEuro = (value) => {
-  const numeric = Number(value || 0);
-  return `${numeric.toFixed(2).replace('.', ',')} € TTC`;
-};
 
 const handleNumberInputFocus = (e) => {
   e.target.select();
@@ -28,6 +25,16 @@ const toNumberOrFallback = (value, fallback = 0) => {
 };
 
 export default function AdminSettingsPage() {
+  const ts = useTranslations('admin.settings');
+  const locale = useLocale();
+  const formatEuro = (value) => {
+    const numeric = Number(value || 0);
+    const cur = new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(numeric);
+    return `${cur} ${ts('formatEuroNote')}`;
+  };
   const [settings, setSettings] = useState({
     emailNotifications: { contactMessages: true, stockAlerts: false, newOrders: true },
     features: { rouletteEnabled: false },
@@ -93,11 +100,11 @@ export default function AdminSettingsPage() {
           });
         }
       } else {
-        toast.error('Erreur de chargement des paramètres');
+        toast.error(ts('toastLoadError'));
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      toast.error('Erreur de chargement');
+      toast.error(ts('toastLoadGeneric'));
     } finally {
       setLoading(false);
     }
@@ -117,7 +124,7 @@ export default function AdminSettingsPage() {
       const token = localStorage.getItem('token');
 
       if (!token) {
-        toast.error('Non authentifié');
+        toast.error(ts('toastUnauth'));
         setSettings(previousSettings);
         return;
       }
@@ -133,15 +140,15 @@ export default function AdminSettingsPage() {
       });
 
       if (response.ok) {
-        toast.success('Paramètre enregistré');
+        toast.success(ts('toastSaved'));
       } else {
         setSettings(previousSettings);
-        toast.error('Erreur lors de la sauvegarde');
+        toast.error(ts('toastSaveError'));
       }
     } catch (error) {
       console.error('Error saving settings:', error);
       setSettings(previousSettings);
-      toast.error('Erreur lors de la sauvegarde');
+      toast.error(ts('toastSaveError'));
     }
   };
 
@@ -150,7 +157,7 @@ export default function AdminSettingsPage() {
       const token = localStorage.getItem('token');
 
       if (!token) {
-        toast.error('Non authentifié');
+        toast.error(ts('toastUnauth'));
         return;
       }
 
@@ -180,13 +187,13 @@ export default function AdminSettingsPage() {
             },
           }));
         }
-        toast.success('Formats enregistrés');
+        toast.success(ts('toastFormatsSaved'));
       } else {
-        toast.error('Erreur lors de la sauvegarde des formats');
+        toast.error(ts('toastFormatsError'));
       }
     } catch (error) {
       console.error('Error saving product formats:', error);
-      toast.error('Erreur lors de la sauvegarde des formats');
+      toast.error(ts('toastFormatsError'));
     } finally {
       setSavingFormats(false);
     }
@@ -196,7 +203,7 @@ export default function AdminSettingsPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Non authentifié');
+        toast.error(ts('toastUnauth'));
         return;
       }
 
@@ -232,7 +239,7 @@ export default function AdminSettingsPage() {
       });
 
       if (!response.ok) {
-        toast.error('Erreur lors de la sauvegarde des frais de livraison');
+        toast.error(ts('toastShippingError'));
         return;
       }
 
@@ -242,13 +249,13 @@ export default function AdminSettingsPage() {
           ...prev,
           shippingSettings: data?.data?.shippingSettings ?? prev.shippingSettings,
         }));
-        toast.success('Frais de livraison enregistrés');
+        toast.success(ts('toastShippingSaved'));
       } else {
-        toast.error('Erreur lors de la sauvegarde des frais de livraison');
+        toast.error(ts('toastShippingError'));
       }
     } catch (error) {
       console.error('Error saving shipping settings:', error);
-      toast.error('Erreur lors de la sauvegarde des frais de livraison');
+      toast.error(ts('toastShippingError'));
     } finally {
       setSavingShippingSettings(false);
     }
@@ -259,7 +266,7 @@ export default function AdminSettingsPage() {
       <>
         <AdminHeader />
         <div className="space-y-6 p-6 lg:p-8">
-          <div className="py-10 text-center text-sm text-slate-500">Loading settings...</div>
+          <div className="py-10 text-center text-sm text-slate-500">{ts('loading')}</div>
         </div>
       </>
     );
@@ -271,22 +278,22 @@ export default function AdminSettingsPage() {
       <div className="space-y-6 p-6 lg:p-8">
         <div>
           <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-            Settings
+            {ts('title')}
           </div>
-          <p className="text-sm text-slate-500">Manage notifications and feature visibility. Changes are saved automatically.</p>
+          <p className="text-sm text-slate-500">{ts('subtitle')}</p>
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="border-b border-slate-200 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Email Notifications</h2>
-            <p className="mt-1 text-xs text-slate-500">Configure email alerts for admin messages and stock monitoring.</p>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('emailSection')}</h2>
+            <p className="mt-1 text-xs text-slate-500">{ts('emailSectionDesc')}</p>
           </div>
 
           <div className="divide-y divide-slate-100">
             {[
-              { id: 'contactMessages', label: 'Contact Messages', desc: 'Email alerts for new contact form submissions', cat: 'emailNotifications' },
-              { id: 'stockAlerts', label: 'Stock Alerts', desc: 'Email alerts when product stock is running low', cat: 'emailNotifications' },
-              { id: 'newOrders', label: 'New orders', desc: 'Email admins when a payment succeeds and an order is created', cat: 'emailNotifications' }
+              { id: 'contactMessages', label: ts('notifContactLabel'), desc: ts('notifContactDesc'), cat: 'emailNotifications' },
+              { id: 'stockAlerts', label: ts('notifStockLabel'), desc: ts('notifStockDesc'), cat: 'emailNotifications' },
+              { id: 'newOrders', label: ts('notifOrdersLabel'), desc: ts('notifOrdersDesc'), cat: 'emailNotifications' }
             ].map((item) => (
               <div key={item.id} className="flex items-center justify-between py-4">
                 <div>
@@ -316,14 +323,14 @@ export default function AdminSettingsPage() {
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="border-b border-slate-200 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Features</h2>
-            <p className="mt-1 text-xs text-slate-500">Control storefront feature visibility.</p>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('featuresSection')}</h2>
+            <p className="mt-1 text-xs text-slate-500">{ts('featuresSectionDesc')}</p>
           </div>
 
           <div className="flex items-center justify-between py-4">
             <div>
-              <p className="text-sm font-medium text-slate-900">Roulette Widget</p>
-              <p className="text-sm text-slate-500">Show or hide the roulette widget on the home page</p>
+              <p className="text-sm font-medium text-slate-900">{ts('rouletteLabel')}</p>
+              <p className="text-sm text-slate-500">{ts('rouletteDesc')}</p>
             </div>
             <button
               type="button"
@@ -346,13 +353,13 @@ export default function AdminSettingsPage() {
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="border-b border-slate-200 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Professional Space</h2>
-            <p className="mt-1 text-xs text-slate-500">Update product formats shown on the Professional Space page.</p>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('proSection')}</h2>
+            <p className="mt-1 text-xs text-slate-500">{ts('proSectionDesc')}</p>
           </div>
 
           <div className="py-4 space-y-3">
             <label htmlFor="productFormats" className="text-sm font-medium text-slate-900">
-              Product formats text
+              {ts('productFormatsLabel')}
             </label>
             <input
               id="productFormats"
@@ -367,7 +374,7 @@ export default function AdminSettingsPage() {
                   },
                 }));
               }}
-              placeholder="1kg, 2kg, 10kg"
+              placeholder={ts('placeholderFormats')}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-[#556822] focus:outline-none focus:ring-2 focus:ring-[#556822]/20"
             />
 
@@ -378,7 +385,7 @@ export default function AdminSettingsPage() {
                 disabled={savingFormats}
                 className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {savingFormats ? 'Saving...' : 'Save'}
+                {savingFormats ? ts('saving') : ts('save')}
               </button>
             </div>
           </div>
@@ -386,49 +393,49 @@ export default function AdminSettingsPage() {
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="border-b border-slate-200 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Shipping Settings</h2>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('shippingSection')}</h2>
             <p className="mt-1 text-xs text-slate-500">
-              Configure checkout pricing rules shown in front office. Prices are tax-inclusive.
+              {ts('shippingSectionDesc')}
             </p>
           </div>
 
           <div className="py-4 space-y-6">
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold text-slate-900">Front-office explanation (customer view)</h3>
-              <p className="mt-1 text-xs text-slate-500">This summary helps admins verify exactly what customers see at checkout.</p>
+              <h3 className="text-sm font-semibold text-slate-900">{ts('customerViewTitle')}</h3>
+              <p className="mt-1 text-xs text-slate-500">{ts('customerViewDesc')}</p>
 
               <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Pickup point</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{ts('pickupPoint')}</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
-                    <li>{formatEuro(settings.shippingSettings.relay.belowThresholdPrice)} - cart &lt; {settings.shippingSettings.relay.freeThreshold} €</li>
-                    <li>FREE - from {settings.shippingSettings.relay.freeThreshold} €</li>
+                    <li>{ts('relayBulletLow', { price: formatEuro(settings.shippingSettings.relay.belowThresholdPrice), amount: settings.shippingSettings.relay.freeThreshold })}</li>
+                    <li>{ts('relayBulletFree', { amount: settings.shippingSettings.relay.freeThreshold })}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Home delivery</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{ts('homeDelivery')}</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
-                    <li>{formatEuro(settings.shippingSettings.home.belowReducedPrice)} - cart &lt; {settings.shippingSettings.home.reducedThreshold} €</li>
-                    <li>{formatEuro(settings.shippingSettings.home.betweenReducedAndFreePrice)} - {toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0)} € to {Math.max(toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0), toNumberOrFallback(settings.shippingSettings.home.freeThreshold, 0) - 1)} €</li>
-                    <li>FREE - from {settings.shippingSettings.home.freeThreshold} €</li>
+                    <li>{ts('homeBulletLow', { price: formatEuro(settings.shippingSettings.home.belowReducedPrice), amount: settings.shippingSettings.home.reducedThreshold })}</li>
+                    <li>{ts('homeBulletMid', { price: formatEuro(settings.shippingSettings.home.betweenReducedAndFreePrice), from: toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0), to: Math.max(toNumberOrFallback(settings.shippingSettings.home.reducedThreshold, 0), toNumberOrFallback(settings.shippingSettings.home.freeThreshold, 0) - 1) })}</li>
+                    <li>{ts('homeBulletFree', { amount: settings.shippingSettings.home.freeThreshold })}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Express delivery</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{ts('expressDeliveryLabel')}</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-700">
-                    <li>{formatEuro(settings.shippingSettings.express.addonPrice)}</li>
+                    <li>{ts('expressBullet', { price: formatEuro(settings.shippingSettings.express.addonPrice) })}</li>
                   </ul>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pickup Point</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{ts('pickupPointSettings')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Free shipping from cart amount (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('relayFreeFrom')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -451,7 +458,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Price when cart is below threshold (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('relayPriceBelow')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -477,11 +484,11 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Home Delivery</h3>
-              <p className="text-xs text-slate-500">Rule: below reduced threshold = low tier, between thresholds = mid tier, from free threshold = free.</p>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{ts('homeDeliverySettings')}</h3>
+              <p className="text-xs text-slate-500">{ts('homeRuleHint')}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Reduced-price threshold (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('reducedThreshold')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -504,7 +511,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Free shipping threshold (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('freeThreshold')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -527,7 +534,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Price below reduced threshold (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('priceBelowReduced')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -550,7 +557,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Price between reduced and free thresholds (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('priceBetween')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -576,11 +583,11 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Express Delivery</h3>
-              <p className="text-xs text-slate-500">This is the full customer price for express delivery.</p>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{ts('expressSettings')}</h3>
+              <p className="text-xs text-slate-500">{ts('expressPriceHint')}</p>
               <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Express delivery price (EUR)</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('expressPrice')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -606,13 +613,13 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Boxtal Quotes</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{ts('boxtalSection')}</h3>
               <p className="text-xs text-slate-500">
-                Applied only to back-office Boxtal quote calculations.
+                {ts('boxtalHint')}
               </p>
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">Boxtal margin multiplier</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">{ts('boxtalMargin')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -641,7 +648,7 @@ export default function AdminSettingsPage() {
                 disabled={savingShippingSettings}
                 className="rounded-md bg-[#556822] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#44591a] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {savingShippingSettings ? 'Saving...' : 'Save Shipping Settings'}
+                {savingShippingSettings ? ts('savingShipping') : ts('saveShipping')}
               </button>
             </div>
           </div>

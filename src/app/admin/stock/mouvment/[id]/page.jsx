@@ -7,17 +7,18 @@ import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { stockAPI } from '@/lib/api';
 import { ArrowLeft } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
-function MovementRow({ m }) {
+function MovementRow({ m, tm, locale }) {
   const order = m.orderId;
   const populated = order && typeof order === 'object' && order._id;
   const linkId = populated ? order._id : order || null;
-  const label = populated ? order.invoiceNumber || String(order._id).slice(-8) : linkId ? 'Commande' : null;
+  const label = populated ? order.invoiceNumber || String(order._id).slice(-8) : linkId ? tm('orderLabel') : null;
 
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50/80">
       <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-        {m.date ? new Date(m.date).toLocaleString('fr-FR') : '—'}
+        {m.date ? new Date(m.date).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US') : '—'}
       </td>
       <td className="px-4 py-3">
         <span
@@ -47,6 +48,9 @@ function MovementRow({ m }) {
 }
 
 function StockMovementInner() {
+  const tm = useTranslations('admin.stockMovement');
+  const tcom = useTranslations('admin.common');
+  const locale = useLocale();
   const params = useParams();
   const id = params?.id;
   const [data, setData] = useState(null);
@@ -62,9 +66,9 @@ function StockMovementInner() {
       try {
         const res = await stockAPI.getMovements(id);
         if (res?.success) setData(res.data);
-        else setError(res?.message || 'Erreur');
+        else setError(res?.message || tm('error'));
       } catch (e) {
-        setError(e.message || 'Erreur');
+        setError(e.message || tm('error'));
       } finally {
         setLoading(false);
       }
@@ -105,19 +109,19 @@ function StockMovementInner() {
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#556822]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour au stock
+          {tm('back')}
         </Link>
 
-        {loading && <p className="text-slate-500">Chargement…</p>}
+        {loading && <p className="text-slate-500">{tm('loading')}</p>}
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         {!loading && data && (
           <>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Mouvements de stock</h1>
+              <h1 className="text-2xl font-bold text-slate-900">{tm('title')}</h1>
               <p className="text-slate-600 mt-1">{data.productName}</p>
               <p className="text-sm text-slate-500 mt-2">
-                Stock actuel :{' '}
+                {tm('currentStock')}{' '}
                 <span className="font-semibold text-slate-800">{data.currentQuantity}</span>
               </p>
             </div>
@@ -126,21 +130,21 @@ function StockMovementInner() {
               <table className="min-w-full text-sm">
                 <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium">Date</th>
-                    <th className="px-4 py-3 text-left font-medium">Type</th>
-                    <th className="px-4 py-3 text-left font-medium">Quantité</th>
-                    <th className="px-4 py-3 text-left font-medium">Commande</th>
+                    <th className="px-4 py-3 text-left font-medium">{tm('colDate')}</th>
+                    <th className="px-4 py-3 text-left font-medium">{tm('colType')}</th>
+                    <th className="px-4 py-3 text-left font-medium">{tm('colQuantity')}</th>
+                    <th className="px-4 py-3 text-left font-medium">{tm('colOrder')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {movements.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-4 py-10 text-center text-slate-500">
-                        Aucun mouvement enregistré
+                        {tm('empty')}
                       </td>
                     </tr>
                   ) : (
-                    paginatedMovements.map((m, i) => <MovementRow key={`${m._id || m.date || i}-${i}`} m={m} />)
+                    paginatedMovements.map((m, i) => <MovementRow key={`${m._id || m.date || i}-${i}`} m={m} tm={tm} locale={locale} />)
                   )}
                 </tbody>
               </table>
@@ -149,7 +153,7 @@ function StockMovementInner() {
             {movements.length > 0 && (
               <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
                 <p>
-                  Affichage de {startDisplay} à {endDisplay} sur {movements.length} mouvements
+                  {tm('showing', { start: startDisplay, end: endDisplay, total: movements.length })}
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -158,7 +162,7 @@ function StockMovementInner() {
                     disabled={currentPage === 1}
                     className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Précédent
+                    {tcom('previous')}
                   </button>
                   <button
                     type="button"
@@ -166,7 +170,7 @@ function StockMovementInner() {
                     disabled={currentPage >= totalPages}
                     className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Suivant
+                    {tcom('next')}
                   </button>
                 </div>
               </div>

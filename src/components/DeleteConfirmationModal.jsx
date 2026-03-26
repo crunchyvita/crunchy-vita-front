@@ -13,6 +13,7 @@ export default function DeleteConfirmationModal({
   actionVerb = "delete",
   confirmButtonLabel = "Delete",
   confirmLoadingLabel = "Deleting...",
+  cancelButtonLabel = "Cancel",
 }) {
   if (!isOpen) return null;
 
@@ -53,7 +54,7 @@ export default function DeleteConfirmationModal({
             disabled={isDeleting}
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
-            Cancel
+            {cancelButtonLabel}
           </button>
           <button
             type="button"

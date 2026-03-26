@@ -5,10 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
+import { useTranslations } from "next-intl";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function EditBlogPage() {
+  const t = useTranslations("admin.blogsForm");
   const router = useRouter();
   const params = useParams();
   const blogId = params?.id;
@@ -45,7 +47,7 @@ export default function EditBlogPage() {
       const response = await fetch(`${backendUrl}/blogs/admin/${blogId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch blog");
+      if (!response.ok) throw new Error(t("fetchFailed"));
       const result = await response.json();
       const blog = result.data;
 
@@ -57,7 +59,7 @@ export default function EditBlogPage() {
       const existingImages = getExistingImageUrls(blog);
       setImages(existingImages.map((url) => ({ url, isNew: false, file: null })));
     } catch (err) {
-      setError(err.message || "Failed to fetch blog");
+      setError(err.message || t("fetchFailed"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ export default function EditBlogPage() {
 
     const remainingSlots = Math.max(0, 10 - images.length);
     if (remainingSlots === 0) {
-      setError("Maximum 10 images allowed");
+      setError(t("maxImages"));
       e.target.value = "";
       return;
     }
@@ -113,7 +115,7 @@ export default function EditBlogPage() {
     e.preventDefault();
     setError(""); setSuccess(""); setSubmitting(true);
     try {
-      if (!formData.title || !formData.content) throw new Error("All fields are required");
+      if (!formData.title || !formData.content) throw new Error(t("allFieldsRequired"));
       const token = localStorage.getItem("token");
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
@@ -136,8 +138,8 @@ export default function EditBlogPage() {
         body: formDataToSend,
       });
 
-      if (!response.ok) throw new Error("Failed to update blog post");
-      setSuccess("Blog post updated successfully!");
+      if (!response.ok) throw new Error(t("updateFailed"));
+      setSuccess(t("updateSuccess"));
       setTimeout(() => router.push("/admin/blogs"), 1500);
     } catch (err) {
       setError(err.message);
@@ -162,14 +164,14 @@ export default function EditBlogPage() {
           <div>
             <Link href="/admin/blogs" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-2 transition w-fit">
               <ArrowLeft className="h-4 w-4" />
-              Back to List
+              {t("backToList")}
             </Link>
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Edit Blog Post</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">{t("editTitle")}</h1>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/admin/blogs" className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition text-sm font-medium">
-              Cancel
+              {t("cancel")}
             </Link>
             <button
               type="submit"
@@ -178,7 +180,7 @@ export default function EditBlogPage() {
               className="px-5 py-2.5 text-white rounded-lg transition disabled:opacity-50 text-sm font-medium shadow-sm"
               style={{ backgroundColor: "#556622" }}
             >
-              {submitting ? "Saving..." : "Save Post"}
+              {submitting ? t("saving") : t("savePost")}
             </button>
           </div>
         </div>
@@ -207,27 +209,27 @@ export default function EditBlogPage() {
               <div className="lg:col-span-2 space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Post Title <span className="text-red-500">*</span>
+                    {t("postTitle")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    placeholder="Enter post title"
+                    placeholder={t("placeholderTitle")}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition text-lg font-medium"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Content Body <span className="text-red-500">*</span>
+                    {t("contentBody")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="content"
                     value={formData.content}
                     onChange={handleInputChange}
-                    placeholder="Start writing your article..."
+                    placeholder={t("placeholderContent")}
                     rows={18}
                     className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition resize-none leading-relaxed"
                   />
@@ -238,12 +240,12 @@ export default function EditBlogPage() {
                 <div className="sticky top-6 space-y-6">
                   <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-6">
                     <label className="block text-sm font-bold text-gray-700 mb-4">
-                      Featured Image
+                      {t("featuredImage")}
                     </label>
 
                     {images[0]?.url ? (
                       <div className="relative group aspect-video rounded-xl overflow-hidden shadow-md">
-                        <img src={images[0].url} alt="Featured preview" className="w-full h-full object-cover" />
+                        <img src={images[0].url} alt={t("featuredAlt")} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => removeImageAtIndex(0)}
@@ -255,7 +257,7 @@ export default function EditBlogPage() {
                     ) : (
                       <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white hover:border-[#556622] transition-all group">
                         <ImageIcon className="h-10 w-10 text-gray-400 group-hover:text-[#556622] mb-2" />
-                        <p className="text-sm font-medium text-gray-600">Click to upload</p>
+                        <p className="text-sm font-medium text-gray-600">{t("clickUpload")}</p>
                         <input
                           type="file"
                           accept="image/*"
@@ -267,7 +269,7 @@ export default function EditBlogPage() {
                     )}
 
                     <p className="mt-4 text-xs text-gray-500 leading-tight">
-                      This image will appear at the top of your blog post and in list views.
+                      {t("imageHint")}
                     </p>
 
                     {images.length > 1 && (
@@ -288,7 +290,7 @@ export default function EditBlogPage() {
                     )}
 
                     <label className="mt-4 inline-flex items-center justify-center w-full px-3 py-2 text-xs border border-gray-300 rounded-lg cursor-pointer hover:bg-white transition">
-                      Add more images
+                      {t("addMoreImages")}
                       <input
                         type="file"
                         accept="image/*"

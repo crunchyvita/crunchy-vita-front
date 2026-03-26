@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { adminManagementAPI } from "@/lib/api";
 import { Shield, Plus, RefreshCw, Power, Search, Trash2, Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 const INITIAL_CREATE_FORM = {
   email: "",
@@ -13,6 +14,9 @@ const INITIAL_CREATE_FORM = {
 
 function AdministratorManagementPageContent() {
   const PAGE_SIZE = 6;
+  const ta = useTranslations("admin.administrators");
+  const tcom = useTranslations("admin.common");
+  const locale = useLocale();
   const [admins, setAdmins] = useState([]);
   const [allClients, setAllClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +41,7 @@ function AdministratorManagementPageContent() {
       setAdmins(list);
       setPage(1);
     } catch (err) {
-      setError(err.message || "Failed to load administrators");
+      setError(err.message || ta("loadError"));
     } finally {
       setLoading(false);
     }
@@ -89,7 +93,7 @@ function AdministratorManagementPageContent() {
       setCreateForm(INITIAL_CREATE_FORM);
       await loadAdmins();
     } catch (err) {
-      setError(err.message || "Failed to assign admin");
+      setError(err.message || ta("assignError"));
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +109,7 @@ function AdministratorManagementPageContent() {
         prev.map((a) => (a.id === adminId ? { ...a, isActive: newStatus } : a))
       );
     } catch (err) {
-      setError(err.message || "Failed to update status");
+      setError(err.message || ta("updateError"));
     } finally {
       setUpdatingId(null);
     }
@@ -126,7 +130,7 @@ function AdministratorManagementPageContent() {
       setIsDeleteModalOpen(false);
       setAdminToDelete(null);
     } catch (err) {
-      setError(err.message || "Failed to remove administrator");
+      setError(err.message || ta("removeError"));
     } finally {
       setIsDeletingAdmin(false);
     }
@@ -141,11 +145,11 @@ function AdministratorManagementPageContent() {
     if (!dateString) return "-";
     const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return "-";
-    const months = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month}, ${year}`;
+    return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
@@ -156,12 +160,12 @@ function AdministratorManagementPageContent() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              Administrators
+              {ta("title")}
               <span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-                {admins.length} Admins
+                {tcom("adminsCount", { count: admins.length })}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Manage administrative privileges</p>
+            <p className="text-sm text-slate-500">{ta("subtitle")}</p>
           </div>
         </div>
 
@@ -175,7 +179,7 @@ function AdministratorManagementPageContent() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="search"
-                placeholder="Search client email to assign admin..."
+                placeholder={ta("searchPlaceholder")}
                 value={createForm.email}
                 onChange={(e) => setCreateForm((prev) => ({ ...prev, email: e.target.value }))}
                 onFocus={() => createForm.email.trim() && setShowSuggestions(true)}
@@ -186,9 +190,9 @@ function AdministratorManagementPageContent() {
               {showSuggestions && (
                 <div className="absolute z-20 mt-1 w-full rounded-md border border-slate-200 bg-white shadow-lg overflow-hidden">
                   {searchLoading ? (
-                    <div className="px-3 py-4 text-center text-xs text-slate-400">Searching...</div>
+                    <div className="px-3 py-4 text-center text-xs text-slate-400">{ta("searching")}</div>
                   ) : clientSuggestions.length === 0 ? (
-                    <div className="px-3 py-4 text-center text-xs text-slate-400">No clients found</div>
+                    <div className="px-3 py-4 text-center text-xs text-slate-400">{ta("noClientsFound")}</div>
                   ) : (
                     <ul className="max-h-56 overflow-auto">
                       {clientSuggestions.map((client) => (
@@ -205,7 +209,7 @@ function AdministratorManagementPageContent() {
                             className="w-full px-3 py-2 text-left hover:bg-slate-50 transition-colors"
                           >
                             <p className="text-sm font-medium text-slate-800">{client.email}</p>
-                            <p className="text-[10px] uppercase text-slate-400">{client.name || "Client"}</p>
+                            <p className="text-[10px] uppercase text-slate-400">{client.name || tcom("client")}</p>
                           </button>
                         </li>
                       ))}
@@ -220,7 +224,7 @@ function AdministratorManagementPageContent() {
               style={{ backgroundColor: "#556622" }}
               className="flex items-center justify-center gap-2 rounded-md px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? "Assigning..." : "Assign Admin"}
+              {submitting ? ta("assigning") : ta("assignAdmin")}
             </button>
           </form>
         </section>
@@ -232,17 +236,17 @@ function AdministratorManagementPageContent() {
           {loading ? (
             <div className="py-20 text-center text-sm text-slate-500 flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-slate-200" />
-              Loading administrators...
+              {ta("loading")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="px-3 py-2 font-medium">Administrator</th>
-                    <th className="px-3 py-2 font-medium">Role</th>
-                    <th className="px-3 py-2 font-medium">Status</th>
-                    <th className="px-3 py-2 font-medium">Updated</th>
+                    <th className="px-3 py-2 font-medium">{ta("administrator")}</th>
+                    <th className="px-3 py-2 font-medium">{tcom("role")}</th>
+                    <th className="px-3 py-2 font-medium">{tcom("status")}</th>
+                    <th className="px-3 py-2 font-medium">{tcom("updated")}</th>
                     <th className="px-3 py-2 text-right"></th>
                   </tr>
                 </thead>
@@ -260,7 +264,7 @@ function AdministratorManagementPageContent() {
                         <span className={`inline-flex rounded-full px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${
                           admin.isActive !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                         }`}>
-                          {admin.isActive !== false ? "Actif" : "Inactif"}
+                          {admin.isActive !== false ? tcom("active") : tcom("inactive")}
                         </span>
                       </td>
                       <td className="px-3 py-4 align-middle text-slate-700">{formatDate(admin.updatedAt)}</td>
@@ -275,7 +279,7 @@ function AdministratorManagementPageContent() {
                             }`}
                           >
                             {updatingId === admin.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Power className="h-3.5 w-3.5" />}
-                            {admin.isActive !== false ? "Désactiver" : "Activer"}
+                            {admin.isActive !== false ? ta("deactivate") : ta("activate")}
                           </button>
                           <button
                             type="button"
@@ -283,7 +287,7 @@ function AdministratorManagementPageContent() {
                             className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
-                            Remove
+                            {ta("remove")}
                           </button>
                         </div>
                       </td>
@@ -298,21 +302,21 @@ function AdministratorManagementPageContent() {
         {/* Pagination Section */}
         {!loading && admins.length > 0 && (
           <div className="flex items-center justify-between text-sm text-slate-500">
-            <p>Page {safePage} of {totalPages}</p>
+            <p>{tcom("pageOf", { page: safePage, total: totalPages })}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage <= 1}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50 transition shadow-sm bg-white"
               >
-                Previous
+                {tcom("previous")}
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage >= totalPages}
                 className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50 disabled:opacity-50 transition shadow-sm bg-white"
               >
-                Next
+                {tcom("next")}
               </button>
             </div>
           </div>
@@ -323,20 +327,15 @@ function AdministratorManagementPageContent() {
         isOpen={isDeleteModalOpen}
         onClose={() => !isDeletingAdmin && setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Remove admin access"
-        confirmMessage={
-          <>
-            Are you sure you want to remove admin access for{" "}
-            <span className="font-semibold text-slate-900">
-              "{adminToDelete?.email || "this admin"}"
-            </span>
-            ?
-          </>
-        }
-        description="The account will remain active, but the user will no longer have access to the admin dashboard."
+        title={ta("deleteTitle")}
+        confirmMessage={ta("deleteConfirm", {
+          email: adminToDelete?.email || ta("thisAdmin"),
+        })}
+        description={ta("deleteDescription")}
         isDeleting={isDeletingAdmin}
-        confirmButtonLabel="Remove admin access"
-        confirmLoadingLabel="Removing admin access..."
+        confirmButtonLabel={ta("confirmRemove")}
+        confirmLoadingLabel={ta("confirmRemoving")}
+        cancelButtonLabel={tcom("cancel")}
       />
     </>
   );

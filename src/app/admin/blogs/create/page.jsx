@@ -5,10 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
+import { useTranslations } from "next-intl";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function CreateBlogPage() {
+  const t = useTranslations("admin.blogsForm");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -44,7 +46,7 @@ export default function CreateBlogPage() {
 
     const remainingSlots = Math.max(0, 10 - imageFiles.length);
     if (remainingSlots === 0) {
-      setError("Maximum 10 images allowed");
+      setError(t("maxImages"));
       e.target.value = "";
       return;
     }
@@ -81,7 +83,7 @@ export default function CreateBlogPage() {
 
     try {
       if (!formData.title?.trim() || !formData.content?.trim()) {
-        throw new Error("Title and content are required");
+        throw new Error(t("titleContentRequired"));
       }
 
       const token = localStorage.getItem("token");
@@ -108,10 +110,10 @@ export default function CreateBlogPage() {
         throw new Error(errorData.message || "Failed to create blog post");
       }
 
-      setSuccess("Blog post created successfully!");
+      setSuccess(t("createSuccess"));
       setTimeout(() => router.push("/admin/blogs"), 1200);
     } catch (err) {
-      setError(err?.message || "Failed to create blog post");
+      setError(err?.message || t("createFailed"));
     } finally {
       setLoading(false);
     }
@@ -125,14 +127,14 @@ export default function CreateBlogPage() {
           <div>
             <Link href="/admin/blogs" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-2 transition w-fit">
               <ArrowLeft className="h-4 w-4" />
-              Back to Blogs
+              {t("backToBlogs")}
             </Link>
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Create Blog Post</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">{t("createTitle")}</h1>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/admin/blogs" className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition text-sm font-medium">
-              Cancel
+              {t("cancel")}
             </Link>
             <button
               type="submit"
@@ -141,7 +143,7 @@ export default function CreateBlogPage() {
               className="px-5 py-2.5 text-white rounded-lg transition disabled:opacity-50 text-sm font-medium shadow-sm"
               style={{ backgroundColor: "#556622" }}
             >
-              {loading ? "Publishing..." : "Publish Post"}
+              {loading ? t("publishing") : t("publishPost")}
             </button>
           </div>
         </div>
@@ -170,27 +172,27 @@ export default function CreateBlogPage() {
               <div className="lg:col-span-2 space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Post Title <span className="text-red-500">*</span>
+                    {t("postTitle")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    placeholder="Enter post title"
+                    placeholder={t("placeholderTitle")}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition text-lg font-medium"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Content Body <span className="text-red-500">*</span>
+                    {t("contentBody")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="content"
                     value={formData.content}
                     onChange={handleInputChange}
-                    placeholder="Start writing your article..."
+                    placeholder={t("placeholderContent")}
                     rows={18}
                     className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#556622] focus:border-transparent outline-none transition resize-none leading-relaxed"
                   />
@@ -201,12 +203,12 @@ export default function CreateBlogPage() {
                 <div className="sticky top-6 space-y-6">
                   <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-6">
                     <label className="block text-sm font-bold text-gray-700 mb-4">
-                      Featured Image
+                      {t("featuredImage")}
                     </label>
 
                     {imagePreviews[0] ? (
                       <div className="relative group aspect-video rounded-xl overflow-hidden shadow-md">
-                        <img src={imagePreviews[0]} alt="Featured preview" className="w-full h-full object-cover" />
+                        <img src={imagePreviews[0]} alt={t("featuredAlt")} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => removeImageAtIndex(0)}
@@ -218,7 +220,7 @@ export default function CreateBlogPage() {
                     ) : (
                       <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white hover:border-[#556622] transition-all group">
                         <ImageIcon className="h-10 w-10 text-gray-400 group-hover:text-[#556622] mb-2" />
-                        <p className="text-sm font-medium text-gray-600">Click to upload</p>
+                        <p className="text-sm font-medium text-gray-600">{t("clickUpload")}</p>
                         <input
                           type="file"
                           accept="image/*"
@@ -230,7 +232,7 @@ export default function CreateBlogPage() {
                     )}
 
                     <p className="mt-4 text-xs text-gray-500 leading-tight">
-                      This image will appear at the top of your blog post and in list views.
+                      {t("imageHint")}
                     </p>
 
                     {imagePreviews.length > 1 && (
@@ -252,7 +254,7 @@ export default function CreateBlogPage() {
 
                     {imagePreviews[0] && (
                       <label className="mt-4 inline-flex items-center justify-center w-full px-3 py-2 text-xs border border-gray-300 rounded-lg cursor-pointer hover:bg-white transition">
-                        Add more images
+                        {t("addMoreImages")}
                         <input
                           type="file"
                           accept="image/*"

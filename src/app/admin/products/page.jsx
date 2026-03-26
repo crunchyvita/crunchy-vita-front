@@ -13,6 +13,7 @@ import {
 	Info,
 	Package
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 function formatCurrency(value) {
 	if (value === undefined || value === null || Number.isNaN(Number(value))) {
@@ -21,20 +22,10 @@ function formatCurrency(value) {
 	return `$${Number(value).toLocaleString()}`;
 }
 
-function formatDate(dateString) {
-	if (!dateString) return "-";
-	
-	const date = new Date(dateString);
-	const months = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-	
-	const day = date.getDate();
-	const month = months[date.getMonth()];
-	const year = date.getFullYear();
-	
-	return `${day} ${month}, ${year}`;
-}
-
 export default function ProductsPage() {
+	const tp = useTranslations("admin.products");
+	const tcom = useTranslations("admin.common");
+	const locale = useLocale();
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -51,7 +42,7 @@ export default function ProductsPage() {
 				const list = Array.isArray(data) ? data : data?.data || [];
 				setProducts(list);
 			} catch (err) {
-				setError(err.message || "Failed to load products");
+				setError(err.message || tp("loadError"));
 			} finally {
 				setLoading(false);
 			}
@@ -68,6 +59,17 @@ export default function ProductsPage() {
 		});
 	}, [products, search]);
 
+	const formatDate = (dateString) => {
+		if (!dateString) return "-";
+		const date = new Date(dateString);
+		if (Number.isNaN(date.getTime())) return "-";
+		return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", {
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+		});
+	};
+
 	return (
 		<>
 		<AdminHeader />
@@ -75,12 +77,12 @@ export default function ProductsPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-						Product
+						{tp("title")}
 						<span className="rounded-full bg-green-100 px-2 text-xs font-medium text-green-700">
-							{products.length} Products
+							{tcom("productsCount", { count: products.length })}
 						</span>
 					</div>
-					<p className="text-sm text-slate-500">Keep track of products</p>
+					<p className="text-sm text-slate-500">{tp("subtitle")}</p>
 				</div>
 
 				<div className="flex items-center gap-3">
@@ -93,7 +95,7 @@ export default function ProductsPage() {
 						onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
 					>
 						<Plus className="h-4 w-4" />
-						Add Product
+						{tp("add")}
 					</Link>
 				</div>
 			</div>
@@ -103,7 +105,7 @@ export default function ProductsPage() {
 					<Search className="h-4 w-4 text-slate-400" />
 					<input
 						type="text"
-						placeholder="Search"
+						placeholder={tcom("search")}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -117,7 +119,7 @@ export default function ProductsPage() {
 				) : null}
 
 				{loading ? (
-					<div className="py-10 text-center text-sm text-slate-500">Loading products...</div>
+					<div className="py-10 text-center text-sm text-slate-500">{tp("loading")}</div>
 				) : filteredProducts.length === 0 ? (
 					<table className="min-w-full">
 						<tbody>
@@ -125,7 +127,7 @@ export default function ProductsPage() {
 								<td colSpan={6} className="py-20 text-center">
 									<div className="flex flex-col items-center gap-2">
 										<Package className="h-10 w-10 text-slate-200" />
-										<p className="font-bold text-slate-400">Aucun produit trouvé</p>
+										<p className="font-bold text-slate-400">{tp("empty")}</p>
 									</div>
 								</td>
 							</tr>
@@ -136,11 +138,11 @@ export default function ProductsPage() {
 						<table className="min-w-full text-sm">
 							<thead>
 								<tr className="border-b border-slate-200 text-left text-slate-500">
-								<th className="px-3 py-2 font-medium">Product name</th>
-								<th className="px-3 py-2 font-medium">Total Stock</th>
-								<th className="px-3 py-2 font-medium">Reserved</th>
-								<th className="px-3 py-2 font-medium">Price</th>
-								<th className="px-3 py-2 font-medium">Date uploaded</th>
+								<th className="px-3 py-2 font-medium">{tp("nameCol")}</th>
+								<th className="px-3 py-2 font-medium">{tp("stockCol")}</th>
+								<th className="px-3 py-2 font-medium">{tp("reservedCol")}</th>
+								<th className="px-3 py-2 font-medium">{tp("priceCol")}</th>
+								<th className="px-3 py-2 font-medium">{tp("uploadedCol")}</th>
 									<th className="px-3 py-2"></th>
 								</tr>
 							</thead>
@@ -183,7 +185,7 @@ export default function ProductsPage() {
         onClick={() => setOpenDropdown(null)}
       >
         <Edit2 className="h-5 w-5" />
-        Edit Product
+        {tp("editProduct")}
       </Link>
       <Link
         href={`/admin/products/${product._id}`}
@@ -191,7 +193,7 @@ export default function ProductsPage() {
         onClick={() => setOpenDropdown(null)}
       >
 														<Info className="h-5 w-5" />
-														View Details
+														{tp("viewDetails")}
 													</Link>
 												</div>
 											)}
@@ -207,10 +209,10 @@ export default function ProductsPage() {
 			</div>
 
 			<div className="flex items-center justify-between text-sm text-slate-500">
-				<p>Page 1 of 1</p>
+				<p>{tcom("pageOf", { page: 1, total: 1 })}</p>
 				<div className="flex gap-2">
-					<button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">Previous</button>
-					<button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">Next</button>
+					<button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">{tcom("previous")}</button>
+					<button className="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50">{tcom("next")}</button>
 				</div>
 			</div>
 		</div>

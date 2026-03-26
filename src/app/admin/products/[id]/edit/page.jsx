@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -23,6 +24,8 @@ import TagInput from "@/components/TagInput";
 import { createEmptyNutrition, normalizeNutrition, NUTRITION_ROWS } from "@/lib/nutrition";
 
 export default function EditProductPage() {
+  const tp = useTranslations("admin.productsForm");
+  const locale = useLocale();
   const { id: productId } = useParams();
   const router = useRouter();
   const [product, setProduct] = useState(null);
@@ -243,11 +246,11 @@ export default function EditProductPage() {
     
     // Quick validation
     if (!formData.name.trim()) {
-      setError("Product name is required");
+      setError(tp("nameRequired"));
       return;
     }
     if (!formData.price || Number(formData.price) <= 0) {
-      setError("Valid price is required");
+      setError(tp("priceRequired"));
       return;
     }
 
@@ -289,7 +292,7 @@ export default function EditProductPage() {
       // Immediate redirect with success feedback
       router.push(`/admin/products/${productId}?updated=true`);
     } catch (err) {
-      setError(err.message || "Failed to update product");
+      setError(err.message || tp("updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -315,7 +318,7 @@ export default function EditProductPage() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
-      <p className="font-bold text-slate-500 uppercase tracking-widest text-xs">Loading product data...</p>
+      <p className="font-bold text-slate-500 uppercase tracking-widest text-xs">{tp("loadingProduct")}</p>
     </div>
   );
 
@@ -328,16 +331,17 @@ export default function EditProductPage() {
         <div className="space-y-1">
           <Link href={`/admin/products/${productId}`} className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Details
+            {tp("backDetails")}
           </Link>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-            Edit <span className="text-green-800">{getTranslatedProduct(product, "fr").name}</span>
+            {tp("editTitle")}{" "}
+            <span className="text-green-800">{getTranslatedProduct(product, locale).name}</span>
           </h1>
         </div>
         
         <div className="flex items-center gap-4">
           <button type="button" onClick={() => router.back()} className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 transition-all">
-            Discard
+            {tp("discard")}
           </button>
           <button
             onClick={handleSubmit}
@@ -350,12 +354,12 @@ export default function EditProductPage() {
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                {tp("saving")}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Update Product
+                {tp("updateProduct")}
               </>
             )}
           </button>
@@ -375,12 +379,12 @@ export default function EditProductPage() {
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-8">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
               <div className="p-3 bg-slate-900 text-white rounded-2xl"><Type size={24}/></div>
-              <h3 className="font-black text-xl text-slate-900">General Information</h3>
+              <h3 className="font-black text-xl text-slate-900">{tp("generalInformation")}</h3>
             </div>
             
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Product Name</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("labelTitle")}</label>
                 <input
                   type="text"
                   name="name"
@@ -391,7 +395,7 @@ export default function EditProductPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Description</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("labelDescription")}</label>
                 <textarea
                   name="description"
                   rows={8}
@@ -408,7 +412,7 @@ export default function EditProductPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                   <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><DollarSign size={20}/></div>
-                  <h3 className="font-black text-lg text-slate-900">Pricing</h3>
+                  <h3 className="font-black text-lg text-slate-900">{tp("pricingTitle")}</h3>
                </div>
                <div className="relative">
                   <span className="absolute left-6 top-1/2 -translate-y-1/2 text-black font-black text-lg">$</span>
@@ -427,7 +431,7 @@ export default function EditProductPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                   <div className="p-2 bg-amber-100 text-amber-700 rounded-xl"><ShieldCheck size={20}/></div>
-                  <h3 className="font-black text-lg text-slate-900">Stock Alert</h3>
+                  <h3 className="font-black text-lg text-slate-900">{tp("stockAlert")}</h3>
                </div>
               <input
                   type="number"
@@ -443,12 +447,12 @@ export default function EditProductPage() {
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="p-2 bg-slate-100 text-slate-700 rounded-xl"><AlertTriangle size={20}/></div>
-              <h3 className="font-black text-lg text-slate-900">Dimensions & Weight</h3>
+              <h3 className="font-black text-lg text-slate-900">{tp("dimensionsTitle")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Width(cm)</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("width")}</label>
                 <input
                   type="number"
                   name="width"
@@ -462,7 +466,7 @@ export default function EditProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Height(cm)</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("height")}</label>
                 <input
                   type="number"
                   name="height"
@@ -476,7 +480,7 @@ export default function EditProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Depth(cm)</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("depth")}</label>
                 <input
                   type="number"
                   name="depth"
@@ -490,7 +494,7 @@ export default function EditProductPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Weight(kg)</label>
+                <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("weight")}</label>
                 <input
                   type="number"
                   name="weight"
@@ -509,13 +513,13 @@ export default function EditProductPage() {
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="p-2 bg-fuchsia-100 text-fuchsia-700 rounded-xl"><ShieldCheck size={20}/></div>
               <div>
-                <h3 className="font-black text-lg text-slate-900">Tableau nutritionnel</h3>
-                <p className="text-sm text-slate-500">Mettez a jour les valeurs nutritionnelles affichees sur la fiche produit.</p>
+                <h3 className="font-black text-lg text-slate-900">{tp("nutritionTitle")}</h3>
+                <p className="text-sm text-slate-500">{tp("nutritionDesc")}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Libelle portion</label>
+              <label className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{tp("servingLabel")}</label>
               <input
                 type="text"
                 value={formData.nutrition.servingLabel}
@@ -528,7 +532,7 @@ export default function EditProductPage() {
                     },
                   }))
                 }
-                placeholder="16 g"
+                placeholder={tp("servingPlaceholder")}
                 className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-base font-medium text-black placeholder:text-slate-400 focus:border-[#556822] focus:bg-white outline-none transition-all"
               />
             </div>
@@ -536,8 +540,8 @@ export default function EditProductPage() {
             <div className="overflow-x-auto">
               <div className="space-y-3" style={{ minWidth: "760px" }}>
                 <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-3">
-                  <div className="rounded-2xl bg-slate-900 px-5 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">Infos nutritionnelles</div>
-                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>100 g</div>
+                  <div className="rounded-2xl bg-slate-900 px-5 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">{tp("nutritionGridLabel")}</div>
+                  <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>{tp("per100g")}</div>
                   <div className="rounded-2xl px-5 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white" style={{ backgroundColor: "#556822" }}>
                     {formData.nutrition.servingLabel}
                   </div>
@@ -573,9 +577,9 @@ export default function EditProductPage() {
             <div className="flex items-center justify-between border-b border-slate-100 pb-5">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-purple-100 text-purple-700 rounded-2xl"><ImageIcon size={24}/></div>
-                <h3 className="font-black text-xl text-slate-900">Media Gallery</h3>
+                <h3 className="font-black text-xl text-slate-900">{tp("visualMedia")}</h3>
               </div>
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{displayMedia.length} Photos</span>
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{tp("imagesUploaded", { count: displayMedia.length })}</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -586,9 +590,9 @@ export default function EditProductPage() {
 
               {displayMedia.map((item, idx) => (
                 <div key={idx} className="group relative aspect-square rounded-3xl overflow-hidden border-4 border-white shadow-lg bg-slate-100">
-                  <img src={item.url} alt="Product" className="h-full w-full object-cover" />
+                  <img src={item.url} alt={tp("previewAlt")} className="h-full w-full object-cover" />
                   {item.isNew && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-emerald-500 text-[8px] font-black text-white rounded-md uppercase">New</div>
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-emerald-500 text-[8px] font-black text-white rounded-md uppercase">{tp("newBadge")}</div>
                   )}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
@@ -608,24 +612,24 @@ export default function EditProductPage() {
         {/* SIDEBAR AREA */}
         <div className="space-y-8">
           <div className="bg-slate-900 rounded-3xl p-8 shadow-2xl space-y-10">
-            <h3 className="font-black text-white text-xs uppercase tracking-[0.3em] border-b border-white/10 pb-4">Settings</h3>
+            <h3 className="font-black text-white text-xs uppercase tracking-[0.3em] border-b border-white/10 pb-4">{tp("settingsHeading")}</h3>
 
             {/* Status */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Product Status</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("productStatus")}</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
                 className="w-full rounded-xl bg-white/5 border border-white/10 px-5 py-3.5 text-sm font-bold text-white focus:bg-white/10 focus:border-blue-500 outline-none transition-all"
               >
-                <option value="ACTIVE" className="text-slate-900">Active</option>
-                <option value="INACTIVE" className="text-slate-900">Inactive</option>
+                <option value="ACTIVE" className="text-slate-900">{tp("optionActive")}</option>
+                <option value="INACTIVE" className="text-slate-900">{tp("optionInactive")}</option>
               </select>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Shop Visibility</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("shopVisibility")}</label>
               <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -638,13 +642,13 @@ export default function EditProductPage() {
                   }
                   className="h-4 w-4 accent-emerald-500"
                 />
-                <span className="text-sm font-bold text-white">Show this product in Shop</span>
+                <span className="text-sm font-bold text-white">{tp("showInShop")}</span>
               </label>
             </div>
 
             {/* Category Search */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Product Category</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("categoryLabel")}</label>
               <div className="relative" ref={autocompleteRef}>
                 <input
                   type="text"
@@ -666,7 +670,7 @@ export default function EditProductPage() {
                       setShowSuggestions(false);
                     }
                   }}
-                  placeholder="Start typing..."
+                  placeholder={tp("categoryPlaceholder")}
                   className="w-full rounded-xl bg-white/5 border border-white/10 px-5 py-3.5 text-sm font-bold text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-emerald-500 outline-none transition-all"
                 />
                 {showSuggestions && categoryInput && suggestions.length > 0 && (
@@ -713,7 +717,7 @@ export default function EditProductPage() {
                           }));
                         }}
                         className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
-                        aria-label={`Remove ${cat.name}`}
+                        aria-label={tp("removeCategoryAria", { name: cat.name })}
                       >
                         <X size={12} />
                       </button>
@@ -725,11 +729,11 @@ export default function EditProductPage() {
 
             {/* Tags */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">SEO Tags</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("seoTags")}</label>
               <TagInput
                 value={formData.tags}
                 onChange={(tags) => setFormData((prev) => ({ ...prev, tags }))}
-                placeholder="Add tags..."
+                placeholder={tp("tagsPlaceholder")}
               />
             </div>
           </div>

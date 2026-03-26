@@ -9,7 +9,8 @@ import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import NutritionTable from "@/components/NutritionTable";
 import { hasNutritionData } from "@/lib/nutrition";
-import  {
+import { useTranslations, useLocale } from "next-intl";
+import {
   ArrowLeft,
   Calendar,
   History,
@@ -32,6 +33,8 @@ import  {
 } from "lucide-react";
 
 export default function ProductDetailPage() {
+  const t = useTranslations("admin.productDetail");
+  const locale = useLocale();
   const { id: productId } = useParams();
   const searchParams = useSearchParams();
   const [product, setProduct] = useState(null);
@@ -53,13 +56,13 @@ export default function ProductDetailPage() {
     const updated = searchParams.get('updated');
     
     if (created === 'true') {
-      setSuccessMessage('Product created successfully!');
+      setSuccessMessage(t('successCreated'));
       setTimeout(() => setSuccessMessage(''), 3000);
     } else if (updated === 'true') {
-      setSuccessMessage('Product updated successfully!');
+      setSuccessMessage(t('successUpdated'));
       setTimeout(() => setSuccessMessage(''), 3000);
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   // Parse URL params on mount to set active tab
   useEffect(() => {
@@ -123,17 +126,21 @@ export default function ProductDetailPage() {
     }
   }, []);
 
-  if (!product && !loading) return <div className="p-20 text-center text-slate-500">Product not found.</div>;
-  
-  if (!product) return null; // Return nothing while loading, page will appear instantly once data arrives
+  if (!product && !loading) return <div className="p-20 text-center text-slate-500">{t("notFound")}</div>;
+
+  if (!product) return null;
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const months = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month}, ${year}`;
+    if (!dateString) return "";
+    try {
+      return new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(new Date(dateString));
+    } catch {
+      return "";
+    }
   };
 
   const latestPrice = product.pricingHistory?.[product.pricingHistory.length - 1]?.price || 0;
@@ -223,7 +230,7 @@ export default function ProductDetailPage() {
       console.error("Error deleting comment:", err);
       // Rollback on error
       setProduct(originalProduct);
-      alert("Failed to delete comment. Please try again.");
+      alert(t("deleteCommentFailed"));
     } finally {
       setDeletingCommentId(null);
     }
@@ -250,7 +257,7 @@ export default function ProductDetailPage() {
       }
     } catch (err) {
       console.error('Error approving comment:', err);
-      alert("Failed to approve comment. Please try again.");
+      alert(t("approveFailed"));
     } finally {
       setApprovingId(null);
     }
@@ -277,7 +284,7 @@ export default function ProductDetailPage() {
       }
     } catch (err) {
       console.error('Error rejecting comment:', err);
-      alert("Failed to reject comment. Please try again.");
+      alert(t("rejectFailed"));
     } finally {
       setRejectingId(null);
     }
@@ -311,7 +318,7 @@ export default function ProductDetailPage() {
       .slice(0, 2);
   };
 
-  const translatedProduct = product ? getTranslatedProduct(product, "fr") : { name: "", description: "" };
+  const translatedProduct = product ? getTranslatedProduct(product, locale) : { name: "", description: "" };
 
   return (
     <>
@@ -321,14 +328,14 @@ export default function ProductDetailPage() {
         <div className="max-w-400 mx-auto flex items-center justify-between">
           <Link href="/admin/products" className="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center gap-2 text-slate-600 font-semibold">
             <ArrowLeft size={20} />
-            <span>Back to Products</span>
+            <span>{t("backToProducts")}</span>
           </Link>
           <Link href="/admin/promotions" className="text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
             style={{backgroundColor: '#556622'}}
             onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Calendar size={18} />
-            Schedule Promotion
+            {t("schedulePromotion")}
           </Link>
         </div>
       </header>
@@ -364,7 +371,7 @@ export default function ProductDetailPage() {
                   {product.categoryId?.name && (
                     <div>
                       <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-                        <FolderOpen size={12} /> Category
+                        <FolderOpen size={12} /> {t("category")}
                       </h3>
                       <div className="bg-white border border-slate-200 px-4 py-3 rounded-2xl shadow-sm">
                         <span className="text-sm font-bold text-slate-900">{product.categoryId.name}</span>
@@ -373,7 +380,7 @@ export default function ProductDetailPage() {
                   )}
 
                   <div>
-                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-3">Gallery</h3>
+                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-3">{t("gallery")}</h3>
                     <div className="grid grid-cols-3 gap-2">
                       {images.map((img, i) => (
                         <button key={i} onClick={() => setImageIdx(i)} className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${imageIdx === i ? 'border-blue-600' : 'border-transparent opacity-60'}`}>
@@ -386,7 +393,7 @@ export default function ProductDetailPage() {
                   {(product.tag || product.tags || []).length > 0 && (
                     <div>
                       <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-                        <TagIcon size={12} /> Tags
+                        <TagIcon size={12} /> {t("tags")}
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
                         {(product.tag || product.tags || []).map((tag, i) => (
@@ -412,7 +419,7 @@ export default function ProductDetailPage() {
               
               <div className="flex border-b border-slate-100">
                 <button onClick={() => setActiveTab("reviews")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "reviews" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
-                  <MessageSquare size={16} /> Reviews
+                  <MessageSquare size={16} /> {t("tabReviews")}
                   {approvedComments.length > 0 && (
                     <span className="ml-1 px-2 py-0.5 bg-blue-100 text-gray-700 rounded-full text-xs">
                       {approvedComments.length}
@@ -420,7 +427,7 @@ export default function ProductDetailPage() {
                   )}
                 </button>
                 <button onClick={() => setActiveTab("pending")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "pending" ? "text-gray-800 border-b-2 border-gray-600 bg-yellow-50/30" : "text-slate-400 hover:text-slate-600"}`}>
-                  <AlertTriangle size={16} /> Pending
+                  <AlertTriangle size={16} /> {t("tabPending")}
                   {pendingComments.length > 0 && (
                     <span className="ml-1 px-2 py-0.5 bg-yellow-100 text-gray-700 rounded-full text-xs">
                       {pendingComments.length}
@@ -428,7 +435,7 @@ export default function ProductDetailPage() {
                   )}
                 </button>
                 <button onClick={() => setActiveTab("history")} className={`px-8 py-5 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "history" ? "text-gray-800 border-b-2 border-gray-600 bg-blue-50/30" : "text-slate-400 hover:text-slate-600"}`}>
-                  <History size={16} /> Pricing History
+                  <History size={16} /> {t("tabPricingHistory")}
                 </button>
               </div>
               <div className="p-8">
@@ -437,13 +444,13 @@ export default function ProductDetailPage() {
                     {displayedComments.length === 0 ? (
                       <div className="text-center py-12 text-slate-400">
                         <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                        <p className="text-base font-medium">No reviews yet</p>
-                        <p className="text-sm mt-1">Be the first to review this product!</p>
+                        <p className="text-base font-medium">{t("noReviewsYet")}</p>
+                        <p className="text-sm mt-1">{t("firstReview")}</p>
                       </div>
                     ) : (
                       <>
                         {displayedComments.map((comment) => {
-                          const userName = comment.isAnonymous ? "Anonymous" : (comment.userId?.name || "Anonymous");
+                          const userName = comment.isAnonymous ? t("anonymous") : (comment.userId?.name || t("anonymous"));
                           const isPending = comment.status === 'pending';
                           const isRejected = comment.status === 'rejected';
                           const isDeleted = comment.status === 'deleted';
@@ -489,17 +496,17 @@ export default function ProductDetailPage() {
                                     </p>
                                     {isPending && (
                                       <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-yellow-50 text-yellow-700 ring-yellow-600/20">
-                                        Pending
+                                        {t("pending")}
                                       </span>
                                     )}
                                     {isRejected && (
                                       <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-orange-50 text-orange-700 ring-orange-600/20">
-                                        Rejected
+                                        {t("rejected")}
                                       </span>
                                     )}
                                     {isDeleted && (
                                       <span className="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ring-1 ring-inset bg-red-50 text-red-700 ring-red-600/20">
-                                        Deleted
+                                        {t("deleted")}
                                       </span>
                                     )}
                                   </div>
@@ -513,7 +520,7 @@ export default function ProductDetailPage() {
                                           onClick={() => handleApprovePending(comment._id)}
                                           disabled={approvingId === comment._id}
                                           className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                          title="Approve this comment"
+                                          title={t("approveTitle")}
                                         >
                                           {approvingId === comment._id ? (
                                             <Loader2 size={16} className="animate-spin" />
@@ -525,7 +532,7 @@ export default function ProductDetailPage() {
                                           onClick={() => handleRejectPending(comment._id)}
                                           disabled={rejectingId === comment._id}
                                           className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                          title="Reject this comment"
+                                          title={t("rejectTitle")}
                                         >
                                           {rejectingId === comment._id ? (
                                             <Loader2 size={16} className="animate-spin" />
@@ -542,7 +549,7 @@ export default function ProductDetailPage() {
                                         onClick={() => handleDeleteComment(comment._id)}
                                         disabled={deletingCommentId === comment._id || isDeleted}
                                         className={`p-2 ${isDeleted ? 'text-slate-400' : 'text-red-600 hover:bg-red-50'} rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-                                        title={isDeleted ? "Already deleted" : "Delete comment"}
+                                        title={isDeleted ? t("deleteTitleDeleted") : t("deleteTitle")}
                                       >
                                         {deletingCommentId === comment._id ? (
                                           <Loader2 size={16} className="animate-spin" />
@@ -570,7 +577,7 @@ export default function ProductDetailPage() {
                               className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-bold text-sm transition-colors group"
                             >
                               <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
-                              Load More Reviews
+                              {t("loadMoreReviews")}
                             </button>
                           </div>
                         )}
@@ -607,7 +614,7 @@ export default function ProductDetailPage() {
                       : "text-slate-600"
                   }`}>
                     <Globe size={14} />
-                    {product.status === "ACTIVE" ? "Product is live on shop" : "Product is offline"}
+                    {product.status === "ACTIVE" ? t("liveOnShop") : t("offline")}
                   </div>
                   <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase ${
                     product.status === "ACTIVE" 
@@ -619,7 +626,7 @@ export default function ProductDetailPage() {
                         ? "bg-emerald-500" 
                         : "bg-slate-400"
                     }`} />
-                    {product.status === "ACTIVE" ? "Active" : "Inactive"}
+                    {product.status === "ACTIVE" ? t("active") : t("inactive")}
                   </div>
                 </div>
 
@@ -643,9 +650,9 @@ export default function ProductDetailPage() {
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <h4 className="text-orange-900 font-bold text-xs uppercase">Low Inventory Alert</h4>
+                  <h4 className="text-orange-900 font-bold text-xs uppercase">{t("lowStockTitle")}</h4>
                   <p className="text-orange-700 text-[11px] mt-1">
-                    Only <span className="font-bold">{availableQty} items</span> remaining in stock.
+                    {t("lowStockBody", { count: availableQty })}
                   </p>
                 </div>
               </div>
@@ -654,19 +661,19 @@ export default function ProductDetailPage() {
             {/* STOCK INFORMATION CARD */}
             <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm">
               <h3 className="flex items-center gap-2 text-slate-900 font-bold uppercase text-[10px] tracking-widest mb-6 pb-4 border-b border-slate-100">
-                <Layers size={14} className="text-blue-600"/> Stock Information
+                <Layers size={14} className="text-blue-600"/> {t("stockInformation")}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-slate-500 text-xs font-medium">Available Stock</span>
+                  <span className="text-slate-500 text-xs font-medium">{t("availableStock")}</span>
                   <span className={`font-black text-sm ${isLowStock ? 'text-orange-600' : 'text-slate-900'}`}>{availableQty}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 text-xs font-medium">Reserved Stock</span>
+                  <span className="text-slate-500 text-xs font-medium">{t("reservedStock")}</span>
                   <span className="text-blue-600 font-bold text-sm">{product.stock?.reservedQuantity || 0}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-slate-50">
-                  <span className="text-slate-500 text-xs font-medium">Total Inventory</span>
+                  <span className="text-slate-500 text-xs font-medium">{t("totalInventory")}</span>
                   <span className="text-slate-900 font-bold text-sm">{product.stock?.quantity || 0}</span>
                 </div>
               </div>
@@ -682,8 +689,8 @@ export default function ProductDetailPage() {
           setCommentToDelete(null);
         }}
         onConfirm={confirmDeleteComment}
-        title="Delete this review?"
-        description="This action is permanent. The review will be permanently deleted from the database."
+        title={t("deleteReviewTitle")}
+        description={t("deleteReviewDesc")}
         isDeleting={deletingCommentId === commentToDelete}
       />
     </div>

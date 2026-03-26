@@ -6,8 +6,11 @@ import Link from "next/link";
 import AdminHeader from "@/components/admin/header";
 import { stockAPI } from "@/lib/api";
 import { ArrowLeft, Info, AlertTriangle, CheckCircle2, TrendingUp, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function EditStockPage() {
+  const te = useTranslations("admin.stockEdit");
+  const tcom = useTranslations("admin.common");
   const { id: productId } = useParams();
   const [stock, setStock] = useState(null);
   const [alertThreshold, setAlertThreshold] = useState(10);
@@ -27,11 +30,11 @@ export default function EditStockPage() {
         setStock(res.data);
         setAlertThreshold(res.data.alertThreshold || 10);
       } else {
-        setError("Stock data not available");
+        setError(te("loadUnavailable"));
       }
     } catch (err) {
       // Extract error message safely
-      let errorMessage = "Failed to load stock";
+      let errorMessage = te("loadFailed");
       if (err && typeof err === 'object') {
         if (err.message) {
           errorMessage = err.message;
@@ -64,9 +67,9 @@ export default function EditStockPage() {
     try {
       await stockAPI.update(productId, { alertThreshold });
       await loadStock();
-      setMessage("Alert threshold updated successfully");
+      setMessage(te("thresholdUpdated"));
     } catch (err) {
-      const errorMessage = err?.message || err?.error || "Failed to update alert threshold";
+      const errorMessage = err?.message || err?.error || te("updateThresholdFailed");
       setError(errorMessage);
       console.error("Error updating alert threshold:", err);
     } finally {
@@ -76,7 +79,7 @@ export default function EditStockPage() {
 
   const handleAddQuantity = async () => {
     if (quantityToAdd <= 0) {
-      setError("Please enter a valid quantity");
+      setError(te("validQty"));
       return;
     }
     setSaving(true);
@@ -85,11 +88,11 @@ export default function EditStockPage() {
     try {
       await stockAPI.adjustQuantity(productId, quantityToAdd, "IN");
       await loadStock();
-      setMessage(`Successfully added ${quantityToAdd} units to stock`);
+      setMessage(te("addSuccess", { count: quantityToAdd }));
       setShowModal(false);
       setQuantityToAdd(0);
     } catch (err) {
-      const errorMessage = err?.message || err?.error || "Failed to add quantity";
+      const errorMessage = err?.message || err?.error || te("addFailed");
       setError(errorMessage);
       console.error("Error adding quantity:", err);
     } finally {
@@ -101,7 +104,7 @@ export default function EditStockPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-        <p className="font-bold text-slate-500 uppercase tracking-widest text-xs">Loading stock data...</p>
+        <p className="font-bold text-slate-500 uppercase tracking-widest text-xs">{te("loading")}</p>
       </div>
     );
   }
@@ -111,14 +114,14 @@ export default function EditStockPage() {
       <div className="space-y-6">
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center gap-3">
           <AlertTriangle size={20} />
-          <span className="text-sm font-medium">Unable to load stock information. Please try again.</span>
+          <span className="text-sm font-medium">{te("loadErrorPage")}</span>
         </div>
         <Link
           href="/admin/stock"
           className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
         >
           <ArrowLeft size={16} />
-          Back to Inventory List
+          {te("backToList")}
         </Link>
       </div>
     );
@@ -136,17 +139,17 @@ export default function EditStockPage() {
             className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors mb-2"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Inventory List
+            {te("backToList")}
           </Link>
           <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-            {stock?.productName || "Loading..."}
+            {stock?.productName || te("loadingName")}
             {stock && (
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${
                   stock.isLowStock ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
                 }`}
               >
-                {stock.isLowStock ? "Limited Stock" : "In Stock"}
+                {stock.isLowStock ? te("limited") : te("inStock")}
               </span>
             )}
           </div>
@@ -160,7 +163,7 @@ export default function EditStockPage() {
           onMouseLeave={(e) => !stock || (e.target.style.backgroundColor = '#556622')}
         >
           <Plus size={20} />
-          Add Stock
+          {te("addStock")}
         </button>
       </div>
 
@@ -185,7 +188,7 @@ export default function EditStockPage() {
             <TrendingUp size={28} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Total Physical</p>
+            <p className="text-sm text-slate-500 font-medium">{te("totalPhysical")}</p>
             <p className="text-3xl font-bold text-slate-900">{stock?.quantity || 0}</p>
           </div>
         </div>
@@ -194,7 +197,7 @@ export default function EditStockPage() {
             <AlertTriangle size={28} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Reserved Units</p>
+            <p className="text-sm text-slate-500 font-medium">{te("reservedUnits")}</p>
             <p className="text-3xl font-bold text-slate-900">{stock?.reservedQuantity || 0}</p>
           </div>
         </div>
@@ -203,7 +206,7 @@ export default function EditStockPage() {
             <CheckCircle2 size={28} />
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium">Available to Sell</p>
+            <p className="text-sm text-slate-500 font-medium">{te("availableToSell")}</p>
             <p className="text-3xl font-bold text-emerald-600">{availableQty}</p>
           </div>
         </div>
@@ -217,10 +220,9 @@ export default function EditStockPage() {
               <Info size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-blue-900 text-base mb-2">Inventory Logic</h4>
+              <h4 className="font-bold text-blue-900 text-base mb-2">{te("inventoryTitle")}</h4>
               <p className="text-blue-700/80 text-sm leading-relaxed">
-                Reserved units are items currently held in pending orders. They are deducted from your total to
-                calculate the <strong>Available to Sell</strong> amount. This ensures you don't oversell products.
+                {te("inventoryBody")}
               </p>
             </div>
           </div>
@@ -231,11 +233,11 @@ export default function EditStockPage() {
           <form onSubmit={handleSaveAlert} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6 h-full">
             <div className="flex items-center gap-2">
               <ShieldCheck className="text-slate-400" size={24} />
-              <h3 className="font-bold text-slate-800 text-lg">Alert Settings</h3>
+              <h3 className="font-bold text-slate-800 text-lg">{te("alertSettings")}</h3>
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-bold text-slate-700">Alert Threshold</label>
+              <label className="text-sm font-bold text-slate-700">{te("alertThreshold")}</label>
               <input
                 type="number"
                 value={alertThreshold}
@@ -245,7 +247,7 @@ export default function EditStockPage() {
                 min="0"
               />
               <p className="text-xs text-slate-500">
-                Get notified when stock drops below {alertThreshold} units
+                {te("notifyBelow", { count: alertThreshold })}
               </p>
             </div>
 
@@ -257,7 +259,7 @@ export default function EditStockPage() {
               onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617')}
               onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622')}
             >
-              {saving ? "Updating..." : "Save Alert Threshold"}
+              {saving ? te("updating") : te("saveThreshold")}
             </button>
           </form>
         </div>
@@ -268,7 +270,7 @@ export default function EditStockPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900">Add Stock</h3>
+              <h3 className="text-xl font-bold text-slate-900">{te("modalTitle")}</h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -279,7 +281,7 @@ export default function EditStockPage() {
             
             <div className="space-y-4 mb-6">
               <div>
-                <label className="text-sm font-bold text-slate-700 mb-2 block">Quantity to Add</label>
+                <label className="text-sm font-bold text-slate-700 mb-2 block">{te("quantityToAdd")}</label>
                 <input
                   type="number"
                   value={quantityToAdd}
@@ -288,12 +290,12 @@ export default function EditStockPage() {
                   onWheel={(e) => e.currentTarget.blur()}
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-xl font-bold text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                   min="1"
-                  placeholder="Enter quantity"
+                  placeholder={te("placeholderQty")}
                   autoFocus
                 />
               </div>
               <p className="text-xs text-slate-500">
-                This will add {quantityToAdd} units to the current stock of {stock?.quantity || 0}
+                {te("summaryAdd", { add: quantityToAdd, current: stock?.quantity || 0 })}
               </p>
             </div>
 
@@ -302,7 +304,7 @@ export default function EditStockPage() {
                 onClick={() => setShowModal(false)}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-lg font-semibold text-sm transition-all"
               >
-                Cancel
+                {tcom("cancel")}
               </button>
               <button
                 onClick={handleAddQuantity}
@@ -312,7 +314,7 @@ export default function EditStockPage() {
                 onMouseEnter={(e) => (saving || quantityToAdd <= 0) || (e.target.style.backgroundColor = '#3d4617')}
                 onMouseLeave={(e) => (saving || quantityToAdd <= 0) || (e.target.style.backgroundColor = '#556622')}
               >
-                {saving ? "Adding..." : "Add Stock"}
+                {saving ? te("adding") : te("confirmAdd")}
               </button>
             </div>
           </div>

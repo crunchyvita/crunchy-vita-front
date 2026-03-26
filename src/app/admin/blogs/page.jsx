@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { Trash2, Edit, Plus, AlertCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function BlogsPage() {
+  const tb = useTranslations("admin.blogs");
+  const tcom = useTranslations("admin.common");
+  const locale = useLocale();
   const router = useRouter();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,13 +37,13 @@ export default function BlogsPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch blogs");
+        throw new Error(tb("fetchError"));
       }
 
       const result = await response.json();
       setBlogs(result.data || []);
     } catch (err) {
-      setError(err.message || "Failed to fetch blogs");
+      setError(err.message || tb("fetchError"));
     } finally {
       setLoading(false);
     }
@@ -57,13 +61,13 @@ export default function BlogsPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete blog");
+        throw new Error(tb("deleteError"));
       }
 
       setBlogs(blogs.filter((blog) => blog._id !== id));
       setDeleteConfirm(null);
     } catch (err) {
-      setError(err.message || "Failed to delete blog");
+      setError(err.message || tb("deleteError"));
     } finally {
       setDeleting(false);
     }
@@ -84,8 +88,8 @@ export default function BlogsPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Blog Posts</h1>
-          <p className="text-gray-600 mt-2">Manage your blog posts</p>
+          <h1 className="text-3xl font-bold text-gray-900">{tb("title")}</h1>
+          <p className="text-gray-600 mt-2">{tb("subtitle")}</p>
         </div>
         <Link href="/admin/blogs/create">
           <button className="text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
@@ -93,7 +97,7 @@ export default function BlogsPage() {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
             <Plus className="h-4 w-4" />
-            Create Blog Post
+            {tb("create")}
           </button>
         </Link>
       </div>
@@ -110,13 +114,13 @@ export default function BlogsPage() {
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {blogs.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No blog posts yet</p>
+            <p className="text-gray-600 mb-4">{tb("empty")}</p>
             <Link href="/admin/blogs/create">
               <button className="text-white px-4 py-2 rounded-lg transition"
                 style={{backgroundColor: '#556622'}}
                 onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
-                Create your first blog post
+                {tb("emptyCta")}
               </button>
             </Link>
           </div>
@@ -124,10 +128,10 @@ export default function BlogsPage() {
           <table className="w-full">
             <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Author</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created At</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{tb("titleCol")}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{tb("authorCol")}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{tb("createdCol")}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{tb("actionsCol")}</th>
               </tr>
             </thead>
             <tbody>
@@ -137,10 +141,10 @@ export default function BlogsPage() {
                     <p className="font-medium text-gray-900">{blog.title}</p>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {blog.authorId?.name || "Unknown"}
+                    {blog.authorId?.name || tcom("unknown")}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(blog.createdAt).toLocaleDateString()}
+                    {new Date(blog.createdAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <Link href={`/admin/blogs/${blog._id}/edit`}>
@@ -166,9 +170,10 @@ export default function BlogsPage() {
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={() => handleDelete(deleteConfirm)}
-        title="Delete Blog Post"
+        title={tb("deleteTitle")}
         itemName={blogs.find(b => b._id === deleteConfirm)?.title}
         isDeleting={deleting}
+        cancelButtonLabel={tcom("cancel")}
       />
     </div>
     </>

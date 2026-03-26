@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import AdminHeader from "@/components/admin/header";
+import { useTranslations } from "next-intl";
 import { 
   ArrowLeft, 
   Save, 
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 
 export default function CreateEditPackagePage() {
+  const t = useTranslations("admin.packagesForm");
   const router = useRouter();
   const params = useParams();
   const packageId = params?.id;
@@ -120,11 +122,11 @@ export default function CreateEditPackagePage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("You must be logged in to create a package");
+        throw new Error(t("loginRequired"));
       }
 
       if (formData.packageType === "FIXED" && fixedProducts.length === 0) {
-        throw new Error("Fixed packages must include at least one product");
+        throw new Error(t("fixedNeedsProduct"));
       }
 
       // Prepare FormData for multipart/form-data submission
@@ -160,18 +162,18 @@ export default function CreateEditPackagePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create package");
+        throw new Error(errorData.message || t("createFailed"));
       }
 
       const result = await response.json();
-      setSuccess("Package created successfully!");
+      setSuccess(t("createSuccess"));
       
       // Redirect after success
       setTimeout(() => {
         router.push("/admin/package");
       }, 1500);
     } catch (err) {
-      setError(err.message || "Failed to save package");
+      setError(err.message || t("saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -187,7 +189,7 @@ export default function CreateEditPackagePage() {
           // const packageData = await fetchPackage(packageId);
           // setFormData(packageData);
         } catch (err) {
-          setError("Failed to load package");
+          setError(t("loadFailed"));
         } finally {
           setLoading(false);
         }
@@ -232,10 +234,10 @@ export default function CreateEditPackagePage() {
               className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Packages
+              {t("back")}
             </button>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-              {isEditing ? "Edit Package" : "Create New Package"}
+              {isEditing ? t("editTitle") : t("createTitle")}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -244,7 +246,7 @@ export default function CreateEditPackagePage() {
               onClick={() => router.back()}
               className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 transition-all"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
@@ -258,12 +260,12 @@ export default function CreateEditPackagePage() {
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {isEditing ? "Updating..." : "Creating..."}
+                  {isEditing ? t("updating") : t("creating")}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {isEditing ? "Update Package" : "Save & Publish"}
+                  {isEditing ? t("updatePackage") : t("savePublish")}
                 </>
               )}
             </button>
@@ -292,13 +294,13 @@ export default function CreateEditPackagePage() {
               <div className="border-b border-slate-200 px-6 py-4">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <Package className="h-4 w-4 text-slate-500" />
-                  Basic Information
+                  {t("basicInfo")}
                 </h2>
               </div>
               <div className="p-6 space-y-6">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-900">
-                    Package Name
+                    {t("packageName")}
                   </label>
                   <div className="relative">
                     <Type className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -307,7 +309,7 @@ export default function CreateEditPackagePage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="e.g. Summer Bundle"
+                      placeholder={t("namePlaceholder")}
                       className="block w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
                       required
                     />
@@ -316,14 +318,14 @@ export default function CreateEditPackagePage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-900">
-                    Description
+                    {t("description")}
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    placeholder="Describe the package benefits..."
+                    placeholder={t("descPlaceholder")}
                     className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 resize-none"
                   />
                 </div>
@@ -335,12 +337,12 @@ export default function CreateEditPackagePage() {
               <div className="border-b border-slate-200 px-6 py-4">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <Settings className="h-4 w-4 text-slate-500" />
-                  Configuration & Rules
+                  {t("configuration")}
                 </h2>
               </div>
               <div className="p-6 space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-900">Package Type</label>
+                  <label className="mb-2 block text-sm font-medium text-slate-900">{t("packageType")}</label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "CUSTOM" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
                       <input
@@ -352,8 +354,8 @@ export default function CreateEditPackagePage() {
                         className="mt-1 h-4 w-4 text-emerald-600"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">Custom Package</p>
-                        <p className="text-xs text-slate-500">Customers build their own selection.</p>
+                        <p className="text-sm font-semibold text-slate-900">{t("customTitle")}</p>
+                        <p className="text-xs text-slate-500">{t("customDesc")}</p>
                       </div>
                     </label>
                     <label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "FIXED" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
@@ -366,8 +368,8 @@ export default function CreateEditPackagePage() {
                         className="mt-1 h-4 w-4 text-emerald-600"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">Fixed Package</p>
-                        <p className="text-xs text-slate-500">Admin defines products and quantities.</p>
+                        <p className="text-sm font-semibold text-slate-900">{t("fixedTitle")}</p>
+                        <p className="text-xs text-slate-500">{t("fixedDesc")}</p>
                       </div>
                     </label>
                   </div>
@@ -377,7 +379,7 @@ export default function CreateEditPackagePage() {
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-900">
-                      Minimum Products
+                      {t("minProducts")}
                     </label>
                     <input
                       type="number"
@@ -391,7 +393,7 @@ export default function CreateEditPackagePage() {
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-900">
-                      Maximum Products
+                      {t("maxProducts")}
                     </label>
                     <input
                       type="number"
@@ -416,9 +418,9 @@ export default function CreateEditPackagePage() {
                         className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                       />
                       <div>
-                        <span className="block text-sm font-medium text-slate-900">Allow Multiple Quantities</span>
+                        <span className="block text-sm font-medium text-slate-900">{t("allowMultiple")}</span>
                         <span className="block text-xs text-slate-500 mt-1">
-                          If enabled, customers can buy more than 1 of the same item within the package.
+                          {t("allowMultipleHint")}
                         </span>
                       </div>
                     </label>
@@ -429,13 +431,13 @@ export default function CreateEditPackagePage() {
                   <div className="space-y-4 border-t border-slate-100 pt-4">
                     <div className="flex items-end gap-3">
                       <div className="flex-1">
-                        <label className="mb-2 block text-sm font-medium text-slate-900">Add Product</label>
+                        <label className="mb-2 block text-sm font-medium text-slate-900">{t("addProduct")}</label>
                         <select
                           value={selectedProductId}
                           onChange={(e) => setSelectedProductId(e.target.value)}
                           className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
                         >
-                          <option value="">Select a product...</option>
+                          <option value="">{t("selectProduct")}</option>
                           {allProducts.map((product) => (
                             <option key={product._id} value={product._id}>{product.name}</option>
                           ))}
@@ -449,13 +451,13 @@ export default function CreateEditPackagePage() {
                         onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
                         onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
                       >
-                        Add
+                        {t("add")}
                       </button>
                     </div>
 
                     {fixedProducts.length === 0 ? (
                       <div className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">
-                        No products selected yet.
+                        {t("noProductsYet")}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -465,14 +467,14 @@ export default function CreateEditPackagePage() {
                             <div key={item.productId} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
                               <div className="h-12 w-12 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
                                 {getProductImageUrl(product) ? (
-                                  <img src={getProductImageUrl(product)} alt={product?.name || "Product"} className="h-full w-full object-cover" />
+                                  <img src={getProductImageUrl(product)} alt={product?.name || t("productAlt")} className="h-full w-full object-cover" />
                                 ) : (
                                   <ImageIcon className="h-5 w-5 text-slate-300" />
                                 )}
                               </div>
                               <div className="flex-1">
-                                <p className="text-sm font-semibold text-slate-900">{product?.name || item.productName || "Unknown product"}</p>
-                                <p className="text-xs text-slate-500">Fixed quantity</p>
+                                <p className="text-sm font-semibold text-slate-900">{product?.name || item.productName || t("unknownProduct")}</p>
+                                <p className="text-xs text-slate-500">{t("fixedQuantity")}</p>
                               </div>
                               <input
                                 type="number"
@@ -486,7 +488,7 @@ export default function CreateEditPackagePage() {
                                 onClick={() => handleRemoveFixedProduct(item.productId)}
                                 className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
                               >
-                                Remove
+                                {t("remove")}
                               </button>
                             </div>
                           );
@@ -504,11 +506,11 @@ export default function CreateEditPackagePage() {
             {/* Status Card */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-200 px-6 py-4">
-                <h2 className="text-base font-semibold text-slate-900">Status</h2>
+                <h2 className="text-base font-semibold text-slate-900">{t("status")}</h2>
               </div>
               <div className="p-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700">Active Status</span>
+                  <span className="text-sm text-slate-700">{t("activeStatus")}</span>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input 
                       type="checkbox" 
@@ -522,8 +524,8 @@ export default function CreateEditPackagePage() {
                 </div>
                 <p className="mt-2 text-xs text-slate-500">
                   {formData.isActive 
-                    ? "This package is visible to customers." 
-                    : "This package is hidden from the store."}
+                    ? t("statusVisible") 
+                    : t("statusHidden")}
                 </p>
               </div>
             </div>
@@ -533,12 +535,12 @@ export default function CreateEditPackagePage() {
               <div className="border-b border-slate-200 px-6 py-4">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <Percent className="h-4 w-4 text-slate-500" />
-                  Pricing
+                  {t("pricing")}
                 </h2>
               </div>
               <div className="p-6">
                 <label className="mb-2 block text-sm font-medium text-slate-900">
-                  Discount Percentage
+                  {t("discountPercent")}
                 </label>
                 <div className="relative">
                   <input
@@ -553,7 +555,7 @@ export default function CreateEditPackagePage() {
                   />
                   <span className="absolute right-3 top-2.5 text-slate-400 text-sm font-medium">%</span>
                 </div>
-                <p className="mt-2 text-xs text-slate-500">Applied to all products in the bundle.</p>
+                <p className="mt-2 text-xs text-slate-500">{t("discountHint")}</p>
               </div>
             </div>
 
@@ -562,7 +564,7 @@ export default function CreateEditPackagePage() {
               <div className="border-b border-slate-200 px-6 py-4">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <ImageIcon className="h-4 w-4 text-slate-500" />
-                  Media
+                  {t("media")}
                 </h2>
               </div>
               <div className="p-6">
@@ -573,8 +575,8 @@ export default function CreateEditPackagePage() {
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="mb-2 h-8 w-8 text-slate-400 group-hover:text-emerald-500" />
-                      <p className="mb-1 text-sm text-slate-500 font-medium">Click to upload</p>
-                      <p className="text-xs text-slate-400">SVG, PNG, JPG</p>
+                      <p className="mb-1 text-sm text-slate-500 font-medium">{t("clickUpload")}</p>
+                      <p className="text-xs text-slate-400">{t("mediaFormats")}</p>
                     </div>
                   </div>
                 ) : (
@@ -588,7 +590,7 @@ export default function CreateEditPackagePage() {
                     </button>
                     <img
                       src={imagePreview}
-                      alt="Package preview"
+                      alt={t("previewAlt")}
                       className="h-40 w-full object-cover"
                     />
                   </div>
@@ -608,11 +610,11 @@ export default function CreateEditPackagePage() {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-semibold text-blue-900">Package Type</h3>
+                  <h3 className="text-sm font-semibold text-blue-900">{t("infoTitle")}</h3>
                   <p className="mt-1 text-xs text-blue-700 leading-relaxed">
                     {formData.packageType === "CUSTOM"
-                      ? "You are creating a template. Customers will build their own bundles based on your rules."
-                      : "You are creating a fixed package. Customers cannot modify the products or quantities."}
+                      ? t("infoCustom")
+                      : t("infoFixed")}
                   </p>
                 </div>
               </div>

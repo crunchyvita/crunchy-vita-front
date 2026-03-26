@@ -2,31 +2,30 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
+import { useTranslations } from "next-intl";
 import AdminHeader from "@/components/admin/header";
-import { 
-	ArrowLeft, 
-	Save, 
-	Loader2, 
-	Package, 
-	Percent, 
-	AlertCircle, 
-	CheckCircle2, 
-	Info, 
+import {
+	ArrowLeft,
+	Save,
+	Loader2,
+	Package,
+	Percent,
+	AlertCircle,
+	CheckCircle2,
+	Info,
 	Type,
-	LayoutGrid,
 	Settings,
 	Upload,
 	X,
-	Image as ImageIcon
+	Image as ImageIcon,
 } from "lucide-react";
 
 export default function EditPackagePage() {
+	const t = useTranslations("admin.packagesForm");
 	const router = useRouter();
 	const params = useParams();
 	const packageId = params?.id;
-	const isEditing = true;
-  
+
 	const fileInputRef = useRef(null);
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
@@ -45,27 +44,32 @@ export default function EditPackagePage() {
 		maxProducts: 5,
 		allowMultipleQuantities: false,
 		isActive: true,
-		discountPercentage: 0
+		discountPercentage: 0,
 	});
 
 	const getProductImageUrl = (product) => {
 		if (!product) return null;
-		const url = product.imageUrl || product.image || product.productImage || (product.media?.[0]?.url || product.media?.[0]);
-		return (!url || url === "undefined") ? null : url;
+		const url =
+			product.imageUrl ||
+			product.image ||
+			product.productImage ||
+			product.media?.[0]?.url ||
+			product.media?.[0];
+		return !url || url === "undefined" ? null : url;
 	};
 
 	const handleInputChange = (e) => {
 		const { name, value, type, checked } = e.target;
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
-			[name]: type === 'checkbox' ? checked : value
+			[name]: type === "checkbox" ? checked : value,
 		}));
 	};
 
 	const handleToggleMultipleQuantities = () => {
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
-			allowMultipleQuantities: !prev.allowMultipleQuantities
+			allowMultipleQuantities: !prev.allowMultipleQuantities,
 		}));
 	};
 
@@ -73,18 +77,21 @@ export default function EditPackagePage() {
 		if (!selectedProductId) return;
 		if (fixedProducts.find((p) => p.productId === selectedProductId)) return;
 		const product = allProducts.find((p) => p._id === selectedProductId);
-		setFixedProducts((prev) => ([...prev, {
-			productId: selectedProductId,
-			quantity: 1,
-			productName: product?.name,
-			imageUrl: product?.imageUrl || product?.image || product?.productImage,
-			media: product?.media || [],
-		}]));
+		setFixedProducts((prev) => [
+			...prev,
+			{
+				productId: selectedProductId,
+				quantity: 1,
+				productName: product?.name,
+				imageUrl: product?.imageUrl || product?.image || product?.productImage,
+				media: product?.media || [],
+			},
+		]);
 		setSelectedProductId("");
 	};
 
 	const availableProducts = allProducts.filter(
-		(product) => !fixedProducts.some((p) => p.productId === product._id)
+		(product) => !fixedProducts.some((p) => p.productId === product._id),
 	);
 
 	const handleRemoveFixedProduct = (productId) => {
@@ -93,9 +100,9 @@ export default function EditPackagePage() {
 
 	const handleFixedQuantityChange = (productId, quantity) => {
 		const normalized = Math.max(1, Number(quantity) || 1);
-		setFixedProducts((prev) => prev.map((p) => (
-			p.productId === productId ? { ...p, quantity: normalized } : p
-		)));
+		setFixedProducts((prev) =>
+			prev.map((p) => (p.productId === productId ? { ...p, quantity: normalized } : p)),
+		);
 	};
 
 	const handleImageChange = (e) => {
@@ -127,42 +134,38 @@ export default function EditPackagePage() {
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) {
-				throw new Error("You must be logged in to update a package");
+				throw new Error(t("loginRequiredEdit"));
 			}
 
 			if (formData.packageType === "FIXED" && fixedProducts.length === 0) {
-				throw new Error("Fixed packages must include at least one product");
+				throw new Error(t("fixedNeedsProduct"));
 			}
 
-			// Prepare FormData for multipart/form-data submission
 			const formDataToSend = new FormData();
 			formDataToSend.append("name", formData.name);
 			formDataToSend.append("description", formData.description || "");
 			formDataToSend.append("packageType", formData.packageType);
 			formDataToSend.append("discountPercentage", formData.discountPercentage);
-			formDataToSend.append("allowAllProducts", "false"); // Always false as per requirements
+			formDataToSend.append("allowAllProducts", "false");
 
 			if (formData.packageType === "CUSTOM") {
 				formDataToSend.append("minProducts", formData.minProducts);
 				formDataToSend.append("maxProducts", formData.maxProducts);
 				formDataToSend.append("allowMultipleQuantities", formData.allowMultipleQuantities);
 			} else if (formData.packageType === "FIXED") {
-				// Only send productId and quantity for each product
 				const productsToSend = fixedProducts.map((p) => ({
 					productId: p.productId,
-					quantity: p.quantity
+					quantity: p.quantity,
 				}));
 				formDataToSend.append("products", JSON.stringify(productsToSend));
 			}
 
 			formDataToSend.append("isActive", formData.isActive);
 
-			// Add image only if user selected a new one
 			if (fileInputRef.current?.files?.[0]) {
 				formDataToSend.append("image", fileInputRef.current.files[0]);
 			}
 
-			// Tell backend to delete image if user removed it
 			if (shouldDeleteImage && !fileInputRef.current?.files?.[0]) {
 				formDataToSend.append("deleteImage", "true");
 			}
@@ -177,29 +180,28 @@ export default function EditPackagePage() {
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.message || "Failed to update package");
+				throw new Error(errorData.message || t("saveFailed"));
 			}
 
-			const result = await response.json();
-			setSuccess("Package updated successfully!");
+			await response.json();
+			setSuccess(t("updateSuccess"));
 			setTimeout(() => {
 				router.push("/admin/package");
 			}, 1500);
 		} catch (err) {
-			setError(err.message || "Failed to update package");
+			setError(err.message || t("saveFailed"));
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	// Load package data for editing
 	useEffect(() => {
 		if (packageId) {
 			const loadPackage = async () => {
 				setLoading(true);
 				try {
 					const response = await fetch(`/api/packages/${packageId}`);
-					if (!response.ok) throw new Error("Failed to load package");
+					if (!response.ok) throw new Error(t("loadFailed"));
 					const result = await response.json();
 					const packageData = result.data;
 					setFormData({
@@ -210,29 +212,34 @@ export default function EditPackagePage() {
 						maxProducts: packageData.maxProducts ?? 5,
 						allowMultipleQuantities: packageData.allowMultipleQuantities ?? false,
 						isActive: packageData.isActive ?? true,
-						discountPercentage: packageData.discountPercentage ?? 0
+						discountPercentage: packageData.discountPercentage ?? 0,
 					});
 					if (packageData.packageType === "FIXED") {
 						const fixed = (packageData.products || []).map((item) => ({
 							productId: item.productId?._id || item.productId,
 							quantity: item.quantity || 1,
 							productName: item.productId?.name,
-							imageUrl: item.productId?.imageUrl || item.productId?.image || item.productId?.productImage,
+							imageUrl:
+								item.productId?.imageUrl ||
+								item.productId?.image ||
+								item.productId?.productImage,
 							media: item.productId?.media || [],
 						}));
 						setFixedProducts(fixed);
 					}
 					if (packageData.image) {
-						setImagePreview(packageData.image);					setShouldDeleteImage(false);					}
-				} catch (err) {
-					setError("Failed to load package");
+						setImagePreview(packageData.image);
+						setShouldDeleteImage(false);
+					}
+				} catch {
+					setError(t("loadFailed"));
 				} finally {
 					setLoading(false);
 				}
 			};
 			loadPackage();
 		}
-	}, [packageId]);
+	}, [packageId, t]);
 
 	useEffect(() => {
 		const loadProducts = async () => {
@@ -240,7 +247,7 @@ export default function EditPackagePage() {
 				const response = await fetch("/api/products");
 				if (!response.ok) throw new Error("Failed to load products");
 				const result = await response.json();
-				const list = Array.isArray(result) ? result : (result.data || []);
+				const list = Array.isArray(result) ? result : result.data || [];
 				setAllProducts(list.filter((p) => p.status === "ACTIVE"));
 			} catch (err) {
 				console.error("Failed to load products", err);
@@ -261,7 +268,6 @@ export default function EditPackagePage() {
 		<div className="min-h-screen bg-slate-50 pb-24">
 			<AdminHeader />
 			<div className="w-full p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
-				{/* Header */}
 				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-8">
 					<div className="space-y-1">
 						<button
@@ -270,10 +276,10 @@ export default function EditPackagePage() {
 							className="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors"
 						>
 							<ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-							Back to Packages
+							{t("back")}
 						</button>
 						<h1 className="text-4xl font-black text-slate-900 tracking-tight">
-							Edit Package {` ${formData.name}`}
+							{t("editTitle")} {formData.name ? ` ${formData.name}` : ""}
 						</h1>
 					</div>
 					<div className="flex items-center gap-4">
@@ -282,33 +288,45 @@ export default function EditPackagePage() {
 							onClick={() => router.back()}
 							className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 transition-all"
 						>
-							Cancel
+							{t("cancel")}
 						</button>
 						<button
 							type="submit"
 							form="package-edit-form"
 							disabled={saving}
 							className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-black text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-							style={{backgroundColor: '#556622', boxShadow: '0 10px 15px rgba(85, 102, 34, 0.3)'}}
-							onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#3d4617', e.target.style.boxShadow = '0 15px 25px rgba(85, 102, 34, 0.4)')}
-							onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#556622', e.target.style.boxShadow = '0 10px 15px rgba(85, 102, 34, 0.3)')}
+							style={{
+								backgroundColor: "#556622",
+								boxShadow: "0 10px 15px rgba(85, 102, 34, 0.3)",
+							}}
+							onMouseEnter={(e) => {
+								if (!saving) {
+									e.target.style.backgroundColor = "#3d4617";
+									e.target.style.boxShadow = "0 15px 25px rgba(85, 102, 34, 0.4)";
+								}
+							}}
+							onMouseLeave={(e) => {
+								if (!saving) {
+									e.target.style.backgroundColor = "#556622";
+									e.target.style.boxShadow = "0 10px 15px rgba(85, 102, 34, 0.3)";
+								}
+							}}
 						>
 							{saving ? (
 								<>
 									<Loader2 className="h-4 w-4 animate-spin" />
-									Updating...
+									{t("updating")}
 								</>
 							) : (
 								<>
 									<Save className="h-4 w-4" />
-									Update Package
+									{t("updatePackage")}
 								</>
 							)}
 						</button>
 					</div>
 				</div>
 
-				{/* Feedback Messages */}
 				{error && (
 					<div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
 						<AlertCircle className="h-5 w-5 shrink-0" />
@@ -323,20 +341,18 @@ export default function EditPackagePage() {
 				)}
 
 				<form id="package-edit-form" onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-					{/* LEFT COLUMN - Main Content */}
 					<div className="lg:col-span-2 space-y-8">
-						{/* Basic Information Card */}
 						<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 							<div className="border-b border-slate-200 px-6 py-4">
 								<h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
 									<Package className="h-4 w-4 text-slate-500" />
-									Basic Information
+									{t("basicInfo")}
 								</h2>
 							</div>
 							<div className="p-6 space-y-6">
 								<div>
 									<label className="mb-2 block text-sm font-medium text-slate-900">
-										Package Name
+										{t("packageName")}
 									</label>
 									<div className="relative">
 										<Type className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -345,7 +361,7 @@ export default function EditPackagePage() {
 											name="name"
 											value={formData.name}
 											onChange={handleInputChange}
-											placeholder="e.g. Summer Bundle"
+											placeholder={t("namePlaceholder")}
 											className="block w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 											required
 										/>
@@ -354,33 +370,34 @@ export default function EditPackagePage() {
 
 								<div>
 									<label className="mb-2 block text-sm font-medium text-slate-900">
-										Description
+										{t("description")}
 									</label>
 									<textarea
 										name="description"
 										value={formData.description}
 										onChange={handleInputChange}
 										rows={4}
-										placeholder="Describe the package benefits..."
+										placeholder={t("descPlaceholder")}
 										className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 resize-none"
 									/>
 								</div>
 							</div>
 						</div>
 
-						{/* Configuration Card */}
 						<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 							<div className="border-b border-slate-200 px-6 py-4">
 								<h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
 									<Settings className="h-4 w-4 text-slate-500" />
-									Configuration & Rules
+									{t("configuration")}
 								</h2>
 							</div>
 							<div className="p-6 space-y-6">
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-900">Package Type</label>
+									<label className="mb-2 block text-sm font-medium text-slate-900">{t("packageType")}</label>
 									<div className="grid gap-3 sm:grid-cols-2">
-										<label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "CUSTOM" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
+										<label
+											className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "CUSTOM" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}
+										>
 											<input
 												type="radio"
 												name="packageType"
@@ -390,11 +407,13 @@ export default function EditPackagePage() {
 												className="mt-1 h-4 w-4 text-emerald-600"
 											/>
 											<div>
-												<p className="text-sm font-semibold text-slate-900">Custom Package</p>
-												<p className="text-xs text-slate-500">Customers build their own selection.</p>
+												<p className="text-sm font-semibold text-slate-900">{t("customTitle")}</p>
+												<p className="text-xs text-slate-500">{t("customDesc")}</p>
 											</div>
 										</label>
-										<label className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "FIXED" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}>
+										<label
+											className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer ${formData.packageType === "FIXED" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"}`}
+										>
 											<input
 												type="radio"
 												name="packageType"
@@ -404,215 +423,211 @@ export default function EditPackagePage() {
 												className="mt-1 h-4 w-4 text-emerald-600"
 											/>
 											<div>
-												<p className="text-sm font-semibold text-slate-900">Fixed Package</p>
-												<p className="text-xs text-slate-500">Admin defines products and quantities.</p>
+												<p className="text-sm font-semibold text-slate-900">{t("fixedTitle")}</p>
+												<p className="text-xs text-slate-500">{t("fixedDesc")}</p>
 											</div>
 										</label>
 									</div>
 								</div>
 
 								{formData.packageType === "CUSTOM" && (
-								<div className="grid gap-6 sm:grid-cols-2">
-									<div>
-										<label className="mb-2 block text-sm font-medium text-slate-900">
-											Minimum Products
-										</label>
-										<input
-											type="number"
-											name="minProducts"
-											value={formData.minProducts}
-											onChange={handleInputChange}
-											onWheel={(e) => e.currentTarget.blur()}
-											min="1"
-											className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
-										/>
-									</div>
-									<div>
-										<label className="mb-2 block text-sm font-medium text-slate-900">
-											Maximum Products
-										</label>
-										<input
-											type="number"
-											name="maxProducts"
-											value={formData.maxProducts}
-											onChange={handleInputChange}
-											onWheel={(e) => e.currentTarget.blur()}
-											min="1"
-											className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
-										/>
-									</div>
-								</div>
-							)}
-
-							{formData.packageType === "CUSTOM" && (
-								<div className="pt-4 border-t border-slate-100">
-									<label className="flex items-start gap-3 cursor-pointer">
-										<input
-											type="checkbox"
-											checked={formData.allowMultipleQuantities}
-											onChange={handleToggleMultipleQuantities}
-											className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-										/>
+									<div className="grid gap-6 sm:grid-cols-2">
 										<div>
-											<span className="block text-sm font-medium text-slate-900">Allow Multiple Quantities</span>
-											<span className="block text-xs text-slate-500 mt-1">
-												If enabled, customers can buy more than 1 of the same item within the package.
-											</span>
-										</div>
-									</label>
-								</div>
-							)}
-
-							{formData.packageType === "FIXED" && (
-								<div className="space-y-4 border-t border-slate-100 pt-4">
-									<div className="flex items-end gap-3">
-										<div className="flex-1">
-											<label className="mb-2 block text-sm font-medium text-slate-900">Add Product</label>
-											<select
-												value={selectedProductId}
-												onChange={(e) => setSelectedProductId(e.target.value)}
+											<label className="mb-2 block text-sm font-medium text-slate-900">{t("minProducts")}</label>
+											<input
+												type="number"
+												name="minProducts"
+												value={formData.minProducts}
+												onChange={handleInputChange}
+												onWheel={(e) => e.currentTarget.blur()}
+												min="1"
 												className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
-											>
-												<option value="">Select a product...</option>
-												{availableProducts.map((product) => (
-													<option key={product._id} value={product._id}>{product.name}</option>
-												))}
-											</select>
+											/>
 										</div>
-										<button
-											type="button"
-											onClick={handleAddFixedProduct}
-											className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
-											style={{backgroundColor: '#556622'}}
-											onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
-											onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}
-										>
-											Add
-										</button>
+										<div>
+											<label className="mb-2 block text-sm font-medium text-slate-900">{t("maxProducts")}</label>
+											<input
+												type="number"
+												name="maxProducts"
+												value={formData.maxProducts}
+												onChange={handleInputChange}
+												onWheel={(e) => e.currentTarget.blur()}
+												min="1"
+												className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
+											/>
+										</div>
 									</div>
+								)}
 
-									{fixedProducts.length === 0 ? (
-										<div className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">
-											No products selected yet.
+								{formData.packageType === "CUSTOM" && (
+									<div className="pt-4 border-t border-slate-100">
+										<label className="flex items-start gap-3 cursor-pointer">
+											<input
+												type="checkbox"
+												checked={formData.allowMultipleQuantities}
+												onChange={handleToggleMultipleQuantities}
+												className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+											/>
+											<div>
+												<span className="block text-sm font-medium text-slate-900">{t("allowMultiple")}</span>
+												<span className="block text-xs text-slate-500 mt-1">{t("allowMultipleHint")}</span>
+											</div>
+										</label>
+									</div>
+								)}
+
+								{formData.packageType === "FIXED" && (
+									<div className="space-y-4 border-t border-slate-100 pt-4">
+										<div className="flex items-end gap-3">
+											<div className="flex-1">
+												<label className="mb-2 block text-sm font-medium text-slate-900">{t("addProduct")}</label>
+												<select
+													value={selectedProductId}
+													onChange={(e) => setSelectedProductId(e.target.value)}
+													className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
+												>
+													<option value="">{t("selectProduct")}</option>
+													{availableProducts.map((product) => (
+														<option key={product._id} value={product._id}>
+															{product.name}
+														</option>
+													))}
+												</select>
+											</div>
+											<button
+												type="button"
+												onClick={handleAddFixedProduct}
+												className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+												style={{ backgroundColor: "#556622" }}
+												onMouseEnter={(e) => (e.target.style.backgroundColor = "#3d4617")}
+												onMouseLeave={(e) => (e.target.style.backgroundColor = "#556622")}
+											>
+												{t("add")}
+											</button>
 										</div>
-									) : (
-										<div className="space-y-3">
-											{fixedProducts.map((item) => {
-												const product = allProducts.find((p) => p._id === item.productId) || item;
-												return (
-													<div key={item.productId} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-														<div className="h-12 w-12 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
-															{getProductImageUrl(product) ? (
-																<img src={getProductImageUrl(product)} alt={product?.name || "Product"} className="h-full w-full object-cover" />
-															) : (
-																<ImageIcon className="h-5 w-5 text-slate-300" />
-															)}
+
+										{fixedProducts.length === 0 ? (
+											<div className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">
+												{t("noProductsYet")}
+											</div>
+										) : (
+											<div className="space-y-3">
+												{fixedProducts.map((item) => {
+													const product = allProducts.find((p) => p._id === item.productId) || item;
+													return (
+														<div key={item.productId} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+															<div className="h-12 w-12 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
+																{getProductImageUrl(product) ? (
+																	<img
+																		src={getProductImageUrl(product)}
+																		alt={product?.name || t("productAlt")}
+																		className="h-full w-full object-cover"
+																	/>
+																) : (
+																	<ImageIcon className="h-5 w-5 text-slate-300" />
+																)}
+															</div>
+															<div className="flex-1">
+																<p className="text-sm font-semibold text-slate-900">
+																	{product?.name || item.productName || t("unknownProduct")}
+																</p>
+																<p className="text-xs text-slate-500">{t("fixedQuantity")}</p>
+															</div>
+															<input
+																type="number"
+																min="1"
+																value={item.quantity}
+																onChange={(e) =>
+																	handleFixedQuantityChange(item.productId, e.target.value)
+																}
+																className="w-20 rounded-md border border-slate-200 px-2 py-1 text-sm"
+															/>
+															<button
+																type="button"
+																onClick={() => handleRemoveFixedProduct(item.productId)}
+																className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+															>
+																{t("remove")}
+															</button>
 														</div>
-														<div className="flex-1">
-															<p className="text-sm font-semibold text-slate-900">{product?.name || item.productName || "Unknown product"}</p>
-															<p className="text-xs text-slate-500">Fixed quantity</p>
-														</div>
-														<input
-															type="number"
-															min="1"
-															value={item.quantity}
-															onChange={(e) => handleFixedQuantityChange(item.productId, e.target.value)}
-															className="w-20 rounded-md border border-slate-200 px-2 py-1 text-sm"
-														/>
-														<button
-															type="button"
-															onClick={() => handleRemoveFixedProduct(item.productId)}
-															className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
-														>
-															Remove
-														</button>
-													</div>
-												);
-											})}
-										</div>
-									)}
-								</div>
-							)}
+													);
+												})}
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 						</div>
 					</div>
 
-					{/* RIGHT COLUMN - Sidebar */}
 					<div className="space-y-8">
-						{/* Status Card */}
 						<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 							<div className="border-b border-slate-200 px-6 py-4">
-								<h2 className="text-base font-semibold text-slate-900">Status</h2>
+								<h2 className="text-base font-semibold text-slate-900">{t("status")}</h2>
 							</div>
 							<div className="p-6">
 								<div className="flex items-center justify-between">
-									<span className="text-sm text-slate-700">Active Status</span>
+									<span className="text-sm text-slate-700">{t("activeStatus")}</span>
 									<label className="relative inline-flex cursor-pointer items-center">
-										<input 
-											type="checkbox" 
+										<input
+											type="checkbox"
 											name="isActive"
 											checked={formData.isActive}
 											onChange={handleInputChange}
-											className="peer sr-only" 
+											className="peer sr-only"
 										/>
 										<div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/20"></div>
 									</label>
 								</div>
 								<p className="mt-2 text-xs text-slate-500">
-									{formData.isActive 
-										? "This package is visible to customers." 
-										: "This package is hidden from the store."}
+									{formData.isActive ? t("statusVisible") : t("statusHidden")}
 								</p>
 							</div>
 						</div>
 
-						{/* Pricing Card */}
 						<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 							<div className="border-b border-slate-200 px-6 py-4">
 								<h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
 									<Percent className="h-4 w-4 text-slate-500" />
-									Pricing
+									{t("pricing")}
 								</h2>
 							</div>
 							<div className="p-6">
-								<label className="mb-2 block text-sm font-medium text-slate-900">
-									Discount Percentage
-								</label>
+								<label className="mb-2 block text-sm font-medium text-slate-900">{t("discountPercent")}</label>
 								<div className="relative">
 									<input
 										type="number"
 										name="discountPercentage"
 										value={formData.discountPercentage}
-											onChange={handleInputChange}
-											onWheel={(e) => e.currentTarget.blur()}
-											min="0"
+										onChange={handleInputChange}
+										onWheel={(e) => e.currentTarget.blur()}
+										min="0"
 										max="100"
 										className="block w-full rounded-lg border border-slate-200 py-2.5 pr-8 pl-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
 									/>
 									<span className="absolute right-3 top-2.5 text-slate-400 text-sm font-medium">%</span>
 								</div>
-								<p className="mt-2 text-xs text-slate-500">Applied to all products in the bundle.</p>
+								<p className="mt-2 text-xs text-slate-500">{t("discountHint")}</p>
 							</div>
 						</div>
 
-						{/* Image Upload Card */}
 						<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 							<div className="border-b border-slate-200 px-6 py-4">
 								<h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
 									<ImageIcon className="h-4 w-4 text-slate-500" />
-									Media
+									{t("media")}
 								</h2>
 							</div>
 							<div className="p-6">
 								{!imagePreview ? (
-									<div 
+									<div
 										onClick={() => fileInputRef.current?.click()}
 										className="group relative flex h-40 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-emerald-500 hover:bg-emerald-50/50"
 									>
 										<div className="flex flex-col items-center justify-center pt-5 pb-6">
 											<Upload className="mb-2 h-8 w-8 text-slate-400 group-hover:text-emerald-500" />
-											<p className="mb-1 text-sm text-slate-500 font-medium">Click to upload</p>
-											<p className="text-xs text-slate-400">SVG, PNG, JPG</p>
+											<p className="mb-1 text-sm text-slate-500 font-medium">{t("clickUpload")}</p>
+											<p className="text-xs text-slate-400">{t("mediaFormats")}</p>
 										</div>
 									</div>
 								) : (
@@ -624,11 +639,7 @@ export default function EditPackagePage() {
 										>
 											<X className="h-4 w-4" />
 										</button>
-										<img
-											src={imagePreview}
-											alt="Package preview"
-											className="h-40 w-full object-cover"
-										/>
+										<img src={imagePreview} alt={t("previewAlt")} className="h-40 w-full object-cover" />
 									</div>
 								)}
 								<input
@@ -641,22 +652,18 @@ export default function EditPackagePage() {
 							</div>
 						</div>
 
-						{/* Info Card */}
 						<div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4">
 							<div className="flex items-start gap-3">
 								<Info className="h-5 w-5 text-blue-600 mt-0.5" />
 								<div>
-									<h3 className="text-sm font-semibold text-blue-900">Package Type</h3>
+									<h3 className="text-sm font-semibold text-blue-900">{t("infoTitle")}</h3>
 									<p className="mt-1 text-xs text-blue-700 leading-relaxed">
-										{formData.packageType === "CUSTOM"
-											? "You are editing a template. Customers will build their own bundles based on your rules."
-											: "You are editing a fixed package. Customers cannot modify the products or quantities."}
+										{formData.packageType === "CUSTOM" ? t("infoCustomEdit") : t("infoFixedEdit")}
 									</p>
 								</div>
 							</div>
 						</div>
 					</div>
-
 				</form>
 			</div>
 		</div>
