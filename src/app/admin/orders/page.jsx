@@ -6,7 +6,7 @@ import Link from 'next/link';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
-import { Search, MoreVertical, Eye, Pencil, Truck } from 'lucide-react';
+import { Search, MoreVertical, Eye, Truck } from 'lucide-react';
 
 const ORDER_STATUS_LABEL = {
   pending: 'Pending',
@@ -55,11 +55,8 @@ function AdminOrdersInner() {
   const [listTotal, setListTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [updating, setUpdating] = useState(null);
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [page, setPage] = useState(1);
-  const [editOrder, setEditOrder] = useState(null);
-  const [nextStatus, setNextStatus] = useState('pending');
 
   const load = async () => {
     setLoading(true);
@@ -88,40 +85,6 @@ function AdminOrdersInner() {
   }, [tab, page]);
 
   const totalPages = Math.max(1, Math.ceil(listTotal / PAGE_SIZE));
-
-  const statusOptions = [
-    { value: 'pending', label: ORDER_STATUS_LABEL.pending },
-    { value: 'awaiting_delivery', label: ORDER_STATUS_LABEL.awaiting_delivery },
-    { value: 'shipped', label: ORDER_STATUS_LABEL.shipped },
-    { value: 'delivered', label: ORDER_STATUS_LABEL.delivered },
-    { value: 'returned', label: ORDER_STATUS_LABEL.returned },
-    { value: 'refunded', label: ORDER_STATUS_LABEL.refunded },
-    { value: 'cancelled', label: ORDER_STATUS_LABEL.cancelled },
-  ];
-
-  const changeStatus = async (id, status) => {
-    setUpdating(id);
-    try {
-      await orderAPI.updateAdminStatus(id, status);
-      await load();
-    } catch (e) {
-      setError(e.message || 'Update failed');
-    } finally {
-      setUpdating(null);
-    }
-  };
-
-  const openEditModal = (order) => {
-    setEditOrder(order);
-    setNextStatus(order?.status || 'pending');
-    setMenuOpenFor(null);
-  };
-
-  const submitEditStatus = async () => {
-    if (!editOrder?._id) return;
-    await changeStatus(editOrder._id, nextStatus);
-    setEditOrder(null);
-  };
 
   return (
     <>
@@ -266,14 +229,6 @@ function AdminOrdersInner() {
                                 Edit shipping offer
                               </Link>
                             ) : null}
-                            <button
-                              type="button"
-                              className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-t border-slate-100 transition-colors"
-                              onClick={() => openEditModal(o)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                              Edit status
-                            </button>
                           </div>
                         )}
                       </td>
@@ -315,55 +270,6 @@ function AdminOrdersInner() {
           </div>
         )}
 
-        {editOrder && (
-          <div className="fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
-            <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-slate-200">
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-slate-900">Edit status</h3>
-                <button
-                  type="button"
-                  className="text-sm text-slate-500 hover:text-slate-700"
-                  onClick={() => setEditOrder(null)}
-                >
-                  Close
-                </button>
-              </div>
-              <div className="p-6 space-y-4">
-                <p className="text-sm text-slate-600">Order #{editOrder.invoiceNumber}</p>
-                <select
-                  className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white"
-                  value={nextStatus}
-                  onChange={(e) => setNextStatus(e.target.value)}
-                  disabled={updating === editOrder._id}
-                >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700"
-                    onClick={() => setEditOrder(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="px-3 py-2 rounded-lg bg-[#556622] text-white text-sm disabled:opacity-60"
-                    onClick={submitEditStatus}
-                    disabled={updating === editOrder._id}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
