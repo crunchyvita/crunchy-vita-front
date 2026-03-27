@@ -122,11 +122,10 @@ function AdminOrdersInner() {
                   setTab(t.id);
                   setPage(1);
                 }}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  tab === t.id
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${tab === t.id
                     ? 'bg-[#556622] text-white'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 {t.label}
               </button>
@@ -184,9 +183,9 @@ function AdminOrdersInner() {
                       <td className="px-3 py-4 text-slate-600 whitespace-nowrap">
                         {o.createdAt
                           ? new Date(o.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            })
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })
                           : '—'}
                       </td>
                       <td className="px-3 py-4">
@@ -202,10 +201,7 @@ function AdminOrdersInner() {
                         {typeof o.totalItemCount === 'number' ? o.totalItemCount : '—'}
                       </td>
                       <td className="px-3 py-4 text-right font-semibold text-slate-900 tabular-nums">
-                        {new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
-                          style: 'currency',
-                          currency: (o.currency || 'eur').toUpperCase(),
-                        }).format(Number(o.totalAmount) || 0)}
+                        {(Number(o.totalAmount) || 0).toFixed(2)} €
                       </td>
                       <td className="px-3 py-4 text-right relative">
                         <button

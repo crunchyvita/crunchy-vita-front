@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
@@ -41,6 +41,52 @@ function formatMoney(amount, currency = 'eur') {
   } catch {
     return `€${Number(amount || 0).toFixed(2)}`;
   }
+}
+
+const pulse = 'animate-pulse rounded-md bg-gray-200/80';
+
+function OrdersListSkeleton() {
+  return (
+    <div className="space-y-6" aria-hidden>
+      {[0, 1, 2].map((card) => (
+        <div
+          key={card}
+          className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row"
+        >
+          <div className="md:w-52 shrink-0 border-b md:border-b-0 md:border-r border-gray-100 p-5 bg-gray-50">
+            <div className="space-y-4">
+              {[0, 1, 2, 3].map((row) => (
+                <div key={row}>
+                  <div className={`h-3 w-16 mb-2 ${pulse}`} />
+                  <div className={`h-5 w-full max-w-[10rem] ${pulse}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 p-4 sm:p-5">
+            <div className="space-y-4">
+              {[0, 1].map((line) => (
+                <div
+                  key={line}
+                  className="flex gap-3 sm:gap-4 items-center py-3 border-b border-gray-100 last:border-b-0"
+                >
+                  <div className={`h-16 w-16 sm:h-20 sm:w-20 shrink-0 ${pulse}`} />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className={`h-5 w-full max-w-md ${pulse}`} />
+                    <div className={`h-4 w-24 ${pulse}`} />
+                  </div>
+                  <div className={`h-4 w-20 shrink-0 ${pulse}`} />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end mt-5">
+              <div className={`h-10 w-36 rounded-md ${pulse}`} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function OrdersContent() {
@@ -112,20 +158,31 @@ function OrdersContent() {
           <p className="text-sm text-gray-500 mb-6">{t('description')}</p>
 
           <div className="mb-8">
-            <input
-              type="text"
-              placeholder={t('searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#556822] focus:border-transparent transition-all"
-            />
+            {loading ? (
+              <div className={`h-12 w-full ${pulse} rounded-lg`} aria-hidden />
+            ) : (
+              <input
+                type="text"
+                placeholder={t('searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#556822] focus:border-transparent transition-all"
+              />
+            )}
           </div>
 
-          {loading && <p className="text-gray-500">{t('loading')}</p>}
-          {Boolean(error) && <p className="text-red-600 text-sm">{error}</p>}
+          {loading ? (
+            <>
+              <div className="sr-only" aria-live="polite">
+                {t('loading')}
+              </div>
+              <OrdersListSkeleton />
+            </>
+          ) : null}
+          {!loading && Boolean(error) ? <p className="text-red-600 text-sm">{error}</p> : null}
 
           {!loading && !orders.length && !error ? (
             <div className="text-center py-16 sm:py-20">
@@ -145,7 +202,8 @@ function OrdersContent() {
           ) : null}
 
           <div className="space-y-6">
-            {displayedOrders.map((order) => {
+            {!loading &&
+              displayedOrders.map((order) => {
               const st = statusStyle[order.status] || statusStyle.pending;
               const lines = order.items || [];
               return (
@@ -248,7 +306,7 @@ function OrdersContent() {
             })}
           </div>
 
-          {filteredTotalPages > 1 ? (
+          {!loading && filteredTotalPages > 1 ? (
             <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"

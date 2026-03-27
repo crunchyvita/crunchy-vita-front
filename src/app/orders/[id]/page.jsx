@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { useParams } from 'next/navigation';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
@@ -10,6 +10,60 @@ import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
+
+function OrderDetailSkeleton() {
+  const pulse = 'animate-pulse rounded-md bg-gray-200/80';
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 min-w-0 space-y-6 sm:space-y-8">
+      <div className="space-y-3">
+        <div className={`h-8 sm:h-9 w-48 max-w-[85%] ${pulse}`} />
+        <div className={`h-4 w-40 ${pulse}`} />
+      </div>
+
+      <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4 sm:p-6">
+        <div className={`h-6 w-32 mb-6 ${pulse}`} />
+        <ul className="divide-y divide-gray-100 space-y-0">
+          {[0, 1, 2].map((i) => (
+            <li key={i} className="flex gap-3 sm:gap-4 py-4 first:pt-0 items-center">
+              <div className={`h-16 w-16 sm:h-20 sm:w-20 shrink-0 ${pulse}`} />
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className={`h-5 w-full max-w-md ${pulse}`} />
+                <div className={`h-3 w-16 ${pulse}`} />
+              </div>
+              <div className={`h-6 w-16 shrink-0 ${pulse}`} />
+            </li>
+          ))}
+        </ul>
+        <div className="border-t border-gray-100 pt-4 mt-4 space-y-3">
+          <div className="flex justify-between gap-4">
+            <div className={`h-4 w-24 ${pulse}`} />
+            <div className={`h-4 w-20 ${pulse}`} />
+          </div>
+          <div className="flex justify-between gap-4">
+            <div className={`h-4 w-28 ${pulse}`} />
+            <div className={`h-4 w-16 ${pulse}`} />
+          </div>
+          <div className={`h-px bg-gray-100 my-3`} />
+          <div className="flex justify-between gap-4">
+            <div className={`h-6 w-20 ${pulse}`} />
+            <div className={`h-6 w-24 ${pulse}`} />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4 sm:p-6">
+        <div className={`h-6 w-36 mb-4 ${pulse}`} />
+        <div className="space-y-2">
+          <div className={`h-4 w-full max-w-lg ${pulse}`} />
+          <div className={`h-4 w-[80%] max-w-md ${pulse}`} />
+          <div className={`h-4 w-32 ${pulse}`} />
+        </div>
+      </div>
+
+      <div className={`h-11 w-full sm:w-48 rounded-md ${pulse}`} />
+    </div>
+  );
+}
 
 function formatMoney(amount, currency = 'eur') {
   const cur = (currency || 'eur').toUpperCase();
@@ -32,18 +86,29 @@ function OrderDetailContent() {
   const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      setError(t('notFound'));
+      return;
+    }
+    let cancelled = false;
     (async () => {
       try {
+        setLoading(true);
+        setError('');
         const res = await orderAPI.getMine(id);
+        if (cancelled) return;
         if (res?.success) setOrder(res.data);
         else setError(res?.message || t('notFound'));
       } catch (e) {
-        setError(e.message || t('notFound'));
+        if (!cancelled) setError(e.message || t('notFound'));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [id, t]);
 
   useEffect(() => {
@@ -61,13 +126,10 @@ function OrderDetailContent() {
       <div className={shellClass}>
         <HeaderAndBreadcrumbs />
         <main className={mainClass}>
-          <div className="bg-white rounded-lg shadow-sm p-8 sm:p-12 flex flex-col items-center justify-center text-gray-500">
-            <div
-              className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-[#556822] mb-4"
-              aria-hidden
-            />
-            <p>{t('loading')}</p>
+          <div className="sr-only" aria-live="polite">
+            {t('loading')}
           </div>
+          <OrderDetailSkeleton />
         </main>
         <Footer />
       </div>
