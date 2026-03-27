@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   LayoutGrid,
   Info,
-  Type
+  Type,
+  Save,
 } from "lucide-react";
 import { productAPI, categoryAPI } from "@/lib/api";
 import { useTranslations } from "next-intl";
@@ -222,7 +223,7 @@ export default function CreateProductPage() {
               </>
             ) : (
               <>
-                <Plus className="h-4 w-4" />
+                <Save className="h-4 w-4" />
                 {tp("savePublish")}
               </>
             )}
@@ -510,6 +511,24 @@ export default function CreateProductPage() {
           <div className="bg-slate-900 rounded-3xl p-8 shadow-2xl space-y-10">
             <h3 className="font-black text-white text-xs uppercase tracking-[0.3em] border-b border-white/10 pb-4">{tp("classification")}</h3>
 
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("visibilityLabel")}</label>
+              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.showInShop)}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      showInShop: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 accent-emerald-500"
+                />
+                <span className="text-sm font-bold text-white">{tp("showInShop")}</span>
+              </label>
+            </div>
+
             {/* Category */}
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("categoryLabel")}</label>
@@ -567,7 +586,7 @@ export default function CreateProductPage() {
                         type="button"
                         onClick={() => removeCategorySelection(cat.id)}
                         className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
-                        aria-label={tp('removeCategoryAria', { name: cat.name })}
+                        aria-label={tp("removeCategoryAria", { name: cat.name })}
                       >
                         <X size={12} />
                       </button>
@@ -585,24 +604,6 @@ export default function CreateProductPage() {
                 onChange={(tags) => setForm((prev) => ({ ...prev, tags }))}
                 placeholder={tp("tagsPlaceholder")}
               />
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("visibilityLabel")}</label>
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(form.showInShop)}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      showInShop: e.target.checked,
-                    }))
-                  }
-                  className="h-4 w-4 accent-emerald-500"
-                />
-                <span className="text-sm font-bold text-white">{tp("showInShop")}</span>
-              </label>
             </div>
           </div>
 

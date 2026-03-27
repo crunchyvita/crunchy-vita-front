@@ -72,7 +72,7 @@
     "groups": {
       "catalog": "Catalog",
       "sales": "Sales",
-      "customers": "Customers",
+      "customers": "users",
       "contentMarketing": "Content & Marketing",
       "analytics": "Analytics"
     },
@@ -134,7 +134,7 @@
     "subtitle": "Successful payments only. Open the linked order for full details.",
     "loading": "Loading…",
     "loadError": "Failed to load",
-    "paymentIntent": "Payment intent",
+    "paymentIntent": "Payment reference",
     "order": "Order",
     "amount": "Amount",
     "empty": "No paid checkout sessions"
@@ -670,7 +670,7 @@
     "cancel": "Cancel",
     "creating": "Creating…",
     "updating": "Updating…",
-    "savePublish": "Save & publish",
+    "savePublish": "Save ",
     "updatePackage": "Update package",
     "loginRequired": "You must be logged in to create a package",
     "fixedNeedsProduct": "Fixed packages must include at least one product",
@@ -838,7 +838,7 @@
     "title": "Create new product",
     "cancel": "Cancel",
     "creating": "Creating…",
-    "savePublish": "Save & publish",
+    "savePublish": "Save ",
     "createFailed": "Failed to create product",
     "sectionProductContent": "Product content",
     "sectionProductContentDesc": "Define the core information for your item",

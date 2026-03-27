@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import AdminHeader from "@/components/admin/header";
 import {

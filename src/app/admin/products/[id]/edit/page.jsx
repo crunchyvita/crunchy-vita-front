@@ -83,6 +83,21 @@ export default function EditProductPage() {
     setSelectedCategories((prev) => prev.filter((item) => String(item.id) !== String(categoryId)));
   };
 
+  const normalizeTags = (rawTags) => {
+    if (Array.isArray(rawTags)) {
+      return rawTags
+        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+        .filter(Boolean);
+    }
+    if (typeof rawTags === "string") {
+      return rawTags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
   const loadProduct = async () => {
     try {
       setLoading(true);
@@ -125,7 +140,7 @@ export default function EditProductPage() {
         price: data.pricingHistory?.length > 0 
           ? data.pricingHistory[data.pricingHistory.length - 1].price 
           : "",
-        tags: Array.isArray(data.tag) ? data.tag : (data.tag ? [data.tag] : []),
+        tags: normalizeTags(data.tags ?? data.tag),
         description: data.description || "",
         width: data.width || "",
         height: data.height || "",
@@ -729,7 +744,7 @@ export default function EditProductPage() {
 
             {/* Tags */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{tp("seoTags")}</label>
+              <label className="text-[10px] font-black  text-slate-400 uppercase tracking-widest italic">{tp("seoTags")}</label>
               <TagInput
                 value={formData.tags}
                 onChange={(tags) => setFormData((prev) => ({ ...prev, tags }))}

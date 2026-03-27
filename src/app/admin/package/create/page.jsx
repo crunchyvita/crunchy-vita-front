@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import AdminHeader from "@/components/admin/header";
 import { useTranslations } from "next-intl";
@@ -438,9 +439,11 @@ export default function CreateEditPackagePage() {
                           className="block w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
                         >
                           <option value="">{t("selectProduct")}</option>
-                          {allProducts.map((product) => (
-                            <option key={product._id} value={product._id}>{product.name}</option>
-                          ))}
+                          {allProducts
+                            .filter((product) => !fixedProducts.some((fp) => fp.productId === product._id))
+                            .map((product) => (
+                              <option key={product._id} value={product._id}>{product.name}</option>
+                            ))}
                         </select>
                       </div>
                       <button

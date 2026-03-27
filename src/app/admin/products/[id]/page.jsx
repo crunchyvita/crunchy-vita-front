@@ -325,17 +325,10 @@ export default function ProductDetailPage() {
     <AdminHeader />
     <div className="min-h-screen bg-[#f8fafc]">
       <header className="bg-white border-b border-slate-200 px-8 py-4">
-        <div className="max-w-400 mx-auto flex items-center justify-between">
+        <div className="max-w-400 mx-auto flex items-center">
           <Link href="/admin/products" className="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center gap-2 text-slate-600 font-semibold">
             <ArrowLeft size={20} />
             <span>{t("backToProducts")}</span>
-          </Link>
-          <Link href="/admin/promotions" className="text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
-            style={{backgroundColor: '#556622'}}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#3d4617'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#556622'}>
-            <Calendar size={18} />
-            {t("schedulePromotion")}
           </Link>
         </div>
       </header>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import AdminHeader from "@/components/admin/header";
 import { useTranslations } from "next-intl";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { useLocale, useTranslations } from "next-intl";
@@ -229,10 +229,10 @@ export default function PackagesPage() {
 											</span>
 										</td>
 
-										<td className="px-4 py-3 text-sm text-slate-600">
+										<td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
 											{pkg.packageType === "FIXED" ? (
 												<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
-													{tp("itemsCount", { count: pkg.products?.length || 0 })}
+													{tp("productsCount", { count: pkg.products?.length || 0 })}
 												</span>
 											) : (
 												<span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">

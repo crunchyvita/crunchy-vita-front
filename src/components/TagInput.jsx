@@ -135,20 +135,20 @@ export default function TagInput({ value = [], onChange, placeholder = "Type and
   return (
     <div className="relative space-y-3" ref={containerRef}>
       {/* Selected Tags */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-2 pt-2">
         {value.map((tag, index) => (
           <span
             key={index}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white text-sm font-bold rounded-lg hover:bg-emerald-600 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-3 py-1 text-xs font-black text-white"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(index)}
-              className="hover:bg-white/20 rounded p-0.5 transition-colors"
+              className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
               aria-label={`Remove ${tag}`}
             >
-              <X size={16} />
+              <X size={12} />
             </button>
           </span>
         ))}
@@ -163,7 +163,7 @@ export default function TagInput({ value = [], onChange, placeholder = "Type and
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
-          placeholder={value.length === 0 ? "Start typing..." : "Add another tag..."}
+          placeholder={placeholder}
           className="w-full rounded-xl bg-white/5 border border-white/10 px-5 py-3.5 text-sm font-bold text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-emerald-500 outline-none transition-all"
         />
 
@@ -187,18 +187,13 @@ export default function TagInput({ value = [], onChange, placeholder = "Type and
                 ))}
               </ul>
             ) : inputValue.trim() ? (
-              <div className="px-5 py-3 text-sm font-medium text-slate-900">
+              <div className="px-5 py-3 text-sm font-bold text-slate-900">
                 Press Enter to create &quot;{inputValue.trim()}&quot;
               </div>
             ) : null}
           </div>
         )}
       </div>
-
-      {/* Helper Text */}
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-        Type to search existing tags or create new ones. Press Enter to add.
-      </p>
     </div>
   );
 }

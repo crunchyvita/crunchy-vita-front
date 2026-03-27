@@ -27,7 +27,8 @@ import {
   Tag,
   ChevronDown,
 } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import { useAdminLayout } from "@/context/AdminLayoutContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";

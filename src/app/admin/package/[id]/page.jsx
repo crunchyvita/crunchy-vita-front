@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter, Link } from "@/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import AdminHeader from "@/components/admin/header";
 import {
@@ -169,7 +168,6 @@ export default function PackageDetailPage({ params }) {
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 						<div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
-							<Percent className="h-4 w-4" />
 							{t("discountPercentage")}
 						</div>
 						<p className="text-2xl font-bold text-orange-600">

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
@@ -232,7 +232,7 @@ function AdminOrdersInner() {
                             {!o.shippingOfferLocked ? (
                               <Link
                                 href={`/admin/orders/${o._id}/shipping-offers`}
-                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100"
+                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100 whitespace-nowrap"
                                 onClick={() => setMenuOpenFor(null)}
                               >
                                 <Truck className="h-4 w-4" />

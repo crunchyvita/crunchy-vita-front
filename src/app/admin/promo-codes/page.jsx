@@ -13,7 +13,7 @@ import {
   Trash2,
   MoreVertical,
 } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import AdminHeader from '@/components/admin/header';
 import { useLocale, useTranslations } from 'next-intl';
 

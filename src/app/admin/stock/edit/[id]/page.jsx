@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import AdminHeader from "@/components/admin/header";
 import { stockAPI } from "@/lib/api";
 import { ArrowLeft, Info, AlertTriangle, CheckCircle2, TrendingUp, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
