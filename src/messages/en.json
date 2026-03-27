@@ -958,10 +958,22 @@
       "expressCheckboxHint": "Fixed express rate instead of standard tiered home delivery.",
       "appliedFeesTitle": "Applied shipping fees",
       "infoCardTitle": "Shipping information",
+      "infoLabels": {
+        "pickupPoint": "Pickup point",
+        "homeDelivery": "Home delivery"
+      },
+      "infoRelaySimple": "FREE from {threshold} € of purchases",
+      "infoHomeReducedSimple": "{reducedPrice} € from {reducedThreshold} € of purchases",
+      "infoHomeFreeSimple": "Free from {freeThreshold} € of purchases",
       "infoRelay": "Relay point: FREE from {threshold} EUR",
       "infoHome": "Home delivery: {reducedPrice} EUR from {reducedThreshold} EUR | Free from {freeThreshold} EUR",
       "validationHome": "Fill email + first/last name + address + city + postal code.",
-      "validationRelay": "Fill email + first/last name and select a relay point."
+      "validationRelay": "Fill email + first/last name and select a relay point.",
+      "errors": {
+        "noHomeOfferForAddress": "No home delivery offer is available for this address.",
+        "invalidDestinationCountry": "Invalid destination country for home delivery. Please verify the country field.",
+        "homeOfferCheckFailed": "Unable to verify home delivery offers for this address."
+      }
     },
     "payment": {
       "title": "Payment",

@@ -958,10 +958,22 @@
       "expressCheckboxHint": "Tarif express fixe au lieu du tarif standard selon les paliers du panier.",
       "appliedFeesTitle": "Frais de livraison appliques",
       "infoCardTitle": "Informations livraison",
+      "infoLabels": {
+        "pickupPoint": "Point relais",
+        "homeDelivery": "Livraison a domicile"
+      },
+      "infoRelaySimple": "GRATUIT dès {threshold} € d'achats",
+      "infoHomeReducedSimple": "{reducedPrice} € dès {reducedThreshold} € d'achats",
+      "infoHomeFreeSimple": "Gratuit dès {freeThreshold} € d'achats",
       "infoRelay": "Point Relais : GRATUIT - des {threshold} EUR",
       "infoHome": "Livraison a domicile : {reducedPrice} EUR des {reducedThreshold} EUR | Gratuit des {freeThreshold} EUR",
       "validationHome": "Remplis email + prenom/nom + adresse + ville + code postal.",
-      "validationRelay": "Remplis email + prenom/nom et selectionne un point relais."
+      "validationRelay": "Remplis email + prenom/nom et selectionne un point relais.",
+      "errors": {
+        "noHomeOfferForAddress": "Aucune offre de livraison a domicile n'est disponible pour cette adresse.",
+        "invalidDestinationCountry": "Pays de destination invalide pour la livraison a domicile. Veuillez verifier le champ pays.",
+        "homeOfferCheckFailed": "Impossible de verifier les offres de livraison a domicile pour cette adresse."
+      }
     },
     "payment": {
       "title": "Paiement",

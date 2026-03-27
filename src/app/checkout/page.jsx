@@ -90,6 +90,18 @@ const getCartItemImagesLocal = (item) => {
   return unique;
 };
 
+const RELAY_COUNTRY_OPTIONS = [
+  { value: 'France', label: 'France' },
+  { value: 'Allemagne', label: 'Allemagne' },
+  { value: 'Belgique', label: 'Belgique' },
+  { value: 'Espagne', label: 'Espagne' },
+  { value: 'Italie', label: 'Italie' },
+  { value: 'Monaco', label: 'Monaco' },
+  { value: 'Pays-Bas', label: 'Pays-Bas' },
+  { value: 'Portugal', label: 'Portugal' },
+  { value: 'Royaume-Uni', label: 'Royaume-Uni' },
+];
+
 const PaymentForm = ({
   locale,
   t,
@@ -327,7 +339,7 @@ const CheckoutPage = () => {
   const [expressDelivery, setExpressDelivery] = useState(false);
 
   // Relay search + selection
-  const [relayCountry, setRelayCountry] = useState('');
+  const [relayCountry, setRelayCountry] = useState('France');
   const [relayAddressQuery, setRelayAddressQuery] = useState('');
   const [relayPoints, setRelayPoints] = useState([]);
   const [relayLoading, setRelayLoading] = useState(false);
@@ -350,6 +362,10 @@ const CheckoutPage = () => {
   const [homeOffersPage, setHomeOffersPage] = useState(1);
   const [homeShippingLoading, setHomeShippingLoading] = useState(false);
   const [homeShippingError, setHomeShippingError] = useState('');
+  const [homeOfferAvailabilityLoading, setHomeOfferAvailabilityLoading] = useState(false);
+  const [homeAddressHasOffer, setHomeAddressHasOffer] = useState(true);
+  const [homeAddressOfferError, setHomeAddressOfferError] = useState('');
+  const [homeOfferVerifiedKey, setHomeOfferVerifiedKey] = useState('');
   const [shippingSettings, setShippingSettings] = useState({
     relay: { freeThreshold: 40, belowThresholdPrice: 4.9 },
     home: {
@@ -552,6 +568,34 @@ const CheckoutPage = () => {
   const isShippingReady =
     deliveryType === 'home' ? Boolean(isHomeAddressValid) : Boolean(selectedRelay);
 
+  const homeAddressVerificationKey = useMemo(
+    () =>
+      [
+        String(country || '').trim().toLowerCase(),
+        String(street || '').trim().toLowerCase(),
+        String(city || '').trim().toLowerCase(),
+        String(postalCode || '').trim().toLowerCase(),
+        String(firstName || '').trim().toLowerCase(),
+        String(lastName || '').trim().toLowerCase(),
+        String(email || '').trim().toLowerCase(),
+        String(phone || '').trim().toLowerCase(),
+        String(Number(subtotal || 0).toFixed(2)),
+      ].join('|'),
+    [country, street, city, postalCode, firstName, lastName, email, phone, subtotal]
+  );
+
+  const normalizeHomeOfferErrorMessage = (rawMessage) => {
+    const msg = String(rawMessage || '').trim();
+    if (!msg) return '';
+    if (/Invalid destination country for home shipping quote/i.test(msg)) {
+      return t('shipping.errors.invalidDestinationCountry');
+    }
+    if (/No shipping offer available/i.test(msg)) {
+      return t('shipping.errors.noHomeOfferForAddress');
+    }
+    return msg;
+  };
+
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
 
@@ -621,6 +665,44 @@ const CheckoutPage = () => {
     setCheckoutError('');
 
     try {
+      if (deliveryType === 'home') {
+        const homeOffersRes = await fetchShippingWithFallback('home-offers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toAddress: {
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
+              email: email.trim().toLowerCase(),
+              phone: phone.trim(),
+              street: street.trim(),
+              city: city.trim(),
+              postalCode: postalCode.trim(),
+              country: country.trim(),
+            },
+            subtotal: Number(subtotal || 0),
+          }),
+        });
+
+        const homeOffersPayload = await homeOffersRes.json().catch(() => ({}));
+        const homeOffers = Array.isArray(homeOffersPayload?.offers) ? homeOffersPayload.offers : [];
+        const isFallbackSource = String(homeOffersPayload?.source || '').trim() === 'fallback-rule-engine';
+
+        if (!homeOffersRes.ok || homeOffers.length === 0 || isFallbackSource) {
+          const messageRaw =
+            homeOffersPayload?.message ||
+            t('shipping.noHomeOffer') ||
+            'Aucune offre de livraison domicile n’est disponible pour cette adresse. Veuillez vérifier votre adresse ou choisir un point relais.';
+          const message = normalizeHomeOfferErrorMessage(messageRaw);
+          setHomeAddressHasOffer(false);
+          setHomeAddressOfferError(message);
+          setCheckoutError(message);
+          throw new Error(message);
+        }
+        setHomeAddressHasOffer(true);
+        setHomeAddressOfferError('');
+      }
+
       const payload = getCheckoutPayload();
       const response = await paymentAPI.createPaymentIntent(payload);
 
@@ -752,7 +834,24 @@ const CheckoutPage = () => {
     deliveryType === 'home'
       ? isHomeValid
       : isRelayValid;
-  const canConfirm = canConfirmBase && cartItems.length > 0;
+  const canConfirm =
+    canConfirmBase &&
+    cartItems.length > 0 &&
+    !(
+      deliveryType === 'home' &&
+      (
+        homeOfferAvailabilityLoading ||
+        !homeAddressHasOffer ||
+        homeOfferVerifiedKey !== homeAddressVerificationKey
+      )
+    );
+  const shouldShowHomeDeliveryPricing =
+    deliveryType === 'home' &&
+    isHomeAddressValid &&
+    !homeOfferAvailabilityLoading &&
+    homeAddressHasOffer &&
+    homeOfferVerifiedKey === homeAddressVerificationKey &&
+    !homeAddressOfferError;
 
   const RELAY_PAGE_SIZE = 4;
   const totalRelayPages = Math.max(1, Math.ceil(relayPoints.length / RELAY_PAGE_SIZE));
@@ -897,6 +996,94 @@ const CheckoutPage = () => {
     city,
     postalCode,
     country,
+  ]);
+
+  useEffect(() => {
+    if (deliveryType !== 'home') {
+      setHomeAddressHasOffer(false);
+      setHomeAddressOfferError('');
+      setHomeOfferAvailabilityLoading(false);
+      setHomeOfferVerifiedKey('');
+      return;
+    }
+
+    if (!isHomeAddressValid) {
+      setHomeAddressHasOffer(false);
+      setHomeAddressOfferError('');
+      setHomeOfferAvailabilityLoading(false);
+      setHomeOfferVerifiedKey('');
+      return;
+    }
+
+    let cancelled = false;
+    // Strict mode: any address change invalidates previous verification immediately.
+    setHomeAddressHasOffer(false);
+    setHomeAddressOfferError('');
+    setHomeOfferVerifiedKey('');
+    setHomeOfferAvailabilityLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetchShippingWithFallback('home-offers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toAddress: {
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
+              email: email.trim().toLowerCase(),
+              phone: phone.trim(),
+              street: street.trim(),
+              city: city.trim(),
+              postalCode: postalCode.trim(),
+              country: country.trim(),
+            },
+            subtotal: Number(subtotal || 0),
+          }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        const offers = Array.isArray(payload?.offers) ? payload.offers : [];
+        const isFallbackSource = String(payload?.source || '').trim() === 'fallback-rule-engine';
+        if (cancelled) return;
+        if (!res.ok || offers.length === 0 || isFallbackSource) {
+          setHomeAddressHasOffer(false);
+          setHomeAddressOfferError(
+            normalizeHomeOfferErrorMessage(
+              payload?.message || t('shipping.errors.noHomeOfferForAddress')
+            )
+          );
+          setHomeOfferVerifiedKey(homeAddressVerificationKey);
+        } else {
+          setHomeAddressHasOffer(true);
+          setHomeAddressOfferError('');
+          setHomeOfferVerifiedKey(homeAddressVerificationKey);
+        }
+      } catch (_) {
+        if (cancelled) return;
+        setHomeAddressHasOffer(false);
+        setHomeAddressOfferError(t('shipping.errors.homeOfferCheckFailed'));
+        setHomeOfferVerifiedKey(homeAddressVerificationKey);
+      } finally {
+        if (!cancelled) setHomeOfferAvailabilityLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [
+    deliveryType,
+    isHomeAddressValid,
+    firstName,
+    lastName,
+    email,
+    phone,
+    street,
+    city,
+    postalCode,
+    country,
+    subtotal,
+    homeAddressVerificationKey,
   ]);
 
   useEffect(() => {
@@ -1366,12 +1553,17 @@ const CheckoutPage = () => {
                           <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                             {t('shipping.country') || 'Pays / région'}
                           </label>
-                          <input
+                          <select
                             value={relayCountry}
                             onChange={(e) => setRelayCountry(e.target.value)}
                             className="w-full p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
-                            placeholder={t('shipping.countryPlaceholder') || 'ex: France'}
-                          />
+                          >
+                            {RELAY_COUNTRY_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         <div className="md:col-span-2">
@@ -1530,7 +1722,7 @@ const CheckoutPage = () => {
 
               {deliveryType === 'home' && isHomeAddressValid && (
                 <div className="mt-6 space-y-4">
-                  {shippingSettings?.express?.enabled && (
+                  {shouldShowHomeDeliveryPricing && shippingSettings?.express?.enabled && (
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-4">
                       <input
                         type="checkbox"
@@ -1545,23 +1737,28 @@ const CheckoutPage = () => {
                     </label>
                   )}
 
-                  <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#556822]">
-                          {t('shipping.appliedFeesTitle')}
-                        </p>
-                        <p className="text-sm text-slate-700 mt-1">
-                          {expressDelivery && shippingSettings?.express?.enabled
-                            ? t('shipping.methodExpress')
-                            : t('shipping.homeDeliveryStandard')}
+                  {shouldShowHomeDeliveryPricing && (
+                    <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wider text-[#556822]">
+                            {t('shipping.appliedFeesTitle')}
+                          </p>
+                          <p className="text-sm text-slate-700 mt-1">
+                            {expressDelivery && shippingSettings?.express?.enabled
+                              ? t('shipping.methodExpress')
+                              : t('shipping.homeDeliveryStandard')}
+                          </p>
+                        </div>
+                        <p className="text-lg font-black text-[#556822]">
+                          {Number(displayedShipping || 0).toFixed(2)} EUR
                         </p>
                       </div>
-                      <p className="text-lg font-black text-[#556822]">
-                        {Number(displayedShipping || 0).toFixed(2)} EUR
-                      </p>
                     </div>
-                  </div>
+                  )}
+                  {homeAddressOfferError ? (
+                    <p className="text-sm text-red-600">{homeAddressOfferError}</p>
+                  ) : null}
                 </div>
               )}
             </section>
@@ -1730,20 +1927,36 @@ const CheckoutPage = () => {
                 <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
               ) : null}
 
-              <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-left">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('shipping.infoCardTitle')}</p>
-                <p className="mt-2 text-sm text-slate-700">
-                  {t('shipping.infoRelay', {
-                    threshold: Number(shippingSettings?.relay?.freeThreshold ?? 40).toFixed(0),
-                  })}
-                </p>
-                <p className="mt-1 text-sm text-slate-700">
-                  {t('shipping.infoHome', {
-                    reducedPrice: Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9).toFixed(2),
-                    reducedThreshold: Number(shippingSettings?.home?.reducedThreshold ?? 40).toFixed(0),
-                    freeThreshold: Number(shippingSettings?.home?.freeThreshold ?? 60).toFixed(0),
-                  })}
-                </p>
+              <div className="mt-4 rounded-xl border border-[#556822]/15 bg-white p-4 text-left shadow-sm">
+                <p className="text-xs font-black uppercase tracking-wider text-[#556822]">{t('shipping.infoCardTitle')}</p>
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                      {t('shipping.infoLabels.pickupPoint')}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#556822]">
+                      {t('shipping.infoRelaySimple', {
+                        threshold: Number(shippingSettings?.relay?.freeThreshold ?? 40).toFixed(0),
+                      })}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                      {t('shipping.infoLabels.homeDelivery')}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                      {t('shipping.infoHomeReducedSimple', {
+                        reducedPrice: Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9).toFixed(2),
+                        reducedThreshold: Number(shippingSettings?.home?.reducedThreshold ?? 40).toFixed(0),
+                      })}
+                    </p>
+                    <p className="text-sm font-semibold text-[#556822]">
+                      {t('shipping.infoHomeFreeSimple', {
+                        freeThreshold: Number(shippingSettings?.home?.freeThreshold ?? 60).toFixed(0),
+                      })}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
