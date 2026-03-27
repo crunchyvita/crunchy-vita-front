@@ -540,25 +540,7 @@ export default function AdminHeader() {
                 {showProfileDropdown && (
                   <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-xl shadow-xl border border-slate-200 overflow-visible z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="p-4 bg-slate-50">
-                      <div className="flex items-center gap-3 mb-2">
-                        {user?.photo ? (
-                          <img
-                            src={user.photo}
-                            alt={user.name || ""}
-                            className="h-12 w-12 rounded-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextElementSibling.style.display = "flex";
-                            }}
-                          />
-                        ) : null}
-                        <div
-                          className="h-12 w-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase"
-                          style={{ display: user?.photo ? "none" : "flex" }}
-                        >
-                          {user?.name?.[0] || <User className="h-5 w-5" />}
-                        </div>
-                      </div>
+                    
                       <p className="text-sm font-bold">{user?.name}</p>
                       <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     </div>

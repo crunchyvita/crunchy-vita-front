@@ -2,6 +2,8 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from '@/navigation';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
@@ -120,6 +122,8 @@ const getItemAvailableStock = async (item, API_URL) => {
 export default function CartPage() {
   const t = useTranslations('Cart');
   const locale = useLocale();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const { cartItems, removeFromCart, updateQuantity, subtotal, shipping, total, isLoading, error, stockAlertTick } =
     useCart();
 
@@ -276,6 +280,25 @@ export default function CartPage() {
   const isEmpty = cartItems.length === 0;
   const displayedCartShipping = 0;
   const displayedCartTotal = Number(subtotal || 0) + displayedCartShipping;
+
+  const handleCheckoutClick = () => {
+    const checkoutPath = '/checkout';
+    if (authLoading) return;
+
+    if (!user) {
+      if (typeof window !== 'undefined') {
+        try {
+          window.sessionStorage.setItem('postLoginRedirect', checkoutPath);
+        } catch {
+          // Ignore storage errors.
+        }
+      }
+      router.push(`/auth/login?redirect=${encodeURIComponent(checkoutPath)}`);
+      return;
+    }
+
+    router.push(checkoutPath);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Maison_Neue]">
@@ -523,13 +546,15 @@ export default function CartPage() {
                     <span>{t('summary.total')}</span>
                     <span className="text-[#E10C69]">{displayedCartTotal.toFixed(2)} €</span>
                   </div>
-                  <Link
-                    href={`/${locale}/checkout`}
+                  <button
+                    type="button"
+                    onClick={handleCheckoutClick}
+                    disabled={authLoading}
                     style={{ backgroundColor: '#556822' }}
-                    className="block w-full text-white py-3 rounded-md font-bold hover:opacity-90 transition-opacity mb-3 text-center"
+                    className="block w-full text-white py-3 rounded-md font-bold hover:opacity-90 transition-opacity mb-3 text-center disabled:opacity-60"
                   >
                     {t('actions.checkout')}
-                  </Link>
+                  </button>
                   <Link
                     href="/shop"
                     className="block w-full bg-white border border-gray-200 text-[#556822] py-3 rounded-md font-bold hover:bg-gray-50 transition-colors text-center"

@@ -293,7 +293,7 @@ function OrdersContent() {
 
 export default function OrdersPage() {
   return (
-    <ProtectedRoute allowedRoles={['CLIENT']}>
+    <ProtectedRoute allowedRoles={['CLIENT', 'ADMIN', 'SUPERADMIN']}>
       <OrdersContent />
     </ProtectedRoute>
   );

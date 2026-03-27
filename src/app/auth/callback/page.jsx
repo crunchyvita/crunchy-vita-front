@@ -58,10 +58,29 @@ function AuthCallbackContent() {
     }
   };
 
+  const getSafeRedirectPath = () => {
+    const queryRedirect = String(searchParams.get('redirect') || '').trim();
+    const storedRedirect =
+      typeof window !== 'undefined' ? String(window.sessionStorage.getItem('postLoginRedirect') || '').trim() : '';
+    const requested = queryRedirect || storedRedirect;
+    if (!requested) return null;
+    if (!requested.startsWith('/') || requested.startsWith('//')) return null;
+    return requested;
+  };
+
+  const consumePostLoginRedirect = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.removeItem('postLoginRedirect');
+    } catch {
+      // Ignore storage errors.
+    }
+  };
+
   const resolveTargetPath = (role) => {
     const normalizedRole = normalizeRole(role);
     if (normalizedRole === 'ADMIN' || normalizedRole === 'SUPERADMIN') return '/admin/dashboard';
-    if (normalizedRole === 'CLIENT') return '/shop';
+    if (normalizedRole === 'CLIENT') return getSafeRedirectPath() || '/shop';
     return '/';
   };
 
@@ -104,6 +123,7 @@ function AuthCallbackContent() {
           );
 
           const callbackTarget = resolveTargetPath(roleParam);
+          consumePostLoginRedirect();
           console.log('[Auth] Redirect target from callback role:', callbackTarget, 'role:', roleParam);
           redirectNow(callbackTarget, hardTimeout);
           return;
@@ -124,6 +144,7 @@ function AuthCallbackContent() {
         setUserData(user, token);
 
         const targetPath = resolveTargetPath(user.role);
+        consumePostLoginRedirect();
         console.log('[Auth] Redirect target:', targetPath, 'role:', user.role);
         redirectNow(targetPath, hardTimeout);
       } catch (error) {
@@ -145,6 +166,7 @@ function AuthCallbackContent() {
             token
           );
           const fallbackTarget = resolveTargetPath(roleParam);
+          consumePostLoginRedirect();
           redirectNow(fallbackTarget, hardTimeout);
           return;
         }
@@ -160,10 +182,10 @@ function AuthCallbackContent() {
   }, [searchParams]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50">
       <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-600 border-r-transparent"></div>
-        <p className="mt-4 text-gray-600">Completing authentication...</p>
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#556822] border-r-transparent"></div>
+        <p className="mt-4 text-[#556822] text-sm font-medium">Completing authentication...</p>
       </div>
     </div>
   );
@@ -173,10 +195,10 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
           <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-600 border-r-transparent"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#556822] border-r-transparent"></div>
+            <p className="mt-4 text-[#556822] text-sm font-medium">Completing authentication...</p>
           </div>
         </div>
       }

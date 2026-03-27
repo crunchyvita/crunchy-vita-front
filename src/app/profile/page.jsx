@@ -192,9 +192,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
+    <div className="bg-slate-50">
       <HeaderAndBreadcrumbs />
-      <main className="min-h-screen bg-slate-50 py-12">
+      <main className="min-h-screen py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Page Header */}
@@ -409,7 +409,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-[#064E3B] text-white font-semibold rounded-xl hover:bg-[#065f46] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-[#556822] text-white font-semibold rounded-xl hover:bg-[#556822] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -428,6 +428,6 @@ export default function ProfilePage() {
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

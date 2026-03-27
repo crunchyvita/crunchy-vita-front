@@ -392,12 +392,15 @@ export const paymentAPI = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  getOrderDetails: async (id, kind = "payment_intent") => {
+  getOrderDetails: async (id, kind = "payment_intent", options = {}) => {
     const q = new URLSearchParams();
     if (kind === "session") {
       q.set("session_id", id);
     } else {
       q.set("payment_intent", id);
+    }
+    if (options?.includePaymentDetails) {
+      q.set("include_payment_details", "1");
     }
     return apiRequest(`/payment/order-details?${q.toString()}`, { method: "GET" });
   },

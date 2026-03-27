@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, Link } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/api';
 import { Mail, Lock, ArrowRight, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react'; 
@@ -13,21 +14,48 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { login, user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('Auth');
+
+  const getSafeRedirectPath = () => {
+    const queryRedirect = String(searchParams.get('redirect') || '').trim();
+    const storedRedirect =
+      typeof window !== 'undefined' ? String(window.sessionStorage.getItem('postLoginRedirect') || '').trim() : '';
+    const requested = queryRedirect || storedRedirect;
+    if (!requested) return null;
+    // Prevent open redirects: only allow internal absolute paths.
+    if (!requested.startsWith('/') || requested.startsWith('//')) return null;
+    return requested;
+  };
+
+  const consumePostLoginRedirect = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.removeItem('postLoginRedirect');
+    } catch {
+      // Ignore storage errors.
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
+      setIsRedirecting(true);
       redirectBasedOnRole(user.role);
     }
   }, [authLoading, isAuthenticated, user, router]);
 
   const redirectBasedOnRole = (role) => {
+    setIsRedirecting(true);
     if (role === 'ADMIN' || role === 'SUPERADMIN') {
+      consumePostLoginRedirect();
       router.push('/admin/dashboard');
     } else if (role === 'CLIENT') {
-      router.push('/shop');
+      const safeRedirect = getSafeRedirectPath();
+      consumePostLoginRedirect();
+      router.push(safeRedirect || '/shop');
     }
   };
 
@@ -37,7 +65,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const result = await login(email, password);
-      if (result.success) redirectBasedOnRole(result.user.role);
+      if (result.success) {
+        setIsRedirecting(true);
+        redirectBasedOnRole(result.user.role);
+      }
       else {
         const errorMessage = result.error || t('login.errors.invalidCredentials');
         if (String(errorMessage).toLowerCase().includes('deactivated')) {
@@ -52,6 +83,17 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (authLoading || isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#556822] mx-auto" />
+          <p className="mt-4 text-[#556822] text-sm font-medium">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleGoogleLogin = () => {
     window.location.href = authAPI.getGoogleAuthUrl();

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from '@/navigation';
+import { useRouter, usePathname } from '@/navigation';
 import {
   useStripe,
   useElements,
@@ -272,6 +272,7 @@ const PaymentForm = ({
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading: authLoading } = useAuth();
   const t = useTranslations('Checkout');
   const locale = useLocale();
@@ -283,9 +284,17 @@ const CheckoutPage = () => {
   useEffect(() => {
     if (authLoading) return; // Wait for auth check to complete
     if (!user) {
-      router.push('/auth/login');
+      const target = pathname || '/checkout';
+      if (typeof window !== 'undefined') {
+        try {
+          window.sessionStorage.setItem('postLoginRedirect', target);
+        } catch {
+          // Ignore storage errors.
+        }
+      }
+      router.push(`/auth/login?redirect=${encodeURIComponent(target)}`);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, pathname]);
 
   // Pre-populate email from authenticated user
   useEffect(() => {
@@ -921,6 +930,20 @@ const CheckoutPage = () => {
       setPaymentError('');
     }
   }, [cartItems.length]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <HeaderAndBreadcrumbs />
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-[#556822]" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <CheckoutProvider>
@@ -1631,9 +1654,7 @@ const CheckoutPage = () => {
                           </div>
                         ) : (
                           <>
-                            <p className="text-xs text-gray-400">
-                              {t('summary.qty')}: {item.quantity}
-                            </p>
+                            <p className="text-xs text-gray-400">x {item.quantity}</p>
                             <p className="text-sm font-black text-[#E10C69]">
                               {(item.price * item.quantity).toFixed(2)} €
                             </p>

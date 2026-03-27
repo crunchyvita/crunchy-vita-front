@@ -75,6 +75,103 @@ export default function Breadcrumbs() {
   const items = useMemo(() => {
     if (shouldHide(pathname)) return [];
 
+    const getCustomCrumbs = () => {
+      const base = [{ href: '/', label: t('home') }];
+
+      if (pathname === '/cart') {
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/cart', label: t('cart'), isLast: true },
+        ];
+      }
+
+      if (pathname === '/profile') {
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/profile', label: t('profile'), isLast: true },
+        ];
+      }
+
+      if (pathname === '/checkout') {
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/cart', label: t('cart') },
+          { href: '/checkout', label: t('checkout'), isLast: true },
+        ];
+      }
+
+      if (pathname === '/checkout/succes') {
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/cart', label: t('cart') },
+          { href: '/checkout', label: t('checkout') },
+          { href: '/checkout/succes', label: t('orderSuccess'), isLast: true },
+        ];
+      }
+
+      if (pathname === '/orders') {
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/orders', label: t('orders'), isLast: true },
+        ];
+      }
+
+      if (pathname.startsWith('/orders/')) {
+        const parts = pathname.split('/').filter(Boolean);
+        const orderId = parts[1] || '';
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/orders', label: t('orders') },
+          {
+            href: orderId ? `/orders/${orderId}` : '/orders',
+            label: lastLabel || t('orderDetail'),
+            isLast: true,
+          },
+        ];
+      }
+
+      if (pathname.startsWith('/shop/packages/')) {
+        const parts = pathname.split('/').filter(Boolean);
+        const packageId = parts[2] || '';
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/shop?tab=packages', label: t('packages') },
+          {
+            href: packageId ? `/shop/packages/${packageId}` : '/shop?tab=packages',
+            label: lastLabel || t('package'),
+            isLast: true,
+          },
+        ];
+      }
+
+      if (/^\/shop\/[^/]+$/.test(pathname)) {
+        const parts = pathname.split('/').filter(Boolean);
+        const productId = parts[1] || '';
+        return [
+          ...base,
+          { href: '/shop', label: t('shop') },
+          { href: '/shop?tab=products', label: t('product') },
+          {
+            href: productId ? `/shop/${productId}` : '/shop?tab=products',
+            label: lastLabel || t('detail'),
+            isLast: true,
+          },
+        ];
+      }
+
+      return null;
+    };
+
+    const customCrumbs = getCustomCrumbs();
+    if (customCrumbs) return customCrumbs;
+
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) return [];
 
@@ -145,7 +242,7 @@ export default function Breadcrumbs() {
               ) : (
                 <Link
                   href={item.href}
-                  className="shrink-0 text-[#556822] transition-colors hover:underline underline-offset-2"
+                  className="shrink-0 font-bold text-[#556822] transition-colors hover:underline underline-offset-2"
                 >
                   {item.label}
                 </Link>

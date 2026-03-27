@@ -52,7 +52,11 @@ export default function CheckoutSuccessPage() {
         return;
       }
       try {
-        const res = await paymentAPI.getOrderDetails(lookupId, sessionId ? 'session' : 'payment_intent');
+        const res = await paymentAPI.getOrderDetails(
+          lookupId,
+          sessionId ? 'session' : 'payment_intent',
+          { includePaymentDetails: true }
+        );
         if (!cancelled && res?.success) {
           setData(res.data);
           // Server cart is cleared when payment finalizes; refresh every useCart() (header badge, etc.)
@@ -110,68 +114,53 @@ export default function CheckoutSuccessPage() {
   }, [data]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fdfdfd]">
+    <div className="min-h-screen flex flex-col bg-gray-50 font-[Maison_Neue]">
       <HeaderAndBreadcrumbs />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12">
-        
+      <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8">
         {loading && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-pulse">
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm p-8 md:p-10">
+            <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 sm:p-6 min-w-0">
               <div className="flex items-start gap-5 mb-10">
-                <div className="h-14 w-14 rounded-full bg-slate-200 shrink-0" />
+                <div className="h-12 w-12 rounded-full bg-gray-200 shrink-0" />
                 <div className="flex-1 space-y-3">
-                  <div className="h-6 w-2/3 bg-slate-200 rounded" />
-                  <div className="h-4 w-full bg-slate-100 rounded" />
-                  <div className="h-4 w-3/4 bg-slate-100 rounded" />
+                  <div className="h-8 w-2/3 bg-gray-200 rounded" />
+                  <div className="h-4 w-full bg-gray-100 rounded" />
                 </div>
               </div>
-
-              <div className="h-3 w-24 bg-slate-200 rounded mb-6" />
               <div className="space-y-6">
-                {[...Array(2)].map((_, idx) => (
+                {[0, 1].map((idx) => (
                   <div key={idx} className="flex items-center gap-5">
-                    <div className="h-20 w-20 rounded-xl bg-slate-100 shrink-0" />
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-md bg-gray-100 shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 w-2/3 bg-slate-200 rounded" />
-                      <div className="h-3 w-20 bg-slate-100 rounded" />
+                      <div className="h-4 w-2/3 bg-gray-200 rounded" />
+                      <div className="h-3 w-20 bg-gray-100 rounded" />
                     </div>
-                    <div className="h-4 w-16 bg-slate-200 rounded" />
+                    <div className="h-4 w-16 bg-gray-200 rounded" />
                   </div>
                 ))}
               </div>
-
-              <div className="mt-10 pt-8 border-t border-slate-50 space-y-3">
-                <div className="h-4 w-full bg-slate-100 rounded" />
-                <div className="h-4 w-full bg-slate-100 rounded" />
-                <div className="h-4 w-full bg-slate-100 rounded" />
-                <div className="h-6 w-1/3 ml-auto bg-slate-200 rounded" />
+              <div className="mt-10 pt-6 border-t border-gray-100 space-y-3">
+                <div className="h-4 w-full bg-gray-100 rounded" />
+                <div className="h-4 w-full bg-gray-100 rounded" />
+                <div className="h-6 w-1/3 ml-auto bg-gray-200 rounded" />
               </div>
             </div>
-
             <div className="space-y-6">
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-3">
-                <div className="h-3 w-32 bg-slate-200 rounded" />
-                <div className="h-4 w-40 bg-slate-200 rounded" />
-                <div className="h-4 w-full bg-slate-100 rounded" />
-                <div className="h-4 w-5/6 bg-slate-100 rounded" />
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-3">
+                <div className="h-5 w-32 bg-gray-200 rounded" />
+                <div className="h-4 w-full bg-gray-100 rounded" />
+                <div className="h-4 w-5/6 bg-gray-100 rounded" />
               </div>
-
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-3">
-                <div className="h-3 w-24 bg-slate-200 rounded" />
-                <div className="h-4 w-28 bg-slate-100 rounded" />
-                <div className="h-4 w-20 bg-slate-200 rounded" />
-                <div className="h-7 w-32 bg-slate-100 rounded" />
-              </div>
-
-              <div className="space-y-4">
-                <div className="h-12 w-full rounded-2xl bg-slate-200" />
-                <div className="h-12 w-full rounded-2xl bg-slate-100" />
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-3">
+                <div className="h-5 w-24 bg-gray-200 rounded" />
+                <div className="h-4 w-28 bg-gray-100 rounded" />
+                <div className="h-4 w-20 bg-gray-200 rounded" />
               </div>
             </div>
           </div>
         )}
 
-        {!loading && error && (
+        {error && (
           <div className="rounded-xl border border-red-100 bg-red-50 text-red-700 px-6 py-4 text-center">
             {error}
           </div>
@@ -181,50 +170,50 @@ export default function CheckoutSuccessPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
             {/* Left Column: Order Details */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm p-8 md:p-10">
+            <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 sm:p-6 min-w-0">
               <div className="flex items-start gap-5 mb-10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#e8f5e9] text-[#4caf50] shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e8f5e9] text-[#4caf50] shrink-0">
                   <CheckCircle2 className="h-8 w-8" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t('successTitle')}</h1>
-                  <p className="text-slate-500 mt-2 leading-relaxed">
+                  <h1 className="text-2xl sm:text-3xl font-black text-[#556822] font-[agrandir] leading-tight">{t('successTitle')}</h1>
+                  <p className="text-sm text-gray-500 mt-2">
                     {t('successSubtitle', { invoiceNumber: displayInvoice })}
                   </p>
                 </div>
               </div>
 
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">{t('items')}</h2>
+              <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('items')}</h2>
               <ul className="space-y-6">
                 {items.map((line, idx) => (
                   <li key={idx} className="flex items-center gap-5">
-                    <div className="h-20 w-20 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100">
-                      {line.imageUrl ? (
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-md bg-gray-50 overflow-hidden shrink-0 border border-gray-100">
+                      {line?.imageUrl ? (
                         <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <div className="h-full w-full bg-slate-100" />
+                        <div className="h-full w-full bg-gray-100" />
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-900">{line.name || '—'}</p>
-                      <p className="text-sm text-slate-500">{t('quantity')} {line.quantity}</p>
+                      <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{line?.name || '—'}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">x {line?.quantity || 0}</p>
                     </div>
-                    <p className="font-bold text-slate-900 tabular-nums text-right">
-                      {formatMoney(line.lineTotal, currency)}
+                    <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums text-right">
+                      {line?.lineTotal != null ? formatMoney(line.lineTotal, currency) : formatMoney(0, currency)}
                     </p>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-10 pt-8 border-t border-slate-50 space-y-3">
-                <div className="flex justify-between text-slate-500 font-medium">
+              <div className="mt-10 pt-6 border-t border-gray-100 space-y-3 text-sm">
+                <div className="flex justify-between text-gray-600">
                   <span>{t('subtotal')}</span>
-                  <span className="tabular-nums">{formatMoney(subtotal, currency)}</span>
+                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(subtotal, currency)}</span>
                 </div>
                 
-                <div className="flex justify-between text-slate-500 font-medium">
+                <div className="flex justify-between text-gray-600">
                   <span>{t('shipping')}</span>
-                  <span className="tabular-nums">{formatMoney(shipping, currency)}</span>
+                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency)}</span>
                 </div>
 
                 {discount > 0 && (
@@ -234,20 +223,20 @@ export default function CheckoutSuccessPage() {
                   </div>
                 )}
 
-                <div className="flex justify-between text-xl font-black text-slate-900 pt-4">
-                  <span>{t('total')}</span>
-                  <span className="tabular-nums">{formatMoney(total, currency)}</span>
+                <div className="flex justify-between text-xl font-black pt-4">
+                  <span className="text-[#556822]">{t('total')}</span>
+                  <span className="text-[#E10C69] tabular-nums">{formatMoney(total, currency)}</span>
                 </div>
               </div>
             </div>
 
             {/* Right Column: Metadata */}
             <div className="space-y-6">
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">{t('shippingAddress')}</h3>
-                <p className="font-bold text-slate-900 mb-2">{shipName}</p>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                <h3 className="text-lg font-black text-[#556822] mb-3 font-[agrandir]">{t('shippingAddress')}</h3>
+                <p className="font-bold text-gray-900 mb-2">{shipName}</p>
                 {addr && (
-                  <div className="text-[15px] text-slate-500 leading-relaxed">
+                  <div className="text-sm text-gray-600 leading-relaxed">
                     <p>
                       {[addr.line1, addr.line2].filter(Boolean).join(', ')}<br />
                       {[addr.postalCode, addr.city].filter(Boolean).join(' ')}<br />
@@ -260,11 +249,11 @@ export default function CheckoutSuccessPage() {
                 )}
               </div>
 
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 mb-5">
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                <h3 className="text-lg font-black text-[#556822] mb-4 font-[agrandir]">
                   {t('paymentInfo')}
                 </h3>
-                <div className="space-y-1.5 text-[15px] font-normal text-slate-500 leading-relaxed">
+                <div className="space-y-1.5 text-sm text-gray-600 leading-relaxed">
                   <p>{t('paymentMethod')}</p>
                   {cardLast4 ? (
                     <>
@@ -282,15 +271,15 @@ export default function CheckoutSuccessPage() {
               <div className="flex flex-col gap-4">
                 <Link
                   href="/shop"
-                  className="w-full text-center rounded-2xl py-4 font-bold text-white shadow-md hover:opacity-90 transition-all active:scale-[0.98]"
-                  style={{ backgroundColor: '#556622' }}
+                  className="w-full text-center rounded-md py-3 font-bold text-white hover:opacity-90 transition-all"
+                  style={{ backgroundColor: '#556822' }}
                 >
                   {t('continueShopping')}
                 </Link>
                 {isAuthenticated && data?.orderId && (
                   <Link
                     href={`/orders/${data.orderId}`}
-                    className="w-full text-center rounded-2xl py-4 font-bold border-2 border-slate-100 bg-white text-slate-600 hover:bg-slate-50 transition-all active:scale-[0.98]"
+                    className="w-full text-center rounded-md py-3 font-bold border border-gray-200 bg-white text-[#556822] hover:bg-gray-50 transition-all"
                   >
                     {t('viewOrder')}
                   </Link>
