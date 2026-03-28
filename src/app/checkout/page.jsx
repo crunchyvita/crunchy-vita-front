@@ -30,6 +30,14 @@ const pickUrl = (v) => {
   return null;
 };
 
+/** Cart `price` is the unit price; line subtotal = unit × quantity. */
+const lineSubtotalFromCartItem = (item) => {
+  if (!item || item.isFreeItem) return 0;
+  const unit = Number(item.unitPrice ?? item.price ?? 0);
+  const q = Math.max(1, Number(item.quantity ?? 1));
+  return Number((unit * q).toFixed(2));
+};
+
 const getCartItemImagesLocal = (item) => {
   const isPackage = item.type === 'package' || !!item.packageId;
   const one = pickUrl(item?.image);
@@ -1845,7 +1853,7 @@ const CheckoutPage = () => {
                         {item.isFreeItem ? (
                           <div className="flex flex-col gap-1">
                             <p className="text-xs text-gray-400 line-through">
-                              {(item.price * item.quantity).toFixed(2)} €
+                              {lineSubtotalFromCartItem({ ...item, isFreeItem: false }).toFixed(2)} €
                             </p>
                             <p className="text-sm font-black text-[#E10C69]">0 €</p>
                           </div>
@@ -1853,7 +1861,7 @@ const CheckoutPage = () => {
                           <>
                             <p className="text-xs text-gray-400">x {item.quantity}</p>
                             <p className="text-sm font-black text-[#E10C69]">
-                              {(item.price * item.quantity).toFixed(2)} €
+                              {lineSubtotalFromCartItem(item).toFixed(2)} €
                             </p>
                           </>
                         )}

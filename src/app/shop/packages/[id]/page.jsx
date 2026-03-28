@@ -29,7 +29,6 @@ import { useBreadcrumbOverride } from "@/context/BreadcrumbContext";
 
 // --- BRAND COLOR PALETTE ---
 const COLORS = {
-  pistachio: "#B3C800",
   grass: "#556822",
   nightNight: "#005085",
   bubbleGum: "#EF8EB8",
@@ -703,15 +702,7 @@ export default function PackageCustomizationPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.back()}
-              style={{ color: COLORS.grass }}
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-all"
-            >
-              <ArrowLeft size={16} /> {t("backToShop")}
-            </button>
-          </div>
+          
 
           <h1 className="text-4xl font-black font-[agrandir] text-gray-900 uppercase">
             {t("title")} <span style={{ color: COLORS.grass }}>{translatedPackage.name}</span>
@@ -745,7 +736,7 @@ export default function PackageCustomizationPage() {
                     initial={false}
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
-                    style={{ borderColor: isSelected ? COLORS.pistachio : "transparent" }}
+                    style={{ borderColor: isSelected ? COLORS.grass : "transparent" }}
                     className="bg-white rounded-[24px] border-2 shadow-sm overflow-hidden flex flex-col transition-all"
                   >
                     <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
@@ -764,7 +755,7 @@ export default function PackageCustomizationPage() {
 
                       {isSelected && !isOutOfStock && (
                         <div className="absolute top-3 right-3 shadow-lg">
-                          <CheckCircle2 size={24} fill={COLORS.pistachio} color="white" />
+                          <CheckCircle2 size={24} fill={COLORS.grass} color="white" />
                         </div>
                       )}
                     </div>
@@ -850,7 +841,7 @@ export default function PackageCustomizationPage() {
                                 isOutOfStock
                                   ? "bg-[#9CA3AF] text-white cursor-not-allowed opacity-90"
                                   : isSelected
-                                  ? "bg-red-50 text-red-500 cursor-pointer"
+                                  ? "bg-[#556822]/12 text-[#556822] border-2 border-[#556822] cursor-pointer"
                                   : "bg-[#556822] text-white cursor-pointer"
                               }`}
                           >
