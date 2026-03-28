@@ -439,6 +439,32 @@ export const orderAPI = {
     const suffix = q.toString() ? `?${q.toString()}` : '';
     return apiRequest(`/orders/admin/dashboard-stats${suffix}`, { method: 'GET' });
   },
+  /** POST { orderIds: string[] } → Excel file blob (Boxtal shipment import). */
+  exportAdminBoxtalXlsx: async (orderIds = []) => {
+    const url = `${API_URL}/orders/admin/boxtal-export`;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ orderIds }),
+    });
+    if (!response.ok) {
+      let message = `HTTP ${response.status}`;
+      try {
+        const err = await response.json();
+        message = err.message || err.error || message;
+      } catch {
+        message = response.statusText || message;
+      }
+      throw new Error(typeof message === "string" ? message : "Export failed");
+    }
+    return response.blob();
+  },
 };
 
 export const paymentAdminAPI = {

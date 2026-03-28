@@ -85,6 +85,7 @@ function InnerPage() {
   const [offersPage, setOffersPage] = useState(1);
   const [relayPage, setRelayPage] = useState(1);
   const [shippingOfferLocked, setShippingOfferLocked] = useState(false);
+  const [parcelSnapshot, setParcelSnapshot] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -109,6 +110,7 @@ function InnerPage() {
         const nextOffers = offersRes?.data?.offers || [];
         const nextPoints = offersRes?.data?.relayPoints || [];
         const dType = String(offersRes?.data?.deliveryType || o?.deliveryType || 'home');
+        setParcelSnapshot(offersRes?.data?.parcelSnapshot || null);
 
         const savedAdmin = o?.adminShippingOffer && typeof o.adminShippingOffer === 'object' ? o.adminShippingOffer : null;
         const savedCode =
@@ -300,6 +302,42 @@ function InnerPage() {
             <p className="text-sm text-slate-600 mt-2 max-w-2xl">
               {ts('relayHelp')}
             </p>
+          ) : null}
+          {parcelSnapshot && !orderLoading ? (
+            <div className="mt-4 rounded-xl border border-[#556822]/20 bg-[#556822]/5 px-4 py-3 text-sm text-slate-800">
+              <p className="font-bold text-[#556822] text-xs uppercase tracking-wide">{ts('parcelForQuote')}</p>
+              <p className="text-xs text-slate-600 mt-1">{ts('parcelForQuoteHint')}</p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2 text-xs tabular-nums">
+                <li>
+                  <span className="text-slate-500">{ts('parcelColis')}:</span>{' '}
+                  <span className="font-semibold">{parcelSnapshot.colisCount ?? 1}</span>
+                </li>
+                <li>
+                  <span className="text-slate-500">{ts('parcelWeight')}:</span>{' '}
+                  <span className="font-semibold">
+                    {Number(parcelSnapshot.weightKg ?? 0).toFixed(3)} kg
+                  </span>
+                </li>
+                <li className="sm:col-span-2">
+                  <span className="text-slate-500">{ts('parcelDims')}:</span>{' '}
+                  <span className="font-semibold">
+                    {Number(parcelSnapshot.lengthCm ?? 0).toFixed(0)} ×{' '}
+                    {Number(parcelSnapshot.widthCm ?? 0).toFixed(0)} ×{' '}
+                    {Number(parcelSnapshot.heightCm ?? 0).toFixed(0)} cm
+                  </span>
+                </li>
+                <li>
+                  <span className="text-slate-500">{ts('parcelItems')}:</span>{' '}
+                  <span className="font-semibold">{parcelSnapshot.itemCount ?? '—'}</span>
+                </li>
+                <li>
+                  <span className="text-slate-500">{ts('parcelValue')}:</span>{' '}
+                  <span className="font-semibold">
+                    {money(parcelSnapshot.declaredValue, parcelSnapshot.currency || 'EUR', numberLocale)}
+                  </span>
+                </li>
+              </ul>
+            </div>
           ) : null}
         </div>
 

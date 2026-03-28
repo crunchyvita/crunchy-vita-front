@@ -248,7 +248,14 @@
       "returned": "Retournées",
       "refunded": "Remboursées",
       "cancelled": "Annulées"
-    }
+    },
+    "exportBoxtal": "Exporter Excel ",
+    "exportBoxtalHint": "Cochez les commandes puis téléchargez le fichier d’import expédition Boxtal (colonnes du modèle officiel).",
+    "selectedCount": "{count, plural, =0 {Aucune sélection} one {# sélectionnée} other {# sélectionnées}}",
+    "exporting": "Export…",
+    "exportError": "Échec de l’export Excel",
+    "selectAllPage": "Sélectionner la page",
+    "selectOrder": "Sélectionner la commande {invoice}"
   },
   "blogs": {
     "title": "Articles de blog",
@@ -479,7 +486,14 @@
     "cancel": "Annuler",
     "validate": "Valider l’offre",
     "validating": "Validation…",
-    "validateError": "Impossible de valider l’offre"
+    "validateError": "Impossible de valider l’offre",
+    "parcelForQuote": "Colis envoyé à Boxtal pour ce devis",
+    "parcelForQuoteHint": "Un seul colis, poids et dimensions calculés depuis le catalogue produits (comme les devis au panier). Des colis plus légers et réalistes donnent en général des tarifs plus bas.",
+    "parcelColis": "Colis",
+    "parcelWeight": "Poids",
+    "parcelDims": "L × l × h",
+    "parcelItems": "Unités comptées",
+    "parcelValue": "Valeur déclarée"
   },
   "promoCodes": {
     "title": "Codes promo",

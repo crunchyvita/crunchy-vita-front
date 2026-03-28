@@ -6,7 +6,7 @@ import { Link } from '@/navigation';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
-import { Search, MoreVertical, Eye, Truck } from 'lucide-react';
+import { Search, MoreVertical, Eye, Truck, Download } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 const badge = (status) => {
@@ -67,6 +67,8 @@ function AdminOrdersInner() {
   const [error, setError] = useState('');
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [exporting, setExporting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -94,13 +96,58 @@ function AdminOrdersInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, page]);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [tab, page]);
+
+  const pageOrderIds = useMemo(() => orders.map((o) => String(o._id)), [orders]);
+  const allPageSelected =
+    pageOrderIds.length > 0 && pageOrderIds.every((id) => selectedIds.includes(id));
+  const somePageSelected = pageOrderIds.some((id) => selectedIds.includes(id));
+
+  const toggleSelectAllPage = () => {
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageOrderIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => [...new Set([...prev, ...pageOrderIds])]);
+    }
+  };
+
+  const toggleRow = (id) => {
+    const sid = String(id);
+    setSelectedIds((prev) =>
+      prev.includes(sid) ? prev.filter((x) => x !== sid) : [...prev, sid]
+    );
+  };
+
+  const handleExportBoxtal = async () => {
+    if (selectedIds.length === 0 || exporting) return;
+    setExporting(true);
+    setError('');
+    try {
+      const blob = await orderAPI.exportAdminBoxtalXlsx(selectedIds);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boxtal-shipment-import-${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e?.message || t('exportError'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const totalPages = Math.max(1, Math.ceil(listTotal / PAGE_SIZE));
 
   return (
     <>
       <AdminHeader />
       <div className="p-6 lg:p-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
               {t('title')}
@@ -109,6 +156,19 @@ function AdminOrdersInner() {
               </span>
             </div>
             <p className="text-sm text-slate-500">{t('subtitle')}</p>
+            <p className="text-xs text-slate-400 mt-1 max-w-xl">{t('exportBoxtalHint')}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+           
+            <button
+              type="button"
+              onClick={handleExportBoxtal}
+              disabled={selectedIds.length === 0 || exporting}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#556822] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              {exporting ? t('exporting') : t('exportBoxtal')}
+            </button>
           </div>
         </div>
 
@@ -158,6 +218,18 @@ function AdminOrdersInner() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-slate-500">
+                    <th className="px-3 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={allPageSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = somePageSelected && !allPageSelected;
+                        }}
+                        onChange={toggleSelectAllPage}
+                        className="h-4 w-4 rounded border-slate-300 text-[#556822] focus:ring-[#556822]"
+                        aria-label={t('selectAllPage')}
+                      />
+                    </th>
                     <th className="px-3 py-3 font-medium">{t('invoice')}</th>
                     <th className="px-3 py-3 font-medium">{tcom('customer')}</th>
                     <th className="px-3 py-3 font-medium">{tcom('date')}</th>
@@ -175,6 +247,15 @@ function AdminOrdersInner() {
                         highlight === o._id ? 'bg-amber-50/80' : 'hover:bg-slate-50/50 transition-colors'
                       }
                     >
+                      <td className="px-3 py-4 align-middle">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(String(o._id))}
+                          onChange={() => toggleRow(o._id)}
+                          className="h-4 w-4 rounded border-slate-300 text-[#556822] focus:ring-[#556822]"
+                          aria-label={t('selectOrder', { invoice: o.invoiceNumber })}
+                        />
+                      </td>
                       <td className="px-3 py-4 font-mono font-medium text-slate-900">{o.invoiceNumber}</td>
                       <td className="px-3 py-4">
                         <div className="font-medium text-slate-900">{o.customerName || '—'}</div>
