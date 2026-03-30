@@ -396,7 +396,7 @@ function AdminDashboard() {
                     <p className="text-xs font-semibold text-slate-500 uppercase">{td('stats.totalCustomers')}</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{dashStats.totalCustomers || 0}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      {td('stats.prev7dBuyers', { count: dashStats.weekOverWeek?.customers?.previous ?? 0 })}
+                      {td('stats.prev7dClients', { count: dashStats.weekOverWeek?.customers?.previous ?? 0 })}
                     </p>
                     <StatInsight
                       changePct={dashStats.weekOverWeek?.customers?.changePct}

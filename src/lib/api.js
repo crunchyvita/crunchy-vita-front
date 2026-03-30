@@ -701,6 +701,7 @@ export const reportAPI = {
     const q = new URLSearchParams();
     if (params.from) q.set('from', params.from);
     if (params.to) q.set('to', params.to);
+    if (params.granularity) q.set('granularity', params.granularity);
     if (params.search) q.set('search', params.search);
     if (params.page) q.set('page', String(params.page));
     if (params.pageSize) q.set('pageSize', String(params.pageSize));
