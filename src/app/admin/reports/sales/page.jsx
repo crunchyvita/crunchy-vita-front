@@ -15,7 +15,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { Download } from 'lucide-react';
+import { Download, RefreshCw } from 'lucide-react';
 import AdminHeader from '@/components/admin/header';
 import { DoughnutWithCenter } from '@/components/admin/DoughnutWithCenter';
 import { reportAPI } from '@/lib/api';
@@ -39,6 +39,7 @@ const cardClass = 'bg-white p-5 rounded-2xl border border-slate-200 shadow-sm';
 
 /** Wider hole so center labels fit; thinner ring. */
 const DOUGHNUT_CUTOUT = '70%';
+const PRODUCTS_TABLE_PAGE = 6;
 
 const emptySales = {
   points: [],
@@ -47,6 +48,7 @@ const emptySales = {
   expressVsStandard: { express: 0, standard: 0 },
   byCountry: [],
   byCity: [],
+  packageVsProductUnits: { product: 0, package: 0 },
 };
 
 const skel = 'animate-pulse rounded-md bg-slate-200/80';
@@ -88,19 +90,23 @@ function SalesReportSkeleton({ loadingLabel }) {
           <div className={`h-96 w-full rounded-xl ${skel}`} />
         </div>
       </section>
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className={cardClass}>
-          <div className={`mb-4 h-6 w-48 max-w-[90%] ${skel}`} />
-          <div className="flex flex-col items-center gap-4 pt-1">
-            <div className={`h-56 w-56 shrink-0 rounded-full ${skel}`} />
-            <div className="flex flex-wrap justify-center gap-2">
-              {[0, 1, 2, 3].map((j) => (
-                <div key={j} className={`h-9 w-20 ${skel}`} />
-              ))}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          {[0, 1].map((i) => (
+            <div key={i} className={cardClass}>
+              <div className={`mb-4 h-6 w-48 max-w-[90%] ${skel}`} />
+              <div className="flex flex-col items-center gap-4 pt-1">
+                <div className={`h-56 w-full max-w-[280px] rounded-full ${skel}`} />
+                <div className="flex w-full flex-wrap justify-center gap-2">
+                  {[0, 1, 2].map((j) => (
+                    <div key={j} className={`h-9 w-20 ${skel}`} />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-        <div className={`${cardClass} xl:col-span-2`}>
+        <div className={cardClass}>
           <div className={`mb-4 h-6 w-40 max-w-[45%] ${skel}`} />
           <div className="space-y-1">
             <div className="flex gap-4 border-b border-slate-200 pb-3">
@@ -116,13 +122,14 @@ function SalesReportSkeleton({ loadingLabel }) {
                 <div className={`h-4 w-12 shrink-0 ${skel}`} />
               </div>
             ))}
+            <div className={`mt-4 h-9 w-32 ${skel}`} />
             <div className="mt-4 space-y-2 pt-2">
               <div className={`h-4 w-36 ${skel}`} />
               <div className={`h-4 w-full max-w-2xl ${skel}`} />
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
@@ -144,6 +151,7 @@ export default function SalesReportPage() {
 
   const [sales, setSales] = useState(emptySales);
   const [products, setProducts] = useState({ rows: [], summary: {} });
+  const [productsTableVisibleCount, setProductsTableVisibleCount] = useState(PRODUCTS_TABLE_PAGE);
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat(numberLocale, {
@@ -225,6 +233,10 @@ export default function SalesReportPage() {
 
     load();
   }, [queryFilters, tsr]);
+
+  useEffect(() => {
+    setProductsTableVisibleCount(PRODUCTS_TABLE_PAGE);
+  }, [queryFilters]);
 
   const monthShortLabels = useMemo(
     () =>
@@ -395,6 +407,24 @@ export default function SalesReportPage() {
     };
   }, [sales, tsr]);
 
+  const packageProductChart = useMemo(() => {
+    const pu = Number(sales?.packageVsProductUnits?.product ?? 0);
+    const pk = Number(sales?.packageVsProductUnits?.package ?? 0);
+    const hasData = pu + pk > 0;
+    return {
+      labels: [tsr('lineItemProduct'), tsr('lineItemPackage')],
+      datasets: [
+        {
+          data: hasData ? [pu, pk] : [1, 0],
+          backgroundColor: hasData
+            ? ['#556822', '#8B9A48']
+            : ['rgba(85, 104, 34, 0.35)', 'rgba(139, 154, 72, 0.35)'],
+        },
+      ],
+      hasData,
+    };
+  }, [sales, tsr]);
+
   const doughnutTooltip = useMemo(
     () => ({
       callbacks: {
@@ -507,6 +537,11 @@ export default function SalesReportPage() {
     [expressChart]
   );
 
+  const packageProductDoughnutRevision = useMemo(
+    () => JSON.stringify({ l: packageProductChart.labels, d: packageProductChart.datasets?.[0]?.data }),
+    [packageProductChart]
+  );
+
   const productsFlowData = useMemo(() => {
     const rows = Array.isArray(products?.rows) ? products.rows : [];
     const sortedRows = rows
@@ -576,6 +611,16 @@ export default function SalesReportPage() {
       elements: { arc: { borderWidth: 0 } },
     }),
     [formatNumber]
+  );
+
+  const productDetailRowsSorted = useMemo(() => {
+    const rows = Array.isArray(products?.rows) ? products.rows : [];
+    return [...rows].sort((a, b) => Number(b?.salesCount || 0) - Number(a?.salesCount || 0));
+  }, [products]);
+
+  const productDetailRowsVisible = useMemo(
+    () => productDetailRowsSorted.slice(0, productsTableVisibleCount),
+    [productDetailRowsSorted, productsTableVisibleCount]
   );
 
   const downloadBlob = async (url, filename) => {
@@ -771,28 +816,53 @@ export default function SalesReportPage() {
                 </div>
               </section>
 
-              <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-                <div className={cardClass}>
-                  <h2 className="mb-4 font-bold text-slate-900">{tsr('topProducts')}</h2>
-                  <div className="min-h-0">
-                    {productsFlowData.hasRealData ? (
-                      <DoughnutWithCenter
-                        key={productsDoughnutRevision}
-                        chartData={productsFlowData}
-                        options={productsDoughnutOptions}
-                        heightClass="h-72"
-                        totalCaptionKey="doughnutTotalUnits"
-                        formatNumber={formatNumber}
-                        tsr={tsr}
-                        dataRevision={productsDoughnutRevision}
-                      />
-                    ) : (
-                      <p className="flex h-full items-center justify-center text-sm text-slate-400">{tsr('noChartData')}</p>
-                    )}
-                  </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+                  <section className={cardClass}>
+                    <h2 className="mb-4 font-bold text-slate-900">{tsr('topProducts')}</h2>
+                    <div className="min-h-0">
+                      {productsFlowData.hasRealData ? (
+                        <DoughnutWithCenter
+                          key={productsDoughnutRevision}
+                          chartData={productsFlowData}
+                          options={productsDoughnutOptions}
+                          heightClass="h-72"
+                          totalCaptionKey="doughnutTotalUnits"
+                          formatNumber={formatNumber}
+                          tsr={tsr}
+                          dataRevision={productsDoughnutRevision}
+                        />
+                      ) : (
+                        <p className="flex h-full min-h-[18rem] items-center justify-center text-sm text-slate-400">
+                          {tsr('noChartData')}
+                        </p>
+                      )}
+                    </div>
+                  </section>
+                  <section className={cardClass}>
+                    <h2 className="mb-4 font-bold text-slate-900">{tsr('packageVsProductTitle')}</h2>
+                    <div className="min-h-0">
+                      {packageProductChart.hasData ? (
+                        <DoughnutWithCenter
+                          key={packageProductDoughnutRevision}
+                          chartData={packageProductChart}
+                          options={doughnutOptions}
+                          heightClass="h-72"
+                          totalCaptionKey="doughnutTotalUnits"
+                          formatNumber={formatNumber}
+                          tsr={tsr}
+                          dataRevision={packageProductDoughnutRevision}
+                        />
+                      ) : (
+                        <p className="flex h-full min-h-[18rem] items-center justify-center text-sm text-slate-400">
+                          {tsr('noChartData')}
+                        </p>
+                      )}
+                    </div>
+                  </section>
                 </div>
 
-                <div className={`${cardClass} xl:col-span-2`}>
+                <section className={cardClass}>
                   <h2 className="mb-4 font-bold text-slate-900">{tsr('productDetails')}</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-sm">
@@ -805,9 +875,11 @@ export default function SalesReportPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(products?.rows || []).slice(0, 15).map((row) => (
+                        {productDetailRowsVisible.map((row) => (
                           <tr key={`${row.productId || row.name}`} className="border-b border-slate-100">
-                            <td className="py-3 font-medium text-slate-800">{row.name}</td>
+                            <td className="py-3">
+                              <p className="font-medium text-slate-800">{row.name}</p>
+                            </td>
                             <td className="py-3">{formatNumber(row.salesCount)}</td>
                             <td className="py-3">{formatCurrency(row.revenue)}</td>
                             <td className={`py-3 ${row.isLowStock ? 'text-rose-600 font-medium' : 'text-slate-700'}`}>
@@ -818,14 +890,29 @@ export default function SalesReportPage() {
                       </tbody>
                     </table>
                   </div>
+                  {productDetailRowsSorted.length > productDetailRowsVisible.length ? (
+                    <div className="mt-4 border-t border-slate-200 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setProductsTableVisibleCount((c) => c + PRODUCTS_TABLE_PAGE)}
+                        className="flex items-center gap-2.5 text-left text-sm font-medium text-slate-600 transition-colors hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 rounded-sm"
+                      >
+                        <RefreshCw className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                        {tsr('loadMore')}
+                      </button>
+                    </div>
+                  ) : null}
+                  {productDetailRowsSorted.length === 0 ? (
+                    <p className="mt-4 text-center text-sm text-slate-400">{tsr('noChartData')}</p>
+                  ) : null}
                   <div className="mt-4">
                     <p className="text-sm font-semibold text-slate-800">{tsr('unsoldTitle')}</p>
                     <p className="text-sm text-slate-600">
                       {(products?.summary?.unsoldProducts || []).map((p) => p.name).join(', ') || tsr('unsoldNone')}
                     </p>
                   </div>
-                </div>
-              </section>
+                </section>
+              </div>
             </>
           ) : null}
         </div>
