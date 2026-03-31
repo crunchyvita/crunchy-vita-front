@@ -8,7 +8,7 @@ import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { paymentAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Gift } from 'lucide-react';
 
 function formatMoney(amount, currency = 'eur') {
   const cur = (currency || 'eur').toUpperCase();
@@ -59,6 +59,15 @@ export default function CheckoutSuccessPage() {
         );
         if (!cancelled && res?.success) {
           setData(res.data);
+          // This order is completed; clear any persisted promo so the next checkout starts clean.
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.removeItem('appliedPromoCode');
+            } catch {
+              // Ignore storage errors.
+            }
+            window.dispatchEvent(new Event('promoCodeCleared'));
+          }
           // Server cart is cleared when payment finalizes; refresh every useCart() (header badge, etc.)
           syncCartFromServer();
           retryTimer = window.setTimeout(() => {
@@ -81,6 +90,30 @@ export default function CheckoutSuccessPage() {
   }, [lookupId, sessionId, t]);
 
   const items = useMemo(() => data?.items || [], [data]);
+  const promoFreeItem = useMemo(() => data?.promoDetails?.freeItem || null, [data]);
+  const isLineFreeGift = (line) => {
+    if (!line) return false;
+
+    const unit = Number(line.unitPrice);
+    const totalLine = Number(line.lineTotal);
+    const isZeroPriced =
+      (Number.isFinite(unit) && unit === 0) || (Number.isFinite(totalLine) && totalLine === 0);
+
+    const promo = promoFreeItem;
+    if (promo && typeof promo === 'object') {
+      const promoType = String(promo.type || '').toUpperCase();
+      const promoId = promo.id ? String(promo.id) : '';
+      if (promoType === 'PRODUCT') {
+        return Boolean(promoId && String(line.productId || '') === promoId && isZeroPriced);
+      }
+      if (promoType === 'PACKAGE') {
+        return Boolean(promoId && String(line.packageId || '') === promoId && isZeroPriced);
+      }
+    }
+
+    // Fallback: gift lines are stored with unitPrice 0 in order snapshots.
+    return isZeroPriced;
+  };
 
   const displayInvoice = data?.invoiceNumber || data?.orderId || lookupId;
   const subtotal = data?.subtotalAmount ?? 0;
@@ -88,6 +121,7 @@ export default function CheckoutSuccessPage() {
   const discount = data?.discountAmount ?? 0;
   const total = data?.totalAmount ?? 0;
   const currency = data?.currency || 'eur';
+  const appliedPromoCode = data?.promoCode ? String(data.promoCode).trim() : '';
 
   const shipName = String(data?.customerName || '').trim() || '—';
 
@@ -187,12 +221,19 @@ export default function CheckoutSuccessPage() {
               <ul className="space-y-6">
                 {items.map((line, idx) => (
                   <li key={idx} className="flex items-center gap-5">
-                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-md bg-gray-50 overflow-hidden shrink-0 border border-gray-100">
-                      {line?.imageUrl ? (
-                        <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="h-full w-full bg-gray-100" />
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0">
+                      {isLineFreeGift(line) && (
+                        <span className="absolute -top-2 -right-2 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm">
+                          <Gift size={12} />
+                        </span>
                       )}
+                      <div className="h-full w-full rounded-md bg-gray-50 overflow-hidden border border-gray-100">
+                        {line?.imageUrl ? (
+                          <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full bg-gray-100" />
+                        )}
+                      </div>
                     </div>
                     <div className="flex-1">
                       <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{line?.name || '—'}</p>
@@ -215,6 +256,13 @@ export default function CheckoutSuccessPage() {
                   <span>{t('shipping')}</span>
                   <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency)}</span>
                 </div>
+
+                {appliedPromoCode && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Promo code</span>
+                    <span className="font-bold text-gray-900 tabular-nums">{appliedPromoCode}</span>
+                  </div>
+                )}
 
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">

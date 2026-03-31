@@ -125,6 +125,7 @@ const PaymentForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const [cardholderName, setCardholderName] = useState('');
+  const cardholderInputRef = useRef(null);
   const [cardCompletion, setCardCompletion] = useState({
     number: false,
     expiry: false,
@@ -152,6 +153,14 @@ const PaymentForm = ({
       Boolean(cardCompletion.number && cardCompletion.expiry && cardCompletion.cvc && cardholderName.trim())
     );
   }, [cardCompletion, cardholderName, onPaymentFormCompleteChange]);
+
+  useEffect(() => {
+    // Prevent the cardholder name input from appearing focused on initial render.
+    // (Stripe Elements may not be focusable at mount, so the browser can focus the first plain input.)
+    const el = cardholderInputRef.current;
+    if (typeof document === 'undefined' || !el) return;
+    if (document.activeElement === el) el.blur();
+  }, []);
 
   const handleSubmitPayment = async (e) => {
     e.preventDefault();
@@ -265,11 +274,12 @@ const PaymentForm = ({
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Cardholder name</label>
             <input
+              ref={cardholderInputRef}
               type="text"
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value)}
               placeholder="Full name on card"
-              className="w-full rounded-md border border-gray-300 px-3 py-3 bg-white outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
+              className="w-full rounded-md border border-gray-300 px-3 py-3 bg-white outline-none"
             />
           </div>
 

@@ -127,7 +127,7 @@ export default function AddedToCartModal({ isOpen, onClose, product, quantity })
               {product.name}
             </h3>
             <p className="text-xs text-gray-500 mb-1">
-              {t('quantityLabel')}: <span className="font-bold text-gray-900">{quantity}</span>
+              x <span className="font-bold text-gray-900">{quantity}</span>
             </p>
             {product.price ? (
               <p className="text-xs font-bold text-[#E10C69]">

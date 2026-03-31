@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { AlertCircle, Tag, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoApplied }) {
+  const t = useTranslations('PromoCode');
   const [promoCode, setPromoCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,6 +19,10 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
 
     if (normalized.includes('already used') || normalized.includes('already been used')) {
       return 'Vous avez deja utilise ce code promo';
+    }
+
+    if (normalized.includes('promotional offer is currently unavailable')) {
+      return t('errors.offerUnavailable');
     }
 
     return raw;
