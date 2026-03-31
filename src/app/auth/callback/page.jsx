@@ -122,6 +122,11 @@ function AuthCallbackContent() {
             token
           );
 
+          // Ensure cart refresh after OAuth: backend may have merged guest cart on callback.
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('cartNeedsReload'));
+          }
+
           const callbackTarget = resolveTargetPath(roleParam);
           consumePostLoginRedirect();
           console.log('[Auth] Redirect target from callback role:', callbackTarget, 'role:', roleParam);
@@ -165,6 +170,9 @@ function AuthCallbackContent() {
             },
             token
           );
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('cartNeedsReload'));
+          }
           const fallbackTarget = resolveTargetPath(roleParam);
           consumePostLoginRedirect();
           redirectNow(fallbackTarget, hardTimeout);
