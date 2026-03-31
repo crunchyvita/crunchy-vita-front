@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { attachGuestIdHeader, storeGuestIdFromPayload } from '@/lib/guestId';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -19,9 +20,9 @@ const getErrorMessage = (err) => {
 const cartAPI = async (endpoint, method = 'GET', body = null) => {
   const options = {
     method,
-    headers: {
+    headers: attachGuestIdHeader({
       'Content-Type': 'application/json',
-    },
+    }),
     credentials: 'include', // Send cookies (guestId)
   };
 
@@ -51,7 +52,9 @@ const cartAPI = async (endpoint, method = 'GET', body = null) => {
     throw requestError;
   }
 
-  return await response.json();
+  const result = await response.json();
+  storeGuestIdFromPayload(result);
+  return result;
 };
 
 const getProductAvailableStock = async (productId) => {

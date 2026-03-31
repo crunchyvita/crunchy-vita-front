@@ -1,3 +1,5 @@
+import { attachGuestIdHeader, storeGuestIdFromPayload } from './guestId';
+
 // API base URL - adjust this to match your backend URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -24,10 +26,10 @@ async function apiRequest(endpoint, options = {}) {
   const config = {
     ...options,
     credentials: 'include', // CRITICAL: Include cookies (guestId, session)
-    headers: {
+    headers: attachGuestIdHeader({
       ...defaultHeaders,
       ...options.headers,
-    },
+    }),
   };
 
   try {
@@ -67,6 +69,7 @@ async function apiRequest(endpoint, options = {}) {
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
+      storeGuestIdFromPayload(data);
       return data;
     } else {
       // Return empty object for non-JSON responses
