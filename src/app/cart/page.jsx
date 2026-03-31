@@ -106,7 +106,7 @@ const getItemAvailableStock = async (item, API_URL) => {
     const stock = result?.data || result;
     if (!stock) return null;
 
-    // Return the TOTAL quantity (absolute max for this product)
+    // Return the TOTAL quantity 
     return {
       quantityTotal: Number(stock.quantity || 0),
       availableQuantity: stock.availableQuantity !== undefined 
