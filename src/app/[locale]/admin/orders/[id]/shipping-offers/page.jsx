@@ -1,2 +1,2 @@
-export { default } from '../../../../../admin/orders/[id]/shipping-offers/page';
+export { default } from '../../../../../admin/orders/[id]/shipping-offers/page.jsx';
 

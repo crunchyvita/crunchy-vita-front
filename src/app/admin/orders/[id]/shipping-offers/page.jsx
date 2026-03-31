@@ -298,11 +298,6 @@ function InnerPage() {
               delivery: deliveryType === 'relay' ? ts('relayPoint') : ts('homeDelivery'),
             })}
           </p>
-          {deliveryType === 'relay' && !orderLoading ? (
-            <p className="text-sm text-slate-600 mt-2 max-w-2xl">
-              {ts('relayHelp')}
-            </p>
-          ) : null}
           {parcelSnapshot && !orderLoading ? (
             <div className="mt-4 rounded-xl border border-[#556822]/20 bg-[#556822]/5 px-4 py-3 text-sm text-slate-800">
               <p className="font-bold text-[#556822] text-xs uppercase tracking-wide">{ts('parcelForQuote')}</p>
@@ -497,7 +492,7 @@ function InnerPage() {
 
         {!orderLoading && !offersLoading && deliveryType === 'relay' && (
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">{ts('customerRelay')}</h2>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('relayPoints')}</h2>
             {relayPoints.length === 0 ? (
               <p className="text-sm text-slate-500">{ts('noRelayPoints')}</p>
             ) : (
@@ -529,15 +524,8 @@ function InnerPage() {
                           <div className="min-w-0">
                             <p className="font-bold text-slate-900 uppercase tracking-tight">
                               {point.name}
-                              {point.clientSelected ? (
-                                <span className="ml-2 align-middle inline-flex rounded-full bg-[#556822]/15 px-2 py-0.5 text-[10px] font-bold normal-case tracking-wide text-[#556822]">
-                                  {ts('customerChoice')}
-                                </span>
-                              ) : null}
                             </p>
-                            <span className="text-xs font-bold text-slate-700 lowercase block mt-1">
-                              {carrierLabel}
-                            </span>
+                        
                             {logoUrl ? (
                               <img src={logoUrl} alt="" className="h-5 w-auto max-w-[88px] object-contain mt-1.5" />
                             ) : null}
