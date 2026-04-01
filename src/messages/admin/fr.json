@@ -412,6 +412,7 @@
     "productName": "Nom du produit",
     "availableQty": "Quantité disponible",
     "reserved": "Réservé",
+    "availableToSell": "Disponible à la vente",
     "threshold": "Seuil",
     "statusOut": "Rupture",
     "statusLimited": "Stock limité",

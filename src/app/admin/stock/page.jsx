@@ -104,6 +104,7 @@ export default function StockPage() {
                   <th className="px-3 py-3 font-medium">{ts("productName")}</th>
                   <th className="px-3 py-3 font-medium text-center">{ts("availableQty")}</th>
                   <th className="px-3 py-3 font-medium text-center">{ts("reserved")}</th>
+                  <th className="px-3 py-3 font-medium text-center">{ts("availableToSell")}</th>
                   <th className="px-3 py-3 font-medium text-center">{ts("threshold")}</th>
                   <th className="px-3 py-3 font-medium text-center">{tcom("status")}</th>
                   <th className="px-3 py-3"></th>
@@ -121,6 +122,7 @@ export default function StockPage() {
                       </span>
                     </td>
                     <td className="px-3 py-4 text-center text-slate-500">{stock.reservedQuantity}</td>
+                    <td className="px-3 py-4 text-center text-slate-500">{stock.available_to_sell}</td>
                     <td className="px-3 py-4 text-center text-slate-500">{stock.alertThreshold}</td>
                     <td className="px-3 py-4">
                       <div className="flex justify-center">
