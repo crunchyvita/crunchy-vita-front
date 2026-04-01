@@ -16,6 +16,13 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   const normalizeRole = (role) => String(role || '').trim().toUpperCase();
+  const isLikelyJwt = (value) => {
+    const token = String(value || '').trim();
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    return parts.every((part) => /^[A-Za-z0-9_-]{8,}$/.test(part));
+  };
 
   // Helper to normalize user data
   const normalizeUser = (userData) => {
@@ -67,7 +74,7 @@ export function AuthProvider({ children }) {
     }
     const local = String(localStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
     const session = String(sessionStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
-    const present = Boolean(local || session);
+    const present = isLikelyJwt(local) || isLikelyJwt(session);
     setHasToken(present);
     return present;
   };
@@ -159,8 +166,9 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-      if (!token) {
+      const token = String(localStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+      if (!isLikelyJwt(token)) {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
         localStorage.removeItem(USER_STORAGE_KEY);
         setUser(null);
         setHasToken(false);
@@ -209,6 +217,10 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
+      if (!isLikelyJwt(response?.token)) {
+        clearSession();
+        return { success: false, error: 'Invalid authentication token. Please login again.' };
+      }
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
       setHasToken(true);
       
@@ -231,6 +243,10 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       const response = await authAPI.register(name, email, password);
+      if (!isLikelyJwt(response?.token)) {
+        clearSession();
+        return { success: false, error: 'Invalid authentication token. Please login again.' };
+      }
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
       setHasToken(true);
       
@@ -271,10 +287,14 @@ export function AuthProvider({ children }) {
   };
 
   const setUserData = (userData, token) => {
-    if (token) {
+    if (token && isLikelyJwt(token)) {
       localStorage.setItem(TOKEN_STORAGE_KEY, token);
       setHasToken(true);
     } else {
+      if (token && typeof window !== 'undefined') {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      }
       syncTokenState();
     }
     

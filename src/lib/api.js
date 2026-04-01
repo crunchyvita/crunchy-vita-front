@@ -3,11 +3,21 @@ import { attachGuestIdHeader, storeGuestIdFromPayload } from './guestId';
 // API base URL - adjust this to match your backend URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+const isLikelyJwt = (value) => {
+  const token = String(value || '').trim();
+  if (!token) return false;
+  const parts = token.split('.');
+  if (parts.length !== 3) return false;
+  return parts.every((part) => /^[A-Za-z0-9_-]{8,}$/.test(part));
+};
+
 const getStoredAuthToken = () => {
   if (typeof window === 'undefined') return '';
   const local = String(localStorage.getItem('token') || '').trim();
-  if (local) return local;
-  return String(sessionStorage.getItem('token') || '').trim();
+  if (local && isLikelyJwt(local)) return local;
+  const session = String(sessionStorage.getItem('token') || '').trim();
+  if (session && isLikelyJwt(session)) return session;
+  return '';
 };
 
 // Helper function to make API requests
