@@ -30,6 +30,15 @@ function AuthCallbackContent() {
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  const isLikelyJwt = (value) => {
+    const token = String(value || '').trim();
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    // base64url-ish segments with a minimum practical size
+    return parts.every((part) => /^[A-Za-z0-9_-]{8,}$/.test(part));
+  };
+
   const fetchCurrentUserWithRetry = async (maxAttempts = 3) => {
     let lastError;
 
@@ -101,7 +110,7 @@ function AuthCallbackContent() {
       const userParam = searchParams.get('user');
       const roleParam = searchParams.get('role');
 
-      if (!token) {
+      if (!token || !isLikelyJwt(token)) {
         redirectNow('/auth/login?error=authentication_failed', hardTimeout);
         return;
       }
@@ -110,35 +119,11 @@ function AuthCallbackContent() {
         // Persist token as soon as possible for subsequent requests.
         localStorage.setItem('token', token);
 
-        // Use callback role immediately to avoid misrouting while /auth/me is still resolving.
-        if (roleParam) {
-          setUserData(
-            {
-              id: 'oauth-pending',
-              name: 'Google User',
-              email: '',
-              role: roleParam,
-            },
-            token
-          );
-
-          // Ensure cart refresh after OAuth: backend may have merged guest cart on callback.
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('cartNeedsReload'));
-          }
-
-          const callbackTarget = resolveTargetPath(roleParam);
-          consumePostLoginRedirect();
-          console.log('[Auth] Redirect target from callback role:', callbackTarget, 'role:', roleParam);
-          redirectNow(callbackTarget, hardTimeout);
-          return;
-        }
-
         // Legacy path: older backend callback may still provide user payload.
         let user = parseUserParam(userParam);
 
         // Main path: resolve user from API with retries (required for role updates).
-        if (!user) {
+        if (!user || !user.id || !user.email) {
           user = await fetchCurrentUserWithRetry(3);
         }
 
@@ -156,26 +141,6 @@ function AuthCallbackContent() {
         console.error('Error processing authentication:', error);
         if (String(error?.message || '').toLowerCase().includes('deactivated')) {
           redirectNow('/auth/deactivated', hardTimeout);
-          return;
-        }
-
-        // If role is known from callback, route user safely instead of forcing login loop.
-        if (roleParam) {
-          setUserData(
-            {
-              id: 'oauth-pending',
-              name: 'Google User',
-              email: '',
-              role: roleParam,
-            },
-            token
-          );
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('cartNeedsReload'));
-          }
-          const fallbackTarget = resolveTargetPath(roleParam);
-          consumePostLoginRedirect();
-          redirectNow(fallbackTarget, hardTimeout);
           return;
         }
 

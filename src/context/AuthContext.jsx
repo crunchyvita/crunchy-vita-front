@@ -11,10 +11,18 @@ const USER_STORAGE_KEY = 'auth_user';
 export function AuthProvider({ children }) {
   // Keep initial render identical between server and client to avoid hydration mismatch.
   const [user, setUser] = useState(null);
+  const [hasToken, setHasToken] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const normalizeRole = (role) => String(role || '').trim().toUpperCase();
+  const isLikelyJwt = (value) => {
+    const token = String(value || '').trim();
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    return parts.every((part) => /^[A-Za-z0-9_-]{8,}$/.test(part));
+  };
 
   // Helper to normalize user data
   const normalizeUser = (userData) => {
@@ -53,14 +61,46 @@ export function AuthProvider({ children }) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(USER_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     }
+    setHasToken(false);
     setUser(null);
+  };
+
+  const syncTokenState = () => {
+    if (typeof window === 'undefined') {
+      setHasToken(false);
+      return false;
+    }
+    const local = String(localStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+    const session = String(sessionStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+    const present = isLikelyJwt(local) || isLikelyJwt(session);
+    setHasToken(present);
+    return present;
   };
 
   // Check if user is authenticated on mount
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    const onUnauthorized = () => {
+      console.warn('[Auth] Received unauthorized API event, clearing auth state');
+      clearSession();
+      router.push('/auth/login?error=session_expired');
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:unauthorized', onUnauthorized);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('auth:unauthorized', onUnauthorized);
+      }
+    };
+  }, [router]);
 
   // Keep session in sync: if account is deactivated server-side, force logout quickly.
   // But use a longer interval (60s) and be more resilient to network errors
@@ -126,13 +166,17 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-      if (!token) {
+      const token = String(localStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+      if (!isLikelyJwt(token)) {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
         localStorage.removeItem(USER_STORAGE_KEY);
         setUser(null);
+        setHasToken(false);
         setLoading(false);
         return;
       }
+
+      setHasToken(true);
 
       const cachedUser = getStoredUser();
 
@@ -165,6 +209,7 @@ export function AuthProvider({ children }) {
         setUser(cachedUser);
       }
     } finally {
+      syncTokenState();
       setLoading(false);
     }
   };
@@ -172,7 +217,12 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
+      if (!isLikelyJwt(response?.token)) {
+        clearSession();
+        return { success: false, error: 'Invalid authentication token. Please login again.' };
+      }
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setHasToken(true);
       
       // Normalize user data (trim and uppercase role)
       const normalizedUser = normalizeUser(response.user);
@@ -193,7 +243,12 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       const response = await authAPI.register(name, email, password);
+      if (!isLikelyJwt(response?.token)) {
+        clearSession();
+        return { success: false, error: 'Invalid authentication token. Please login again.' };
+      }
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setHasToken(true);
       
       // Normalize user data (trim and uppercase role)
       const normalizedUser = normalizeUser(response.user);
@@ -232,8 +287,15 @@ export function AuthProvider({ children }) {
   };
 
   const setUserData = (userData, token) => {
-    if (token) {
+    if (token && isLikelyJwt(token)) {
       localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      setHasToken(true);
+    } else {
+      if (token && typeof window !== 'undefined') {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      }
+      syncTokenState();
     }
     
     // Normalize user data (trim and uppercase role)
@@ -260,7 +322,7 @@ export function AuthProvider({ children }) {
     logout,
     setUserData,
     updateUser,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && hasToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
