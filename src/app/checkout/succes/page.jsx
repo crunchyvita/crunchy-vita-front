@@ -121,7 +121,6 @@ export default function CheckoutSuccessPage() {
   const discount = data?.discountAmount ?? 0;
   const total = data?.totalAmount ?? 0;
   const currency = data?.currency || 'eur';
-  const appliedPromoCode = data?.promoCode ? String(data.promoCode).trim() : '';
 
   const shipName = String(data?.customerName || '').trim() || '—';
 
@@ -256,13 +255,6 @@ export default function CheckoutSuccessPage() {
                   <span>{t('shipping')}</span>
                   <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency)}</span>
                 </div>
-
-                {appliedPromoCode && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>Promo code</span>
-                    <span className="font-bold text-gray-900 tabular-nums">{appliedPromoCode}</span>
-                  </div>
-                )}
 
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">
