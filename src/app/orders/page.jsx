@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
@@ -92,6 +92,7 @@ function OrdersListSkeleton() {
 function OrdersContent() {
   const t = useTranslations('Orders');
   const tCart = useTranslations('Cart');
+  const locale = useLocale();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -124,12 +125,19 @@ function OrdersContent() {
     const query = searchQuery.toLowerCase();
     const matchesOrderId = order.invoiceNumber?.toString().toLowerCase().includes(query);
     const matchesProduct = (order.items || []).some((item) =>
-      String(item.name || '')
-        .toLowerCase()
-        .includes(query)
+      [item?.name, item?.name_en]
+        .map((v) => String(v || '').toLowerCase())
+        .some((name) => name.includes(query))
     );
     return matchesOrderId || matchesProduct;
   });
+
+  const getLocalizedLineName = (line) => {
+    const frName = String(line?.name || '').trim();
+    const enName = String(line?.name_en || '').trim();
+    if (locale === 'en') return enName || frName || '—';
+    return frName || enName || '—';
+  };
 
   // Recalculate pagination for filtered results
   const filteredTotalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -275,7 +283,7 @@ function OrdersContent() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-[#556822] text-base sm:text-lg break-words hyphens-auto">
-                              {line.name || '—'}
+                              {getLocalizedLineName(line)}
                             </p>
                             <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                               <span className="font-black text-[#E10C69] tabular-nums">
