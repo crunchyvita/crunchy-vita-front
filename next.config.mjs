@@ -11,7 +11,7 @@ const nextConfig = {
       { protocol: "http", hostname: "localhost", port: "5000", pathname: "/uploads/**" },
       { protocol: "http", hostname: "localhost", pathname: "/uploads/**" },
       { protocol: "http", hostname: "127.0.0.1", port: "5000", pathname: "/uploads/**" },
-      { protocol: "https", hostname: "crunchy-vita-back.onrender.com", pathname: "/uploads/**" },
+      { protocol: "https", hostname: "crunchy-vita-backend.onrender.com", pathname: "/uploads/**" },
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
     ],
     dangerouslyAllowSVG: true,
