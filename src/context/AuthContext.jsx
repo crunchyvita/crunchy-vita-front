@@ -11,6 +11,7 @@ const USER_STORAGE_KEY = 'auth_user';
 export function AuthProvider({ children }) {
   // Keep initial render identical between server and client to avoid hydration mismatch.
   const [user, setUser] = useState(null);
+  const [hasToken, setHasToken] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -53,14 +54,46 @@ export function AuthProvider({ children }) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(USER_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     }
+    setHasToken(false);
     setUser(null);
+  };
+
+  const syncTokenState = () => {
+    if (typeof window === 'undefined') {
+      setHasToken(false);
+      return false;
+    }
+    const local = String(localStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+    const session = String(sessionStorage.getItem(TOKEN_STORAGE_KEY) || '').trim();
+    const present = Boolean(local || session);
+    setHasToken(present);
+    return present;
   };
 
   // Check if user is authenticated on mount
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    const onUnauthorized = () => {
+      console.warn('[Auth] Received unauthorized API event, clearing auth state');
+      clearSession();
+      router.push('/auth/login?error=session_expired');
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:unauthorized', onUnauthorized);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('auth:unauthorized', onUnauthorized);
+      }
+    };
+  }, [router]);
 
   // Keep session in sync: if account is deactivated server-side, force logout quickly.
   // But use a longer interval (60s) and be more resilient to network errors
@@ -130,9 +163,12 @@ export function AuthProvider({ children }) {
       if (!token) {
         localStorage.removeItem(USER_STORAGE_KEY);
         setUser(null);
+        setHasToken(false);
         setLoading(false);
         return;
       }
+
+      setHasToken(true);
 
       const cachedUser = getStoredUser();
 
@@ -165,6 +201,7 @@ export function AuthProvider({ children }) {
         setUser(cachedUser);
       }
     } finally {
+      syncTokenState();
       setLoading(false);
     }
   };
@@ -173,6 +210,7 @@ export function AuthProvider({ children }) {
     try {
       const response = await authAPI.login(email, password);
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setHasToken(true);
       
       // Normalize user data (trim and uppercase role)
       const normalizedUser = normalizeUser(response.user);
@@ -194,6 +232,7 @@ export function AuthProvider({ children }) {
     try {
       const response = await authAPI.register(name, email, password);
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setHasToken(true);
       
       // Normalize user data (trim and uppercase role)
       const normalizedUser = normalizeUser(response.user);
@@ -234,6 +273,9 @@ export function AuthProvider({ children }) {
   const setUserData = (userData, token) => {
     if (token) {
       localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      setHasToken(true);
+    } else {
+      syncTokenState();
     }
     
     // Normalize user data (trim and uppercase role)
@@ -260,7 +302,7 @@ export function AuthProvider({ children }) {
     logout,
     setUserData,
     updateUser,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && hasToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

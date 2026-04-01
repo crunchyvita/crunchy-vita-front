@@ -3,6 +3,13 @@ import { attachGuestIdHeader, storeGuestIdFromPayload } from './guestId';
 // API base URL - adjust this to match your backend URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+const getStoredAuthToken = () => {
+  if (typeof window === 'undefined') return '';
+  const local = String(localStorage.getItem('token') || '').trim();
+  if (local) return local;
+  return String(sessionStorage.getItem('token') || '').trim();
+};
+
 // Helper function to make API requests
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
@@ -17,7 +24,7 @@ async function apiRequest(endpoint, options = {}) {
 
   // Add auth token if available (client-side only)
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem("token");
+    const token = getStoredAuthToken();
     if (token) {
       defaultHeaders["Authorization"] = `Bearer ${token}`;
     }
@@ -61,6 +68,14 @@ async function apiRequest(endpoint, options = {}) {
         error.statusText = response.statusText;
       }
       error.url = url; // Include URL for debugging
+
+      if (response.status === 401 && typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('auth:unauthorized', {
+            detail: { status: 401, url },
+          })
+        );
+      }
       
       throw error;
     }
