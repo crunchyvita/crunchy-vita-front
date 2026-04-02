@@ -14,7 +14,7 @@ export default function Footer() {
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
-    
+
     setLoading(true);
     try {
       // Add your newsletter subscription API here
@@ -44,30 +44,37 @@ export default function Footer() {
                 className="h-40 w-auto"
               />
             </div>
-            <div className="-mt-4 mb-4">
+            <div className="-mt-12 mb-4 flex items-center justify-start gap-1">
               <Image
-                src="/assets/images/bio1.png"
+                src="/assets/images/certipack.jpg"
                 alt="Certification Agriculture Biologique"
                 width={220}
                 height={140}
-                className="h-auto w-52"
+                className="h-14 w-16 object-contain"
+              />
+              <Image
+                src="/assets/images/ab.jpg"
+                alt="Certification Agriculture Biologique"
+                width={220}
+                height={140}
+                className="h-12 w-14 object-contain -ml-2"
               />
             </div>
             <p className="text-sm text-gray-900 leading-relaxed mb-6">
               {t('about')}
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
               <a href="mailto:contact@crunchyvita.com" className="flex items-center gap-2 text-sm text-gray-900 hover:text-[#556822] transition">
                 <Mail size={16} />
                 {t('email')}
               </a>
-            
+
               <div className="flex items-start gap-2 text-sm text-gray-900">
                 <MapPin size={16} className="shrink-0 mt-1" />
                 <div>
-                
+
                   <p>{t('address.line3')}</p>
                 </div>
               </div>
@@ -122,7 +129,7 @@ export default function Footer() {
         {/* Divider */}
         <div className="border-t border-slate-700 my-12" />
 
-     
+
         {/* Copyright */}
         <div className="pt-8 text-center">
           <p className="text-[#E10C69] text-xs">© {t('copyright')}</p>
