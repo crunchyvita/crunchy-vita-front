@@ -44,7 +44,7 @@ export default function Footer() {
                 className="h-40 w-auto"
               />
             </div>
-            <div className="-mt-12 mb-4 flex items-center justify-start gap-1">
+            <div className="-mt-3 mb-4 flex items-center justify-start gap-1">
               <Image
                 src="/assets/images/certipack.jpg"
                 alt="Certification Agriculture Biologique"
@@ -131,7 +131,61 @@ export default function Footer() {
 
 
         {/* Copyright */}
-        <div className="pt-8 text-center">
+        <div className="pt-2 text-center">
+          <div className="mb-4 flex items-center justify-center gap-4">
+            <a
+              href="#"
+              aria-label="Facebook"
+              className="text-gray-900 hover:text-[#556822] transition"
+            >
+              <Image
+                src="/assets/socialMedia/facebook.svg"
+                alt="Facebook"
+                width={18}
+                height={18}
+                className="h-6 w-6"
+              />
+            </a>
+            <a
+              href="#"
+              aria-label="Instagram"
+              className="text-gray-900 hover:text-[#556822] transition"
+            >
+              <Image
+                src="/assets/socialMedia/logoinstagram.svg"
+                alt="Instagram"
+                width={18}
+                height={18}
+                className="h-6 w-6"
+              />
+            </a>
+            <a
+              href="#"
+              aria-label="TikTok"
+              className="text-gray-900 hover:text-[#556822] transition"
+            >
+              <Image
+                src="/assets/socialMedia/tiktok.svg"
+                alt="TikTok"
+                width={18}
+                height={18}
+                className="h-6 w-6"
+              />
+            </a>
+            <a
+              href="#"
+              aria-label="LinkedIn"
+              className="text-gray-900 hover:text-[#556822] transition"
+            >
+              <Image
+                src="/assets/socialMedia/linkedin.svg"
+                alt="LinkedIn"
+                width={18}
+                height={18}
+                className="h-6 w-6"
+              />
+            </a>
+          </div>
           <p className="text-[#E10C69] text-xs">© {t('copyright')}</p>
         </div>
       </div>
