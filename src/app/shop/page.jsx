@@ -254,7 +254,7 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
           </div>
         )}
 
-        <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+        <div className="product-card-actions absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300">
           <button
             onClick={() => onToggleFavorite(product)}
             className="p-3 bg-white rounded-full shadow-md transition-colors text-[#E10C69] hover:bg-[#FCE7F2]"

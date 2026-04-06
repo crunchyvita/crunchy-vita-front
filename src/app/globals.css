@@ -39,6 +39,23 @@ html {
     filter: grayscale(1) brightness(0.38) contrast(160%);
     opacity: 1;
   }
+
+  .product-card-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .product-card-actions {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+
+    .group:hover .product-card-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @theme inline {
