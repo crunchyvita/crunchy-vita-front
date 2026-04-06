@@ -1589,7 +1589,7 @@ const CheckoutPage = () => {
                             {t('shipping.relayAddress') || 'Adresse / Code postal'}
                           </label>
 
-                          <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <input
                               type="text"
                               value={relayAddressQuery}
@@ -1601,7 +1601,7 @@ const CheckoutPage = () => {
                               type="button"
                               onClick={handleSearchRelay}
                               disabled={relayLoading || !relayAddressQuery.trim()}
-                              className="px-4 py-2 rounded-lg bg-[#556822] text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-2"
+                              className="w-full sm:w-auto sm:min-w-33 px-4 py-3 sm:py-2 rounded-lg bg-[#556822] text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2 shrink-0"
                             >
                               {relayLoading ? <Loader2 size={16} className="animate-spin" /> : null}
                               {t('shipping.search') || 'Rechercher'}

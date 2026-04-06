@@ -189,7 +189,7 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
     <div className="space-y-4">
       {!appliedPromo && (
         <form onSubmit={handleValidatePromo} className="space-y-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={promoCode}
@@ -204,7 +204,7 @@ export default function PromoCodeInput({ cartTotal, cartItems = [], onPromoAppli
             <button
               type="submit"
               disabled={loading || !promoCode.trim()}
-              className="px-5 py-3.5 bg-[#556822] hover:bg-[#44591a] disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-[15px] min-w-24"
+              className="w-full sm:w-auto sm:min-w-24 px-5 py-3.5 bg-[#556822] hover:bg-[#44591a] disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-[15px] inline-flex items-center justify-center shrink-0"
             >
               {loading ? 'Checking...' : 'Apply'}
             </button>
