@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { useParams } from 'next/navigation';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -78,6 +78,7 @@ function formatMoney(amount, currency = 'eur') {
 
 function OrderDetailContent() {
   const t = useTranslations('OrderDetail');
+  const locale = useLocale();
   const params = useParams();
   const id = params?.id;
   const [order, setOrder] = useState(null);
@@ -158,6 +159,12 @@ function OrderDetailContent() {
   }
 
   const addr = order.shippingAddress;
+  const getLocalizedLineName = (line) => {
+    const frName = String(line?.name || '').trim();
+    const enName = String(line?.name_en || '').trim();
+    if (locale === 'en') return enName || frName || '—';
+    return frName || enName || '—';
+  };
 
   return (
     <div className={shellClass}>
@@ -190,7 +197,7 @@ function OrderDetailContent() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{line.name || '—'}</p>
+                    <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{getLocalizedLineName(line)}</p>
                     <p className="text-xs sm:text-sm text-gray-500 mt-0.5">× {line.quantity}</p>
                   </div>
                   <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums shrink-0">

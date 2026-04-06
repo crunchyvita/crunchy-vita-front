@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useRouter, usePathname } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { LogOut, ShoppingCart, Heart, User, Package, Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/hooks/useCart';
@@ -20,9 +21,14 @@ export default function Header() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations('Header');
   const { cartItems, loadCart } = useCart();
+  const pathnameWithQuery = useMemo(() => {
+    const qs = searchParams?.toString() || '';
+    return qs ? `${pathname}?${qs}` : pathname;
+  }, [pathname, searchParams]);
 
   const cartUnitCount = useMemo(
     () =>
@@ -146,7 +152,7 @@ export default function Header() {
                 <ul className="flex flex-col">
                   <li>
                     <Link
-                      href={pathname}
+                      href={pathnameWithQuery}
                       locale="en"
                       onClick={() => setIsLangMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${locale === 'en' ? 'font-bold text-[#556822] bg-gray-50/50' : 'text-gray-600'}`}
@@ -157,7 +163,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link
-                      href={pathname}
+                      href={pathnameWithQuery}
                       locale="fr"
                       onClick={() => setIsLangMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${locale === 'fr' ? 'font-bold text-[#556822] bg-gray-50/50' : 'text-gray-600'}`}
@@ -224,11 +230,11 @@ export default function Header() {
           
           {/* Mobile Language Switcher */}
           <div className="flex gap-4 px-4 py-2 border-t border-gray-50 mt-2 pt-4">
-             <Link href={pathname} locale="en" className="flex items-center gap-2 text-sm text-gray-600">
+             <Link href={pathnameWithQuery} locale="en" className="flex items-center gap-2 text-sm text-gray-600">
                <img src="/assets/images/en.png" alt="English" className="w-6 h-6 rounded-full object-cover border border-gray-100" />
                English
              </Link>
-             <Link href={pathname} locale="fr" className="flex items-center gap-2 text-sm text-gray-600">
+             <Link href={pathnameWithQuery} locale="fr" className="flex items-center gap-2 text-sm text-gray-600">
                <img src="/assets/images/fr.png" alt="Français" className="w-6 h-6 rounded-full object-cover border border-gray-100" />
                Français
              </Link>

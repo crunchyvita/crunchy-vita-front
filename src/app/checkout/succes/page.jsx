@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
@@ -26,6 +26,7 @@ function formatMoney(amount, currency = 'eur') {
 export default function CheckoutSuccessPage() {
   const { isAuthenticated } = useAuth();
   const t = useTranslations('CheckoutSuccess');
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const paymentIntent = searchParams.get('payment_intent');
   const sessionId = searchParams.get('session_id');
@@ -114,6 +115,12 @@ export default function CheckoutSuccessPage() {
     // Fallback: gift lines are stored with unitPrice 0 in order snapshots.
     return isZeroPriced;
   };
+  const getLocalizedLineName = (line) => {
+    const frName = String(line?.name || '').trim();
+    const enName = String(line?.name_en || '').trim();
+    if (locale === 'en') return enName || frName || '—';
+    return frName || enName || '—';
+  };
 
   const displayInvoice = data?.invoiceNumber || data?.orderId || lookupId;
   const subtotal = data?.subtotalAmount ?? 0;
@@ -121,7 +128,6 @@ export default function CheckoutSuccessPage() {
   const discount = data?.discountAmount ?? 0;
   const total = data?.totalAmount ?? 0;
   const currency = data?.currency || 'eur';
-  const appliedPromoCode = data?.promoCode ? String(data.promoCode).trim() : '';
 
   const shipName = String(data?.customerName || '').trim() || '—';
 
@@ -236,7 +242,7 @@ export default function CheckoutSuccessPage() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{line?.name || '—'}</p>
+                      <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{getLocalizedLineName(line)}</p>
                       <p className="text-xs sm:text-sm text-gray-500">x {line?.quantity || 0}</p>
                     </div>
                     <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums text-right">
@@ -256,13 +262,6 @@ export default function CheckoutSuccessPage() {
                   <span>{t('shipping')}</span>
                   <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency)}</span>
                 </div>
-
-                {appliedPromoCode && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>Promo code</span>
-                    <span className="font-bold text-gray-900 tabular-nums">{appliedPromoCode}</span>
-                  </div>
-                )}
 
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">

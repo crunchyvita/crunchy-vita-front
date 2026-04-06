@@ -16,8 +16,9 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   const normalizeRole = (role) => String(role || '').trim().toUpperCase();
+  const normalizeToken = (value) => String(value || '').replace(/^Bearer\s+/i, '').trim();
   const isLikelyJwt = (value) => {
-    const token = String(value || '').trim();
+    const token = normalizeToken(value);
     if (!token) return false;
     const parts = token.split('.');
     if (parts.length !== 3) return false;
@@ -287,8 +288,9 @@ export function AuthProvider({ children }) {
   };
 
   const setUserData = (userData, token) => {
-    if (token && isLikelyJwt(token)) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    const normalizedToken = normalizeToken(token);
+    if (normalizedToken && isLikelyJwt(normalizedToken)) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, normalizedToken);
       setHasToken(true);
     } else {
       if (token && typeof window !== 'undefined') {
@@ -303,6 +305,10 @@ export function AuthProvider({ children }) {
     console.log('[Auth] setUserData user:', normalizedUser);
     setUser(normalizedUser);
     saveUserToStorage(normalizedUser);
+    // Keep cart state in sync after OAuth callback login (same behavior as email/password).
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cartNeedsReload'));
+    }
     setLoading(false); // Ensure loading is set to false after setting user
   };
 
