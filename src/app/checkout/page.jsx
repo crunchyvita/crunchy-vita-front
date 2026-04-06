@@ -208,13 +208,13 @@ const PaymentForm = ({
 
   return (
     <form id="checkout-payment-form" onSubmit={handleSubmitPayment} className="mt-1">
-      <div className="mb-6 border border-gray-200 rounded-lg bg-white p-4">
-        <div className="text-[18px] font-semibold text-gray-900">Card</div>
+      <div className="mb-4 sm:mb-6 border border-gray-200 rounded-lg bg-white p-3 sm:p-4">
+        <div className="text-base sm:text-[18px] font-semibold text-gray-900">Card</div>
 
-        <div className="mt-4 space-y-3 bg-white">
+        <div className="mt-3 sm:mt-4 space-y-2.5 sm:space-y-3 bg-white">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Card information</label>
-            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+            <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">Card information</label>
+            <div className="rounded-md border border-gray-300 px-2.5 sm:px-3 py-2.5 sm:py-3 bg-white">
               <CardNumberElement
                 options={{
                   ...cardElementStyle,
@@ -235,8 +235,8 @@ const PaymentForm = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="rounded-md border border-gray-300 px-2.5 sm:px-3 py-2.5 sm:py-3 bg-white">
               <CardExpiryElement
                 options={{
                   ...cardElementStyle,
@@ -253,7 +253,7 @@ const PaymentForm = ({
               />
             </div>
 
-            <div className="rounded-md border border-gray-300 px-3 py-3 bg-white">
+            <div className="rounded-md border border-gray-300 px-2.5 sm:px-3 py-2.5 sm:py-3 bg-white">
               <CardCvcElement
                 options={{
                   ...cardElementStyle,
@@ -272,14 +272,14 @@ const PaymentForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Cardholder name</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">Cardholder name</label>
             <input
               ref={cardholderInputRef}
               type="text"
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value)}
               placeholder="Full name on card"
-              className="w-full rounded-md border border-gray-300 px-3 py-3 bg-white outline-none"
+              className="w-full rounded-md border border-gray-300 px-2.5 sm:px-3 py-2.5 sm:py-3 bg-white outline-none"
             />
           </div>
 
@@ -293,7 +293,7 @@ const PaymentForm = ({
         </div>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-[11px] sm:text-xs text-gray-500 text-center">
         {t('securityNote')}
       </p>
     </form>
@@ -1174,15 +1174,15 @@ const CheckoutPage = () => {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Left Column: Forms */}
-          <div className="grow space-y-6">
+          <div className="grow space-y-4 sm:space-y-6">
             {/* Contact Information */}
-            <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('contact.title')}</h2>
-              <div className="space-y-4">
+            <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('contact.title')}</h2>
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                     {t('contact.emailLabel')} <span aria-hidden="true">*</span>
                   </label>
                   <input
@@ -1191,12 +1191,12 @@ const CheckoutPage = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('contact.emailPlaceholder')}
                     required
-                    className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
+                    className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                     {(t('contact.phoneLabel') || 'Telephone')} <span aria-hidden="true">*</span>
                   </label>
                   <input
@@ -1205,23 +1205,23 @@ const CheckoutPage = () => {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
                     required
-                    className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
+                    className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
                   />
                 </div>
               </div>
             </section>
 
             {/* Shipping Information */}
-            <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('shipping.title')}</h2>
+            <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('shipping.title')}</h2>
 
               {/* Delivery type toggles */}
-              <div className="mb-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+              <div className="mb-4 sm:mb-6">
+                <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                   {t('shipping.deliveryType') || 'Livraison'}
                 </label>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -1231,17 +1231,17 @@ const CheckoutPage = () => {
                       setRelayError('');
                       setGeoError('');
                     }}
-                    className={`p-4 rounded-lg border text-left transition-all flex items-center justify-between ${
+                    className={`p-3 sm:p-4 rounded-lg border text-left transition-all flex items-center justify-between ${
                       deliveryType === 'home'
                         ? 'border-[#556822] bg-[#556822]/5'
                         : 'border-gray-200 bg-white hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <Home size={18} className="text-[#556822]" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Home size={16} className="text-[#556822] sm:h-4.5 sm:w-4.5" />
                       <div>
-                        <div className="font-bold">{t('shipping.home') || "Expédier à l’adresse"}</div>
-                        <div className="text-xs text-gray-500">{t('shipping.homeHint') || 'À votre domicile'}</div>
+                        <div className="text-sm sm:text-base font-bold">{t('shipping.home') || "Expédier à l’adresse"}</div>
+                        <div className="text-[11px] sm:text-xs text-gray-500">{t('shipping.homeHint') || 'À votre domicile'}</div>
                       </div>
                     </div>
                     <div
@@ -1259,17 +1259,17 @@ const CheckoutPage = () => {
                       setRelayError('');
                       setGeoError('');
                     }}
-                    className={`p-4 rounded-lg border text-left transition-all flex items-center justify-between ${
+                    className={`p-3 sm:p-4 rounded-lg border text-left transition-all flex items-center justify-between ${
                       deliveryType === 'relay'
                         ? 'border-[#556822] bg-[#556822]/5'
                         : 'border-gray-200 bg-white hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <MapPin size={18} className="text-[#556822]" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <MapPin size={16} className="text-[#556822] sm:h-4.5 sm:w-4.5" />
                       <div>
-                        <div className="font-bold">{t('shipping.relay') || "Expédier au point relais"}</div>
-                        <div className="text-xs text-gray-500">{t('shipping.relayHint') || 'Choisir un relais proche'}</div>
+                        <div className="text-sm sm:text-base font-bold">{t('shipping.relay') || "Expédier au point relais"}</div>
+                        <div className="text-[11px] sm:text-xs text-gray-500">{t('shipping.relayHint') || 'Choisir un relais proche'}</div>
                       </div>
                     </div>
                     <div
@@ -1281,10 +1281,10 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Name fields */}
                 <div className="md:col-span-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                     {t('shipping.firstName')}
                   </label>
                   <input
@@ -1292,12 +1292,12 @@ const CheckoutPage = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder={t('shipping.firstNamePlaceholder')}
-                    className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                    className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                     {t('shipping.lastName')}
                   </label>
                   <input
@@ -1305,7 +1305,7 @@ const CheckoutPage = () => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder={t('shipping.lastNamePlaceholder')}
-                    className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                    className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
                 </div>
 
@@ -1313,7 +1313,7 @@ const CheckoutPage = () => {
                 {deliveryType === 'home' && (
                   <>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.country')}
                       </label>
                       <input
@@ -1321,11 +1321,11 @@ const CheckoutPage = () => {
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                         placeholder={t('shipping.countryPlaceholder')}
-                        className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.street')}
                       </label>
                       <input
@@ -1333,11 +1333,11 @@ const CheckoutPage = () => {
                         value={street}
                         onChange={(e) => setStreet(e.target.value)}
                         placeholder={t('shipping.streetPlaceholder')}
-                        className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
                     </div>
                     <div className="md:col-span-1">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.city')}
                       </label>
                       <input
@@ -1345,11 +1345,11 @@ const CheckoutPage = () => {
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         placeholder={t('shipping.cityPlaceholder')}
-                        className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
                     </div>
                     <div className="md:col-span-1">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                      <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.postalCode')}
                       </label>
                       <input
@@ -1357,13 +1357,13 @@ const CheckoutPage = () => {
                         value={postalCode}
                         onChange={(e) => setPostalCode(e.target.value)}
                         placeholder={t('shipping.postalCodePlaceholder')}
-                        className="w-full p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
                     </div>
 
                     {showHomeOffersPanel && (
                       <div className="md:col-span-2">
-                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 sm:px-4 py-2.5 sm:py-3 text-sm">
                           <div className="flex items-center justify-between gap-3">
                             <span className="font-bold text-gray-700">{t('shipping.homeOffersTitle')}</span>
                             <span className="font-black text-[#556822]">
@@ -1384,7 +1384,7 @@ const CheckoutPage = () => {
 
                               <div className="max-h-136 overflow-auto border border-gray-300 bg-white">
                                 {[0, 1, 2].map((i) => (
-                                  <div key={i} className="w-full p-4 border-b border-gray-200">
+                                    <div key={i} className="w-full p-3 sm:p-4 border-b border-gray-200">
                                     <div className="flex items-start justify-between gap-4">
                                       <div className="flex items-start gap-3 min-w-0">
                                         <div className="mt-1 h-5 w-5 rounded-full border-2 border-gray-200 bg-gray-100" />
@@ -1443,7 +1443,7 @@ const CheckoutPage = () => {
                                       key={code}
                                       type="button"
                                       onClick={() => setSelectedHomeShippingOfferCode(code)}
-                                      className={`w-full text-left p-4 border-b border-gray-200 transition-colors ${
+                                      className={`w-full text-left p-3 sm:p-4 border-b border-gray-200 transition-colors ${
                                         active ? 'bg-[#556822]/5' : 'bg-white hover:bg-gray-50/50'
                                       }`}
                                     >
@@ -1547,7 +1547,7 @@ const CheckoutPage = () => {
                 {/* Relay UI */}
                 {deliveryType === 'relay' && (
                   <div className="md:col-span-2 space-y-4">
-                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3 sm:p-4">
                       <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
                         <div className="text-sm font-black text-[#556822]">
                           {t('shipping.relayTitle') || 'Point relais'}
@@ -1557,7 +1557,7 @@ const CheckoutPage = () => {
                           type="button"
                           onClick={handleUseMyLocation}
                           disabled={geoLoading}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-bold hover:bg-gray-50 disabled:opacity-50"
+                          className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-bold hover:bg-gray-50 disabled:opacity-50"
                         >
                           {geoLoading ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
                           {t('shipping.useMyLocation') || 'Utiliser mon emplacement'}
@@ -1566,7 +1566,7 @@ const CheckoutPage = () => {
 
                       {geoError && <div className="mt-3 text-sm text-red-600">{geoError}</div>}
 
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="mt-3 sm:mt-4 grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
                         <div className="md:col-span-1">
                           <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                             {t('shipping.country') || 'Pays / région'}
@@ -1574,7 +1574,7 @@ const CheckoutPage = () => {
                           <select
                             value={relayCountry}
                             onChange={(e) => setRelayCountry(e.target.value)}
-                            className="w-full p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
+                            className="w-full p-3 sm:p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
                           >
                             {RELAY_COUNTRY_OPTIONS.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -1595,7 +1595,7 @@ const CheckoutPage = () => {
                               value={relayAddressQuery}
                               onChange={(e) => setRelayAddressQuery(e.target.value)}
                               placeholder={t('shipping.relayPlaceholder') || 'ex: 75001 Paris'}
-                              className="flex-1 p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
+                              className="flex-1 p-3 sm:p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
                             />
                             <button
                               type="button"
@@ -1739,9 +1739,9 @@ const CheckoutPage = () => {
               </div>
 
               {deliveryType === 'home' && isHomeAddressValid && (
-                <div className="mt-6 space-y-4">
+                <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                   {shouldShowHomeDeliveryPricing && shippingSettings?.express?.enabled && (
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-4">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-3 sm:p-4">
                       <input
                         type="checkbox"
                         checked={expressDelivery}
@@ -1756,7 +1756,7 @@ const CheckoutPage = () => {
                   )}
 
                   {shouldShowHomeDeliveryPricing && (
-                    <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-4">
+                    <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-wider text-[#556822]">
@@ -1782,9 +1782,9 @@ const CheckoutPage = () => {
             </section>
 
             {/* Payment Section */}
-            <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('payment.title')}</h2>
-              <div className="border border-gray-200 rounded-xl p-6 bg-white">
+            <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('payment.title')}</h2>
+              <div className="border border-gray-200 rounded-xl p-3 sm:p-6 bg-white">
                 <PaymentForm
                   locale={locale}
                   t={t}

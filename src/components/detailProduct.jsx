@@ -291,28 +291,32 @@ export default function ProductDetailModal({
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-xs font-bold text-gray-400 uppercase font-[Maison Neue Mono] whitespace-nowrap">{t('quantity')}</span>
-                  <div className="flex items-center bg-gray-100 rounded-xl sm:rounded-2xl p-0.5 sm:p-1">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-1.5 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-lg sm:rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
-                      disabled={quantity <= 1}
-                    >
-                      <Minus size={16} className="sm:h-4.5 sm:w-4.5" />
-                    </button>
-                    <span className="w-9 sm:w-12 text-center font-bold text-sm sm:text-lg font-[Agrandir]">{quantity}</span>
-                    <button
-                      onClick={handleIncrement}
-                      className="p-1.5 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-lg sm:rounded-xl transition-all font-[Maison Neue Mono]"
-                    >
-                      <Plus size={16} className="sm:h-4.5 sm:w-4.5" />
-                    </button>
-                  </div>
+              <div className="flex items-end gap-2 sm:gap-4 mb-5 sm:mb-6 w-full">
+                <span className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase font-[Maison Neue Mono] whitespace-nowrap pb-1">
+                  {t('quantity')}
+                </span>
+
+                <div className="flex items-center bg-gray-100 rounded-xl sm:rounded-2xl p-0.5 sm:p-1">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-1.5 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-lg sm:rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus size={16} className="sm:h-4.5 sm:w-4.5" />
+                  </button>
+                  <span className="w-9 sm:w-12 text-center font-bold text-sm sm:text-lg font-[Agrandir]">{quantity}</span>
+                  <button
+                    onClick={handleIncrement}
+                    className="p-1.5 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-lg sm:rounded-xl transition-all font-[Maison Neue Mono]"
+                  >
+                    <Plus size={16} className="sm:h-4.5 sm:w-4.5" />
+                  </button>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">{t('totalPrice')}</span>
+
+                <div className="ml-auto text-right">
+                  <span className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">
+                    {t('totalPrice')}
+                  </span>
                   <span className="text-xl sm:text-3xl font-black text-[#E10c69] font-[Erica One]">{totalPrice.toFixed(2)} €</span>
                 </div>
               </div>
