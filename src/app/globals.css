@@ -45,6 +45,10 @@ html {
     transform: translateY(0);
   }
 
+  .detail-primary-action {
+    flex: 3 1 0%;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .product-card-actions {
       opacity: 0;
@@ -54,6 +58,12 @@ html {
     .group:hover .product-card-actions {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .detail-primary-action {
+      flex: 1 1 0%;
     }
   }
 }

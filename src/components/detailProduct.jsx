@@ -160,23 +160,23 @@ export default function ProductDetailModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]"
+      className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-2 sm:p-4 bg-black/60 transition-opacity duration-300 font-[Maison Neue]"
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col lg:flex-row transition-all duration-500 scale-100 font-[Agrandir]"
+        className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-[calc(100vw-1rem)] sm:max-w-5xl w-full max-h-[88vh] sm:max-h-[95vh] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row transition-all duration-500 scale-100 font-[Agrandir]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-50 bg-white/80 backdrop-blur-sm rounded-full p-2.5 text-gray-900 shadow-md hover:bg-red-50 hover:text-red-600 transition-all duration-200 font-[Maison Neue Mono]"
+          className="absolute top-3 right-3 sm:top-5 sm:right-5 z-50 bg-white/80 backdrop-blur-sm rounded-full p-2 sm:p-2.5 text-gray-900 shadow-md hover:bg-red-50 hover:text-red-600 transition-all duration-200 font-[Maison Neue Mono]"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
 
         {/* Left: Image Gallery Section */}
-        <div className="w-full lg:w-1/2 bg-gray-50 p-6 flex flex-col font-[Maison Neue Book]">
+        <div className="w-full lg:w-1/2 bg-gray-50 p-3 sm:p-6 flex flex-col font-[Maison Neue Book]">
           <div className="relative flex-1 group aspect-square rounded-2xl overflow-hidden bg-white shadow-inner">
             {productImages.length > 0 ? (
               <>
@@ -218,7 +218,7 @@ export default function ProductDetailModal({
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${idx === currentImageIndex ? 'border-green-600 ring-4 ring-green-100' : 'border-transparent opacity-60 hover:opacity-100'
+                  className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${idx === currentImageIndex ? 'border-green-600 ring-4 ring-green-100' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                 >
                   <img src={img} className="w-full h-full object-cover" alt="miniature" />
@@ -229,10 +229,10 @@ export default function ProductDetailModal({
         </div>
 
         {/* Right: Product Details Section */}
-        <div className="w-full lg:w-1/2 p-8 lg:p-12 overflow-y-auto bg-white flex flex-col font-[Maison Neue]">
+        <div className="w-full lg:w-1/2 p-4 sm:p-8 lg:p-12 overflow-y-auto bg-white flex flex-col font-[Maison Neue]">
           <div className="flex-1">
             {/* Header: Rating & Stock */}
-            <div className="flex items-center justify-between mb-4 font-[Maison Neue Book]">
+            <div className="flex items-center justify-between mb-3 sm:mb-4 font-[Maison Neue Book]">
               {avgRating ? (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full">
                   <div className="flex items-center gap-0.5">
@@ -266,16 +266,16 @@ export default function ProductDetailModal({
 
             </div>
 
-            <h1 className="text-3xl font-extrabold text-[#556822] mb-2 leading-tight font-[Agrandir]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#556822] mb-2 leading-tight font-[Agrandir]">
               {productName}
             </h1>
 
-            <p className="text-3xl font-black text-[#E10c69] mb-6 font-[Erica One]">
+            <p className="text-2xl sm:text-3xl font-black text-[#E10c69] mb-4 sm:mb-6 font-[Erica One]">
               {productPrice.toFixed(2)} €
               <span className="text-sm text-gray-400 font-medium ml-2 uppercase font-[Maison Neue Book]">{t('perUnit')}</span>
             </p>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               <div className="space-y-2 text-gray-600 leading-relaxed italic border-l-4 border-gray-100 pl-4 font-[Maison Neue Book]">
                 {descriptionLines.map((line, index) => (
                   <p key={`${line}-${index}`} className="m-0">
@@ -291,21 +291,21 @@ export default function ProductDetailModal({
                 </div>
               )}
 
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-[Maison Neue Mono]">{t('quantity')}</span>
                   <div className="flex items-center bg-gray-100 rounded-2xl p-1">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
+                      className="p-2 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 font-[Maison Neue Mono]"
                       disabled={quantity <= 1}
                     >
                       <Minus size={18} />
                     </button>
-                    <span className="w-12 text-center font-bold text-lg font-[Agrandir]">{quantity}</span>
+                    <span className="w-10 sm:w-12 text-center font-bold text-base sm:text-lg font-[Agrandir]">{quantity}</span>
                     <button
                       onClick={handleIncrement}
-                      className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all font-[Maison Neue Mono]"
+                      className="p-2 sm:p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all font-[Maison Neue Mono]"
                     >
                       <Plus size={18} />
                     </button>
@@ -313,14 +313,14 @@ export default function ProductDetailModal({
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-gray-400 uppercase mb-1 block font-[Maison Neue Mono]">{t('totalPrice')}</span>
-                  <span className="text-3xl font-black text-[#E10c69] font-[Erica One]">{totalPrice.toFixed(2)} €</span>
+                  <span className="text-2xl sm:text-3xl font-black text-[#E10c69] font-[Erica One]">{totalPrice.toFixed(2)} €</span>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 <button
                   onClick={handleAddToCart}
                   disabled={availableStock === 0 || addedToCart}
-                  className={`flex-[3] flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-lg transition-all duration-300 group font-[Agrandir] ${
+                  className={`detail-primary-action flex items-center justify-center gap-3 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg transition-all duration-300 group font-[Agrandir] ${
                     availableStock === 0
                       ? 'bg-gray-200 text-white cursor-not-allowed'
                       : addedToCart
