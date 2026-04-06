@@ -23,6 +23,15 @@ import { getTranslatedProduct } from '@/lib/productTranslations';
 import { hasNutritionData } from '@/lib/nutrition';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
+const normalizeDescriptionLines = (description) => {
+  if (typeof description !== 'string') return [];
+
+  return description
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[-•]\s*/, '').trim())
+    .filter(Boolean);
+};
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -43,6 +52,7 @@ export default function ProductDetailPage() {
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
+  const descriptionLines = normalizeDescriptionLines(productDescription || t('descriptionFallback'));
   const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   // ✅ IMPORTANT: error doit être remis à null avant chaque fetch
@@ -771,9 +781,13 @@ export default function ProductDetailPage() {
             </div>
 
             <div>
-              <p className="text-gray-600 leading-relaxed font-[maison-neue-book]">
-                {productDescription || t('descriptionFallback')}
-              </p>
+              <div className="space-y-2 text-gray-600 leading-relaxed font-[maison-neue-book]">
+                {descriptionLines.map((line, index) => (
+                  <p key={`${line}-${index}`} className="m-0">
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
 
             <div>

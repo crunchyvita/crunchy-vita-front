@@ -11,6 +11,15 @@ import {
   Info, Star, AlertCircle, CheckCircle2
 } from 'lucide-react';
 
+const normalizeDescriptionLines = (description) => {
+  if (typeof description !== 'string') return [];
+
+  return description
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[-•]\s*/, '').trim())
+    .filter(Boolean);
+};
+
 export default function ProductDetailModal({
   product,
   isOpen,
@@ -29,6 +38,7 @@ export default function ProductDetailModal({
   const translatedProduct = getTranslatedProduct(product, locale);
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
+  const descriptionLines = normalizeDescriptionLines(productDescription);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
@@ -266,9 +276,13 @@ export default function ProductDetailModal({
             </p>
 
             <div className="space-y-4 mb-8">
-              <p className="text-gray-600 leading-relaxed italic border-l-4 border-gray-100 pl-4 font-[Maison Neue Book]">
-                {productDescription}
-              </p>
+              <div className="space-y-2 text-gray-600 leading-relaxed italic border-l-4 border-gray-100 pl-4 font-[Maison Neue Book]">
+                {descriptionLines.map((line, index) => (
+                  <p key={`${line}-${index}`} className="m-0">
+                    {line}
+                  </p>
+                ))}
+              </div>
 
               {showStockAlert && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold animate-pulse">
