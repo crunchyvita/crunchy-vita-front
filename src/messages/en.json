@@ -12,7 +12,10 @@
     "wishlist": "Wishlist",
     "account": "Account",
     "logout": "Log out",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "language": "Language",
+    "languageEnglish": "English",
+    "languageFrench": "French"
   },
   "Breadcrumbs": {
     "ariaLabel": "Breadcrumb",
@@ -57,7 +60,13 @@
       "contact": "Contact"
     },
     "dashboard": "Dashboard",
-    "order": "Order"
+    "order": "Order",
+    "language": "Language",
+    "languageEnglish": "English",
+    "languageFrench": "French",
+    "account": "Account",
+    "logout": "Log out",
+    "signIn": "Sign in"
   },
   "Footer": {
     "about": "Organic freeze-dried fruits, crunchy and 100% natural. The healthy snack that goes with you every day.",

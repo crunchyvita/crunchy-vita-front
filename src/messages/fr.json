@@ -12,7 +12,10 @@
     "wishlist": "Favoris",
     "account": "Compte",
     "logout": "Se deconnecter",
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "language": "Langue",
+    "languageEnglish": "Anglais",
+    "languageFrench": "Francais"
   },
   "Breadcrumbs": {
     "ariaLabel": "Fil d'Ariane",
@@ -57,7 +60,13 @@
       "contact": "Contact"
     },
     "dashboard": "Tableau de bord",
-    "order": "Commander"
+    "order": "Commander",
+    "language": "Langue",
+    "languageEnglish": "Anglais",
+    "languageFrench": "Francais",
+    "account": "Compte",
+    "logout": "Se deconnecter",
+    "signIn": "Se connecter"
   },
   "Footer": {
     "about": "Fruits lyophilises bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.",

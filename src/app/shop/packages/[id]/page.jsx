@@ -531,7 +531,7 @@ export default function PackageCustomizationPage() {
 
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 lg:grid lg:grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-0">
                 {fixedItems.map((item) => {
                   const product = item.productId || {};
                   const translatedProduct = getTranslatedProduct(product, locale);
@@ -540,7 +540,7 @@ export default function PackageCustomizationPage() {
                   return (
                     <div
                       key={item._id || item.productId?._id || item.productId}
-                      className="bg-white rounded-[24px] border shadow-sm overflow-hidden flex flex-col"
+                      className="shrink-0 w-[85%] sm:w-[48%] md:w-[38%] lg:w-auto snap-start bg-white rounded-[24px] border shadow-sm overflow-hidden flex flex-col"
                     >
                       <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
                         {img ? (
@@ -716,7 +716,7 @@ export default function PackageCustomizationPage() {
         <div className="grid lg:grid-cols-12 gap-8">
           {/* PRODUCT LIST */}
           <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 lg:grid lg:grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-0">
               {products.map((product) => {
                 const translatedProduct = getTranslatedProduct(product, locale);
                 const productName = translatedProduct.name;
@@ -737,7 +737,7 @@ export default function PackageCustomizationPage() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                     style={{ borderColor: isSelected ? COLORS.grass : "transparent" }}
-                    className="bg-white rounded-[24px] border-2 shadow-sm overflow-hidden flex flex-col transition-all"
+                    className="shrink-0 w-[85%] sm:w-[48%] md:w-[38%] lg:w-auto snap-start bg-white rounded-[24px] border-2 shadow-sm overflow-hidden flex flex-col transition-all"
                   >
                     <div className="relative aspect-square bg-gray-50 m-2 rounded-[18px] overflow-hidden">
                       {getProductImageUrl(product) ? (
