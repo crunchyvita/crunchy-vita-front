@@ -94,7 +94,8 @@ export default function HeaderHome() {
           </div>
 
           {/* Right Actions */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Cart Icon - visible on all screen sizes */}
             <Link
               href="/cart"
               className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -109,7 +110,8 @@ export default function HeaderHome() {
               ) : null}
             </Link>
 
-            <div className="relative shrink-0" ref={dropdownRef}>
+            {/* Profile Dropdown - Desktop only */}
+            <div className="hidden md:flex relative shrink-0" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -245,23 +247,6 @@ export default function HeaderHome() {
                 <img src="/assets/images/fr.png" alt="Français" className="w-6 h-6 rounded-full object-cover border border-slate-100" />
               {t('languageFrench')}
                 </Link>
-            </div>
-
-            <div className="px-4 pt-2">
-              <Link
-                href="/cart"
-                className="relative inline-flex p-2 hover:bg-gray-100 rounded-full transition-colors"
-                title="Cart"
-                aria-label={cartUnitCount > 0 ? `Cart (${cartUnitCount})` : 'Cart'}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <ShoppingCart size={18} className="text-gray-700 sm:w-5 sm:h-5" strokeWidth={2} />
-                {cartUnitCount > 0 ? (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-[1.05rem] min-w-[1.05rem] sm:h-4.5 sm:min-w-4.5 items-center justify-center rounded-full bg-red-500 px-0.5 sm:px-1 text-[9px] sm:text-[10px] font-bold tabular-nums leading-none text-white shadow-sm ring-2 ring-white">
-                    {cartUnitCount > 99 ? '99+' : cartUnitCount}
-                  </span>
-                ) : null}
-              </Link>
             </div>
           </div>
         )}
