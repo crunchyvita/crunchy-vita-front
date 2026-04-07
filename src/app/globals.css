@@ -58,7 +58,7 @@ html {
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
-      touch-action: pan-x pinch-zoom;
+      touch-action: manipulation;
       scroll-snap-type: x proximity;
       scroll-behavior: smooth;
       gap: 0.875rem;
