@@ -94,7 +94,7 @@ export default function HeaderHome() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-0.5 md:gap-4">
             {/* Cart Icon - visible on all screen sizes */}
             <Link
               href="/cart"
@@ -110,8 +110,8 @@ export default function HeaderHome() {
               ) : null}
             </Link>
 
-            {/* Profile Dropdown - Desktop only */}
-            <div className="hidden md:flex relative shrink-0" ref={dropdownRef}>
+            {/* Profile Dropdown */}
+            <div className="relative shrink-0" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -207,19 +207,19 @@ export default function HeaderHome() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition"
-          >
-            {isMenuOpen ? (
-              <X size={24} />
-            ) : (
-              <Menu size={24} />
-            )}
-          </button>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            >
+              {isMenuOpen ? (
+                <X size={24} />
+              ) : (
+                <Menu size={24} />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -236,18 +236,6 @@ export default function HeaderHome() {
                 {t(`nav.${link.key}`)}
               </Link>
             ))}
-
-            {/* Mobile Language Switcher */}
-            <div className="flex gap-4 px-4 py-2 border-t border-slate-100 mt-2 pt-4">
-                <Link href={pathname} locale="en" className="flex items-center gap-2 text-sm text-slate-600">
-                <img src="/assets/images/en.png" alt="English" className="w-6 h-6 rounded-full object-cover border border-slate-100" />
-              {t('languageEnglish')}
-                </Link>
-                <Link href={pathname} locale="fr" className="flex items-center gap-2 text-sm text-slate-600">
-                <img src="/assets/images/fr.png" alt="Français" className="w-6 h-6 rounded-full object-cover border border-slate-100" />
-              {t('languageFrench')}
-                </Link>
-            </div>
           </div>
         )}
       </div>

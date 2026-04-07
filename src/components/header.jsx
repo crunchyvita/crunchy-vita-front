@@ -231,18 +231,6 @@ export default function Header() {
               {t(`nav.${link.key}`)}
             </Link>
           ))}
-          
-          {/* Mobile Language Switcher */}
-          <div className="flex gap-4 px-4 py-2 border-t border-gray-50 mt-2 pt-4">
-             <Link href={pathnameWithQuery} locale="en" className="flex items-center gap-2 text-sm text-gray-600">
-               <img src="/assets/images/en.png" alt="English" className="w-6 h-6 rounded-full object-cover border border-gray-100" />
-               {t('languageEnglish')}
-             </Link>
-             <Link href={pathnameWithQuery} locale="fr" className="flex items-center gap-2 text-sm text-gray-600">
-               <img src="/assets/images/fr.png" alt="Français" className="w-6 h-6 rounded-full object-cover border border-gray-100" />
-               {t('languageFrench')}
-             </Link>
-          </div>
 
         </div>
       )}
