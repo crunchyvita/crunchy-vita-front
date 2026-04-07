@@ -50,17 +50,24 @@ html {
   }
 
   /* Mobile-only horizontal swipe list for package product cards */
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .mobile-swipe-track {
       display: flex;
       flex-direction: row;
       overflow-x: auto;
+      overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
       touch-action: pan-x;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
-      scroll-padding-left: 0.25rem;
+      gap: 1rem;
+      width: calc(100% + 2rem);
+      margin-left: -1rem;
+      margin-right: -1rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      scroll-padding-left: 1rem;
       padding-bottom: 0.5rem;
     }
 
@@ -75,8 +82,45 @@ html {
 
     .mobile-swipe-card {
       flex: 0 0 auto;
-      min-width: 40%;
-      max-width: 10.75rem;
+      width: calc(100vw - 2rem);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 768px) {
+    .mobile-swipe-track {
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      gap: 1rem;
+      width: calc(100% + 3rem);
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      scroll-padding-left: 1.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .mobile-swipe-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mobile-swipe-track {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .mobile-swipe-card {
+      flex: 0 0 auto;
+      width: calc(100vw - 3rem);
       scroll-snap-align: start;
       scroll-snap-stop: always;
     }

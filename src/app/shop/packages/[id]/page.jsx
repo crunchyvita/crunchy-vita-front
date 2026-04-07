@@ -531,7 +531,7 @@ export default function PackageCustomizationPage() {
 
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8">
-              <div className="mobile-swipe-track flex flex-row gap-6 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 md:overflow-visible md:snap-none xl:grid-cols-3">
+              <div className="mobile-swipe-track flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none xl:grid-cols-3">
                 {fixedItems.map((item) => {
                   const product = item.productId || {};
                   const translatedProduct = getTranslatedProduct(product, locale);
@@ -570,7 +570,7 @@ export default function PackageCustomizationPage() {
             </div>
 
             <div className="lg:col-span-4">
-              <div className="bg-white rounded-[32px] p-8 sticky top-24 shadow-xl border border-gray-100">
+              <div className="bg-white rounded-[32px] p-8 lg:sticky lg:top-24 shadow-xl border border-gray-100">
                 <div className="flex items-center gap-2 mb-8">
                   <ShoppingBag style={{ color: COLORS.grass }} />
                   <h2 className="text-xl font-black uppercase tracking-tight">{t("summary.title")}</h2>
@@ -716,7 +716,7 @@ export default function PackageCustomizationPage() {
         <div className="grid lg:grid-cols-12 gap-8">
           {/* PRODUCT LIST */}
           <div className="lg:col-span-8">
-            <div className="mobile-swipe-track flex flex-row gap-6 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 md:overflow-visible md:snap-none xl:grid-cols-3">
+            <div className="mobile-swipe-track flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:snap-none xl:grid-cols-3">
               {products.map((product) => {
                 const translatedProduct = getTranslatedProduct(product, locale);
                 const productName = translatedProduct.name;
@@ -869,7 +869,7 @@ export default function PackageCustomizationPage() {
 
           {/* SIDEBAR SUMMARY */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-[32px] p-8 sticky top-24 shadow-xl border border-gray-100">
+            <div className="bg-white rounded-[32px] p-8 lg:sticky lg:top-24 shadow-xl border border-gray-100">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-2">
                   <ShoppingBag style={{ color: COLORS.grass }} />
