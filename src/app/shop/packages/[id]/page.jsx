@@ -512,7 +512,7 @@ export default function PackageCustomizationPage() {
   // ===================== FIXED PACKAGE UI =====================
   if (packageData?.packageType === "FIXED") {
     return (
-      <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
+      <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen overflow-x-hidden">
         <HeaderAndBreadcrumbs />
         <PromoBadge />
 
@@ -696,7 +696,7 @@ export default function PackageCustomizationPage() {
 
   // ===================== CUSTOM PACKAGE UI =====================
   return (
-    <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen">
+    <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen overflow-x-hidden">
       <HeaderAndBreadcrumbs />
       <PromoBadge />
 
