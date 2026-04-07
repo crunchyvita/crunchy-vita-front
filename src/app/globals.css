@@ -49,7 +49,7 @@ html {
     flex: 3 1 0%;
   }
 
-  /* Mobile-only horizontal swipe list for package product cards */
+  /* Mobile carousel for package product cards - shows 1 card at a time */
   @media (max-width: 640px) {
     .mobile-swipe-track {
       display: flex;
@@ -62,13 +62,11 @@ html {
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       gap: 1rem;
-      width: calc(100% + 2rem);
-      margin-left: -1rem;
-      margin-right: -1rem;
-      padding-left: 1rem;
-      padding-right: 1rem;
-      scroll-padding-left: 1rem;
-      padding-bottom: 0.5rem;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      scroll-padding: 0;
+      scroll-padding-bottom: 0.5rem;
     }
 
     .mobile-swipe-track::-webkit-scrollbar {
@@ -82,12 +80,13 @@ html {
 
     .mobile-swipe-card {
       flex: 0 0 auto;
-      width: calc(100vw - 2rem);
+      width: 100%;
       scroll-snap-align: start;
       scroll-snap-stop: always;
     }
   }
 
+  /* Tablet carousel - shows ~1.5 cards at a time for preview of next card */
   @media (min-width: 641px) and (max-width: 768px) {
     .mobile-swipe-track {
       display: flex;
@@ -100,13 +99,11 @@ html {
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       gap: 1rem;
-      width: calc(100% + 3rem);
-      margin-left: -1.5rem;
-      margin-right: -1.5rem;
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-      scroll-padding-left: 1.5rem;
-      padding-bottom: 0.5rem;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      scroll-padding: 0;
+      scroll-padding-bottom: 0.5rem;
     }
 
     .mobile-swipe-track::-webkit-scrollbar {
@@ -120,7 +117,7 @@ html {
 
     .mobile-swipe-card {
       flex: 0 0 auto;
-      width: calc(100vw - 3rem);
+      width: 100%;
       scroll-snap-align: start;
       scroll-snap-stop: always;
     }
