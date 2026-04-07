@@ -49,6 +49,39 @@ html {
     flex: 3 1 0%;
   }
 
+  /* Mobile-only horizontal swipe list for package product cards */
+  @media (max-width: 768px) {
+    .mobile-swipe-track {
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scroll-padding-left: 0.25rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .mobile-swipe-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mobile-swipe-track {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .mobile-swipe-card {
+      flex: 0 0 auto;
+      min-width: 40%;
+      max-width: 10.75rem;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .product-card-actions {
       opacity: 0;
