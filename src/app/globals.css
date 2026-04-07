@@ -86,16 +86,16 @@ html {
 
   @media (max-width: 640px) {
     .mobile-swipe-card {
-      width: calc(100% - 1.5rem);
-      min-width: calc(100% - 1.5rem);
-      max-width: calc(100% - 1.5rem);
+      width: clamp(14.5rem, 76%, 18rem);
+      min-width: clamp(14.5rem, 76%, 18rem);
+      max-width: clamp(14.5rem, 76%, 18rem);
     }
   }
 
   @media (min-width: 641px) and (max-width: 768px) {
     .mobile-swipe-card {
-      width: min(78%, 24rem);
-      min-width: min(78%, 24rem);
+      width: clamp(16rem, 58%, 20rem);
+      min-width: clamp(16rem, 58%, 20rem);
     }
   }
 
