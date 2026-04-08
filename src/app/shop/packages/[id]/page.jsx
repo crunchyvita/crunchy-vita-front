@@ -537,6 +537,9 @@ export default function PackageCustomizationPage() {
                   const translatedProduct = getTranslatedProduct(product, locale);
                   const productName = translatedProduct.name || product.name || "Produit";
                   const img = getProductImageUrl(product);
+                  const avgRating = product.ratings?.length
+                    ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length
+                    : null;
                   return (
                     <div
                       key={item._id || item.productId?._id || item.productId}
@@ -553,6 +556,29 @@ export default function PackageCustomizationPage() {
                       </div>
 
                       <div className="p-5 flex-1 flex flex-col">
+                        {avgRating && (
+                          <div className="flex items-center gap-1 mb-3">
+                            <div className="flex items-center gap-0.5">
+                              <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter mr-2">
+                                {avgRating.toFixed(1)}
+                              </span>
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < Math.round(avgRating)
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "fill-gray-200 text-gray-200"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[12px] font-bold text-gray-400 uppercase tracking-tighter ml-2">
+                              ({product.ratings.length})
+                            </span>
+                          </div>
+                        )}
+
                         <h3 className="font-bold font-[agrandir] text-[#556822] text-lg leading-tight truncate">
                           {productName}
                         </h3>
