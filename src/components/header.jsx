@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useRouter, usePathname } from '@/navigation';
 import { useSearchParams } from 'next/navigation';
-import { LogOut, ShoppingCart, Heart, User, Package, Menu, X, Globe, ChevronDown } from 'lucide-react';
+import { LogOut, ShoppingCart, Heart, User, Package, Menu, X, Globe, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/hooks/useCart';
 import { useTranslations, useLocale } from 'next-intl';
@@ -25,6 +25,7 @@ export default function Header() {
   const locale = useLocale();
   const t = useTranslations('Header');
   const { cartItems, loadCart } = useCart();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
   const pathnameWithQuery = useMemo(() => {
     const qs = searchParams?.toString() || '';
     return qs ? `${pathname}?${qs}` : pathname;
@@ -149,6 +150,19 @@ export default function Header() {
                       <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                     </div>
+                    ) : null}
+
+                    {isAdmin ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowDropdown(false);
+                          router.push('/admin/dashboard');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <LayoutDashboard size={18} /> {t('dashboard')}
+                      </button>
                     ) : null}
 
                     <button

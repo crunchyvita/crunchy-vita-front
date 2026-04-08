@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, usePathname, useRouter } from '@/navigation';
 import Image from 'next/image';
 // Added Globe and ChevronDown
-import { Menu, X, ShoppingCart, ChevronDown, Globe, User, LogOut } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, Globe, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +25,7 @@ export default function HeaderHome() {
   const locale = useLocale();
   const pathname = usePathname();
   const { cartItems, loadCart } = useCart();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
 
   const cartUnitCount = useMemo(
     () =>
@@ -129,6 +130,19 @@ export default function HeaderHome() {
                       <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                     </div>
+                  ) : null}
+
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowDropdown(false);
+                        router.push('/admin/dashboard');
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <LayoutDashboard size={18} /> {t('dashboard')}
+                    </button>
                   ) : null}
 
                   <button
