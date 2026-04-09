@@ -21,6 +21,13 @@ import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navi
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
+import PhoneInput, {
+  getCountries,
+  getCountryCallingCode,
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from 'react-phone-number-input';
+import flags from 'react-phone-number-input/flags';
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -109,6 +116,12 @@ const RELAY_COUNTRY_OPTIONS = [
   { value: 'Portugal', label: 'Portugal' },
   { value: 'Royaume-Uni', label: 'Royaume-Uni' },
 ];
+
+const toFlagEmoji = (countryCode) => {
+  const code = String(countryCode || '').toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code)) return '';
+  return String.fromCodePoint(...[...code].map((char) => 127397 + char.charCodeAt(0)));
+};
 
 const PaymentForm = ({
   locale,
@@ -343,6 +356,9 @@ const CheckoutPage = () => {
   // ----------------------------
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState('FR');
+  const [isPhoneCountryMenuOpen, setIsPhoneCountryMenuOpen] = useState(false);
+  const phoneCountryMenuRef = useRef(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -402,6 +418,42 @@ const CheckoutPage = () => {
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
+
+  const phoneCountryDisplayNames = useMemo(() => {
+    try {
+      return new Intl.DisplayNames([locale === 'fr' ? 'fr' : 'en'], { type: 'region' });
+    } catch {
+      return null;
+    }
+  }, [locale]);
+
+  const phoneCountryOptions = useMemo(
+    () =>
+      getCountries().map((code) => ({
+        code,
+        name: phoneCountryDisplayNames?.of(code) || code,
+        callingCode: getCountryCallingCode(code),
+      })),
+    [phoneCountryDisplayNames]
+  );
+
+  const selectedPhoneCountryName =
+    phoneCountryOptions.find((entry) => entry.code === phoneCountry)?.name || phoneCountry;
+  const SelectedPhoneCountryFlag = flags?.[phoneCountry];
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!phoneCountryMenuRef.current) return;
+      if (!phoneCountryMenuRef.current.contains(event.target)) {
+        setIsPhoneCountryMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -563,6 +615,48 @@ const CheckoutPage = () => {
   };
 
   // Simple validation for UI
+  const isPhoneValid = Boolean(phone) && isValidPhoneNumber(String(phone));
+
+  const handlePhoneChange = (nextValue) => {
+    const normalized = String(nextValue || '');
+    setPhone(normalized);
+
+    if (!normalized.startsWith('+')) return;
+
+    try {
+      const parsed = parsePhoneNumber(normalized);
+      const nextCountry = parsed?.country;
+      if (nextCountry && nextCountry !== phoneCountry) {
+        setPhoneCountry(nextCountry);
+      }
+    } catch {
+      // Ignore partial input while typing.
+    }
+  };
+
+  const handlePhoneCountrySelect = (nextCountryCode) => {
+    const code = String(nextCountryCode || '').toUpperCase();
+    if (!code) return;
+
+    const nextCallingCode = `+${getCountryCallingCode(code)}`;
+    setPhoneCountry(code);
+    setIsPhoneCountryMenuOpen(false);
+
+    // Keep behavior explicit: selecting a country should immediately reflect its dialing code.
+    setPhone((current) => {
+      const currentValue = String(current || '').trim();
+      if (!currentValue) return nextCallingCode;
+
+      try {
+        const parsed = parsePhoneNumber(currentValue);
+        const nationalNumber = String(parsed?.nationalNumber || '').trim();
+        return nationalNumber ? `${nextCallingCode}${nationalNumber}` : nextCallingCode;
+      } catch {
+        return nextCallingCode;
+      }
+    });
+  };
+
   const isHomeAddressValid =
     country.trim() &&
     street.trim() &&
@@ -571,14 +665,14 @@ const CheckoutPage = () => {
 
   const isHomeValid =
     email.trim() &&
-    phone.trim() &&
+    isPhoneValid &&
     firstName.trim() &&
     lastName.trim() &&
     isHomeAddressValid;
 
   const isRelayValid =
     email.trim() &&
-    phone.trim() &&
+    isPhoneValid &&
     firstName.trim() &&
     lastName.trim() &&
     !!selectedRelay;
@@ -1199,14 +1293,67 @@ const CheckoutPage = () => {
                   <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                     {(t('contact.phoneLabel') || 'Telephone')} <span aria-hidden="true">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
-                    required
-                    className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
-                  />
+                  <div className="phone-input">
+                    <div className="phone-country-picker" ref={phoneCountryMenuRef}>
+                      <button
+                        type="button"
+                        className="phone-country-trigger"
+                        onClick={() => setIsPhoneCountryMenuOpen((open) => !open)}
+                        aria-haspopup="listbox"
+                        aria-expanded={isPhoneCountryMenuOpen}
+                        aria-label={selectedPhoneCountryName}
+                      >
+                        <span className="phone-country-selected-flag" aria-hidden="true">
+                          {SelectedPhoneCountryFlag ? (
+                            <SelectedPhoneCountryFlag title={selectedPhoneCountryName} />
+                          ) : (
+                            toFlagEmoji(phoneCountry)
+                          )}
+                        </span>
+                        <span className="phone-country-arrow">▾</span>
+                      </button>
+                      {isPhoneCountryMenuOpen ? (
+                        <div className="phone-country-menu" role="listbox">
+                          {phoneCountryOptions.map((option) => (
+                            <button
+                              key={option.code}
+                              type="button"
+                              className={`phone-country-option ${
+                                option.code === phoneCountry ? 'is-active' : ''
+                              }`}
+                              onClick={() => handlePhoneCountrySelect(option.code)}
+                            >
+                              <span className="phone-country-flag">
+                                {(() => {
+                                  const Flag = flags?.[option.code];
+                                  return Flag ? <Flag title={option.name} /> : toFlagEmoji(option.code);
+                                })()}
+                              </span>
+                              <span className="phone-country-name">{option.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <PhoneInput
+                      country={phoneCountry}
+                      international
+                      withCountryCallingCode
+                      limitMaxLength={true}
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
+                      required
+                      countrySelectComponent={() => null}
+                      className="phone-input-field"
+                    />
+                  </div>
+                  {phone && !isPhoneValid ? (
+                    <p className="mt-2 text-sm text-red-600">
+                      {t('contact.phoneInvalid') || 'Numero de telephone invalide'}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </section>
@@ -1986,6 +2133,150 @@ const CheckoutPage = () => {
       </main>
 
       <Footer />
+      <style jsx global>{`
+        .phone-input {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1rem;
+          background: #f9fafb;
+          border: 1px solid transparent;
+          border-radius: 0.5rem;
+          transition: all 0.2s ease;
+          position: relative;
+        }
+
+        .phone-input:focus-within {
+          background: #ffffff;
+          border-color: #556822;
+        }
+
+        .phone-country-picker {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .phone-country-trigger {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          border: 0;
+          background: transparent;
+          color: #111827;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 0;
+        }
+
+        .phone-country-selected-flag {
+          width: 1rem;
+          height: 0.75rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          border-radius: 2px;
+          box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+          line-height: 1;
+          font-size: 0.8rem;
+        }
+
+        .phone-country-selected-flag svg,
+        .phone-country-selected-flag img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .phone-country-arrow {
+          color: #6b7280;
+          font-size: 0.8rem;
+        }
+
+        .phone-country-menu {
+          position: absolute;
+          z-index: 40;
+          left: 0;
+          top: calc(100% + 0.4rem);
+          width: 17rem;
+          max-height: 16rem;
+          overflow: auto;
+          border-radius: 0.5rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+
+        .phone-country-option {
+          width: 100%;
+          border: 0;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          text-align: left;
+          padding: 0.45rem 0.6rem;
+          cursor: pointer;
+          font-size: 0.88rem;
+        }
+
+        .phone-country-option:hover,
+        .phone-country-option.is-active {
+          background: #f3f4f6;
+        }
+
+        .phone-country-flag {
+          width: 1rem;
+          height: 0.75rem;
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          border-radius: 2px;
+          box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+          font-size: 0.8rem;
+          line-height: 1;
+        }
+
+        .phone-country-flag svg,
+        .phone-country-flag img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .phone-country-name {
+          flex: 1;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .phone-input-field {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .phone-input-field .PhoneInputCountry {
+          display: none;
+        }
+
+        .phone-input-field .PhoneInputInput {
+          flex: 1;
+          min-width: 0;
+          border: 0;
+          outline: none;
+          background: transparent;
+          font-size: 0.95rem;
+          line-height: 1.25rem;
+        }
+      `}</style>
       </div>
     </CheckoutProvider>
   );

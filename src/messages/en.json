@@ -301,7 +301,6 @@
   },
   "Contact": {
     "title": "A question?",
-    "titleAccent": "Contact us",
     "subtitle": "Our team is here to answer all your questions about our products and our approach.",
     "type": {
       "individual": "Individual",
@@ -912,7 +911,8 @@
       "emailLabel": "Email Address",
       "emailPlaceholder": "email@example.com",
       "phoneLabel": "Phone",
-      "phonePlaceholder": "+33 6 00 00 00 00"
+      "phonePlaceholder": "+33 6 00 00 00 00",
+      "phoneInvalid": "Invalid phone number"
     },
     "shipping": {
       "title": "Shipping details",
