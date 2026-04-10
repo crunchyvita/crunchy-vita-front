@@ -244,7 +244,7 @@ function OrderDetailContent() {
             </h2>
             {addr ? (
               <p className="text-gray-600 text-sm leading-relaxed font-[Maison_Neue]">
-                {[addr.line1, addr.line2].filter(Boolean).join(', ')}
+                {[addr.street || addr.line1, addr.line2].filter(Boolean).join(', ')}
                 <br />
                 {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
                 {addr.country ? (

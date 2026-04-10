@@ -285,7 +285,7 @@ export default function CheckoutSuccessPage() {
                 {addr && (
                   <div className="text-sm text-gray-600 leading-relaxed">
                     <p>
-                      {[addr.line1, addr.line2].filter(Boolean).join(', ')}<br />
+                      {[addr.street || addr.line1, addr.line2].filter(Boolean).join(', ')}<br />
                       {[addr.postalCode, addr.city].filter(Boolean).join(' ')}<br />
                       {addr.country || 'France'}
                     </p>

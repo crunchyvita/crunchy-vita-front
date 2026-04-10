@@ -179,7 +179,7 @@ function AdminOrderDetailInner() {
 									<p className="text-sm text-slate-700"><span className="font-medium">{od("deliveryType")}</span> {order.deliveryType || "-"}</p>
 									{shippingAddress ? (
 										<div className="mt-2 text-sm text-slate-700 leading-relaxed">
-											<p>{shippingAddress.line1 || "-"}</p>
+											<p>{shippingAddress.street || "-"}</p>
 											<p>{[shippingAddress.postalCode, shippingAddress.city].filter(Boolean).join(" ") || "-"}</p>
 											<p>{shippingAddress.country || "-"}</p>
 										</div>
@@ -193,6 +193,12 @@ function AdminOrderDetailInner() {
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("offer")}</span> {boxtal?.shippingOfferCode || od("lineFallback")}
 									</p>
+									{boxtal?.shippingPrice != null ? (
+										<p className="text-sm text-slate-700">
+											<span className="font-medium">{od("shipping")}</span>{" "}
+											{formatMoney(boxtal.shippingPrice, boxtalShipment?.selectedOffer?.currency || order.currency, numberLocale)}
+										</p>
+									) : null}
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("boxtalRef")}</span>{" "}
 										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}

@@ -16,8 +16,7 @@ const RELAY_PAGE_SIZE = 12;
 function relayRowKey(point) {
   const id = String(point?.id || point?._id || '').trim();
   const carrier = String(point?.carrier || '').trim().toUpperCase();
-  const offer = String(point?.suggestedShippingOfferCode || point?.matchedRelayOfferCode || '').trim();
-  return `${id}::${carrier}::${offer}`;
+  return `${id}::${carrier}`;
 }
 
 function money(value, currency = 'EUR', localeTag = 'en-US') {
@@ -112,9 +111,7 @@ function InnerPage() {
         const dType = String(offersRes?.data?.deliveryType || o?.deliveryType || 'home');
         setParcelSnapshot(offersRes?.data?.parcelSnapshot || null);
 
-        const savedAdmin = o?.adminShippingOffer && typeof o.adminShippingOffer === 'object' ? o.adminShippingOffer : null;
         const savedCode =
-          savedAdmin?.shippingOfferCode ||
           o?.boxtal?.shippingOfferCode ||
           o?.clientShippingOfferCode ||
           '';
@@ -142,8 +139,7 @@ function InnerPage() {
                 String(p.id || p._id) === rid &&
                 String(p.carrier || '').trim().toUpperCase() === rCarrier.toUpperCase()
             );
-          const byClient = nextPoints.find((p) => p.clientSelected);
-          const pick = exact || byClient || nextPoints[0];
+          const pick = exact || nextPoints[0];
           setSelectedRelayKey(pick ? relayRowKey(pick) : '');
         } else {
           setSelectedRelayKey('');
@@ -215,19 +211,12 @@ function InnerPage() {
   const persistOfferSelection = async () => {
     if (deliveryType === 'relay') {
       if (!selectedRelayPoint) throw new Error('Select a relay point');
-      const code = String(
-        selectedRelayPoint.suggestedShippingOfferCode ||
-          selectedRelayPoint.matchedRelayOfferCode ||
-          ''
-      ).trim();
-      if (!code) {
-        throw new Error('Could not determine the shipping offer code for this carrier.');
-      }
+      const relayOfferCode = String(selectedRelayPoint.shippingOfferCode || '').trim();
+      if (!relayOfferCode) throw new Error('No shipping offer available for this relay point');
       const { raw: _raw, ...relayRest } = selectedRelayPoint;
       await orderAPI.selectAdminShippingOffer(id, {
-        shippingOfferCode: code,
-        shippingOfferId:
-          selectedRelayPoint.suggestedShippingOfferId || selectedRelayPoint.shippingOfferId || null,
+        shippingOfferCode: relayOfferCode,
+        shippingOfferId: selectedRelayPoint.shippingOfferId || null,
         carrier: selectedRelayPoint.carrier || null,
         relayPoint: relayRest,
       });
@@ -270,9 +259,7 @@ function InnerPage() {
   );
 
   const canSaveHome = Boolean(selectedOfferCode && selectedOffer);
-  const canSaveRelay = Boolean(
-    selectedRelayPoint && (selectedRelayPoint.suggestedShippingOfferCode || selectedRelayPoint.matchedRelayOfferCode)
-  );
+  const canSaveRelay = Boolean(selectedRelayPoint?.shippingOfferCode);
   const canSave = deliveryType === 'relay' ? canSaveRelay : canSaveHome;
   const interactive = !shippingOfferLocked;
 
@@ -533,13 +520,6 @@ function InnerPage() {
                               <MapPin className="h-3.5 w-3.5 shrink-0" />
                               {[point.street, point.postalCode, point.city].filter(Boolean).join(', ')}
                             </p>
-                            {active &&
-                            (point.suggestedShippingOfferCode || point.matchedRelayOfferCode) ? (
-                              <p className="text-[11px] text-slate-400 font-mono mt-2 break-all">
-                                {ts('offerPrefix')}{' '}
-                                {point.suggestedShippingOfferCode || point.matchedRelayOfferCode}
-                              </p>
-                            ) : null}
                           </div>
                         </div>
                         <div className="text-right shrink-0 pt-0.5">

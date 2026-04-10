@@ -754,7 +754,7 @@ const CheckoutPage = () => {
 
     if (deliveryType === 'home') {
       payload.shippingAddress = {
-        line1: street.trim(),
+        street: street.trim(),
         city: city.trim(),
         postalCode: postalCode.trim(),
         country: country.trim(),
@@ -762,7 +762,7 @@ const CheckoutPage = () => {
     } else {
       payload.relayPoint = selectedRelay;
       payload.shippingAddress = {
-        line1: selectedRelay?.street || '',
+        street: selectedRelay?.street || '',
         city: selectedRelay?.city || '',
         postalCode: selectedRelay?.postalCode || '',
         country: selectedRelay?.country || relayCountry || country || '',
