@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
-import { ShoppingBag, ArrowRight } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Gift } from 'lucide-react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -139,6 +139,29 @@ function OrdersContent() {
     return frName || enName || '—';
   };
 
+  const isLineFreeGift = (line, order) => {
+    if (!line) return false;
+
+    const unit = Number(line.unitPrice);
+    const totalLine = Number(line.lineTotal);
+    const isZeroPriced =
+      (Number.isFinite(unit) && unit === 0) || (Number.isFinite(totalLine) && totalLine === 0);
+
+    const promoFreeItem = order?.promoDetails?.freeItem || null;
+    if (promoFreeItem && typeof promoFreeItem === 'object') {
+      const promoType = String(promoFreeItem.type || '').toUpperCase();
+      const promoId = promoFreeItem.id ? String(promoFreeItem.id) : '';
+      if (promoType === 'PRODUCT') {
+        return Boolean(promoId && String(line.productId || '') === promoId && isZeroPriced);
+      }
+      if (promoType === 'PACKAGE') {
+        return Boolean(promoId && String(line.packageId || '') === promoId && isZeroPriced);
+      }
+    }
+
+    return isZeroPriced;
+  };
+
   // Recalculate pagination for filtered results
   const filteredTotalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const filteredStartIdx = (currentPage - 1) * itemsPerPage;
@@ -272,14 +295,21 @@ function OrdersContent() {
                           key={i}
                           className="flex gap-3 sm:gap-4 items-center py-3 border-b border-gray-100 last:border-b-0 last:pb-0 first:pt-0"
                         >
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-50 overflow-hidden rounded-md border border-gray-100 shrink-0">
-                            {line.imageUrl ? (
-                              <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <ShoppingBag size={20} className="text-gray-300" />
-                              </div>
-                            )}
+                          <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-visible">
+                            <div className="h-full w-full bg-gray-50 overflow-hidden rounded-md border border-gray-100">
+                              {line.imageUrl ? (
+                                <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center">
+                                  <ShoppingBag size={20} className="text-gray-300" />
+                                </div>
+                              )}
+                            </div>
+                            {isLineFreeGift(line, order) ? (
+                              <span className="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm z-10">
+                                <Gift size={12} />
+                              </span>
+                            ) : null}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-[#556822] text-base sm:text-lg break-words hyphens-auto">
