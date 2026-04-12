@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { useParams } from 'next/navigation';
-import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Gift } from 'lucide-react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -159,6 +159,28 @@ function OrderDetailContent() {
   }
 
   const addr = order.shippingAddress;
+  const promoFreeItem = order?.promoDetails?.freeItem || null;
+  const isLineFreeGift = (line) => {
+    if (!line) return false;
+
+    const unit = Number(line.unitPrice);
+    const totalLine = Number(line.lineTotal);
+    const isZeroPriced =
+      (Number.isFinite(unit) && unit === 0) || (Number.isFinite(totalLine) && totalLine === 0);
+
+    if (promoFreeItem && typeof promoFreeItem === 'object') {
+      const promoType = String(promoFreeItem.type || '').toUpperCase();
+      const promoId = promoFreeItem.id ? String(promoFreeItem.id) : '';
+      if (promoType === 'PRODUCT') {
+        return Boolean(promoId && String(line.productId || '') === promoId && isZeroPriced);
+      }
+      if (promoType === 'PACKAGE') {
+        return Boolean(promoId && String(line.packageId || '') === promoId && isZeroPriced);
+      }
+    }
+
+    return isZeroPriced;
+  };
   const getLocalizedLineName = (line) => {
     const frName = String(line?.name || '').trim();
     const enName = String(line?.name_en || '').trim();
@@ -187,14 +209,21 @@ function OrderDetailContent() {
             <ul className="divide-y divide-gray-100">
               {(order.items || []).map((line, i) => (
                 <li key={i} className="flex gap-3 sm:gap-4 py-4 first:pt-0 items-start">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-md bg-gray-50 overflow-hidden border border-gray-100 shrink-0">
-                    {line.imageUrl ? (
-                      <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <ShoppingBag size={22} className="text-gray-300" />
-                      </div>
-                    )}
+                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-visible">
+                    <div className="h-full w-full rounded-md bg-gray-50 overflow-hidden border border-gray-100">
+                      {line.imageUrl ? (
+                        <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <ShoppingBag size={22} className="text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                    {isLineFreeGift(line) ? (
+                      <span className="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E10C69] text-white shadow-sm z-10">
+                        <Gift size={12} />
+                      </span>
+                    ) : null}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-[#556822] text-base sm:text-lg break-words">{getLocalizedLineName(line)}</p>
@@ -244,7 +273,7 @@ function OrderDetailContent() {
             </h2>
             {addr ? (
               <p className="text-gray-600 text-sm leading-relaxed font-[Maison_Neue]">
-                {[addr.line1, addr.line2].filter(Boolean).join(', ')}
+                {[addr.street || addr.line1, addr.line2].filter(Boolean).join(', ')}
                 <br />
                 {[addr.postalCode, addr.city].filter(Boolean).join(' ')}
                 {addr.country ? (
