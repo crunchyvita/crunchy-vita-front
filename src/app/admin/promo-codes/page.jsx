@@ -122,9 +122,11 @@ export default function PromoCodesPage() {
 
     return promoCodes.filter((code) => {
       const name = String(code?.name || '').toLowerCase();
-      const codeValue = String(code?.code || '').toLowerCase();
+      const rouletteCodes = Array.isArray(code?.rouletteGeneratedCodes)
+        ? code.rouletteGeneratedCodes.map((entry) => String(entry?.code || '').toLowerCase()).join(' ')
+        : '';
       const discountType = String(code?.discountType || '').toLowerCase();
-      return name.includes(q) || codeValue.includes(q) || discountType.includes(q);
+      return name.includes(q) || rouletteCodes.includes(q) || discountType.includes(q);
     });
   }, [promoCodes, search]);
 
@@ -371,7 +373,7 @@ export default function PromoCodesPage() {
         }}
         onConfirm={handleDelete}
         title={tp('deleteTitle')}
-        itemName={selectedCode?.name || selectedCode?.code}
+        itemName={selectedCode?.name || '-'}
         description={tp('deleteDescription')}
         isDeleting={deleting}
       />

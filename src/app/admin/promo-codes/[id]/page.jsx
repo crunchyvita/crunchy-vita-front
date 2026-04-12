@@ -34,7 +34,6 @@ export default function PromoCodeDetailPage() {
 
   const [formData, setFormData] = useState({
     name: '',
-    code: '',
     discountType: 'PERCENTAGE',
     discountValue: '',
     freeItemType: 'PRODUCT',
@@ -89,7 +88,6 @@ export default function PromoCodeDetailPage() {
         const exp = result.data.expirationDate;
         setFormData({
           name: result.data.name || '',
-          code: result.data.code,
           discountType: result.data.discountType,
           discountValue: result.data.discountValue.toString(),
           freeItemType: result.data.freeItemType || 'PRODUCT',
@@ -188,7 +186,7 @@ export default function PromoCodeDetailPage() {
               {t('back')}
             </Link>
             <div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-              {formData.name || formData.code}
+              {formData.name || '-'}
               <span className={`rounded-full px-3 py-1 text-xs font-medium ${
                 formData.isActive && !isExpired ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
               }`}>
