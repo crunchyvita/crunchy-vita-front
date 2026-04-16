@@ -14,6 +14,7 @@ const Wheel = dynamic(
 
 const BRAND_GREEN = '#556822';
 const BRAND_PINK = '#E10C69';
+const LOSS_SEGMENT_VALUE = '__ROULETTE_LOSS__';
 
 export default function CrunchyRoulette({
   isOpen,
@@ -35,7 +36,7 @@ export default function CrunchyRoulette({
   const [rewards, setRewards] = useState([]);
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState('');
-  const [winResult, setWinResult] = useState(null);
+  const [spinResult, setSpinResult] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState(userEmail || '');
@@ -51,7 +52,7 @@ export default function CrunchyRoulette({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !winResult) return;
+    if (!isOpen || spinResult?.outcome !== 'won') return;
 
     const canvas = confettiCanvasRef.current;
     if (!canvas) return;
@@ -131,7 +132,7 @@ export default function CrunchyRoulette({
       window.removeEventListener('resize', resizeCanvas);
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     };
-  }, [isOpen, winResult]);
+  }, [isOpen, spinResult]);
 
   const fetchRewards = async () => {
     setRewardsLoading(true);
@@ -145,9 +146,12 @@ export default function CrunchyRoulette({
       const result = await response.json();
 
       if (result.success && result.data.length > 0) {
-        const doubled = [...result.data, ...result.data];
-        const formattedRewards = doubled.map((reward, index) => ({
-          option: reward,
+        const firstHalf = [...result.data, LOSS_SEGMENT_VALUE];
+        const withLossSegment = [...firstHalf, ...firstHalf];
+        const formattedRewards = withLossSegment.map((reward, index) => ({
+          option: reward === LOSS_SEGMENT_VALUE ? t('loseSegment') : reward,
+          value: reward,
+          isLoss: reward === LOSS_SEGMENT_VALUE,
           style: {
             backgroundColor: index % 2 === 0 ? BRAND_GREEN : BRAND_PINK,
             textColor: '#FFFFFF',
@@ -175,6 +179,7 @@ export default function CrunchyRoulette({
     if (rewards.length === 0 || isSpinning) return;
 
     setError('');
+    setSpinResult(null);
     const newPrizeNumber = Math.floor(Math.random() * rewards.length);
 
     // Keep both state and ref in sync
@@ -191,9 +196,11 @@ export default function CrunchyRoulette({
 
     // Use ref — guaranteed correct value regardless of React re-render timing
     const safePrizeNumber = prizeNumberRef.current;
-    const winningReward = rewards[safePrizeNumber].option;
+    const selectedSegment = rewards[safePrizeNumber];
+    const selectedReward = selectedSegment?.option;
+    const isLoss = selectedSegment?.isLoss === true || selectedSegment?.value === LOSS_SEGMENT_VALUE;
 
-    console.log('🛑 Wheel stopped | prizeNumber:', safePrizeNumber, '| reward:', winningReward);
+    console.log('🛑 Wheel stopped | prizeNumber:', safePrizeNumber, '| reward:', selectedReward, '| isLoss:', isLoss);
 
     try {
       const response = await fetch(`${apiBaseUrl}/roulette/spin`, {
@@ -203,15 +210,28 @@ export default function CrunchyRoulette({
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ email, selectedReward: winningReward }),
+        body: JSON.stringify({
+          email,
+          selectedReward: isLoss ? null : selectedReward,
+          isLoss,
+        }),
       });
       const result = await response.json();
 
       const generatedCode = result?.data?.code;
-      if (result.success && generatedCode) {
-        setWinResult({
+      if (result.success && result?.data?.outcome === 'lost') {
+        setSpinResult({
+          outcome: 'lost',
+        });
+
+        if (onSpinSuccess) {
+          onSpinSuccess();
+        }
+      } else if (result.success && generatedCode) {
+        setSpinResult({
+          outcome: 'won',
           code: generatedCode,
-          reward: winningReward,
+          reward: result?.data?.reward || selectedReward,
         });
 
         if (onSpinSuccess) {
@@ -219,12 +239,12 @@ export default function CrunchyRoulette({
         }
       } else {
         setError(result.message || t('spinError'));
-        setWinResult(null);
+        setSpinResult(null);
       }
     } catch (err) {
       console.error('Error submitting spin:', err);
       setError(t('codeError'));
-      setWinResult(null);
+      setSpinResult(null);
     }
   };
 
@@ -234,7 +254,7 @@ export default function CrunchyRoulette({
     <AnimatePresence mode="wait">
       {isOpen && (
         <>
-          {winResult && (
+          {spinResult?.outcome === 'won' && (
             <canvas
               ref={confettiCanvasRef}
               className="fixed inset-0 z-110 pointer-events-none"
@@ -285,7 +305,7 @@ export default function CrunchyRoulette({
               {/* Decorative header attachment line */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#556822] via-[#E10C69] to-[#556822]" />
 
-              <div className="px-6 py-10 md:px-10 md:py-12">{!winResult ? (
+              <div className="px-6 py-10 md:px-10 md:py-12">{!spinResult ? (
               <div className="flex flex-col md:flex-row items-center justify-around gap-10">
 
                 {/* Wheel Section */}
@@ -393,45 +413,59 @@ export default function CrunchyRoulette({
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-center py-4"
               >
-                <div className="mb-4">
-                  <div style={{ color: BRAND_PINK }} className="flex justify-center mb-2">
-                    <Gift size={48} />
-                  </div>
-                  <h3
-                    style={{ color: BRAND_PINK }}
-                    className="text-3xl font-black uppercase italic"
-                  >
-                    {t('wonTitle')}
-                  </h3>
-                  <p className="text-slate-600">
-                    {t('youWon')}{' '}
-                    <span className="font-bold text-black">{winResult.reward}</span>
-                  </p>
-                </div>
+                {spinResult.outcome === 'won' ? (
+                  <>
+                    <div className="mb-4">
+                      <div style={{ color: BRAND_PINK }} className="flex justify-center mb-2">
+                        <Gift size={48} />
+                      </div>
+                      <h3
+                        style={{ color: BRAND_PINK }}
+                        className="text-3xl font-black uppercase italic"
+                      >
+                        {t('wonTitle')}
+                      </h3>
+                      <p className="text-slate-600">
+                        {t('youWon')}{' '}
+                        <span className="font-bold text-black">{spinResult.reward}</span>
+                      </p>
+                    </div>
 
-                <div
-                  onClick={() => {
-                    navigator.clipboard.writeText(winResult.code);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
-                  className="max-w-md mx-auto border-4 border-dashed rounded-2xl p-6 bg-slate-50 cursor-pointer transition-all hover:bg-white relative overflow-hidden"
-                  style={{ borderColor: BRAND_GREEN }}
-                >
-                  <span
-                    style={{ color: BRAND_GREEN }}
-                    className="text-2xl font-mono font-black tracking-widest uppercase"
-                  >
-                    {winResult.code}
-                  </span>
-                  <div className="mt-2 flex items-center justify-center gap-2 text-slate-400 font-bold uppercase text-xs">
-                    {copied ? (
-                      <><Check size={16} className="text-green-500" /> {t('copied')}</>
-                    ) : (
-                      <><Copy size={16} /> {t('copyHint')}</>
-                    )}
+                    <div
+                      onClick={() => {
+                        navigator.clipboard.writeText(spinResult.code);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="max-w-md mx-auto border-4 border-dashed rounded-2xl p-6 bg-slate-50 cursor-pointer transition-all hover:bg-white relative overflow-hidden"
+                      style={{ borderColor: BRAND_GREEN }}
+                    >
+                      <span
+                        style={{ color: BRAND_GREEN }}
+                        className="text-2xl font-mono font-black tracking-widest uppercase"
+                      >
+                        {spinResult.code}
+                      </span>
+                      <div className="mt-2 flex items-center justify-center gap-2 text-slate-400 font-bold uppercase text-xs">
+                        {copied ? (
+                          <><Check size={16} className="text-green-500" /> {t('copied')}</>
+                        ) : (
+                          <><Copy size={16} /> {t('copyHint')}</>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="max-w-md mx-auto rounded-2xl border-2 border-slate-200 bg-white px-6 py-8">
+                    <h3
+                      style={{ color: BRAND_PINK }}
+                      className="text-3xl font-black uppercase italic"
+                    >
+                      {t('lostTitle')}
+                    </h3>
+                    <p className="mt-3 text-slate-600 font-medium">{t('lostMessage')}</p>
                   </div>
-                </div>
+                )}
 
                 <button
                   onClick={onClose}
