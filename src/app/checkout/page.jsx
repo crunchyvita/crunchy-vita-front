@@ -25,6 +25,8 @@ import {
   resolveShippingPricingForCountry,
   flattenZoneCountryOptions,
 } from '@/lib/shippingZonePricing';
+import { useAddressAutocomplete } from '@/lib/useAddressAutocomplete';
+import { getAddressCountryMismatchKey } from '@/lib/addressCountryConsistency';
 import PhoneInput, {
   getCountries,
   getCountryCallingCode,
@@ -413,6 +415,11 @@ const CheckoutPage = () => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
 
+  const homeAddressAutocomplete = useAddressAutocomplete({ countryIso, debounceMs: 400 });
+  const relayAddressAutocomplete = useAddressAutocomplete({ countryIso: relayCountryIso, debounceMs: 400 });
+  const [homeAddrMenuOpen, setHomeAddrMenuOpen] = useState(false);
+  const [relayAddrMenuOpen, setRelayAddrMenuOpen] = useState(false);
+
   const phoneCountryDisplayNames = useMemo(() => {
     try {
       return new Intl.DisplayNames([locale === 'fr' ? 'fr' : 'en'], { type: 'region' });
@@ -438,6 +445,17 @@ const CheckoutPage = () => {
       return null;
     }
   }, [locale]);
+
+  /** Street (bold) + ", postal city, country" for autocomplete rows — matches compact Nominatim fields. */
+  const formatAddressSuggestionLine = (s) => {
+    const lineStreet = String(s?.street || '').trim();
+    const locality = [s?.postalCode, s?.city].filter(Boolean).join(' ').trim();
+    const countryLabel =
+      String(s?.countryName || '').trim() ||
+      (s?.country ? regionDisplayNames?.of(String(s.country)) : '') ||
+      String(s?.country || '');
+    return { lineStreet, locality, countryLabel };
+  };
 
   const zoneCountryOptions = useMemo(() => {
     const flat = flattenZoneCountryOptions(shippingSettings?.zones || [], regionDisplayNames);
@@ -627,6 +645,23 @@ const CheckoutPage = () => {
     await searchRelayPoints(q);
   };
 
+  const applyHomeAddressSuggestion = (s) => {
+    setStreet(String(s.street || '').trim());
+    setCity(String(s.city || '').trim());
+    setPostalCode(String(s.postalCode || '').trim());
+    homeAddressAutocomplete.clear();
+    setHomeAddrMenuOpen(false);
+  };
+
+  const applyRelayAddressSuggestion = (s) => {
+    const line = [s.postalCode, s.city].filter(Boolean).join(' ').trim();
+    setRelayAddressQuery(
+      line || String(s.shortLabel || s.displayName || '').trim().slice(0, 200)
+    );
+    relayAddressAutocomplete.clear();
+    setRelayAddrMenuOpen(false);
+  };
+
   // "Utiliser mon emplacement" => geolocation -> reverse-ish query for backend
   // Since we can't reliably reverse geocode without an external API,
   // we send lat/lng to backend, and backend can:
@@ -781,11 +816,54 @@ const CheckoutPage = () => {
     if (/Invalid destination country for home shipping quote/i.test(msg)) {
       return t('shipping.errors.invalidDestinationCountry');
     }
+    if (/Missing destination contact fields/i.test(msg)) {
+      return t('shipping.errors.missingContactForHomeQuote');
+    }
+    if (/Missing destination location fields/i.test(msg)) {
+      return t('shipping.errors.completeAddressForHomeQuote');
+    }
+    if (/Address does not match selected country/i.test(msg)) {
+      return t('shipping.errors.addressCountryMismatch');
+    }
     if (/No shipping offer available/i.test(msg)) {
       return t('shipping.errors.noHomeOfferForAddress');
     }
     return msg;
   };
+
+  const homeQuotePrerequisiteMessage = useMemo(() => {
+    if (deliveryType !== 'home') return '';
+    if (!countryIso || !street.trim() || !city.trim() || !postalCode.trim()) {
+      return t('shipping.errors.completeAddressForHomeQuote');
+    }
+    if (getAddressCountryMismatchKey(countryIso, postalCode, city)) {
+      return t('shipping.errors.addressCountryMismatch');
+    }
+    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
+      return t('shipping.errors.missingContactForHomeQuote');
+    }
+    if (!phone.trim()) {
+      return t('shipping.errors.missingPhoneForHomeQuote');
+    }
+    if (!isPhoneValid) {
+      return t('contact.phoneInvalid');
+    }
+    return '';
+  }, [
+    deliveryType,
+    countryIso,
+    street,
+    city,
+    postalCode,
+    firstName,
+    lastName,
+    email,
+    phone,
+    isPhoneValid,
+    t,
+  ]);
+
+  const displayHomeQuoteError = homeQuotePrerequisiteMessage || homeAddressOfferError;
 
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
@@ -859,6 +937,11 @@ const CheckoutPage = () => {
 
     try {
       if (deliveryType === 'home') {
+        if (homeQuotePrerequisiteMessage) {
+          setHomeAddressOfferError(homeQuotePrerequisiteMessage);
+          setCheckoutError(homeQuotePrerequisiteMessage);
+          throw new Error(homeQuotePrerequisiteMessage);
+        }
         const homeOffersRes = await fetchShippingWithFallback('home-offers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1033,6 +1116,7 @@ const CheckoutPage = () => {
     !(
       deliveryType === 'home' &&
       (
+        homeQuotePrerequisiteMessage ||
         homeOfferAvailabilityLoading ||
         !homeAddressHasOffer ||
         homeOfferVerifiedKey !== homeAddressVerificationKey
@@ -1041,6 +1125,7 @@ const CheckoutPage = () => {
   const shouldShowHomeDeliveryPricing =
     deliveryType === 'home' &&
     isHomeAddressValid &&
+    !homeQuotePrerequisiteMessage &&
     !homeOfferAvailabilityLoading &&
     homeAddressHasOffer &&
     homeOfferVerifiedKey === homeAddressVerificationKey &&
@@ -1211,6 +1296,21 @@ const CheckoutPage = () => {
       return;
     }
 
+    const readyForHomeQuoteFetch =
+      Boolean(firstName.trim()) &&
+      Boolean(lastName.trim()) &&
+      Boolean(email.trim()) &&
+      Boolean(phone.trim()) &&
+      isPhoneValid;
+
+    if (!readyForHomeQuoteFetch) {
+      setHomeAddressHasOffer(false);
+      setHomeAddressOfferError('');
+      setHomeOfferAvailabilityLoading(false);
+      setHomeOfferVerifiedKey('');
+      return;
+    }
+
     let cancelled = false;
     // Strict mode: any address change invalidates previous verification immediately.
     setHomeAddressHasOffer(false);
@@ -1274,6 +1374,7 @@ const CheckoutPage = () => {
     lastName,
     email,
     phone,
+    isPhoneValid,
     street,
     city,
     postalCode,
@@ -1603,13 +1704,72 @@ const CheckoutPage = () => {
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.street')}
                       </label>
-                      <input
-                        type="text"
-                        value={street}
-                        onChange={(e) => setStreet(e.target.value)}
-                        placeholder={t('shipping.streetPlaceholder')}
-                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
-                      />
+                    
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={street}
+                          autoComplete="street-address"
+                          aria-autocomplete="list"
+                          aria-expanded={homeAddrMenuOpen && (homeAddressAutocomplete.suggestions.length > 0 || homeAddressAutocomplete.loading)}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setStreet(v);
+                            homeAddressAutocomplete.scheduleSearch(v);
+                            setHomeAddrMenuOpen(true);
+                          }}
+                          onFocus={() => setHomeAddrMenuOpen(true)}
+                          onBlur={() => {
+                            setTimeout(() => setHomeAddrMenuOpen(false), 200);
+                          }}
+                          placeholder={t('shipping.streetPlaceholder')}
+                          className="w-full p-3 sm:p-4 pr-11 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
+                        />
+                        {homeAddressAutocomplete.loading ? (
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <Loader2 size={18} className="animate-spin" aria-hidden />
+                          </span>
+                        ) : null}
+                        {homeAddrMenuOpen &&
+                        street.trim().length >= 3 &&
+                        (homeAddressAutocomplete.suggestions.length > 0 || homeAddressAutocomplete.loading) ? (
+                          <ul
+                            className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                            role="listbox"
+                          >
+                            {homeAddressAutocomplete.suggestions.map((s, idx) => {
+                              const { lineStreet, locality, countryLabel } = formatAddressSuggestionLine(s);
+                              const rest = [locality, countryLabel].filter(Boolean).join(', ');
+                              return (
+                                <li key={`${s.lat}-${s.lon}-${idx}`} role="option">
+                                  <button
+                                    type="button"
+                                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-[#556822]/10"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => applyHomeAddressSuggestion(s)}
+                                  >
+                                    {lineStreet ? (
+                                      <span className="line-clamp-2">
+                                        <span className="font-bold text-gray-900">{lineStreet}</span>
+                                        {rest ? <span className="font-normal text-gray-500">, {rest}</span> : null}
+                                      </span>
+                                    ) : (
+                                      <span className="line-clamp-2 text-gray-800">
+                                        {s.shortLabel || s.displayName}
+                                      </span>
+                                    )}
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        ) : null}
+                      </div>
+                      {homeAddressAutocomplete.error ? (
+                        <p className="mt-1.5 text-xs font-medium text-amber-800" role="alert">
+                          {homeAddressAutocomplete.error}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="md:col-span-1">
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
@@ -1903,15 +2063,74 @@ const CheckoutPage = () => {
                           <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                             {t('shipping.relayAddress') || 'Adresse / Code postal'}
                           </label>
+                        
 
                           <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                              type="text"
-                              value={relayAddressQuery}
-                              onChange={(e) => setRelayAddressQuery(e.target.value)}
-                              placeholder={t('shipping.relayPlaceholder') || 'ex: 75001 Paris'}
-                              className="flex-1 p-3 sm:p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
-                            />
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                value={relayAddressQuery}
+                                autoComplete="off"
+                                aria-autocomplete="list"
+                                aria-expanded={
+                                  relayAddrMenuOpen &&
+                                  (relayAddressAutocomplete.suggestions.length > 0 || relayAddressAutocomplete.loading)
+                                }
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setRelayAddressQuery(v);
+                                  relayAddressAutocomplete.scheduleSearch(v);
+                                  setRelayAddrMenuOpen(true);
+                                }}
+                                onFocus={() => setRelayAddrMenuOpen(true)}
+                                onBlur={() => {
+                                  setTimeout(() => setRelayAddrMenuOpen(false), 200);
+                                }}
+                                placeholder={t('shipping.relayPlaceholder') || 'ex: 75001 Paris'}
+                                className="w-full p-3 sm:p-4 pr-11 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
+                              />
+                              {relayAddressAutocomplete.loading ? (
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                  <Loader2 size={18} className="animate-spin" aria-hidden />
+                                </span>
+                              ) : null}
+                              {relayAddrMenuOpen &&
+                              relayAddressQuery.trim().length >= 3 &&
+                              (relayAddressAutocomplete.suggestions.length > 0 || relayAddressAutocomplete.loading) ? (
+                                <ul
+                                  className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                                  role="listbox"
+                                >
+                                  {relayAddressAutocomplete.suggestions.map((s, idx) => {
+                                    const { lineStreet, locality, countryLabel } = formatAddressSuggestionLine(s);
+                                    const rest = [locality, countryLabel].filter(Boolean).join(', ');
+                                    return (
+                                      <li key={`relay-${s.lat}-${s.lon}-${idx}`} role="option">
+                                        <button
+                                          type="button"
+                                          className="w-full px-3 py-2.5 text-left text-sm hover:bg-[#556822]/10"
+                                          onMouseDown={(e) => e.preventDefault()}
+                                          onClick={() => applyRelayAddressSuggestion(s)}
+                                        >
+                                          {lineStreet ? (
+                                            <span className="line-clamp-2">
+                                              <span className="font-bold text-gray-900">{lineStreet}</span>
+                                              {rest ? (
+                                                <span className="font-normal text-gray-500">, {rest}</span>
+                                              ) : null}
+                                            </span>
+                                          ) : (
+                                            <span className="line-clamp-2 text-gray-800">
+                                              {s.shortLabel || s.displayName}
+                                            </span>
+                                          )}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              ) : null}
+                            </div>
                             <button
                               type="button"
                               onClick={handleSearchRelay}
@@ -1922,6 +2141,11 @@ const CheckoutPage = () => {
                               {t('shipping.search') || 'Rechercher'}
                             </button>
                           </div>
+                          {relayAddressAutocomplete.error ? (
+                            <p className="mt-1.5 text-xs font-medium text-amber-800" role="alert">
+                              {relayAddressAutocomplete.error}
+                            </p>
+                          ) : null}
                         </div>
                       </div>
 
@@ -1972,7 +2196,12 @@ const CheckoutPage = () => {
                                       </div>
 
                                       <div className="mt-1 text-sm text-gray-500">
-                                        {p.street}, {p.postalCode} {p.city}
+                                        {[
+                                          p.street,
+                                          [p.postalCode, p.city].filter(Boolean).join(' ').trim(),
+                                        ]
+                                          .filter(Boolean)
+                                          .join(', ')}
                                       </div>
 
                                       {carrierLogoUrl ? (
@@ -2053,8 +2282,13 @@ const CheckoutPage = () => {
                 )}
               </div>
 
-              {deliveryType === 'home' && isHomeAddressValid && (
+              {deliveryType === 'home' && (
                 <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                  {displayHomeQuoteError ? (
+                    <p className="text-sm text-red-600" role="alert">
+                      {displayHomeQuoteError}
+                    </p>
+                  ) : null}
                   {shouldShowHomeDeliveryPricing && expressAvailable && (
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-3 sm:p-4">
                       <input
@@ -2089,9 +2323,6 @@ const CheckoutPage = () => {
                       </div>
                     </div>
                   )}
-                  {homeAddressOfferError ? (
-                    <p className="text-sm text-red-600">{homeAddressOfferError}</p>
-                  ) : null}
                 </div>
               )}
             </section>

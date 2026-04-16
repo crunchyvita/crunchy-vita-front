@@ -505,6 +505,26 @@ export const paymentAdminAPI = {
   },
 };
 
+/** Shipping helpers (public; uses session/guest cookies like other checkout calls). */
+export const shippingAPI = {
+  /**
+   * Nominatim-backed address suggestions restricted to `country` (ISO 3166-1 alpha-2).
+   * @param {string} q
+   * @param {string} country
+   * @param {{ signal?: AbortSignal }} [options]
+   */
+  addressAutocomplete: async (q, country, options = {}) => {
+    const params = new URLSearchParams({
+      q: String(q || '').trim(),
+      country: String(country || '').trim().toUpperCase(),
+    });
+    return apiRequest(`/shipping/address-autocomplete?${params.toString()}`, {
+      method: 'GET',
+      signal: options.signal,
+    });
+  },
+};
+
 // Contact/Message API functions
 export const messageAPI = {
   list: async () => apiRequest('/contact', { method: 'GET' }),

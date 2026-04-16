@@ -926,6 +926,7 @@
       "cityPlaceholder": "Paris",
       "postalCode": "Code postal",
       "postalCodePlaceholder": "75001",
+      "addressAutocompleteHint": "Après avoir choisi un pays, saisis au moins 3 caractères pour rechercher une adresse dans ce pays.",
       "countryPlaceholder": "France",
       "deliveryType": "Livraison",
       "home": "Expedier a l'adresse",
@@ -984,7 +985,11 @@
       "errors": {
         "noHomeOfferForAddress": "Aucune offre de livraison a domicile n'est disponible pour cette adresse.",
         "invalidDestinationCountry": "Pays de destination invalide pour la livraison a domicile. Veuillez verifier le champ pays.",
-        "homeOfferCheckFailed": "Impossible de verifier les offres de livraison a domicile pour cette adresse."
+        "homeOfferCheckFailed": "Impossible de verifier les offres de livraison a domicile pour cette adresse.",
+        "completeAddressForHomeQuote": "Choisis un pays et complète ton adresse pour obtenir une cotation de livraison.",
+        "missingContactForHomeQuote": "Renseigne ton prenom, nom et e-mail pour obtenir une cotation de livraison.",
+        "missingPhoneForHomeQuote": "Renseigne ton numero de telephone pour obtenir une cotation de livraison.",
+        "addressCountryMismatch": "Cette adresse ne correspond pas au pays sélectionné"
       }
     },
     "payment": {

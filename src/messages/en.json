@@ -926,6 +926,7 @@
       "cityPlaceholder": "Paris",
       "postalCode": "Postal Code",
       "postalCodePlaceholder": "75001",
+      "addressAutocompleteHint": "After choosing a country, type at least 3 characters to search for an address in that country.",
       "countryPlaceholder": "France",
       "deliveryType": "Delivery",
       "home": "Ship to address",
@@ -984,7 +985,11 @@
       "errors": {
         "noHomeOfferForAddress": "No home delivery offer is available for this address.",
         "invalidDestinationCountry": "Invalid destination country for home delivery. Please verify the country field.",
-        "homeOfferCheckFailed": "Unable to verify home delivery offers for this address."
+        "homeOfferCheckFailed": "Unable to verify home delivery offers for this address.",
+        "completeAddressForHomeQuote": "Select a country and complete your address to get a shipping quote.",
+        "missingContactForHomeQuote": "Please enter your first name, last name, and email so we can get a shipping quote.",
+        "missingPhoneForHomeQuote": "Please enter your phone number so we can get a shipping quote.",
+        "addressCountryMismatch": "This address does not match the selected country"
       }
     },
     "payment": {
