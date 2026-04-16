@@ -26,6 +26,7 @@ import {
   Heart,
   Tag,
   ChevronDown,
+  Truck,
 } from "lucide-react";
 import { usePathname } from "@/navigation";
 import { useSearchParams } from "next/navigation";
@@ -55,6 +56,7 @@ const NAV_GROUPS = [
     items: [
       { labelKey: "orders", href: "/admin/orders", icon: CreditCard },
       { labelKey: "checkout", href: "/admin/checkout", icon: CreditCard },
+      { labelKey: "shipping", href: "/admin/shipping", icon: Truck },
       { labelKey: "promotions", href: "/admin/promo-codes", icon: ArrowUpDown },
     ],
   },

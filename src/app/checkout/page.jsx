@@ -21,6 +21,10 @@ import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navi
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
+import {
+  resolveShippingPricingForCountry,
+  flattenZoneCountryOptions,
+} from '@/lib/shippingZonePricing';
 import PhoneInput, {
   getCountries,
   getCountryCallingCode,
@@ -103,24 +107,6 @@ const getCartItemImagesLocal = (item) => {
   }
 
   return unique;
-};
-
-const RELAY_COUNTRY_OPTIONS = [
-  { value: 'France', label: 'France' },
-  { value: 'Allemagne', label: 'Allemagne' },
-  { value: 'Belgique', label: 'Belgique' },
-  { value: 'Espagne', label: 'Espagne' },
-  { value: 'Italie', label: 'Italie' },
-  { value: 'Monaco', label: 'Monaco' },
-  { value: 'Pays-Bas', label: 'Pays-Bas' },
-  { value: 'Portugal', label: 'Portugal' },
-  { value: 'Royaume-Uni', label: 'Royaume-Uni' },
-];
-
-const toFlagEmoji = (countryCode) => {
-  const code = String(countryCode || '').toUpperCase();
-  if (!/^[A-Z]{2}$/.test(code)) return '';
-  return String.fromCodePoint(...[...code].map((char) => 127397 + char.charCodeAt(0)));
 };
 
 const PaymentForm = ({
@@ -366,14 +352,15 @@ const CheckoutPage = () => {
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
-  const [country, setCountry] = useState('');
+  /** ISO 3166-1 alpha-2 for home delivery */
+  const [countryIso, setCountryIso] = useState('FR');
 
   // Delivery type: home | relay
   const [deliveryType, setDeliveryType] = useState('home'); // "home" | "relay"
   const [expressDelivery, setExpressDelivery] = useState(false);
 
-  // Relay search + selection
-  const [relayCountry, setRelayCountry] = useState('France');
+  // Relay search + selection (ISO code for zone-based pricing + API)
+  const [relayCountryIso, setRelayCountryIso] = useState('FR');
   const [relayAddressQuery, setRelayAddressQuery] = useState('');
   const [relayPoints, setRelayPoints] = useState([]);
   const [relayLoading, setRelayLoading] = useState(false);
@@ -401,14 +388,15 @@ const CheckoutPage = () => {
   const [homeAddressOfferError, setHomeAddressOfferError] = useState('');
   const [homeOfferVerifiedKey, setHomeOfferVerifiedKey] = useState('');
   const [shippingSettings, setShippingSettings] = useState({
-    relay: { freeThreshold: 40, belowThresholdPrice: 4.9 },
+    relay: { freeShipping: 40, StandarShippingFee: 4.9 },
     home: {
-      freeThreshold: 60,
-      reducedThreshold: 40,
-      belowReducedPrice: 7.9,
-      betweenReducedAndFreePrice: 4.9,
+      freeShipping: 60,
+      discountedShipping: 40,
+      StandardShippingFee: 7.9,
+      discountedShippingFee: 4.9,
+      express: 9.9,
     },
-    express: { enabled: true, addonPrice: 9.9 },
+    zones: [],
   });
 
   // Payment states
@@ -436,6 +424,33 @@ const CheckoutPage = () => {
       })),
     [phoneCountryDisplayNames]
   );
+
+  const regionDisplayNames = useMemo(() => {
+    try {
+      return new Intl.DisplayNames([locale === 'fr' ? 'fr' : 'en'], { type: 'region' });
+    } catch {
+      return null;
+    }
+  }, [locale]);
+
+  const zoneCountryOptions = useMemo(() => {
+    const flat = flattenZoneCountryOptions(shippingSettings?.zones || [], regionDisplayNames);
+    if (flat.length > 0) return flat;
+    return [
+      {
+        iso: 'FR',
+        zoneId: '',
+        zoneName: '',
+        label: regionDisplayNames?.of('FR') || 'France',
+      },
+    ];
+  }, [shippingSettings?.zones, regionDisplayNames]);
+
+  const effectiveShippingRules = useMemo(() => {
+    const iso = deliveryType === 'relay' ? relayCountryIso : countryIso;
+    return resolveShippingPricingForCountry(shippingSettings, iso);
+  }, [deliveryType, relayCountryIso, countryIso, shippingSettings]);
+  const expressAvailable = Number(effectiveShippingRules?.home?.express ?? 0) > 0;
 
   const selectedPhoneCountryName =
     phoneCountryOptions.find((entry) => entry.code === phoneCountry)?.name || phoneCountry;
@@ -465,6 +480,9 @@ const CheckoutPage = () => {
           setShippingSettings((prev) => ({
             ...prev,
             ...data.data.shippingSettings,
+            zones: Array.isArray(data.data.shippingSettings.zones)
+              ? data.data.shippingSettings.zones
+              : prev.zones || [],
           }));
         }
       } catch (_) {
@@ -519,7 +537,7 @@ const CheckoutPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          country: relayCountry,
+          country: relayCountryIso,
           query: q,
           limit: 20,
         }),
@@ -582,7 +600,7 @@ const CheckoutPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          country: relayCountry,
+          country: relayCountryIso,
           lat: latitude,
           lng: longitude,
           limit: 20,
@@ -658,7 +676,7 @@ const CheckoutPage = () => {
   };
 
   const isHomeAddressValid =
-    country.trim() &&
+    Boolean(countryIso) &&
     street.trim() &&
     city.trim() &&
     postalCode.trim();
@@ -683,7 +701,7 @@ const CheckoutPage = () => {
   const homeAddressVerificationKey = useMemo(
     () =>
       [
-        String(country || '').trim().toLowerCase(),
+        String(countryIso || '').trim().toLowerCase(),
         String(street || '').trim().toLowerCase(),
         String(city || '').trim().toLowerCase(),
         String(postalCode || '').trim().toLowerCase(),
@@ -693,7 +711,7 @@ const CheckoutPage = () => {
         String(phone || '').trim().toLowerCase(),
         String(Number(subtotal || 0).toFixed(2)),
       ].join('|'),
-    [country, street, city, postalCode, firstName, lastName, email, phone, subtotal]
+    [countryIso, street, city, postalCode, firstName, lastName, email, phone, subtotal]
   );
 
   const normalizeHomeOfferErrorMessage = (rawMessage) => {
@@ -745,7 +763,9 @@ const CheckoutPage = () => {
       promoCode: promoCode || undefined,
       shippingAmount: Number(Number(displayedShipping || 0).toFixed(2)),
       express:
-        deliveryType === 'home' && expressDelivery && shippingSettings?.express?.enabled ? true : false,
+        deliveryType === 'home' && expressDelivery && expressAvailable
+          ? true
+          : false,
       deliveryType,
       locale,
       successUrl: `${origin}${localePrefix}/checkout/succes?session_id={CHECKOUT_SESSION_ID}`,
@@ -757,7 +777,7 @@ const CheckoutPage = () => {
         street: street.trim(),
         city: city.trim(),
         postalCode: postalCode.trim(),
-        country: country.trim(),
+        country: countryIso,
       };
     } else {
       payload.relayPoint = selectedRelay;
@@ -765,7 +785,7 @@ const CheckoutPage = () => {
         street: selectedRelay?.street || '',
         city: selectedRelay?.city || '',
         postalCode: selectedRelay?.postalCode || '',
-        country: selectedRelay?.country || relayCountry || country || '',
+        country: selectedRelay?.country || relayCountryIso || countryIso || '',
       };
     }
 
@@ -790,7 +810,7 @@ const CheckoutPage = () => {
               street: street.trim(),
               city: city.trim(),
               postalCode: postalCode.trim(),
-              country: country.trim(),
+              country: countryIso,
             },
             subtotal: Number(subtotal || 0),
           }),
@@ -982,8 +1002,8 @@ const CheckoutPage = () => {
   };
 
   const getRelayPriceLabel = () => {
-    const relayFreeThreshold = Number(shippingSettings?.relay?.freeThreshold ?? 40);
-    const relayBelowPrice = Number(shippingSettings?.relay?.belowThresholdPrice ?? 4.9);
+    const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
+    const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
     const subtotalValue = Number(subtotal || 0);
     if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
     return `${relayBelowPrice.toFixed(2)} EUR`;
@@ -1028,32 +1048,35 @@ const CheckoutPage = () => {
 
     const subtotalValue = Number(subtotal || 0);
     if (deliveryType === 'relay') {
-      const relayFreeThreshold = Number(shippingSettings?.relay?.freeThreshold ?? 40);
-      const relayBelowPrice = Number(shippingSettings?.relay?.belowThresholdPrice ?? 4.9);
+      const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
+      const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
       return subtotalValue >= relayFreeThreshold ? 0 : relayBelowPrice;
     }
 
-    const homeFreeThreshold = Number(shippingSettings?.home?.freeThreshold ?? 60);
-    const homeReducedThreshold = Number(shippingSettings?.home?.reducedThreshold ?? 40);
-    const homeLowPrice = Number(shippingSettings?.home?.belowReducedPrice ?? 7.9);
-    const homeMidPrice = Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9);
+    const homeFreeThreshold = Number(effectiveShippingRules?.home?.freeShipping ?? 60);
+    const homeReducedThreshold = Number(effectiveShippingRules?.home?.discountedShipping ?? 40);
+    const homeLowPrice = Number(effectiveShippingRules?.home?.StandardShippingFee ?? 7.9);
+    const homeMidPrice = Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9);
     const base =
       subtotalValue >= homeFreeThreshold
         ? 0
         : subtotalValue >= homeReducedThreshold
           ? homeMidPrice
           : homeLowPrice;
-    if (expressDelivery && shippingSettings?.express?.enabled) {
-      return Number(shippingSettings?.express?.addonPrice ?? 9.9);
+    if (expressDelivery && expressAvailable) {
+      return Number(effectiveShippingRules?.home?.express ?? 9.9);
     }
     return base;
-  }, [deliveryType, expressDelivery, isShippingReady, shippingSettings, subtotal]);
+  }, [deliveryType, expressDelivery, isShippingReady, effectiveShippingRules, subtotal, expressAvailable]);
 
   const displayedTotal = useMemo(() => {
     return Number(subtotal || 0) + Number(displayedShipping || 0);
   }, [subtotal, displayedShipping]);
 
   const finalTotal = Math.max(0, Number(displayedTotal || 0) - Number(promoDiscount || 0));
+  const showHomeReducedShippingInfo =
+    Number(effectiveShippingRules?.home?.discountedShipping ?? 40) > 0 &&
+    Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9) > 0;
 
   const getOpeningDaysRows = (point) => {
     const openingDays = point?.raw?.parcelPoint?.openingDays || point?.raw?.parcelpoint?.openingDays;
@@ -1107,7 +1130,7 @@ const CheckoutPage = () => {
     street,
     city,
     postalCode,
-    country,
+    countryIso,
   ]);
 
   useEffect(() => {
@@ -1147,7 +1170,7 @@ const CheckoutPage = () => {
               street: street.trim(),
               city: city.trim(),
               postalCode: postalCode.trim(),
-              country: country.trim(),
+              country: countryIso,
             },
             subtotal: Number(subtotal || 0),
           }),
@@ -1193,7 +1216,7 @@ const CheckoutPage = () => {
     street,
     city,
     postalCode,
-    country,
+    countryIso,
     subtotal,
     homeAddressVerificationKey,
   ]);
@@ -1463,13 +1486,17 @@ const CheckoutPage = () => {
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.country')}
                       </label>
-                      <input
-                        type="text"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        placeholder={t('shipping.countryPlaceholder')}
-                        className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
-                      />
+                      <select
+                        value={countryIso}
+                        onChange={(e) => setCountryIso(e.target.value)}
+                        className="w-full p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#556822] outline-none text-gray-900"
+                      >
+                        {zoneCountryOptions.map((opt) => (
+                          <option key={opt.iso} value={opt.iso}>
+                            {opt.zoneName ? `${opt.label} (${opt.zoneName})` : opt.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
@@ -1719,13 +1746,13 @@ const CheckoutPage = () => {
                             {t('shipping.country') || 'Pays / région'}
                           </label>
                           <select
-                            value={relayCountry}
-                            onChange={(e) => setRelayCountry(e.target.value)}
+                            value={relayCountryIso}
+                            onChange={(e) => setRelayCountryIso(e.target.value)}
                             className="w-full p-3 sm:p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
                           >
-                            {RELAY_COUNTRY_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
+                            {zoneCountryOptions.map((opt) => (
+                              <option key={opt.iso} value={opt.iso}>
+                                {opt.zoneName ? `${opt.label} (${opt.zoneName})` : opt.label}
                               </option>
                             ))}
                           </select>
@@ -1887,7 +1914,7 @@ const CheckoutPage = () => {
 
               {deliveryType === 'home' && isHomeAddressValid && (
                 <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
-                  {shouldShowHomeDeliveryPricing && shippingSettings?.express?.enabled && (
+                  {shouldShowHomeDeliveryPricing && expressAvailable && (
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-3 sm:p-4">
                       <input
                         type="checkbox"
@@ -1910,7 +1937,7 @@ const CheckoutPage = () => {
                             {t('shipping.appliedFeesTitle')}
                           </p>
                           <p className="text-sm text-slate-700 mt-1">
-                            {expressDelivery && shippingSettings?.express?.enabled
+                            {expressDelivery && expressAvailable
                               ? t('shipping.methodExpress')
                               : t('shipping.homeDeliveryStandard')}
                           </p>
@@ -2101,7 +2128,7 @@ const CheckoutPage = () => {
                     </p>
                     <p className="mt-1 text-sm font-semibold text-[#556822]">
                       {t('shipping.infoRelaySimple', {
-                        threshold: Number(shippingSettings?.relay?.freeThreshold ?? 40).toFixed(0),
+                        threshold: Number(effectiveShippingRules?.relay?.freeShipping ?? 40).toFixed(0),
                       })}
                     </p>
                   </div>
@@ -2109,15 +2136,17 @@ const CheckoutPage = () => {
                     <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
                       {t('shipping.infoLabels.homeDelivery')}
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                      {t('shipping.infoHomeReducedSimple', {
-                        reducedPrice: Number(shippingSettings?.home?.betweenReducedAndFreePrice ?? 4.9).toFixed(2),
-                        reducedThreshold: Number(shippingSettings?.home?.reducedThreshold ?? 40).toFixed(0),
-                      })}
-                    </p>
+                    {showHomeReducedShippingInfo ? (
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {t('shipping.infoHomeReducedSimple', {
+                          reducedPrice: Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9).toFixed(2),
+                          reducedThreshold: Number(effectiveShippingRules?.home?.discountedShipping ?? 40).toFixed(0),
+                        })}
+                      </p>
+                    ) : null}
                     <p className="text-sm font-semibold text-[#556822]">
                       {t('shipping.infoHomeFreeSimple', {
-                        freeThreshold: Number(shippingSettings?.home?.freeThreshold ?? 60).toFixed(0),
+                        freeThreshold: Number(effectiveShippingRules?.home?.freeShipping ?? 60).toFixed(0),
                       })}
                     </p>
                   </div>

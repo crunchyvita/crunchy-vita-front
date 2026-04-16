@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { getPromoBadgeThresholds } from '@/lib/shippingZonePricing';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const DEFAULT_RELAY_THRESHOLD = 40;
@@ -38,11 +39,10 @@ export default function PromoBadge() {
         if (!response.ok) return;
 
         const data = await response.json();
-        const relay = Number(data?.data?.shippingSettings?.relay?.freeThreshold);
-        const home = Number(data?.data?.shippingSettings?.home?.freeThreshold);
+        const { relayFree, homeFree } = getPromoBadgeThresholds(data?.data);
         if (!isMounted) return;
-        if (Number.isFinite(relay)) setRelayThreshold(relay);
-        if (Number.isFinite(home)) setHomeThreshold(home);
+        if (Number.isFinite(relayFree)) setRelayThreshold(relayFree);
+        if (Number.isFinite(homeFree)) setHomeThreshold(homeFree);
       } catch (error) {
         if (error?.name === 'AbortError') return;
       }
