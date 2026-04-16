@@ -26,6 +26,7 @@ import {
   flattenZoneCountryOptions,
 } from '@/lib/shippingZonePricing';
 import { useAddressAutocomplete } from '@/lib/useAddressAutocomplete';
+import { attachGuestIdHeader } from '@/lib/guestId';
 import { getAddressCountryMismatchKey } from '@/lib/addressCountryConsistency';
 import PhoneInput, {
   getCountries,
@@ -581,6 +582,26 @@ const CheckoutPage = () => {
     })();
   }, [apiBase]);
 
+  const buildShippingFetchInit = (init = {}) => {
+    const headers = attachGuestIdHeader({
+      'Content-Type': 'application/json',
+      ...(typeof init.headers === 'object' && init.headers && !Array.isArray(init.headers) ? init.headers : {}),
+    });
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) headers.Authorization = `Bearer ${token}`;
+      } catch {
+        // ignore
+      }
+    }
+    return {
+      ...init,
+      credentials: 'include',
+      headers,
+    };
+  };
+
   const buildShippingUrls = (base, suffix) => {
     const normalizedBase = String(base || '').trim().replace(/\/+$/, '');
     const cleanSuffix = String(suffix || '').replace(/^\/+/, '');
@@ -601,9 +622,10 @@ const CheckoutPage = () => {
   const fetchShippingWithFallback = async (suffix, fetchOptions) => {
     const urls = buildShippingUrls(apiBase, suffix);
     let lastResponse = null;
+    const merged = buildShippingFetchInit(fetchOptions || {});
 
     for (const url of urls) {
-      const response = await fetch(url, fetchOptions);
+      const response = await fetch(url, merged);
       if (response.status !== 404) {
         return response;
       }
@@ -695,8 +717,18 @@ const CheckoutPage = () => {
       });
 
       const { latitude, longitude } = pos.coords;
+      const lat = Number(latitude);
+      const lng = Number(longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        throw new Error('Invalid position');
+      }
 
       if (!apiBase) throw new Error('NEXT_PUBLIC_API_URL is missing');
+
+      const country = String(relayCountryIso || '').trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(country)) {
+        throw new Error('Select a country for relay delivery.');
+      }
 
       setRelayLoading(true);
       setRelayPoints([]);
@@ -707,9 +739,9 @@ const CheckoutPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          country: relayCountryIso,
-          lat: latitude,
-          lng: longitude,
+          country,
+          lat,
+          lng,
           limit: 20,
         }),
       });
