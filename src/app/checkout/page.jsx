@@ -343,7 +343,7 @@ const CheckoutPage = () => {
   // Form states
   // ----------------------------
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(() => `+${getCountryCallingCode('FR')}`);
   const [phoneCountry, setPhoneCountry] = useState('FR');
   const [isPhoneCountryMenuOpen, setIsPhoneCountryMenuOpen] = useState(false);
   const phoneCountryMenuRef = useRef(null);
@@ -428,15 +428,22 @@ const CheckoutPage = () => {
     }
   }, [locale]);
 
-  const phoneCountryOptions = useMemo(
-    () =>
-      getCountries().map((code) => ({
+  const phoneCountryOptions = useMemo(() => {
+    const lang = locale === 'fr' ? 'fr' : 'en';
+    const collator = new Intl.Collator(lang, { sensitivity: 'base' });
+
+    return getCountries()
+      .map((code) => ({
         code,
         name: phoneCountryDisplayNames?.of(code) || code,
         callingCode: getCountryCallingCode(code),
-      })),
-    [phoneCountryDisplayNames]
-  );
+      }))
+      .sort((a, b) => {
+        const byName = collator.compare(a.name, b.name);
+        if (byName !== 0) return byName;
+        return a.code.localeCompare(b.code);
+      });
+  }, [phoneCountryDisplayNames, locale]);
 
   const regionDisplayNames = useMemo(() => {
     try {
@@ -737,18 +744,47 @@ const CheckoutPage = () => {
 
   const handlePhoneChange = (nextValue) => {
     const normalized = String(nextValue || '');
-    setPhone(normalized);
+    const nextCallingCode = `+${getCountryCallingCode(phoneCountry)}`;
 
-    if (!normalized.startsWith('+')) return;
+    if (!normalized.trim()) {
+      setPhone(nextCallingCode);
+      return;
+    }
 
     try {
       const parsed = parsePhoneNumber(normalized);
-      const nextCountry = parsed?.country;
-      if (nextCountry && nextCountry !== phoneCountry) {
-        setPhoneCountry(nextCountry);
-      }
+      const nationalNumber = String(parsed?.nationalNumber || '').trim();
+      setPhone(nationalNumber ? `${nextCallingCode}${nationalNumber}` : nextCallingCode);
     } catch {
-      // Ignore partial input while typing.
+      const digitsOnly = normalized.replace(/\D/g, '');
+      const prefixDigits = nextCallingCode.replace(/\D/g, '');
+      const nationalDigits = digitsOnly.startsWith(prefixDigits)
+        ? digitsOnly.slice(prefixDigits.length)
+        : digitsOnly;
+      setPhone(nationalDigits ? `${nextCallingCode}${nationalDigits}` : nextCallingCode);
+    }
+  };
+
+  const handlePhoneKeyDown = (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    const prefix = `+${getCountryCallingCode(phoneCountry)}`;
+    const prefixLength = prefix.length;
+    const selectionStart = Number.isInteger(input.selectionStart) ? input.selectionStart : 0;
+    const selectionEnd = Number.isInteger(input.selectionEnd) ? input.selectionEnd : 0;
+
+    const selectionTouchesPrefix = selectionStart < prefixLength;
+    const selectionRemovesPrefix = selectionTouchesPrefix && selectionEnd <= prefixLength;
+
+    if (event.key === 'Backspace' && selectionStart <= prefixLength) {
+      event.preventDefault();
+      return;
+    }
+
+    if (event.key === 'Delete' && (selectionTouchesPrefix || selectionRemovesPrefix)) {
+      event.preventDefault();
+      return;
     }
   };
 
@@ -1529,10 +1565,12 @@ const CheckoutPage = () => {
                       country={phoneCountry}
                       international
                       withCountryCallingCode
+                      countryCallingCodeEditable={false}
                       limitMaxLength={true}
                       value={phone}
                       onChange={handlePhoneChange}
-                      placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
+                      onKeyDown={handlePhoneKeyDown}
+                    
                       required
                       countrySelectComponent={() => null}
                       className="phone-input-field"
