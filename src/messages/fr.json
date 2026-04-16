@@ -935,6 +935,8 @@
       "relayTitle": "Point relais",
       "useMyLocation": "Utiliser mon emplacement",
       "country": "Pays / région",
+      "searchCountry": "Rechercher les pays...",
+      "noCountriesFound": "Aucun pays trouve",
       "relayAddress": "Adresse / Code postal",
       "relayPlaceholder": "ex: 75001 Paris",
       "search": "Rechercher",

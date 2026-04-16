@@ -173,7 +173,6 @@ export function flattenZoneCountryOptions(zones, displayNames) {
   const list = [];
   const seen = new Set();
   for (const z of Array.isArray(zones) ? zones : []) {
-    const zoneName = String(z?.name || '').trim() || 'Zone';
     for (const c of Array.isArray(z?.countries) ? z.countries : []) {
       const iso = zoneCountryIso(c);
       if (!iso || seen.has(iso)) continue;
@@ -184,8 +183,6 @@ export function flattenZoneCountryOptions(zones, displayNames) {
           : '';
       list.push({
         iso,
-        zoneId: z._id || z.id,
-        zoneName,
         label: custom || displayNames?.of(iso) || iso,
       });
     }

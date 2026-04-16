@@ -354,6 +354,9 @@ const CheckoutPage = () => {
   const [postalCode, setPostalCode] = useState('');
   /** ISO 3166-1 alpha-2 for home delivery */
   const [countryIso, setCountryIso] = useState('FR');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
+  const countryMenuRef = useRef(null);
 
   // Delivery type: home | relay
   const [deliveryType, setDeliveryType] = useState('home'); // "home" | "relay"
@@ -361,6 +364,9 @@ const CheckoutPage = () => {
 
   // Relay search + selection (ISO code for zone-based pricing + API)
   const [relayCountryIso, setRelayCountryIso] = useState('FR');
+  const [isRelayCountryDropdownOpen, setIsRelayCountryDropdownOpen] = useState(false);
+  const [relayCountrySearchQuery, setRelayCountrySearchQuery] = useState('');
+  const relayCountryMenuRef = useRef(null);
   const [relayAddressQuery, setRelayAddressQuery] = useState('');
   const [relayPoints, setRelayPoints] = useState([]);
   const [relayLoading, setRelayLoading] = useState(false);
@@ -439,12 +445,34 @@ const CheckoutPage = () => {
     return [
       {
         iso: 'FR',
-        zoneId: '',
-        zoneName: '',
         label: regionDisplayNames?.of('FR') || 'France',
       },
     ];
   }, [shippingSettings?.zones, regionDisplayNames]);
+
+  const filteredCountryOptions = useMemo(() => {
+    const query = String(countrySearchQuery || '').toLowerCase().trim();
+    if (!query) return zoneCountryOptions;
+    return zoneCountryOptions.filter((opt) =>
+      opt.label.toLowerCase().includes(query) || opt.iso.toLowerCase().includes(query)
+    );
+  }, [zoneCountryOptions, countrySearchQuery]);
+
+  const selectedCountryLabel = useMemo(() => {
+    return zoneCountryOptions.find((opt) => opt.iso === countryIso)?.label || countryIso;
+  }, [zoneCountryOptions, countryIso]);
+
+  const filteredRelayCountryOptions = useMemo(() => {
+    const query = String(relayCountrySearchQuery || '').toLowerCase().trim();
+    if (!query) return zoneCountryOptions;
+    return zoneCountryOptions.filter((opt) =>
+      opt.label.toLowerCase().includes(query) || opt.iso.toLowerCase().includes(query)
+    );
+  }, [zoneCountryOptions, relayCountrySearchQuery]);
+
+  const selectedRelayCountryLabel = useMemo(() => {
+    return zoneCountryOptions.find((opt) => opt.iso === relayCountryIso)?.label || relayCountryIso;
+  }, [zoneCountryOptions, relayCountryIso]);
 
   const effectiveShippingRules = useMemo(() => {
     const iso = deliveryType === 'relay' ? relayCountryIso : countryIso;
@@ -471,6 +499,40 @@ const CheckoutPage = () => {
   }, []);
 
   useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!countryMenuRef.current) return;
+      if (!countryMenuRef.current.contains(event.target)) {
+        setIsCountryDropdownOpen(false);
+        setCountrySearchQuery('');
+      }
+    };
+
+    if (isCountryDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+      return () => {
+        document.removeEventListener('mousedown', handleOutsideClick);
+      };
+    }
+  }, [isCountryDropdownOpen]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!relayCountryMenuRef.current) return;
+      if (!relayCountryMenuRef.current.contains(event.target)) {
+        setIsRelayCountryDropdownOpen(false);
+        setRelayCountrySearchQuery('');
+      }
+    };
+
+    if (isRelayCountryDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+      return () => {
+        document.removeEventListener('mousedown', handleOutsideClick);
+      };
+    }
+  }, [isRelayCountryDropdownOpen]);
+
+  useEffect(() => {
     (async () => {
       try {
         const response = await fetch(`${apiBase}/settings`, { credentials: 'include' });
@@ -486,7 +548,6 @@ const CheckoutPage = () => {
           }));
         }
       } catch (_) {
-        // Keep defaults if settings endpoint is unavailable.
       }
     })();
   }, [apiBase]);
@@ -1486,17 +1547,57 @@ const CheckoutPage = () => {
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
                         {t('shipping.country')}
                       </label>
-                      <select
-                        value={countryIso}
-                        onChange={(e) => setCountryIso(e.target.value)}
-                        className="w-full p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#556822] outline-none text-gray-900"
-                      >
-                        {zoneCountryOptions.map((opt) => (
-                          <option key={opt.iso} value={opt.iso}>
-                            {opt.zoneName ? `${opt.label} (${opt.zoneName})` : opt.label}
-                          </option>
-                        ))}
-                      </select>
+                      <div ref={countryMenuRef} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                          className="w-full p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg text-left flex items-center justify-between hover:border-gray-300 transition-colors"
+                        >
+                          <span className="text-gray-900">{selectedCountryLabel}</span>
+                    
+                        </button>
+
+                        {isCountryDropdownOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            <div className="p-3 border-b border-gray-200">
+                              <input
+                                type="text"
+                                placeholder={t('shipping.searchCountry') || 'Search countries...'}
+                                value={countrySearchQuery}
+                                onChange={(e) => setCountrySearchQuery(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
+                                autoFocus
+                              />
+                            </div>
+                            <div className="max-h-64 overflow-y-auto">
+                              {filteredCountryOptions.length > 0 ? (
+                                filteredCountryOptions.map((opt) => (
+                                  <button
+                                    key={opt.iso}
+                                    type="button"
+                                    onClick={() => {
+                                      setCountryIso(opt.iso);
+                                      setIsCountryDropdownOpen(false);
+                                      setCountrySearchQuery('');
+                                    }}
+                                    className={`w-full text-left px-4 py-3 transition-colors ${
+                                      countryIso === opt.iso
+                                        ? 'bg-[#556822]/10 text-gray-900 font-semibold'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <span>{opt.label}</span>
+                                  </button>
+                                ))
+                              ) : (
+                                <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                  {t('shipping.noCountriesFound') || 'No countries found'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5 sm:mb-2">
@@ -1745,17 +1846,57 @@ const CheckoutPage = () => {
                           <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                             {t('shipping.country') || 'Pays / région'}
                           </label>
-                          <select
-                            value={relayCountryIso}
-                            onChange={(e) => setRelayCountryIso(e.target.value)}
-                            className="w-full p-3 sm:p-4 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
-                          >
-                            {zoneCountryOptions.map((opt) => (
-                              <option key={opt.iso} value={opt.iso}>
-                                {opt.zoneName ? `${opt.label} (${opt.zoneName})` : opt.label}
-                              </option>
-                            ))}
-                          </select>
+                          <div ref={relayCountryMenuRef} className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setIsRelayCountryDropdownOpen((open) => !open)}
+                              className="w-full p-3 sm:p-4 bg-white border border-gray-200 rounded-lg text-left flex items-center justify-between hover:border-gray-300 transition-colors"
+                            >
+                              <span className="text-gray-900">{selectedRelayCountryLabel}</span>
+                             
+                            </button>
+
+                            {isRelayCountryDropdownOpen && (
+                              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                <div className="p-3 border-b border-gray-200">
+                                  <input
+                                    type="text"
+                                    placeholder={t('shipping.searchCountry') || 'Search countries...'}
+                                    value={relayCountrySearchQuery}
+                                    onChange={(e) => setRelayCountrySearchQuery(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#556822]"
+                                    autoFocus
+                                  />
+                                </div>
+                                <div className="max-h-64 overflow-y-auto">
+                                  {filteredRelayCountryOptions.length > 0 ? (
+                                    filteredRelayCountryOptions.map((opt) => (
+                                      <button
+                                        key={opt.iso}
+                                        type="button"
+                                        onClick={() => {
+                                          setRelayCountryIso(opt.iso);
+                                          setIsRelayCountryDropdownOpen(false);
+                                          setRelayCountrySearchQuery('');
+                                        }}
+                                        className={`w-full text-left px-4 py-3 transition-colors ${
+                                          relayCountryIso === opt.iso
+                                            ? 'bg-[#556822]/10 text-gray-900 font-semibold'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                      >
+                                        <span>{opt.label}</span>
+                                      </button>
+                                    ))
+                                  ) : (
+                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                      {t('shipping.noCountriesFound') || 'No countries found'}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="md:col-span-2">
