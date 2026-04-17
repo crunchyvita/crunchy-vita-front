@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://crunchy-vita-backend.onrender.com/api/$1"
+      "destination": "https://crunchy-vita-back-tnst.onrender.com/api/$1"
     }
   ]
 }
