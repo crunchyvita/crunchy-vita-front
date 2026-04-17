@@ -1026,19 +1026,8 @@ const CheckoutPage = () => {
     setPhoneCountryTypeaheadQuery('');
     phoneCountryTriggerRef.current?.focus();
 
-    // Keep behavior explicit: selecting a country should immediately reflect its dialing code.
-    setPhone((current) => {
-      const currentValue = String(current || '').trim();
-      if (!currentValue) return nextCallingCode;
-
-      try {
-        const parsed = parsePhoneNumber(currentValue);
-        const nationalNumber = String(parsed?.nationalNumber || '').trim();
-        return nationalNumber ? `${nextCallingCode}${nationalNumber}` : nextCallingCode;
-      } catch {
-        return nextCallingCode;
-      }
-    });
+    // Reset any typed number when country changes and keep only the new calling code.
+    setPhone(nextCallingCode);
   };
 
   const isHomeAddressValid =
