@@ -965,7 +965,7 @@
       "geoDenied": "Autorisation refusee. Active la localisation dans ton navigateur.",
       "geoUnavailable": "Position indisponible. Reessaie.",
       "geoTimeout": "Temps depasse. Reessaie.",
-      "geoOutsideZone": "Ton emplacement est hors des zones de livraison relais ({country}). Choisis un autre pays ou recherche par adresse.",
+      "geoOutsideZone": "Ton emplacement est hors des zones de livraison relais ({country}).",
       "methodTitle": "Mode de livraison",
       "methodHome": "Livraison a domicile",
       "methodExpress": "Livraison express",
