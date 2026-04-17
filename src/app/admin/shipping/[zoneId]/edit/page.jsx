@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { 
@@ -42,6 +42,7 @@ function countryDisplayLabel(row, displayNames) {
 
 export default function AdminShippingZoneDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const zoneId = params?.zoneId ? decodeURIComponent(String(params.zoneId)) : "";
   const t = useTranslations("admin.shippingDetail");
   const tcom = useTranslations("admin.common");
@@ -164,7 +165,10 @@ export default function AdminShippingZoneDetailPage() {
     setSaving(true);
     try {
       const ok = await persistCurrentZone(zone);
-      if (ok) toast.success(t("saved"));
+      if (ok) {
+        toast.success(t("saved"));
+        router.replace("/admin/shipping");
+      }
     } finally {
       setSaving(false);
     }
