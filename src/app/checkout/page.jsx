@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/navigation';
@@ -386,6 +386,11 @@ const CheckoutPage = () => {
   const [promoCode, setPromoCode] = useState(null);
   const [isPreparingPaymentIntent, setIsPreparingPaymentIntent] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  /** When true, show soft validation hints (address quote, phone format) — not on first paint. */
+  const [checkoutHintsEnabled, setCheckoutHintsEnabled] = useState(false);
+  const enableCheckoutHints = useCallback(() => {
+    setCheckoutHintsEnabled(true);
+  }, []);
   const [homeShippingOffers, setHomeShippingOffers] = useState([]);
   const [homeShippingMode, setHomeShippingMode] = useState('all');
   const [selectedHomeShippingOfferCode, setSelectedHomeShippingOfferCode] = useState('');
@@ -686,6 +691,7 @@ const CheckoutPage = () => {
   };
 
   const applyHomeAddressSuggestion = (s) => {
+    enableCheckoutHints();
     setStreet(String(s.street || '').trim());
     setCity(String(s.city || '').trim());
     setPostalCode(String(s.postalCode || '').trim());
@@ -694,6 +700,7 @@ const CheckoutPage = () => {
   };
 
   const applyRelayAddressSuggestion = (s) => {
+    enableCheckoutHints();
     const line = [s.postalCode, s.city].filter(Boolean).join(' ').trim();
     setRelayAddressQuery(
       line || String(s.shortLabel || s.displayName || '').trim().slice(0, 200)
@@ -708,6 +715,7 @@ const CheckoutPage = () => {
   // 1) reverse geocode (recommended) OR
   // 2) call Boxtal if it supports search by coordinates
   const handleUseMyLocation = async () => {
+    enableCheckoutHints();
     setGeoError('');
     setRelayError('');
     setGeoLoading(true);
@@ -805,6 +813,7 @@ const CheckoutPage = () => {
   const isPhoneValid = Boolean(phone) && isValidPhoneNumber(String(phone));
 
   const handlePhoneChange = (nextValue) => {
+    enableCheckoutHints();
     const normalized = String(nextValue || '');
     const nextCallingCode = `+${getCountryCallingCode(phoneCountry)}`;
 
@@ -851,6 +860,7 @@ const CheckoutPage = () => {
   };
 
   const handlePhoneCountrySelect = (nextCountryCode) => {
+    enableCheckoutHints();
     const code = String(nextCountryCode || '').toUpperCase();
     if (!code) return;
 
@@ -965,7 +975,8 @@ const CheckoutPage = () => {
     t,
   ]);
 
-  const displayHomeQuoteError = homeQuotePrerequisiteMessage || homeAddressOfferError;
+  const displayHomeQuoteError =
+    (checkoutHintsEnabled && homeQuotePrerequisiteMessage) || homeAddressOfferError;
 
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
@@ -1232,6 +1243,12 @@ const CheckoutPage = () => {
     homeAddressHasOffer &&
     homeOfferVerifiedKey === homeAddressVerificationKey &&
     !homeAddressOfferError;
+
+  const showHomeDeliveryPricingSkeleton =
+    deliveryType === 'home' &&
+    isHomeAddressValid &&
+    !homeQuotePrerequisiteMessage &&
+    homeOfferAvailabilityLoading;
 
   const RELAY_PAGE_SIZE = 4;
   const totalRelayPages = Math.max(1, Math.ceil(relayPoints.length / RELAY_PAGE_SIZE));
@@ -1569,7 +1586,10 @@ const CheckoutPage = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setEmail(e.target.value);
+                    }}
                     placeholder={t('contact.emailPlaceholder')}
                     required
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
@@ -1638,8 +1658,8 @@ const CheckoutPage = () => {
                       className="phone-input-field"
                     />
                   </div>
-                  {phone && !isPhoneValid ? (
-                    <p className="mt-2 text-sm text-red-600">
+                  {checkoutHintsEnabled && phone && !isPhoneValid ? (
+                    <p className="mt-2 text-sm font-medium text-[#556822]">
                       {t('contact.phoneInvalid') || 'Numero de telephone invalide'}
                     </p>
                   ) : null}
@@ -1726,7 +1746,10 @@ const CheckoutPage = () => {
                   <input
                     type="text"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setFirstName(e.target.value);
+                    }}
                     placeholder={t('shipping.firstNamePlaceholder')}
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
@@ -1739,7 +1762,10 @@ const CheckoutPage = () => {
                   <input
                     type="text"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setLastName(e.target.value);
+                    }}
                     placeholder={t('shipping.lastNamePlaceholder')}
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
@@ -1760,6 +1786,7 @@ const CheckoutPage = () => {
                           aria-expanded={isCountryDropdownOpen}
                           value={countrySearchQuery}
                           onChange={(e) => {
+                            enableCheckoutHints();
                             const v = e.target.value;
                             setCountrySearchQuery(v);
                             if (!String(v).trim()) setCountryIso('');
@@ -1778,6 +1805,7 @@ const CheckoutPage = () => {
                                   type="button"
                                   onMouseDown={(e) => e.preventDefault()}
                                   onClick={() => {
+                                    enableCheckoutHints();
                                     setCountryIso(opt.iso);
                                     setCountrySearchQuery(opt.label);
                                     setIsCountryDropdownOpen(false);
@@ -1813,6 +1841,7 @@ const CheckoutPage = () => {
                           aria-autocomplete="list"
                           aria-expanded={homeAddrMenuOpen && (homeAddressAutocomplete.suggestions.length > 0 || homeAddressAutocomplete.loading)}
                           onChange={(e) => {
+                            enableCheckoutHints();
                             const v = e.target.value;
                             setStreet(v);
                             homeAddressAutocomplete.scheduleSearch(v);
@@ -1878,7 +1907,10 @@ const CheckoutPage = () => {
                       <input
                         type="text"
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        onChange={(e) => {
+                          enableCheckoutHints();
+                          setCity(e.target.value);
+                        }}
                         placeholder={t('shipping.cityPlaceholder')}
                         className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
@@ -1890,7 +1922,10 @@ const CheckoutPage = () => {
                       <input
                         type="text"
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
+                        onChange={(e) => {
+                          enableCheckoutHints();
+                          setPostalCode(e.target.value);
+                        }}
                         placeholder={t('shipping.postalCodePlaceholder')}
                         className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
@@ -2114,6 +2149,7 @@ const CheckoutPage = () => {
                               aria-expanded={isRelayCountryDropdownOpen}
                               value={relayCountrySearchQuery}
                               onChange={(e) => {
+                                enableCheckoutHints();
                                 const v = e.target.value;
                                 setRelayCountrySearchQuery(v);
                                 if (!String(v).trim()) setRelayCountryIso('');
@@ -2132,6 +2168,7 @@ const CheckoutPage = () => {
                                       type="button"
                                       onMouseDown={(e) => e.preventDefault()}
                                       onClick={() => {
+                                        enableCheckoutHints();
                                         setRelayCountryIso(opt.iso);
                                         setRelayCountrySearchQuery(opt.label);
                                         setIsRelayCountryDropdownOpen(false);
@@ -2173,6 +2210,7 @@ const CheckoutPage = () => {
                                   (relayAddressAutocomplete.suggestions.length > 0 || relayAddressAutocomplete.loading)
                                 }
                                 onChange={(e) => {
+                                  enableCheckoutHints();
                                   const v = e.target.value;
                                   setRelayAddressQuery(v);
                                   relayAddressAutocomplete.scheduleSearch(v);
@@ -2381,10 +2419,33 @@ const CheckoutPage = () => {
               {deliveryType === 'home' && (
                 <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                   {displayHomeQuoteError ? (
-                    <p className="text-sm text-red-600" role="alert">
+                    <p className="text-sm font-medium text-[#556822]" role="status">
                       {displayHomeQuoteError}
                     </p>
                   ) : null}
+                  {showHomeDeliveryPricingSkeleton && (
+                    <div
+                      className="space-y-2 sm:space-y-2.5"
+                      aria-busy="true"
+                      aria-label={t('shipping.title')}
+                    >
+                      {expressAvailable ? (
+                        <div className="rounded-lg border border-sky-100 bg-slate-50/80 p-2 sm:p-2.5 shadow-sm">
+                          <div
+                            className="h-9 rounded-md bg-slate-200/50 animate-pulse motion-reduce:animate-none sm:h-10"
+                            aria-hidden="true"
+                          />
+                        </div>
+                      ) : null}
+                      <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-2 sm:p-2.5 shadow-sm">
+                        <div
+                          className="h-8 rounded-md bg-gray-200/45 animate-pulse motion-reduce:animate-none sm:h-9"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {shouldShowHomeDeliveryPricing && expressAvailable && (
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-3 sm:p-4">
                       <input
