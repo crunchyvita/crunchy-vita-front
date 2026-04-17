@@ -523,14 +523,16 @@ const CheckoutPage = () => {
       .trim();
 
   const focusPhoneCountryOption = useCallback(
-    (code) => {
+    (code, shouldFocus = true) => {
       const optionElement = phoneCountryMenuListRef.current?.querySelector(
         `[data-country-code="${code}"]`
       );
 
       if (optionElement instanceof HTMLElement) {
         optionElement.scrollIntoView({ block: 'nearest' });
-        optionElement.focus({ preventScroll: true });
+        if (shouldFocus) {
+          optionElement.focus({ preventScroll: true });
+        }
       }
     },
     []
@@ -547,7 +549,8 @@ const CheckoutPage = () => {
       });
 
       if (match) {
-        focusPhoneCountryOption(match.code);
+        // Keep focus in the typeahead input on mobile so the keyboard stays open.
+        focusPhoneCountryOption(match.code, false);
       }
     },
     [focusPhoneCountryOption, phoneCountryOptions]
@@ -570,7 +573,11 @@ const CheckoutPage = () => {
         event.preventDefault();
         setIsPhoneCountryMenuOpen(false);
         phoneCountryTriggerRef.current?.focus();
+        return;
       }
+
+      // Prevent parent listbox key handler from hijacking typed keys.
+      event.stopPropagation();
     },
     []
   );
