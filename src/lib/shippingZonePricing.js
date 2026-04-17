@@ -102,6 +102,10 @@ export function resolveShippingPricingForCountry(shippingSettings, countryIso) {
   const base = normalizeBlock(shippingSettings || {}, defaultPricing());
   const zones = Array.isArray(shippingSettings?.zones) ? shippingSettings.zones : [];
 
+  if (!iso) {
+    return base;
+  }
+
   const zone =
     iso &&
     zones.find((z) => {

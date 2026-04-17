@@ -356,7 +356,7 @@ const CheckoutPage = () => {
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
   /** ISO 3166-1 alpha-2 for home delivery */
-  const [countryIso, setCountryIso] = useState('FR');
+  const [countryIso, setCountryIso] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
   const countryMenuRef = useRef(null);
@@ -366,7 +366,7 @@ const CheckoutPage = () => {
   const [expressDelivery, setExpressDelivery] = useState(false);
 
   // Relay search + selection (ISO code for zone-based pricing + API)
-  const [relayCountryIso, setRelayCountryIso] = useState('FR');
+  const [relayCountryIso, setRelayCountryIso] = useState('');
   const [isRelayCountryDropdownOpen, setIsRelayCountryDropdownOpen] = useState(false);
   const [relayCountrySearchQuery, setRelayCountrySearchQuery] = useState('');
   const relayCountryMenuRef = useRef(null);
@@ -645,11 +645,13 @@ const CheckoutPage = () => {
     try {
       if (!apiBase) throw new Error('NEXT_PUBLIC_API_URL is missing');
 
+      const relayCc = String(relayCountryIso || '').trim().toUpperCase();
+
       const res = await fetchShippingWithFallback('relay-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          country: relayCountryIso,
+          country: relayCc,
           query: q,
           limit: 20,
         }),
@@ -673,6 +675,11 @@ const CheckoutPage = () => {
     const q = (relayAddressQuery || '').trim();
     if (!q) {
       setRelayError(t('shipping.missingRelayQuery') || 'Veuillez saisir une adresse ou un code postal.');
+      return;
+    }
+    const relayCc = String(relayCountryIso || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(relayCc)) {
+      setRelayError(t('shipping.selectCountryForRelay') || 'Select a country for relay delivery first.');
       return;
     }
     await searchRelayPoints(q);
@@ -725,9 +732,14 @@ const CheckoutPage = () => {
 
       if (!apiBase) throw new Error('NEXT_PUBLIC_API_URL is missing');
 
-      const country = String(relayCountryIso || '').trim().toUpperCase();
-      if (!/^[A-Z]{2}$/.test(country)) {
-        throw new Error('Select a country for relay delivery.');
+      const countryHint = String(relayCountryIso || '').trim().toUpperCase();
+      const payload = {
+        lat,
+        lng,
+        limit: 20,
+      };
+      if (/^[A-Z]{2}$/.test(countryHint)) {
+        payload.country = countryHint;
       }
 
       setRelayLoading(true);
@@ -738,18 +750,36 @@ const CheckoutPage = () => {
       const res = await fetchShippingWithFallback('relay-points/by-geo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          country,
-          lat,
-          lng,
-          limit: 20,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to load relay points');
 
       const points = Array.isArray(data?.points) ? data.points : [];
+      const detectedRaw = String(data?.detectedCountryIso || '').trim().toUpperCase();
+      const allowedIsos = new Set(zoneCountryOptions.map((o) => o.iso));
+
+      if (detectedRaw && !allowedIsos.has(detectedRaw)) {
+        setRelayPoints([]);
+        setRelayPage(1);
+        setRelayError(
+          t('shipping.geoOutsideZone', { country: detectedRaw }) ||
+            `Relay delivery is not available for your zone (${detectedRaw}).`
+        );
+        return;
+      }
+
+      if (detectedRaw && allowedIsos.has(detectedRaw)) {
+        setRelayCountryIso(detectedRaw);
+      }
+
+      const loc = data?.location;
+      if (loc && (loc.postalCode || loc.city)) {
+        const line = [loc.postalCode, loc.city].filter(Boolean).join(' ').trim();
+        if (line) setRelayAddressQuery(line);
+      }
+
       setRelayPoints(points);
       setRelayPage(1);
       if (points.length === 0) setRelayError(t('shipping.noRelayFound') || 'Aucun point relais trouvé.');
@@ -1730,7 +1760,9 @@ const CheckoutPage = () => {
                           aria-expanded={isCountryDropdownOpen}
                           value={countrySearchQuery}
                           onChange={(e) => {
-                            setCountrySearchQuery(e.target.value);
+                            const v = e.target.value;
+                            setCountrySearchQuery(v);
+                            if (!String(v).trim()) setCountryIso('');
                             setIsCountryDropdownOpen(true);
                           }}
                           onFocus={() => setIsCountryDropdownOpen(true)}
@@ -2082,7 +2114,9 @@ const CheckoutPage = () => {
                               aria-expanded={isRelayCountryDropdownOpen}
                               value={relayCountrySearchQuery}
                               onChange={(e) => {
-                                setRelayCountrySearchQuery(e.target.value);
+                                const v = e.target.value;
+                                setRelayCountrySearchQuery(v);
+                                if (!String(v).trim()) setRelayCountryIso('');
                                 setIsRelayCountryDropdownOpen(true);
                               }}
                               onFocus={() => setIsRelayCountryDropdownOpen(true)}
