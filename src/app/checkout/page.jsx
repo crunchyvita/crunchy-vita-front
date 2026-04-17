@@ -352,6 +352,8 @@ const CheckoutPage = () => {
   const [phoneCountry, setPhoneCountry] = useState('FR');
   const [isPhoneCountryMenuOpen, setIsPhoneCountryMenuOpen] = useState(false);
   const phoneCountryMenuRef = useRef(null);
+  const phoneCountryTriggerRef = useRef(null);
+  const phoneCountryMenuListRef = useRef(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -511,6 +513,97 @@ const CheckoutPage = () => {
     phoneCountryOptions.find((entry) => entry.code === phoneCountry)?.name || phoneCountry;
   const SelectedPhoneCountryFlag = flags?.[phoneCountry];
 
+  const normalizeTypeaheadText = (value) =>
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+  const focusPhoneCountryOption = useCallback(
+    (code) => {
+      const optionElement = phoneCountryMenuListRef.current?.querySelector(
+        `[data-country-code="${code}"]`
+      );
+
+      if (optionElement instanceof HTMLElement) {
+        optionElement.scrollIntoView({ block: 'nearest' });
+        optionElement.focus({ preventScroll: true });
+      }
+    },
+    []
+  );
+
+  const focusFirstMatchingPhoneCountry = useCallback(
+    (query) => {
+      const normalizedQuery = normalizeTypeaheadText(query);
+      if (!normalizedQuery) return;
+
+      const match = phoneCountryOptions.find((option) => {
+        const normalizedName = normalizeTypeaheadText(option.name);
+        return normalizedName.charAt(0) === normalizedQuery;
+      });
+
+      if (match) {
+        focusPhoneCountryOption(match.code);
+      }
+    },
+    [focusPhoneCountryOption, phoneCountryOptions]
+  );
+
+  const handlePhoneCountryMenuKeyDown = useCallback(
+    (event) => {
+      if (!isPhoneCountryMenuOpen) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsPhoneCountryMenuOpen(false);
+        phoneCountryTriggerRef.current?.focus();
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const currentIndex = phoneCountryOptions.findIndex((option) => option.code === phoneCountry);
+        const delta = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex = currentIndex === -1
+          ? 0
+          : (currentIndex + delta + phoneCountryOptions.length) % phoneCountryOptions.length;
+        const nextOption = phoneCountryOptions[nextIndex];
+        if (nextOption) {
+          focusPhoneCountryOption(nextOption.code);
+        }
+        return;
+      }
+
+      if (event.key === 'Home') {
+        event.preventDefault();
+        const firstOption = phoneCountryOptions[0];
+        if (firstOption) focusPhoneCountryOption(firstOption.code);
+        return;
+      }
+
+      if (event.key === 'End') {
+        event.preventDefault();
+        const lastOption = phoneCountryOptions[phoneCountryOptions.length - 1];
+        if (lastOption) focusPhoneCountryOption(lastOption.code);
+        return;
+      }
+
+      if (event.key.length === 1 && /\S/.test(event.key)) {
+        event.preventDefault();
+        focusFirstMatchingPhoneCountry(event.key);
+      }
+    },
+    [
+      focusFirstMatchingPhoneCountry,
+      focusPhoneCountryOption,
+      isPhoneCountryMenuOpen,
+      phoneCountry,
+      phoneCountryOptions,
+    ]
+  );
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (!phoneCountryMenuRef.current) return;
@@ -524,6 +617,19 @@ const CheckoutPage = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isPhoneCountryMenuOpen) {
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      phoneCountryMenuListRef.current?.focus();
+      focusPhoneCountryOption(phoneCountry);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusPhoneCountryOption, isPhoneCountryMenuOpen, phoneCountry]);
 
   useEffect(() => {
     const label = zoneCountryOptions.find((opt) => opt.iso === countryIso)?.label || countryIso;
@@ -871,6 +977,7 @@ const CheckoutPage = () => {
     const nextCallingCode = `+${getCountryCallingCode(code)}`;
     setPhoneCountry(code);
     setIsPhoneCountryMenuOpen(false);
+    phoneCountryTriggerRef.current?.focus();
 
     // Keep behavior explicit: selecting a country should immediately reflect its dialing code.
     setPhone((current) => {
@@ -1615,6 +1722,7 @@ const CheckoutPage = () => {
                   <div className="phone-input">
                     <div className="phone-country-picker" ref={phoneCountryMenuRef}>
                       <button
+                        ref={phoneCountryTriggerRef}
                         type="button"
                         className="phone-country-trigger"
                         onClick={() => setIsPhoneCountryMenuOpen((open) => !open)}
@@ -1632,14 +1740,22 @@ const CheckoutPage = () => {
                         <span className="phone-country-arrow">▾</span>
                       </button>
                       {isPhoneCountryMenuOpen ? (
-                        <div className="phone-country-menu" role="listbox">
+                        <div
+                          ref={phoneCountryMenuListRef}
+                          className="phone-country-menu"
+                          role="listbox"
+                          tabIndex={0}
+                          onKeyDown={handlePhoneCountryMenuKeyDown}
+                        >
                           {phoneCountryOptions.map((option) => (
                             <button
                               key={option.code}
+                              data-country-code={option.code}
                               type="button"
                               className={`phone-country-option ${
                                 option.code === phoneCountry ? 'is-active' : ''
                               }`}
+                              tabIndex={-1}
                               onClick={() => handlePhoneCountrySelect(option.code)}
                             >
                               <span className="phone-country-flag">
