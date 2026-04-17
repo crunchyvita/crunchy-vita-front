@@ -351,9 +351,11 @@ const CheckoutPage = () => {
   const [phone, setPhone] = useState(() => `+${getCountryCallingCode('FR')}`);
   const [phoneCountry, setPhoneCountry] = useState('FR');
   const [isPhoneCountryMenuOpen, setIsPhoneCountryMenuOpen] = useState(false);
+  const [phoneCountryTypeaheadQuery, setPhoneCountryTypeaheadQuery] = useState('');
   const phoneCountryMenuRef = useRef(null);
   const phoneCountryTriggerRef = useRef(null);
   const phoneCountryMenuListRef = useRef(null);
+  const phoneCountryTypeaheadInputRef = useRef(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -541,7 +543,7 @@ const CheckoutPage = () => {
 
       const match = phoneCountryOptions.find((option) => {
         const normalizedName = normalizeTypeaheadText(option.name);
-        return normalizedName.charAt(0) === normalizedQuery;
+        return normalizedName.startsWith(normalizedQuery);
       });
 
       if (match) {
@@ -549,6 +551,28 @@ const CheckoutPage = () => {
       }
     },
     [focusPhoneCountryOption, phoneCountryOptions]
+  );
+
+  const handlePhoneCountryTypeaheadInputChange = useCallback(
+    (event) => {
+      const normalized = normalizeTypeaheadText(event.target.value || '');
+      setPhoneCountryTypeaheadQuery(normalized);
+      if (normalized) {
+        focusFirstMatchingPhoneCountry(normalized);
+      }
+    },
+    [focusFirstMatchingPhoneCountry]
+  );
+
+  const handlePhoneCountryTypeaheadInputKeyDown = useCallback(
+    (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsPhoneCountryMenuOpen(false);
+        phoneCountryTriggerRef.current?.focus();
+      }
+    },
+    []
   );
 
   const handlePhoneCountryMenuKeyDown = useCallback(
@@ -590,9 +614,23 @@ const CheckoutPage = () => {
         return;
       }
 
+      if (event.key === 'Backspace') {
+        event.preventDefault();
+        const nextQuery = phoneCountryTypeaheadQuery.slice(0, -1);
+        setPhoneCountryTypeaheadQuery(nextQuery);
+        if (nextQuery) {
+          focusFirstMatchingPhoneCountry(nextQuery);
+        }
+        return;
+      }
+
       if (event.key.length === 1 && /\S/.test(event.key)) {
         event.preventDefault();
-        focusFirstMatchingPhoneCountry(event.key);
+        const typed = normalizeTypeaheadText(event.key).charAt(0);
+        if (!typed) return;
+        const nextQuery = `${phoneCountryTypeaheadQuery}${typed}`;
+        setPhoneCountryTypeaheadQuery(nextQuery);
+        focusFirstMatchingPhoneCountry(nextQuery);
       }
     },
     [
@@ -600,6 +638,7 @@ const CheckoutPage = () => {
       focusPhoneCountryOption,
       isPhoneCountryMenuOpen,
       phoneCountry,
+      phoneCountryTypeaheadQuery,
       phoneCountryOptions,
     ]
   );
@@ -620,12 +659,12 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (!isPhoneCountryMenuOpen) {
+      setPhoneCountryTypeaheadQuery('');
       return undefined;
     }
 
     const frame = window.requestAnimationFrame(() => {
-      phoneCountryMenuListRef.current?.focus();
-      focusPhoneCountryOption(phoneCountry);
+      phoneCountryTypeaheadInputRef.current?.focus({ preventScroll: true });
     });
 
     return () => window.cancelAnimationFrame(frame);
@@ -977,6 +1016,7 @@ const CheckoutPage = () => {
     const nextCallingCode = `+${getCountryCallingCode(code)}`;
     setPhoneCountry(code);
     setIsPhoneCountryMenuOpen(false);
+    setPhoneCountryTypeaheadQuery('');
     phoneCountryTriggerRef.current?.focus();
 
     // Keep behavior explicit: selecting a country should immediately reflect its dialing code.
@@ -1747,6 +1787,23 @@ const CheckoutPage = () => {
                           tabIndex={0}
                           onKeyDown={handlePhoneCountryMenuKeyDown}
                         >
+                          <div className="phone-country-typeahead-wrap">
+                            <input
+                              ref={phoneCountryTypeaheadInputRef}
+                              type="text"
+                              inputMode="text"
+                              autoCapitalize="none"
+                              autoCorrect="off"
+                              autoComplete="off"
+                              spellCheck={false}
+                              value={phoneCountryTypeaheadQuery}
+                              onChange={handlePhoneCountryTypeaheadInputChange}
+                              onKeyDown={handlePhoneCountryTypeaheadInputKeyDown}
+                              placeholder={t('shipping.searchCountry') || 'Tapez une lettre'}
+                              className="phone-country-typeahead"
+                              aria-label={t('shipping.searchCountry') || 'Search country by first letter'}
+                            />
+                          </div>
                           {phoneCountryOptions.map((option) => (
                             <button
                               key={option.code}
@@ -2902,6 +2959,30 @@ const CheckoutPage = () => {
           border: 1px solid #e5e7eb;
           background: #ffffff;
           box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+
+        .phone-country-typeahead-wrap {
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          padding: 0.45rem 0.5rem;
+          border-bottom: 1px solid #e5e7eb;
+          background: #ffffff;
+        }
+
+        .phone-country-typeahead {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          border-radius: 0.4rem;
+          padding: 0.35rem 0.5rem;
+          font-size: 0.82rem;
+          outline: none;
+          text-transform: uppercase;
+        }
+
+        .phone-country-typeahead:focus {
+          border-color: #556822;
+          box-shadow: 0 0 0 1px #556822;
         }
 
         .phone-country-option {
