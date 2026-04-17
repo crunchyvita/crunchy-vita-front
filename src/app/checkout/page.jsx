@@ -24,6 +24,10 @@ import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
 import {
   resolveShippingPricingForCountry,
   flattenZoneCountryOptions,
+  getZoneShippingLayersForCountry,
+  shouldShowShippingInfoRelay,
+  shouldShowShippingInfoHomeDiscounted,
+  shouldShowShippingInfoHomeFree,
 } from '@/lib/shippingZonePricing';
 import { useAddressAutocomplete } from '@/lib/useAddressAutocomplete';
 import { attachGuestIdHeader } from '@/lib/guestId';
@@ -1339,9 +1343,17 @@ const CheckoutPage = () => {
   }, [subtotal, displayedShipping]);
 
   const finalTotal = Math.max(0, Number(displayedTotal || 0) - Number(promoDiscount || 0));
-  const showHomeReducedShippingInfo =
-    Number(effectiveShippingRules?.home?.discountedShipping ?? 40) > 0 &&
-    Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9) > 0;
+
+  const shippingInfoCountryIso = deliveryType === 'relay' ? relayCountryIso : countryIso;
+  const shippingInfoZoneLayers = useMemo(
+    () => getZoneShippingLayersForCountry(shippingSettings, shippingInfoCountryIso),
+    [shippingSettings, shippingInfoCountryIso]
+  );
+  const showShippingInfoRelayRow = shouldShowShippingInfoRelay(shippingInfoZoneLayers.relay);
+  const showShippingInfoHomeReducedRow = shouldShowShippingInfoHomeDiscounted(shippingInfoZoneLayers.home);
+  const showShippingInfoHomeFreeRow = shouldShowShippingInfoHomeFree(shippingInfoZoneLayers.home);
+  const showShippingInfoCardBody =
+    showShippingInfoRelayRow || showShippingInfoHomeReducedRow || showShippingInfoHomeFreeRow;
 
   const getOpeningDaysRows = (point) => {
     const openingDays = point?.raw?.parcelPoint?.openingDays || point?.raw?.parcelpoint?.openingDays;
@@ -2648,39 +2660,47 @@ const CheckoutPage = () => {
                 <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
               ) : null}
 
-              <div className="mt-4 rounded-xl border border-[#556822]/15 bg-white p-4 text-left shadow-sm">
-                <p className="text-xs font-black uppercase tracking-wider text-[#556822]">{t('shipping.infoCardTitle')}</p>
-                <div className="mt-3 space-y-3">
-                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                      {t('shipping.infoLabels.pickupPoint')}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#556822]">
-                      {t('shipping.infoRelaySimple', {
-                        threshold: Number(effectiveShippingRules?.relay?.freeShipping ?? 40).toFixed(0),
-                      })}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                      {t('shipping.infoLabels.homeDelivery')}
-                    </p>
-                    {showHomeReducedShippingInfo ? (
-                      <p className="mt-1 text-sm font-semibold text-slate-800">
-                        {t('shipping.infoHomeReducedSimple', {
-                          reducedPrice: Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9).toFixed(2),
-                          reducedThreshold: Number(effectiveShippingRules?.home?.discountedShipping ?? 40).toFixed(0),
-                        })}
-                      </p>
+              {showShippingInfoCardBody ? (
+                <div className="mt-4 rounded-xl border border-[#556822]/15 bg-white p-4 text-left shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-wider text-[#556822]">{t('shipping.infoCardTitle')}</p>
+                  <div className="mt-3 space-y-3">
+                    {showShippingInfoRelayRow ? (
+                      <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          {t('shipping.infoLabels.pickupPoint')}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[#556822]">
+                          {t('shipping.infoRelaySimple', {
+                            threshold: Number(shippingInfoZoneLayers.relay.freeShipping).toFixed(0),
+                          })}
+                        </p>
+                      </div>
                     ) : null}
-                    <p className="text-sm font-semibold text-[#556822]">
-                      {t('shipping.infoHomeFreeSimple', {
-                        freeThreshold: Number(effectiveShippingRules?.home?.freeShipping ?? 60).toFixed(0),
-                      })}
-                    </p>
+                    {showShippingInfoHomeReducedRow || showShippingInfoHomeFreeRow ? (
+                      <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          {t('shipping.infoLabels.homeDelivery')}
+                        </p>
+                        {showShippingInfoHomeReducedRow ? (
+                          <p className="mt-1 text-sm font-semibold text-slate-800">
+                            {t('shipping.infoHomeReducedSimple', {
+                              reducedPrice: Number(shippingInfoZoneLayers.home.discountedShippingFee).toFixed(2),
+                              reducedThreshold: Number(shippingInfoZoneLayers.home.discountedShipping).toFixed(0),
+                            })}
+                          </p>
+                        ) : null}
+                        {showShippingInfoHomeFreeRow ? (
+                          <p className="mt-1 text-sm font-semibold text-[#556822]">
+                            {t('shipping.infoHomeFreeSimple', {
+                              freeThreshold: Number(shippingInfoZoneLayers.home.freeShipping).toFixed(0),
+                            })}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
-              </div>
+              ) : null}
 
               <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
                 {t('securityNote')}

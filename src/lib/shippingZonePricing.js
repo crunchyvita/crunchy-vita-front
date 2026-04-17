@@ -173,6 +173,66 @@ export function getPromoBadgeThresholds(shippingSettings) {
   };
 }
 
+/**
+ * Zone that contains this ISO (no fallback to first zone — use for display-only UIs).
+ */
+export function findShippingZoneForCountry(shippingSettings, countryIso) {
+  const raw = String(countryIso || '').trim();
+  const iso = /^[A-Za-z]{2}$/.test(raw) ? raw.toUpperCase() : '';
+  if (!iso) return null;
+  const zones = Array.isArray(shippingSettings?.zones) ? shippingSettings.zones : [];
+  return (
+    zones.find((z) => {
+      const list = Array.isArray(z?.countries) ? z.countries : [];
+      return list.some((c) => zoneCountryIso(c) === iso);
+    }) || null
+  );
+}
+
+/**
+ * Raw relay/home objects from the matched zone only (not merged with defaults).
+ */
+export function getZoneShippingLayersForCountry(shippingSettings, countryIso) {
+  const zone = findShippingZoneForCountry(shippingSettings, countryIso);
+  if (!zone) return { zone: null, relay: null, home: null };
+  return {
+    zone,
+    relay: zone.relay && typeof zone.relay === 'object' ? zone.relay : null,
+    home: zone.home && typeof zone.home === 'object' ? zone.home : null,
+  };
+}
+
+const finitePositive = (n) => {
+  const x = Number(n);
+  return Number.isFinite(x) && x > 0;
+};
+
+/** Sidebar: show relay free threshold line only if the zone defines it. */
+export function shouldShowShippingInfoRelay(zoneRelay) {
+  if (!zoneRelay) return false;
+  return finitePositive(zoneRelay.freeShipping);
+}
+
+/** Sidebar: show reduced-tier line only if the zone defines both discounted fields. */
+export function shouldShowShippingInfoHomeDiscounted(zoneHome) {
+  if (!zoneHome) return false;
+  if (
+    !Object.prototype.hasOwnProperty.call(zoneHome, 'discountedShipping') ||
+    !Object.prototype.hasOwnProperty.call(zoneHome, 'discountedShippingFee')
+  ) {
+    return false;
+  }
+  const th = Number(zoneHome.discountedShipping);
+  const fee = Number(zoneHome.discountedShippingFee);
+  return finitePositive(th) && Number.isFinite(fee) && fee >= 0;
+}
+
+/** Sidebar: show free-from threshold line only if the zone defines free shipping threshold. */
+export function shouldShowShippingInfoHomeFree(zoneHome) {
+  if (!zoneHome) return false;
+  return finitePositive(zoneHome.freeShipping);
+}
+
 export function flattenZoneCountryOptions(zones, displayNames) {
   const list = [];
   const seen = new Set();
