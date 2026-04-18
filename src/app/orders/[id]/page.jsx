@@ -9,6 +9,13 @@ import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
+import {
+  formatOrderDiscountForDisplay,
+  formatOrderLineTotalForDisplay,
+  formatOrderShippingForDisplay,
+  formatOrderSubtotalForDisplay,
+  formatOrderTotalForDisplay,
+} from '@/lib/orderDisplayAmounts';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
 function OrderDetailSkeleton() {
@@ -230,7 +237,7 @@ function OrderDetailContent() {
                     <p className="text-xs sm:text-sm text-gray-500 mt-0.5">× {line.quantity}</p>
                   </div>
                   <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums shrink-0">
-                    {formatMoney(line.lineTotal, order.currency)}
+                    {formatOrderLineTotalForDisplay(order, line, i)}
                   </p>
                 </li>
               ))}
@@ -240,20 +247,20 @@ function OrderDetailContent() {
               <div className="flex justify-between text-gray-600">
                 <span className="font-medium">{t('subtotal')}</span>
                 <span className="font-bold text-gray-900 tabular-nums">
-                  {formatMoney(order.subtotalAmount, order.currency)}
+                  {formatOrderSubtotalForDisplay(order)}
                 </span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="font-medium">{t('shipping')}</span>
                 <span className="font-bold text-gray-900 tabular-nums">
-                  {formatMoney(order.shippingAmount, order.currency)}
+                  {formatOrderShippingForDisplay(order)}
                 </span>
               </div>
               {order.discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-700">
                   <span className="font-medium">{t('discount')}</span>
                   <span className="font-bold tabular-nums">
-                    −{formatMoney(order.discountAmount, order.currency)}
+                    −{formatOrderDiscountForDisplay(order)}
                   </span>
                 </div>
               )}
@@ -261,7 +268,7 @@ function OrderDetailContent() {
               <div className="flex justify-between text-lg font-black font-[agrandir]">
                 <span className="text-[#556822]">{t('total')}</span>
                 <span className="text-[#E10C69] tabular-nums">
-                  {formatMoney(order.totalAmount, order.currency)}
+                  {formatOrderTotalForDisplay(order)}
                 </span>
               </div>
             </div>

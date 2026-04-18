@@ -138,7 +138,7 @@
     "loadError": "Échec du chargement",
     "paymentIntent": "Référence de paiement",
     "order": "Commande",
-    "amount": "Montant",
+    "amount": "Montant (EUR)",
     "empty": "Aucune session de paiement payée"
   },
   "shipping": {
@@ -205,16 +205,19 @@
     "isoColumn": "Code ISO",
     "emptyCountries": "Aucun pays dans cette zone",
     "deleteCountryTitle": "Retirer le pays",
-    "addCountry": "Ajouter le pays",
+    "addCountry": "Ajouter pays",
     "edit": "Modifier",
     "invalidCountry": "Code pays ISO à 2 lettres invalide",
+    "invalidCurrency": "Code devise ISO à 3 lettres invalide",
     "duplicateCountry": "Ce pays existe déjà dans cette zone.",
     "duplicateCountryGlobal": "Ce pays existe déjà dans une autre zone.",
     "generalSettings": "Paramètres généraux",
     "promoBadgeZoneLabel": "Zone badge promo",
     "promoBadgeZoneDesc": "Afficher le badge de livraison promotionnelle pour cette zone spécifique.",
     "countryNameColumn": "Nom du pays",
-    "isoCodeColumn": "Code ISO"
+    "isoCodeColumn": "Code ISO",
+    "currencyColumn": "Devise (ISO 4217)",
+    "currencyPlaceholder": "EUR"
   },
   "dashboard": {
     "stats": {

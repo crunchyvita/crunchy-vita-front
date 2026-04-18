@@ -10,16 +10,15 @@ import { paymentAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { CheckCircle2, Gift } from 'lucide-react';
 
-function formatMoney(amount, currency = 'eur') {
+function formatMoney(amount, currency = 'eur', localeTag = 'fr-FR') {
   const cur = (currency || 'eur').toUpperCase();
   try {
-    return new Intl.NumberFormat('fr-FR', { 
-      style: 'currency', 
+    return new Intl.NumberFormat(localeTag, {
+      style: 'currency',
       currency: cur,
-      minimumFractionDigits: 2 
     }).format(Number(amount) || 0);
   } catch {
-    return `${Number(amount || 0).toFixed(2)} €`;
+    return `${Number(amount || 0).toFixed(2)} ${cur}`;
   }
 }
 
@@ -90,7 +89,15 @@ export default function CheckoutSuccessPage() {
     };
   }, [lookupId, sessionId, t]);
 
-  const items = useMemo(() => data?.items || [], [data]);
+  const localeTag = locale === 'en' ? 'en-GB' : 'fr-FR';
+
+  /** Montants catalogue en EUR sur la commande ; `displayAmounts` = même conversion que le paiement Stripe (fxSnapshot). */
+  const display = useMemo(() => data?.displayAmounts || null, [data]);
+
+  const items = useMemo(() => {
+    if (display?.items && Array.isArray(display.items)) return display.items;
+    return data?.items || [];
+  }, [data, display]);
   const promoFreeItem = useMemo(() => data?.promoDetails?.freeItem || null, [data]);
   const isLineFreeGift = (line) => {
     if (!line) return false;
@@ -123,11 +130,12 @@ export default function CheckoutSuccessPage() {
   };
 
   const displayInvoice = data?.invoiceNumber || data?.orderId || lookupId;
-  const subtotal = data?.subtotalAmount ?? 0;
-  const shipping = data?.shippingAmount ?? 0;
-  const discount = data?.discountAmount ?? 0;
-  const total = data?.totalAmount ?? 0;
-  const currency = data?.currency || 'eur';
+  const subtotal = display?.subtotalAmount ?? data?.subtotalAmount ?? 0;
+  const shipping = display?.shippingAmount ?? data?.shippingAmount ?? 0;
+  const discount = display?.discountAmount ?? data?.discountAmount ?? 0;
+  const total = display?.totalAmount ?? data?.totalAmount ?? 0;
+  /** Sans `displayAmounts`, les montants restent en EUR catalogue même si `currency` Stripe était autre (anciennes commandes). */
+  const currency = display?.currency ?? 'eur';
 
   const shipName = String(data?.customerName || '').trim() || '—';
 
@@ -246,7 +254,9 @@ export default function CheckoutSuccessPage() {
                       <p className="text-xs sm:text-sm text-gray-500">x {line?.quantity || 0}</p>
                     </div>
                     <p className="font-black text-[#E10C69] text-base sm:text-lg tabular-nums text-right">
-                      {line?.lineTotal != null ? formatMoney(line.lineTotal, currency) : formatMoney(0, currency)}
+                      {line?.lineTotal != null
+                        ? formatMoney(line.lineTotal, currency, localeTag)
+                        : formatMoney(0, currency, localeTag)}
                     </p>
                   </li>
                 ))}
@@ -255,24 +265,24 @@ export default function CheckoutSuccessPage() {
               <div className="mt-10 pt-6 border-t border-gray-100 space-y-3 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>{t('subtotal')}</span>
-                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(subtotal, currency)}</span>
+                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(subtotal, currency, localeTag)}</span>
                 </div>
                 
                 <div className="flex justify-between text-gray-600">
                   <span>{t('shipping')}</span>
-                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency)}</span>
+                  <span className="font-bold text-gray-900 tabular-nums">{formatMoney(shipping, currency, localeTag)}</span>
                 </div>
 
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">
                     <span>{t('discount')}</span>
-                    <span className="tabular-nums">−{formatMoney(discount, currency)}</span>
+                    <span className="tabular-nums">−{formatMoney(discount, currency, localeTag)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822]">{t('total')}</span>
-                  <span className="text-[#E10C69] tabular-nums">{formatMoney(total, currency)}</span>
+                  <span className="text-[#E10C69] tabular-nums">{formatMoney(total, currency, localeTag)}</span>
                 </div>
               </div>
             </div>

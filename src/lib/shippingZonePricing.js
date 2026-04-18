@@ -25,7 +25,12 @@ export function normalizeCountryEntry(c) {
     typeof c === 'object' && c !== null
       ? String(c.label || c.name || '').trim()
       : '';
-  return { iso, label };
+  let currency = 'EUR';
+  if (typeof c === 'object' && c !== null && c.currency != null) {
+    const raw = String(c.currency).trim().toUpperCase();
+    if (/^[A-Z]{3}$/.test(raw)) currency = raw;
+  }
+  return { iso, label, currency };
 }
 
 const toNonNegative = (value, fallback) => {
@@ -187,6 +192,22 @@ export function findShippingZoneForCountry(shippingSettings, countryIso) {
       return list.some((c) => zoneCountryIso(c) === iso);
     }) || null
   );
+}
+
+/**
+ * ISO 4217 for Stripe/display from zone country row (default EUR → eur).
+ */
+export function getCurrencyForCountryIso(shippingSettings, countryIso) {
+  const raw = String(countryIso || '').trim();
+  const iso = /^[A-Za-z]{2}$/.test(raw) ? raw.toUpperCase() : '';
+  if (!iso) return 'eur';
+  const zone = findShippingZoneForCountry(shippingSettings, iso);
+  if (!zone || !Array.isArray(zone.countries)) return 'eur';
+  const row = zone.countries.find((c) => zoneCountryIso(c) === iso);
+  if (!row) return 'eur';
+  const norm = normalizeCountryEntry(row);
+  const cur = String(norm?.currency || 'EUR').trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(cur) ? cur.toLowerCase() : 'eur';
 }
 
 /**

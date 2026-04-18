@@ -978,9 +978,9 @@
         "pickupPoint": "Point relais",
         "homeDelivery": "Livraison a domicile"
       },
-      "infoRelaySimple": "GRATUIT dès {threshold} € d'achats",
-      "infoHomeReducedSimple": "{reducedPrice} € dès {reducedThreshold} € d'achats",
-      "infoHomeFreeSimple": "Gratuit dès {freeThreshold} € d'achats",
+      "infoRelaySimple": "GRATUIT dès {threshold} d'achats",
+      "infoHomeReducedSimple": "{reducedPrice} dès {reducedThreshold} d'achats",
+      "infoHomeFreeSimple": "Gratuit dès {freeThreshold} d'achats",
       "infoRelay": "Point Relais : GRATUIT - des {threshold} EUR",
       "infoHome": "Livraison a domicile : {reducedPrice} EUR des {reducedThreshold} EUR | Gratuit des {freeThreshold} EUR",
       "validationHome": "Remplis email + prenom/nom + adresse + ville + code postal.",
@@ -1017,7 +1017,11 @@
       "qty": "Qté",
       "promoCodeLabel": "Code promo",
       "promoPlaceholder": "Entrez votre code promo",
-      "applyPromo": "Appliquer"
+      "applyPromo": "Appliquer",
+      "catalogEur": "Tarifs en EUR",
+      "pricesInCurrency": "Estimation en {currency}",
+      "fxLoading": "Chargement du cours…",
+      "stripeCharge": "Debit carte (cours du jour)"
     },
     "actions": {
       "confirmOrder": "Confirmer la commande",

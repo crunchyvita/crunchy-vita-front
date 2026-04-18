@@ -9,6 +9,9 @@ import { orderAPI } from "@/lib/api";
 import { ArrowLeft } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+/** Back-office: montants catalogue toujours en EUR (indépendant de la devise Stripe). */
+const ADMIN_MONEY_CURRENCY = "EUR";
+
 function formatMoney(amount, currency = "eur", localeTag = "fr-FR") {
 	try {
 		return new Intl.NumberFormat(localeTag, {
@@ -132,9 +135,9 @@ function AdminOrderDetailInner() {
 												<tr key={idx}>
 													<td className="px-3 py-3">{lineDisplayName(line, od("lineFallback"))}</td>
 													<td className="px-3 py-3">{line?.quantity || 1}</td>
-													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), order?.currency, numberLocale)}</td>
+													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), ADMIN_MONEY_CURRENCY, numberLocale)}</td>
 													<td className="px-3 py-3 text-right font-medium">
-														{formatMoney(line?.lineTotal, order?.currency, numberLocale)}
+														{formatMoney(line?.lineTotal, ADMIN_MONEY_CURRENCY, numberLocale)}
 													</td>
 												</tr>
 											))}
@@ -145,19 +148,19 @@ function AdminOrderDetailInner() {
 								<div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm">
 									<div className="flex justify-between text-slate-600">
 										<span>{od("subtotal")}</span>
-										<span>{formatMoney(order.subtotalAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.subtotalAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
 										<span>{od("shipping")}</span>
-										<span>{formatMoney(order.shippingAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.shippingAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
 										<span>{od("discount")}</span>
-										<span>{formatMoney(order.discountAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.discountAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-900 font-semibold pt-2 border-t border-slate-100">
 										<span>{od("total")}</span>
-										<span>{formatMoney(order.totalAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.totalAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 								</div>
 							</div>
@@ -196,7 +199,7 @@ function AdminOrderDetailInner() {
 									{boxtal?.shippingPrice != null ? (
 										<p className="text-sm text-slate-700">
 											<span className="font-medium">{od("shipping")}</span>{" "}
-											{formatMoney(boxtal.shippingPrice, boxtalShipment?.selectedOffer?.currency || order.currency, numberLocale)}
+											{formatMoney(boxtal.shippingPrice, ADMIN_MONEY_CURRENCY, numberLocale)}
 										</p>
 									) : null}
 									<p className="text-sm text-slate-700">

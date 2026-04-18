@@ -142,6 +142,7 @@ export default function AdminShippingZoneViewPage() {
 										<tr>
 											<th className="px-4 py-3 font-semibold">{t("countryNamePlaceholder")}</th>
 											<th className="px-4 py-3 font-semibold">{t("isoColumn")}</th>
+											<th className="px-4 py-3 font-semibold">{t("currencyColumn")}</th>
 										</tr>
 									</thead>
 									<tbody className="divide-y divide-slate-200 bg-white">
@@ -149,6 +150,9 @@ export default function AdminShippingZoneViewPage() {
 											<tr key={row.iso}>
 												<td className="px-4 py-3 font-medium text-slate-900">{countryLabel(row, displayNames)}</td>
 												<td className="px-4 py-3 font-mono text-slate-500">{row.iso}</td>
+												<td className="px-4 py-3 font-mono text-slate-600">
+													{String(row.currency || "EUR").toUpperCase()}
+												</td>
 											</tr>
 										))}
 									</tbody>

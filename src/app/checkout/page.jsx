@@ -25,10 +25,16 @@ import {
   resolveShippingPricingForCountry,
   flattenZoneCountryOptions,
   getZoneShippingLayersForCountry,
+  getCurrencyForCountryIso,
   shouldShowShippingInfoRelay,
   shouldShowShippingInfoHomeDiscounted,
   shouldShowShippingInfoHomeFree,
 } from '@/lib/shippingZonePricing';
+import {
+  convertEurToDestinationMajor,
+  formatDestinationMoney,
+  fetchEurToDestinationRate,
+} from '@/lib/checkoutCurrencyDisplay';
 import { useAddressAutocomplete } from '@/lib/useAddressAutocomplete';
 import { attachGuestIdHeader } from '@/lib/guestId';
 import { getAddressCountryMismatchKey } from '@/lib/addressCountryConsistency';
@@ -393,6 +399,8 @@ const CheckoutPage = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState(null);
   const [isPreparingPaymentIntent, setIsPreparingPaymentIntent] = useState(false);
+  /** Set when PaymentIntent is created: EUR snapshot + charge currency totals from API */
+  const [paymentChargeTotals, setPaymentChargeTotals] = useState(null);
   const [checkoutError, setCheckoutError] = useState('');
   /** When true, show soft validation hints (address quote, phone format) — not on first paint. */
   const [checkoutHintsEnabled, setCheckoutHintsEnabled] = useState(false);
@@ -1246,7 +1254,12 @@ const CheckoutPage = () => {
         throw new Error(response?.message || t('errors.sessionCreateFailed'));
       }
 
+      setPaymentChargeTotals(response?.data?.totals || null);
+
       return response.data.clientSecret;
+    } catch (err) {
+      setPaymentChargeTotals(null);
+      throw err;
     } finally {
       setIsPreparingPaymentIntent(false);
     }
@@ -1413,14 +1426,6 @@ const CheckoutPage = () => {
     return c ? c.toLowerCase() : '';
   };
 
-  const getRelayPriceLabel = () => {
-    const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
-    const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
-    const subtotalValue = Number(subtotal || 0);
-    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
-    return `${relayBelowPrice.toFixed(2)} EUR`;
-  };
-
   const getRelayNumericPrice = (point) => {
     if (!point || typeof point !== 'object') return null;
 
@@ -1486,6 +1491,111 @@ const CheckoutPage = () => {
   }, [subtotal, displayedShipping]);
 
   const finalTotal = Math.max(0, Number(displayedTotal || 0) - Number(promoDiscount || 0));
+
+  const destinationCountryIsoForCurrency = useMemo(() => {
+    if (deliveryType === 'relay') {
+      const rc = selectedRelay?.country;
+      if (typeof rc === 'string' && /^[A-Za-z]{2}$/.test(rc.trim())) {
+        return rc.trim().toUpperCase();
+      }
+      return String(relayCountryIso || '').trim().toUpperCase();
+    }
+    return String(countryIso || '').trim().toUpperCase();
+  }, [deliveryType, relayCountryIso, countryIso, selectedRelay]);
+
+  const summaryCurrency = useMemo(
+    () => getCurrencyForCountryIso(shippingSettings, destinationCountryIsoForCurrency),
+    [shippingSettings, destinationCountryIsoForCurrency]
+  );
+
+  const [eurToDestRate, setEurToDestRate] = useState(null);
+  const [fxLoading, setFxLoading] = useState(false);
+
+  useEffect(() => {
+    if (summaryCurrency === 'eur') {
+      setEurToDestRate(1);
+      setFxLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    setEurToDestRate(null);
+    setFxLoading(true);
+    fetchEurToDestinationRate(summaryCurrency.toUpperCase())
+      .then((r) => {
+        if (!cancelled) setEurToDestRate(r);
+      })
+      .catch(() => {
+        if (!cancelled) setEurToDestRate(null);
+      })
+      .finally(() => {
+        if (!cancelled) setFxLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [summaryCurrency]);
+
+  const formatEurInSummaryCurrency = useCallback(
+    (amountEur) => {
+      if (summaryCurrency === 'eur') {
+        return `${Number(amountEur || 0).toFixed(2)} €`;
+      }
+      if (fxLoading || eurToDestRate == null || !Number.isFinite(eurToDestRate)) {
+        return null;
+      }
+      const major = convertEurToDestinationMajor(amountEur, eurToDestRate, summaryCurrency);
+      if (major == null) return null;
+      return formatDestinationMoney(major, summaryCurrency, locale);
+    },
+    [summaryCurrency, eurToDestRate, fxLoading, locale]
+  );
+
+  const formatEurOrFallback = useCallback(
+    (amountEur) => {
+      const c = formatEurInSummaryCurrency(amountEur);
+      if (c != null) return c;
+      return `${Number(amountEur || 0).toFixed(2)} €`;
+    },
+    [formatEurInSummaryCurrency]
+  );
+
+  const getRelayPriceLabel = useCallback(() => {
+    const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
+    const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
+    const subtotalValue = Number(subtotal || 0);
+    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
+    const formatted = formatEurInSummaryCurrency(relayBelowPrice);
+    if (formatted) return formatted;
+    return `${relayBelowPrice.toFixed(2)} EUR`;
+  }, [effectiveShippingRules, subtotal, formatEurInSummaryCurrency]);
+
+  useEffect(() => {
+    setPaymentChargeTotals(null);
+  }, [
+    subtotal,
+    displayedShipping,
+    promoDiscount,
+    promoCode,
+    countryIso,
+    relayCountryIso,
+    deliveryType,
+    expressDelivery,
+    selectedRelay,
+    summaryCurrency,
+  ]);
+
+  const paymentChargeLabel = useMemo(() => {
+    const pt = paymentChargeTotals;
+    if (!pt || !pt.currency || String(pt.currency).toLowerCase() === 'eur') return null;
+    const cur = String(pt.currency).toUpperCase();
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: cur }).format(
+        Number(pt.total || 0)
+      );
+    } catch {
+      return `${Number(pt.total || 0).toFixed(2)} ${cur}`;
+    }
+  }, [paymentChargeTotals, locale]);
 
   const shippingInfoCountryIso = deliveryType === 'relay' ? relayCountryIso : countryIso;
   const shippingInfoZoneLayers = useMemo(
@@ -2656,7 +2766,7 @@ const CheckoutPage = () => {
                           </p>
                         </div>
                         <p className="text-lg font-black text-[#556822]">
-                          {Number(displayedShipping || 0).toFixed(2)} EUR
+                          {formatEurOrFallback(Number(displayedShipping || 0))}
                         </p>
                       </div>
                     </div>
@@ -2747,15 +2857,17 @@ const CheckoutPage = () => {
                         {item.isFreeItem ? (
                           <div className="flex flex-col gap-1">
                             <p className="text-xs text-gray-400 line-through">
-                              {lineSubtotalFromCartItem({ ...item, isFreeItem: false }).toFixed(2)} €
+                              {formatEurOrFallback(lineSubtotalFromCartItem({ ...item, isFreeItem: false }))}
                             </p>
-                            <p className="text-sm font-black text-[#E10C69]">0 €</p>
+                            <p className="text-sm font-black text-[#E10C69]">
+                              {formatEurOrFallback(0)}
+                            </p>
                           </div>
                         ) : (
                           <>
                             <p className="text-xs text-gray-400">x {item.quantity}</p>
                             <p className="text-sm font-black text-[#E10C69]">
-                              {lineSubtotalFromCartItem(item).toFixed(2)} €
+                              {formatEurOrFallback(lineSubtotalFromCartItem(item))}
                             </p>
                           </>
                         )}
@@ -2787,23 +2899,45 @@ const CheckoutPage = () => {
 
               {/* Totals */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  {summaryCurrency !== 'eur' && fxLoading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#556822]" aria-hidden />
+                      <span>{t('summary.fxLoading')}</span>
+                    </>
+                  ) : summaryCurrency === 'eur' ? (
+                    <span>{t('summary.catalogEur')}</span>
+                  ) : (
+                    <span>{t('summary.pricesInCurrency', { currency: summaryCurrency.toUpperCase() })}</span>
+                  )}
+                </div>
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.subtotal')}</span>
-                  <span className="text-gray-900">{Number(subtotal).toFixed(2)} €</span>
+                  <span className="text-gray-900">{formatEurOrFallback(Number(subtotal || 0))}</span>
                 </div>
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
-                  <span className="text-gray-900">{Number(isShippingReady ? displayedShipping : 0).toFixed(2)} €</span>
+                  <span className="text-gray-900">
+                    {formatEurOrFallback(Number(isShippingReady ? displayedShipping : 0))}
+                  </span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
                   <div className="text-right leading-tight">
                     {promoDiscount > 0 && (
-                      <div className="text-xs font-semibold text-gray-400 line-through">{Number(displayedTotal).toFixed(2)} €</div>
+                      <div className="text-xs font-semibold text-gray-400 line-through">
+                        {formatEurOrFallback(Number(displayedTotal))}
+                      </div>
                     )}
-                    <span className="text-[#E10C69]">{finalTotal.toFixed(2)} €</span>
+                    <span className="text-[#E10C69]">{formatEurOrFallback(finalTotal)}</span>
                   </div>
                 </div>
+                {paymentChargeLabel ? (
+                  <p className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 px-3 py-2 text-sm text-slate-700">
+                    <span className="font-semibold text-[#556822]">{t('summary.stripeCharge')}: </span>
+                    {paymentChargeLabel}
+                  </p>
+                ) : null}
               </div>
 
               <button
@@ -2840,7 +2974,7 @@ const CheckoutPage = () => {
                         </p>
                         <p className="mt-1 text-sm font-semibold text-[#556822]">
                           {t('shipping.infoRelaySimple', {
-                            threshold: Number(shippingInfoZoneLayers.relay.freeShipping).toFixed(0),
+                            threshold: formatEurOrFallback(Number(shippingInfoZoneLayers.relay.freeShipping || 0)),
                           })}
                         </p>
                       </div>
@@ -2853,15 +2987,19 @@ const CheckoutPage = () => {
                         {showShippingInfoHomeReducedRow ? (
                           <p className="mt-1 text-sm font-semibold text-slate-800">
                             {t('shipping.infoHomeReducedSimple', {
-                              reducedPrice: Number(shippingInfoZoneLayers.home.discountedShippingFee).toFixed(2),
-                              reducedThreshold: Number(shippingInfoZoneLayers.home.discountedShipping).toFixed(0),
+                              reducedPrice: formatEurOrFallback(
+                                Number(shippingInfoZoneLayers.home.discountedShippingFee || 0)
+                              ),
+                              reducedThreshold: formatEurOrFallback(
+                                Number(shippingInfoZoneLayers.home.discountedShipping || 0)
+                              ),
                             })}
                           </p>
                         ) : null}
                         {showShippingInfoHomeFreeRow ? (
                           <p className="mt-1 text-sm font-semibold text-[#556822]">
                             {t('shipping.infoHomeFreeSimple', {
-                              freeThreshold: Number(shippingInfoZoneLayers.home.freeShipping).toFixed(0),
+                              freeThreshold: formatEurOrFallback(Number(shippingInfoZoneLayers.home.freeShipping || 0)),
                             })}
                           </p>
                         ) : null}

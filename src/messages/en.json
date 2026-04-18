@@ -978,9 +978,9 @@
         "pickupPoint": "Pickup point",
         "homeDelivery": "Home delivery"
       },
-      "infoRelaySimple": "FREE from {threshold} € of purchases",
-      "infoHomeReducedSimple": "{reducedPrice} € from {reducedThreshold} € of purchases",
-      "infoHomeFreeSimple": "Free from {freeThreshold} € of purchases",
+      "infoRelaySimple": "FREE from {threshold} of purchases",
+      "infoHomeReducedSimple": "{reducedPrice} from {reducedThreshold} of purchases",
+      "infoHomeFreeSimple": "Free from {freeThreshold} of purchases",
       "infoRelay": "Relay point: FREE from {threshold} EUR",
       "infoHome": "Home delivery: {reducedPrice} EUR from {reducedThreshold} EUR | Free from {freeThreshold} EUR",
       "validationHome": "Fill email + first/last name + address + city + postal code.",
@@ -1017,7 +1017,11 @@
       "qty": "Qty",
       "promoCodeLabel": "Promo code",
       "promoPlaceholder": "Enter coupon code",
-      "applyPromo": "Apply Coupon"
+      "applyPromo": "Apply Coupon",
+      "catalogEur": "Catalog in EUR",
+      "pricesInCurrency": "Estimate in {currency}",
+      "fxLoading": "Loading exchange rate…",
+      "stripeCharge": "Card charge (live rate)"
     },
     "actions": {
       "confirmOrder": "Confirm Order",
