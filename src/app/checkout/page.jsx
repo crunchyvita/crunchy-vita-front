@@ -2932,12 +2932,7 @@ const CheckoutPage = () => {
                     <span className="text-[#E10C69]">{formatEurOrFallback(finalTotal)}</span>
                   </div>
                 </div>
-                {paymentChargeLabel ? (
-                  <p className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 px-3 py-2 text-sm text-slate-700">
-                    <span className="font-semibold text-[#556822]">{t('summary.stripeCharge')}: </span>
-                    {paymentChargeLabel}
-                  </p>
-                ) : null}
+                
               </div>
 
               <button
