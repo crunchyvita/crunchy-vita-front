@@ -997,6 +997,10 @@
     },
     "payment": {
       "title": "Payment",
+      "applePay": "Apple Pay",
+      "applePayOrCard": "Or pay with card",
+      "cancelWalletFallback": "Cancel",
+      "applePayUnavailable": "Apple Pay is not available on this device or browser. Use the card form below.",
       "creditCard": "Credit Card",
       "nameOnCard": "Name on card",
       "nameOnCardPlaceholder": "e.g. Houda Gh",

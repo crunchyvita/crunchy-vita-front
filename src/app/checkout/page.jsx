@@ -10,6 +10,7 @@ import {
   CardNumberElement,
   CardExpiryElement,
   CardCvcElement,
+  PaymentRequestButtonElement,
 } from '@stripe/react-stripe-js';
 import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
@@ -45,6 +46,14 @@ import PhoneInput, {
   parsePhoneNumber,
 } from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
+
+/** Two-letter country of your Stripe account (Apple Pay / Payment Request). */
+const STRIPE_MERCHANT_COUNTRY = String(
+  process.env.NEXT_PUBLIC_STRIPE_MERCHANT_COUNTRY || 'FR'
+)
+  .trim()
+  .slice(0, 2)
+  .toUpperCase();
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -186,7 +195,7 @@ const PaymentForm = ({
     setPaymentError('');
 
     try {
-      const clientSecret = await createPaymentIntent();
+      const { clientSecret } = await createPaymentIntent();
       const cardElement = elements.getElement(CardNumberElement);
 
       if (!cardElement) {
@@ -312,6 +321,163 @@ const PaymentForm = ({
   );
 };
 
+const ApplePayCheckoutButton = ({
+  t,
+  createPaymentIntent,
+  locale,
+  merchantCountry,
+  setPaymentProcessing,
+  setPaymentError,
+  disabled,
+}) => {
+  const stripe = useStripe();
+  const [busy, setBusy] = useState(false);
+  const [fallbackPaymentRequest, setFallbackPaymentRequest] = useState(null);
+
+  const handleApplePay = async () => {
+    if (!stripe || disabled || busy) return;
+    setBusy(true);
+    setPaymentError('');
+    setPaymentProcessing(true);
+    setFallbackPaymentRequest(null);
+
+    let prRef = null;
+    let onPaymentMethod = null;
+    let onCancel = null;
+
+    try {
+      const { clientSecret, amountMinor, currency } = await createPaymentIntent();
+
+      if (!clientSecret || amountMinor == null) {
+        throw new Error('Unable to start Apple Pay');
+      }
+
+      const cy = String(currency || 'eur').toLowerCase().slice(0, 3);
+      const pr = stripe.paymentRequest({
+        country: merchantCountry,
+        currency: cy,
+        total: { label: 'CrunchyVita', amount: amountMinor },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      });
+      prRef = pr;
+
+      onPaymentMethod = async (ev) => {
+        try {
+          const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: ev.paymentMethod.id,
+          });
+          if (confirmError) {
+            ev.complete('fail');
+            setPaymentError(confirmError.message || 'Payment failed');
+            setPaymentProcessing(false);
+          } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+            ev.complete('success');
+            window.location.href = `${locale ? `/${locale}` : ''}/checkout/succes?payment_intent=${encodeURIComponent(paymentIntent.id)}`;
+          } else {
+            ev.complete('fail');
+            setPaymentProcessing(false);
+          }
+        } catch (e) {
+          ev.complete('fail');
+          setPaymentError(e?.message || 'Payment failed');
+          setPaymentProcessing(false);
+        } finally {
+          setBusy(false);
+          if (prRef && onPaymentMethod) prRef.off('paymentmethod', onPaymentMethod);
+          if (prRef && onCancel) prRef.off('cancel', onCancel);
+        }
+      };
+
+      onCancel = () => {
+        setPaymentProcessing(false);
+        setBusy(false);
+        setFallbackPaymentRequest(null);
+        if (prRef && onPaymentMethod) prRef.off('paymentmethod', onPaymentMethod);
+        if (prRef && onCancel) prRef.off('cancel', onCancel);
+      };
+
+      pr.on('paymentmethod', onPaymentMethod);
+      pr.on('cancel', onCancel);
+
+      const can = await pr.canMakePayment();
+      if (!can?.applePay) {
+        pr.off('paymentmethod', onPaymentMethod);
+        pr.off('cancel', onCancel);
+        setPaymentError(t('payment.applePayUnavailable'));
+        setPaymentProcessing(false);
+        setBusy(false);
+        return;
+      }
+
+      try {
+        pr.show();
+      } catch {
+        setFallbackPaymentRequest(pr);
+        setPaymentProcessing(false);
+      }
+    } catch (err) {
+      setPaymentError(err?.message || 'Payment failed');
+      setPaymentProcessing(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (fallbackPaymentRequest) {
+    return (
+      <div className="mb-4 sm:mb-6 space-y-2">
+        <p className="text-xs text-gray-600 text-center">{t('payment.applePay')}</p>
+        <PaymentRequestButtonElement
+          options={{
+            paymentRequest: fallbackPaymentRequest,
+            style: {
+              paymentRequestButton: {
+                type: 'default',
+                theme: 'dark',
+                height: '48px',
+              },
+            },
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              fallbackPaymentRequest.off?.('paymentmethod');
+              fallbackPaymentRequest.off?.('cancel');
+            } catch {
+              // ignore
+            }
+            fallbackPaymentRequest.abort?.();
+            setFallbackPaymentRequest(null);
+            setPaymentProcessing(false);
+            setBusy(false);
+          }}
+          className="w-full text-xs text-gray-500 underline"
+        >
+          {t('payment.cancelWalletFallback')}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4 sm:mb-6">
+      <button
+        type="button"
+        onClick={handleApplePay}
+        disabled={disabled || busy}
+        className="w-full rounded-lg bg-black px-4 py-3 text-[15px] font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 min-h-[48px]"
+        aria-label={t('payment.applePay')}
+      >
+        {busy ? <Loader2 className="animate-spin shrink-0" size={20} aria-hidden /> : null}
+        {t('payment.applePay')}
+      </button>
+    </div>
+  );
+};
+
 const CheckoutPage = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -433,6 +599,18 @@ const CheckoutPage = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [isPaymentFormComplete, setIsPaymentFormComplete] = useState(false);
+  const [canUseApplePay, setCanUseApplePay] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (window.ApplePaySession && typeof window.ApplePaySession.canMakePayments === 'function') {
+        setCanUseApplePay(window.ApplePaySession.canMakePayments());
+      }
+    } catch {
+      setCanUseApplePay(false);
+    }
+  }, []);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
@@ -1256,7 +1434,12 @@ const CheckoutPage = () => {
 
       setPaymentChargeTotals(response?.data?.totals || null);
 
-      return response.data.clientSecret;
+      return {
+        clientSecret: response.data.clientSecret,
+        amountMinor: response.data.amountMinor,
+        currency: response.data.totals?.currency,
+        paymentIntentId: response.data.paymentIntentId,
+      };
     } catch (err) {
       setPaymentChargeTotals(null);
       throw err;
@@ -2779,6 +2962,32 @@ const CheckoutPage = () => {
             <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('payment.title')}</h2>
               <div className="border border-gray-200 rounded-xl p-3 sm:p-6 bg-white">
+                {canUseApplePay ? (
+                  <>
+                    <ApplePayCheckoutButton
+                      t={t}
+                      createPaymentIntent={createPaymentIntent}
+                      locale={locale}
+                      merchantCountry={STRIPE_MERCHANT_COUNTRY}
+                      setPaymentProcessing={setPaymentProcessing}
+                      setPaymentError={setPaymentError}
+                      disabled={
+                        !canConfirm ||
+                        isPreparingPaymentIntent ||
+                        paymentProcessing ||
+                        cartItems.length === 0
+                      }
+                    />
+                    <div className="relative mb-4 sm:mb-6">
+                      <div className="absolute inset-0 flex items-center" aria-hidden>
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="bg-white px-2 text-gray-500">{t('payment.applePayOrCard')}</span>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
                 <PaymentForm
                   locale={locale}
                   t={t}
