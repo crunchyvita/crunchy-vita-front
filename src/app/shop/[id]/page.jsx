@@ -688,8 +688,8 @@ export default function ProductDetailPage() {
 
       <PromoBadge />
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden shadow-lg">
@@ -730,9 +730,9 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Details */}
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             <div>
-              <h1 className="text-5xl font-[Agrandir] text-[#556822] mb-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-[Agrandir] text-[#556822] mb-3 leading-tight">
                 {productName}
               </h1>
 
@@ -768,8 +768,8 @@ export default function ProductDetailPage() {
             </div>
 
             <div>
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-[Agrandir] font-bold text-[#E10c69]">
+              <div className="flex items-baseline gap-2 sm:gap-3 mb-2">
+                <span className="text-3xl sm:text-4xl font-[Agrandir] font-bold text-[#E10c69]">
                   {productPrice.toFixed(2)} €
                 </span>
                 {product.originalPrice && Number(product.originalPrice) > productPrice && (
@@ -798,16 +798,16 @@ export default function ProductDetailPage() {
                   <span>{t('quantity.maxReached')}</span>
                 </div>
               )}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border-2 border-gray-300 rounded-lg">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
+                <div className="flex items-center justify-between border-2 border-gray-300 rounded-lg">
                   <button
                     onClick={decrementQuantity}
                     disabled={quantity <= 1}
-                    className="p-3 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2.5 sm:p-3 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <Minus className="h-5 w-5" />
+                    <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
-                  <span className="px-6 py-3 font-maison-neue-bold text-lg border-x-2 border-gray-300 min-w-15 text-center">
+                  <span className="px-4 sm:px-6 py-2.5 sm:py-3 font-maison-neue-bold text-base sm:text-lg border-x-2 border-gray-300 min-w-12 sm:min-w-14 text-center">
                     {quantity}
                   </span>
                   <button
@@ -819,26 +819,26 @@ export default function ProductDetailPage() {
                         setQuantity(quantity + 1);
                       }
                     }}
-                    className="p-3 hover:bg-gray-100 transition-colors"
+                    className="p-2.5 sm:p-3 hover:bg-gray-100 transition-colors"
                   >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
 
-                <div className="text-lg">
+                <div className="text-sm sm:text-lg whitespace-nowrap">
                   <span className="text-gray-600 font-[maison-neue-book]">{t('total.label')} </span>
-                  <span className="font-[agrandir] font-bold text-[#E10c69] text-2xl">
+                  <span className="font-[agrandir] font-bold text-[#E10c69] text-lg sm:text-2xl">
                     {totalPrice.toFixed(2)} €
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-row gap-2 sm:gap-3">
               <button
                 onClick={handleAddToCart}
                 disabled={availableStock === 0 || addedToCart}
-                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-agrandir font-semibold transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-4 text-sm sm:text-base rounded-lg font-agrandir font-semibold transition-colors ${
                   availableStock === 0
                     ? 'bg-gray-400 cursor-not-allowed text-white'
                     : addedToCart
@@ -848,19 +848,19 @@ export default function ProductDetailPage() {
               >
                 {addedToCart ? (
                   <>
-                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     {t('messages.addedToCart')}
                   </>
                 ) : searchParams.packageId ? (
                   <>
-                    <Package className="h-5 w-5" />
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5" />
                     {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToPack')}
                   </>
                 ) : (
                   <>
-                    <ShoppingCart className="h-5 w-5" />
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                     {availableStock === 0 ? t('buttons.outOfStock') : t('buttons.addToCart')}
                   </>
                 )}
@@ -870,14 +870,14 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToWishlist}
                   disabled={favoritesLoading}
-                  className={`px-6 py-4 border-2 rounded-lg font-agrandir font-semibold transition-colors ${
+                  className={`w-auto shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-2 rounded-lg font-agrandir font-semibold transition-colors flex items-center justify-center ${
                     isFavorite
                       ? 'border-red-500 bg-red-500 text-white hover:bg-red-600'
                       : 'border-red-500 text-red-500 hover:bg-red-50'
                   } ${favoritesLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                   title={isFavorite ? 'Retirer des favoris' : t('buttons.addToWishlist')}
                 >
-                  <Heart className={`h-6 w-6 ${isFavorite ? 'fill-white' : ''}`} />
+                  <Heart className={`h-5 w-5 sm:h-6 sm:w-6 ${isFavorite ? 'fill-white' : ''}`} />
                 </button>
               )}
             </div>
@@ -885,9 +885,9 @@ export default function ProductDetailPage() {
         </div>
 
         {hasNutritionData(product.nutrition) && (
-          <div className="mt-12 border-t border-gray-200 pt-10">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
+          <div className="mt-10 sm:mt-12 border-t border-gray-200 pt-8 sm:pt-10">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-agrandir font-bold text-[#556822] mb-2">
                 {t('nutrition.title')}
               </h2>
               <p className="text-gray-600 font-maison-neue-book">
@@ -906,9 +906,9 @@ export default function ProductDetailPage() {
 
         {/* Image Comparison Section */}
         {freshImg && lyoImg && (
-          <div className="mt-16 border-t border-gray-200 pt-16">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-agrandir font-bold text-[#556822] mb-2">
+          <div className="mt-12 sm:mt-16 border-t border-gray-200 pt-10 sm:pt-16">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-agrandir font-bold text-[#556822] mb-2">
                 {t('comparison.title')}
               </h2>
               <p className="text-gray-600 font-maison-neue-book">
@@ -917,7 +917,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div
-              className="relative w-full max-w-5xl mx-auto h-125 rounded-2xl overflow-hidden shadow-2xl cursor-ew-resize select-none"
+              className="relative w-full max-w-5xl mx-auto h-88 sm:h-112 lg:h-124 rounded-2xl overflow-hidden shadow-2xl cursor-ew-resize select-none"
               onMouseMove={handleSliderMove}
               onMouseDown={handleSliderStart}
               onMouseUp={handleSliderEnd}
@@ -929,8 +929,8 @@ export default function ProductDetailPage() {
               {/* Fresh Fruit Image */}
               <div className="absolute inset-0">
                 <img src={freshImg} alt={t('comparison.freshAlt')} className="w-full h-full object-cover" draggable="false" />
-                <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.freshLabel')}</span>
+                <div className="absolute top-3 left-3 sm:top-6 sm:left-6 bg-white/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-3 rounded-full shadow-lg border-2 border-white/40">
+                  <span className="font-agrandir font-bold text-white text-sm sm:text-lg drop-shadow-lg">{t('comparison.freshLabel')}</span>
                 </div>
               </div>
 
@@ -940,8 +940,8 @@ export default function ProductDetailPage() {
                 style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
               >
                 <img src={lyoImg} alt={t('comparison.lyoAlt')} className="w-full h-full object-cover" draggable="false" />
-                <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border-2 border-white/40">
-                  <span className="font-agrandir font-bold text-white text-lg drop-shadow-lg">{t('comparison.lyoLabel')}</span>
+                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-white/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-3 rounded-full shadow-lg border-2 border-white/40">
+                  <span className="font-agrandir font-bold text-white text-sm sm:text-lg drop-shadow-lg">{t('comparison.lyoLabel')}</span>
                 </div>
               </div>
 
@@ -950,17 +950,17 @@ export default function ProductDetailPage() {
                 className={`absolute top-0 bottom-0 w-0.5 bg-white shadow-2xl ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
                 style={{ left: `${sliderPosition}%` }}
               >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[#556822]">
-                  <svg className="w-6 h-6 text-[#556822]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 sm:border-4 border-[#556822]">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#556822]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
                   </svg>
                 </div>
               </div>
 
               {sliderPosition === 50 && !isDragging && (
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg animate-pulse">
-                  <span className="font-maison-neue-bold text-white text-sm flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg animate-pulse">
+                  <span className="font-maison-neue-bold text-white text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                     </svg>
                     {t('comparison.slide')}
@@ -972,9 +972,9 @@ export default function ProductDetailPage() {
         )}
 
         {/* Reviews Section (inchangé à part les fonctions déjà présentes) */}
-        <div className="mt-16 border-t border-gray-200 pt-8">
-          <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-2xl font-agrandir font-bold text-gray-900">{t('reviews.title')}</h2>
+        <div className="mt-12 sm:mt-16 border-t border-gray-200 pt-8">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-agrandir font-bold text-gray-900">{t('reviews.title')}</h2>
             <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-maison-neue-bold">
               {product.comments?.length || 0}
             </span>
@@ -982,8 +982,8 @@ export default function ProductDetailPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[450px_1fr] gap-8">
             {user && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-20">
-                <h3 className="text-lg font-agrandir font-bold text-gray-900 mb-4">{t('reviews.writeTitle')}</h3>
+              <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 h-fit lg:sticky lg:top-20">
+                <h3 className="text-base sm:text-lg font-agrandir font-bold text-gray-900 mb-4">{t('reviews.writeTitle')}</h3>
                 <form onSubmit={handleSubmitReview} className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2">
@@ -995,7 +995,7 @@ export default function ProductDetailPage() {
                           className="focus:outline-none"
                         >
                           <Star
-                            className={`h-8 w-8 transition-colors ${
+                            className={`h-7 w-7 sm:h-8 sm:w-8 transition-colors ${
                               star <= reviewForm.rating
                                 ? 'fill-yellow-400 text-yellow-400'
                                 : 'text-gray-300 hover:text-yellow-300'
@@ -1100,7 +1100,7 @@ export default function ProductDetailPage() {
 
                 if (reviews.length === 0) {
                   return (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-2xl p-6 sm:p-12 text-center shadow-sm border border-gray-100">
                       <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600 font-maison-neue-bold">{t('reviews.emptyTitle')}</p>
                       <p className="text-sm text-gray-500 mt-2 font-maison-neue-book">
@@ -1124,8 +1124,8 @@ export default function ProductDetailPage() {
                           id={`comment-${review.id}`}
                           className="bg-white border border-slate-200 hover:bg-slate-50 transition-all rounded-xl overflow-hidden"
                         >
-                          <div className="flex gap-4 p-6 group">
-                            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#558822]">
+                          <div className="flex gap-3 sm:gap-4 p-4 sm:p-6 group">
+                            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-[#558822]">
                               {review.userId?.photo && !review.isAnonymous ? (
                                 <img
                                   src={review.userId.photo}
@@ -1143,7 +1143,7 @@ export default function ProductDetailPage() {
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2">
-                                  <p className="text-base font-[Agrandir] text-slate-900">{userName}</p>
+                                  <p className="text-sm sm:text-base font-[Agrandir] text-slate-900">{userName}</p>
                                   {review.rating && (
                                     <div className="flex items-center gap-1">
                                       {[...Array(5)].map((_, i) => (
@@ -1162,7 +1162,7 @@ export default function ProductDetailPage() {
                                   <button
                                     onClick={() => handleDeleteComment(review.id)}
                                     disabled={deletingCommentId === review.id}
-                                    className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                                    className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
                                   >
                                     {deletingCommentId === review.id ? (
                                       <Loader2 className="h-5 w-5 animate-spin" />
@@ -1173,7 +1173,7 @@ export default function ProductDetailPage() {
                                 )}
                               </div>
 
-                              <p className="text-base text-slate-700 mb-3 leading-relaxed font-[maison-neue-book]">
+                              <p className="text-sm sm:text-base text-slate-700 mb-3 leading-relaxed font-[maison-neue-book]">
                                 {review.content}
                               </p>
 
