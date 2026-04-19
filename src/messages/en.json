@@ -997,7 +997,7 @@
     },
     "payment": {
       "title": "Payment",
-      "applePay": "Apple Pay",
+      "applePay": "Pay",
       "applePayOrCard": "Or pay with card",
       "cancelWalletFallback": "Cancel",
       "applePayUnavailable": "Apple Pay is not available on this device or browser. Use the card form below.",
