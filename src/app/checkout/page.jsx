@@ -18,7 +18,7 @@ import { useAuth } from '@/context/AuthContext';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoCodeInput from '@/components/PromoCodeInput';
-import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navigation, Gift } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navigation, Gift, Apple } from 'lucide-react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
@@ -471,7 +471,11 @@ const ApplePayCheckoutButton = ({
         className="w-full rounded-lg bg-black px-4 py-3 text-[15px] font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 min-h-[48px]"
         aria-label={t('payment.applePay')}
       >
-        {busy ? <Loader2 className="animate-spin shrink-0" size={20} aria-hidden /> : null}
+        {busy ? (
+          <Loader2 className="animate-spin shrink-0" size={20} aria-hidden />
+        ) : (
+          <Apple className="shrink-0" size={20} />
+        )}
         {t('payment.applePay')}
       </button>
     </div>
