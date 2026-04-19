@@ -18,7 +18,7 @@ import { useAuth } from '@/context/AuthContext';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoCodeInput from '@/components/PromoCodeInput';
-import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navigation, Gift, Apple } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, MapPin, Home, Loader2, Navigation, Gift } from 'lucide-react';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { paymentAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
@@ -474,7 +474,16 @@ const ApplePayCheckoutButton = ({
         {busy ? (
           <Loader2 className="animate-spin shrink-0" size={20} aria-hidden />
         ) : (
-          <Apple className="shrink-0" size={20} />
+          <svg
+            className="shrink-0"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2.01.77-3.27.82-1.31.05-2.3-1.3-3.14-2.53C4.25 17 2.94 12.46 4.7 9.12c.9-1.56 2.64-2.55 4.48-2.58 1.3-.02 2.53.77 3.29.77.76 0 2.44-1.02 4.11-.85 1.51.11 2.78.73 3.5 1.88-1.74 1.03-2.89 3.05-2.62 5.27.25 2.35 2.27 4.09 4.6 4.09.78 0 1.52-.15 2.23-.4-1.43 2.26-3.79 3.52-5.88 3.52-1.13 0-1.88-.3-2.88-.88z" />
+          </svg>
         )}
         {t('payment.applePay')}
       </button>
