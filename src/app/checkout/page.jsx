@@ -2022,7 +2022,7 @@ const CheckoutPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Left Column: Forms */}
-          <div className="grow space-y-4 sm:space-y-6">
+          <div className="order-2 grow space-y-4 sm:space-y-6 lg:order-1">
             {/* Contact Information */}
             <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('contact.title')}</h2>
@@ -2494,7 +2494,7 @@ const CheckoutPage = () => {
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-start gap-3 min-w-0">
                                           <span
-                                            className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                            className={`mt-1 h-5 w-5 min-h-5 min-w-5 aspect-square shrink-0 rounded-full border-2 flex items-center justify-center ${
                                               active ? 'border-[#556822]' : 'border-gray-300'
                                             }`}
                                           >
@@ -2791,7 +2791,7 @@ const CheckoutPage = () => {
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="flex items-start gap-3 min-w-0">
                                     <span
-                                      className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                      className={`mt-1 h-5 w-5 min-h-5 min-w-5 aspect-square shrink-0 rounded-full border-2 flex items-center justify-center ${
                                         active ? 'border-[#556822]' : 'border-gray-300'
                                       }`}
                                     >
@@ -3005,8 +3005,8 @@ const CheckoutPage = () => {
           </div>
 
           {/* Right Column: Order Summary */}
-          <aside className="lg:w-100">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 sticky top-8">
+          <aside className="order-1 lg:order-2 lg:w-100">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 lg:sticky lg:top-8">
               <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('summary.title')}</h2>
 
               {/* Cart Items List */}
