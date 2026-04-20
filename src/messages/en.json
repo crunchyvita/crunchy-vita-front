@@ -630,27 +630,37 @@
   "ShippingPolicy": {
     "title": "Shipping Policy",
     "preparation": {
-      "title": "Preparation and dispatch",
-      "p1": "Packages are prepared and shipped within 48 hours of the order (excluding Saturdays, Sundays, and public holidays). Once the package is handed to the carrier, you receive a confirmation email with the tracking number.",
-      "p2": "During high-activity periods, the preparation time may be extended to 72 hours. Delivery is handled by Mondial Relay, delivering orders to the customer's home, workplace, or a pickup point."
+      "title": "Preparation and shipping",
+      "p1": "Orders placed on www.crunchyvita.com are prepared and dispatched within an indicative period of 48 business hours from validation, excluding Saturdays, Sundays, and public holidays.",
+      "p2": "As soon as the parcel is handed over to the carrier, the Customer receives a shipping confirmation email including, where applicable, a tracking number to follow the shipment.",
+      "p3": "During periods of high activity, the preparation time may exceptionally be extended to 72 business hours.",
+      "p4": "Delivery is organized via the Boxtal platform, which allows CrunchyVita to select a partner carrier according to the chosen delivery method, destination, and options available at the time of order. Orders may be delivered to the Customer's home, workplace, or a pickup point, depending on the option selected during purchase."
     },
     "absence": {
       "title": "In case of absence",
-      "p1": "If the customer is absent at the time of delivery, a delivery notice will be left and the carrier will contact them.",
-      "p2": "The customer can also leave specific instructions for the courier. If the parcel is not collected within the allotted time, it will be returned to our warehouse."
+      "p1": "If the Customer is absent at the time of home delivery, a delivery notice may be left by the carrier, or the Customer may be contacted according to the carrier's procedures.",
+      "p2": "Where the delivery method allows it, the Customer may also provide delivery instructions to the carrier.",
+      "p3": "If the parcel is not collected within the allotted time, especially at a pickup point, it may be returned to our warehouse."
     },
     "missingInfo": {
       "title": "Missing information or incomplete details",
-      "p1": "The customer must provide all information necessary for proper delivery (exact address, phone number, access code, etc.).",
-      "p2": "If this information is missing, our company will not be liable for delivery failure. Products will be returned to our warehouse and the customer must contact customer service to arrange a new delivery, which will be billed to the customer."
+      "p1": "The Customer must provide all information required for proper shipment of the order, including: full address, phone number, name, access code, floor, or any other useful delivery detail.",
+      "p2": "In the event of an error, omission, or incomplete information preventing delivery, our company cannot be held liable for the inability to deliver the order under the planned conditions.",
+      "p3": "The parcel may then be returned to our warehouse. The Customer must contact customer service to arrange a new shipment, which may be re-invoiced to the Customer."
     },
     "issues": {
       "title": "Delivery issues",
-      "p1": "Products travel at our company's risk, except in special cases.",
-      "p2": "The customer must check the package condition and the number of products upon receipt. Any reservation (damage, missing product, damaged packaging) must be noted on the delivery slip, which the customer must keep a copy of.",
-      "p3": "Any complaint regarding delivery must be made within 3 working days after receipt of the products, by email to:"
+      "p1": "Products are shipped at our company's risk, except in specific cases related to a Customer fault, an incorrect address, or missing information provided at the time of order.",
+      "p2": "Upon receipt, the Customer must check the condition of the parcel and the number of delivered products.",
+      "p3": "Any reservation related to delivery (damaged parcel, missing product, damaged packaging, opened parcel, etc.) must be stated precisely to the carrier or on any delivery document provided at receipt, and the Customer must keep proof.",
+      "p4": "Any complaint regarding delivery must be submitted within 3 working days after receipt of the products, by email to the following address:"
     },
-    "promo": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases!"
+    "fees": {
+      "title": "Shipping fees and delivery offer",
+      "p1": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases may be offered depending on the conditions displayed on www.crunchyvita.com at the time of order. This statement currently appears in the Terms of Sale available on the site.",
+      "p2": "Any complaint regarding delivery must be submitted within 3 working days after receipt of the products, by email to:"
+    },
+    "promo": "Free delivery in France to pickup points from 40EUR of purchases!"
   },
   "ReturnPolicy": {
     "title": "Return Policy",

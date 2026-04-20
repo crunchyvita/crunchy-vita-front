@@ -631,26 +631,36 @@
     "title": "Politique de Livraison",
     "preparation": {
       "title": "Preparation et expedition",
-      "p1": "Les colis sont prepares et expedies dans un delai de 48 heures suivant la commande (hors samedi, dimanche et jours feries). Des que le colis est confie au transporteur, vous recevez un email de confirmation du numero de suivi de votre colis.",
-      "p2": "En periode de forte activite, le delai de preparation peut etre porte a 72 heures. La livraison est assuree par les services de Mondial Relay, qui livrent les commandes a domicile, sur le lieu de travail du Client ou en point relais."
+      "p1": "Les commandes passees sur www.crunchyvita.com sont preparees et expediees dans un delai indicatif de 48 heures ouvrees a compter de leur validation, hors samedis, dimanches et jours feries.",
+      "p2": "Des que le colis est remis au transporteur, le Client recoit un e-mail de confirmation d'expedition comprenant, le cas echeant, un numero de suivi permettant de suivre l'acheminement de la commande.",
+      "p3": "En periode de forte activite, le delai de preparation peut exceptionnellement etre porte a 72 heures ouvrees.",
+      "p4": "La livraison est organisee via la plateforme Boxtal, qui permet a CrunchyVita de selectionner un transporteur partenaire selon le mode de livraison choisi, la destination et les options disponibles au moment de la commande. Les commandes peuvent etre livrees a domicile, sur le lieu de travail du Client ou en point relais, selon l'offre retenue lors de l'achat."
     },
     "absence": {
       "title": "En cas d'absence",
-      "p1": "Si le Client est absent au moment de la livraison, un avis de passage sera laisse et le transporteur prendra contact avec lui.",
-      "p2": "Le Client peut aussi laisser des instructions precisees au livreur. En cas de non-retrait du colis dans les delais impartis, celui-ci sera retourne a notre entrepot."
+      "p1": "En cas d'absence du Client au moment de la livraison a domicile, un avis de passage pourra etre laisse par le transporteur, ou le Client pourra etre contacte selon les modalites prevues par celui-ci.",
+      "p2": "Lorsque le mode de livraison le permet, le Client peut egalement transmettre des instructions de livraison au transporteur.",
+      "p3": "En cas de non-retrait du colis dans les delais impartis, notamment en point relais, le colis pourra etre retourne a notre entrepot."
     },
     "missingInfo": {
       "title": "Absence d'informations ou coordonnees incompletes",
-      "p1": "Le Client est tenu de fournir toutes les informations necessaires a la bonne livraison (adresse exacte, numero de telephone, code d'acces, etc.).",
-      "p2": "En cas de manquement, notre societe sera degagee de toute responsabilite d'un defaut de livraison. Les produits seront alors retournes a notre entrepot et le Client devra contacter le service clientele pour convenir d'une nouvelle livraison, qui sera facturee au Client."
+      "p1": "Le Client est tenu de fournir l'ensemble des informations necessaires au bon acheminement de sa commande, notamment : adresse complete, numero de telephone, nom, code d'acces, etage, ou toute precision utile a la livraison.",
+      "p2": "En cas d'erreur, d'omission ou d'informations incompletes empechant la livraison, notre societe ne pourra etre tenue responsable de l'impossibilite de livrer la commande dans les conditions prevues.",
+      "p3": "Le colis pourra alors etre retourne a notre entrepot. Le Client devra contacter le service client afin d'organiser une nouvelle expedition, laquelle pourra lui etre refacturee."
     },
     "issues": {
       "title": "Problemes de livraison",
-      "p1": "Les produits voyagent aux risques et perils de notre societe, sauf cas particuliers.",
-      "p2": "Le Client doit verifier l'etat du colis et le nombre de produits a la reception. Toute reserve (avarie, produit manquant, emballage endommage) doit etre mentionnee sur le bon de livraison, dont le Client doit conserver un exemplaire.",
-      "p3": "Toute reclamation concernant la livraison doit etre formulee dans un delai de 3 jours ouvres suivant la reception des produits, par e-mail a :"
+      "p1": "Les produits voyagent aux risques et perils de notre societe, sauf cas particulier lie a une faute du Client, a une adresse erronee, ou a un defaut d'information transmis lors de la commande.",
+      "p2": "Au moment de la reception, le Client est tenu de verifier l'etat du colis ainsi que le nombre de produits livres.",
+      "p3": "Toute reserve relative a la livraison (colis endommage, produit manquant, emballage deteriore, colis ouvert, etc.) devra etre formulee de maniere precise aupres du transporteur ou sur tout justificatif de livraison remis au moment de la reception, et le Client devra en conserver une preuve.",
+      "p4": "Toute reclamation relative a la livraison devra etre adressee dans un delai de 3 jours ouvres suivant la reception des produits, par e-mail a l'adresse suivante :"
     },
-    "promo": "Livraison offerte en France en point relais Chronopost des 40EUR d'achats !"
+    "fees": {
+      "title": "Frais et offre de livraison",
+      "p1": "La livraison offerte en France en point relais Chronopost des 40 EUR d'achats peut etre proposee selon les conditions affichees sur www.crunchyvita.com au moment de la commande. Cette mention figure actuellement dans les CGV visibles sur le site.",
+      "p2": "Toute reclamation concernant la livraison doit etre formulee dans un delai de 3 jours ouvres suivant la reception des produits, par e-mail a :"
+    },
+    "promo": "Livraison offerte en France en point relais des 40EUR d'achats !"
   },
   "ReturnPolicy": {
     "title": "Politique de Retour",
