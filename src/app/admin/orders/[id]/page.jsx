@@ -49,6 +49,7 @@ function AdminOrderDetailInner() {
 	const id = params?.id;
 
 	const [order, setOrder] = useState(null);
+	const [shippingTracking, setShippingTracking] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 
@@ -62,6 +63,14 @@ function AdminOrderDetailInner() {
 				const res = await orderAPI.getAdminById(id);
 				if (res?.success) {
 					setOrder(res.data || null);
+					try {
+						const trackingRes = await orderAPI.getAdminShippingTracking(id);
+						if (trackingRes?.success) {
+							setShippingTracking(trackingRes.data || null);
+						}
+					} catch {
+						setShippingTracking(null);
+					}
 				} else {
 					setError(res?.message || od("loadError"));
 				}
@@ -76,6 +85,7 @@ function AdminOrderDetailInner() {
 	const shippingAddress = order?.shippingAddress || null;
 	const boxtal = order?.boxtal || {};
 	const boxtalShipment = boxtal?.shipment || null;
+	const tracked = shippingTracking || {};
 
 	const itemCount = useMemo(() => {
 		const items = Array.isArray(order?.items) ? order.items : [];
@@ -204,20 +214,24 @@ function AdminOrderDetailInner() {
 									) : null}
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("boxtalRef")}</span>{" "}
-										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
+										{tracked?.boxtalOrderRef || boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
 									</p>
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("carrierTracking")}</span>{" "}
-										{boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
+										{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
 									</p>
-									{boxtalShipment?.trackingUrl ? (
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">Shipping status</span>{" "}
+										{tracked?.shippingStatus || boxtal?.shippingStatus || od("lineFallback")}
+									</p>
+									{(tracked?.shippingLabelUrl || boxtal?.shippingLabelUrl) ? (
 										<a
-											href={boxtalShipment.trackingUrl}
+											href={tracked?.shippingLabelUrl || boxtal?.shippingLabelUrl}
 											target="_blank"
 											rel="noreferrer"
-											className="text-sm text-[#556822] hover:underline inline-block mt-2"
+											className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
 										>
-											{od("trackingLink")}
+											Shipping label PDF
 										</a>
 									) : null}
 								</div>

@@ -443,9 +443,9 @@
       "rows": {
         "energy": "Energy",
         "fat": "Fat",
-        "saturatedFat": "Saturated fat",
+        "saturatedFat": "of which saturated",
         "carbohydrates": "Carbohydrates",
-        "sugars": "Sugars",
+        "sugars": "of which sugars",
         "protein": "Protein",
         "salt": "Salt",
         "fiber": "Dietary fiber",

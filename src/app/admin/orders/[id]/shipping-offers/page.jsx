@@ -217,6 +217,8 @@ function InnerPage() {
       await orderAPI.selectAdminShippingOffer(id, {
         shippingOfferCode: relayOfferCode,
         shippingOfferId: selectedRelayPoint.shippingOfferId || null,
+        shippingServiceCode: selectedRelayPoint.serviceCode || null,
+        shippingOperatorCode: selectedRelayPoint.operatorCode || null,
         carrier: selectedRelayPoint.carrier || null,
         relayPoint: relayRest,
       });
@@ -227,6 +229,8 @@ function InnerPage() {
     await orderAPI.selectAdminShippingOffer(id, {
       shippingOfferCode: selectedOffer.shippingOfferCode,
       shippingOfferId: selectedOffer.shippingOfferId || null,
+      shippingServiceCode: selectedOffer.serviceCode || null,
+      shippingOperatorCode: selectedOffer.operatorCode || null,
       carrier: selectedOffer.carrier || null,
       relayPoint: null,
     });

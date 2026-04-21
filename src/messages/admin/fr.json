@@ -1088,7 +1088,7 @@
     "nutritionRows": {
       "energy": "Énergie",
       "fat": "Matières grasses",
-      "saturatedFat": "Dont saturées",
+      "saturatedFat": "Dont acides gras saturés",
       "carbohydrates": "Glucides",
       "sugars": "Dont sucres",
       "protein": "Protéines",
