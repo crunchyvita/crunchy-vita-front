@@ -134,6 +134,11 @@ const getCartItemImagesLocal = (item) => {
 const PaymentForm = ({
   locale,
   t,
+  onConfirmOrder,
+  canConfirm,
+  isPreparingPaymentIntent,
+  isPaymentFormComplete,
+  brandGreen,
   paymentProcessing,
   setPaymentProcessing,
   paymentError,
@@ -314,9 +319,24 @@ const PaymentForm = ({
         </div>
       )}
 
-      <p className="text-[11px] sm:text-xs text-gray-500 text-center">
-        {t('securityNote')}
-      </p>
+      <button
+        type="button"
+        onClick={onConfirmOrder}
+        disabled={
+          !canConfirm ||
+          paymentProcessing ||
+          isPreparingPaymentIntent ||
+          !isPaymentFormComplete
+        }
+        className="w-full mt-4 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+        style={{ backgroundColor: brandGreen }}
+      >
+        {paymentProcessing
+          ? t('actions.paymentProcessing')
+          : isPreparingPaymentIntent
+          ? (t('actions.redirecting') || 'Preparing payment')
+          : (t('actions.pay') || t('actions.confirmOrder'))}
+      </button>
     </form>
   );
 };
@@ -537,6 +557,7 @@ const CheckoutPage = () => {
   const phoneCountryTriggerRef = useRef(null);
   const phoneCountryMenuListRef = useRef(null);
   const phoneCountryTypeaheadInputRef = useRef(null);
+  const phoneInputFieldRef = useRef(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -1751,6 +1772,16 @@ const CheckoutPage = () => {
     [formatEurInSummaryCurrency]
   );
 
+  const formatCompactMoneyLabel = useCallback(
+    (amountEur) => {
+      const formatted = String(formatEurOrFallback(amountEur));
+      return formatted
+        .replace(/(\d+)([.,])(\d*?[1-9])0+(?=[^0-9]|$)/g, '$1$2$3')
+        .replace(/(\d+)([.,])0+(?=[^0-9]|$)/g, '$1');
+    },
+    [formatEurOrFallback]
+  );
+
   const getRelayPriceLabel = useCallback(() => {
     const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
     const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
@@ -2126,20 +2157,32 @@ const CheckoutPage = () => {
                       ) : null}
                     </div>
 
-                    <PhoneInput
-                      country={phoneCountry}
-                      international
-                      withCountryCallingCode
-                      countryCallingCodeEditable={false}
-                      limitMaxLength={true}
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      onKeyDown={handlePhoneKeyDown}
-                    
-                      required
-                      countrySelectComponent={() => null}
+                    <div
+                      ref={phoneInputFieldRef}
                       className="phone-input-field"
-                    />
+                      onClick={(event) => {
+                        const target = event.target;
+                        if (target instanceof HTMLElement && target.closest('input')) return;
+                        const input = phoneInputFieldRef.current?.querySelector('input');
+                        if (input instanceof HTMLInputElement) {
+                          input.focus({ preventScroll: true });
+                        }
+                      }}
+                    >
+                      <PhoneInput
+                        country={phoneCountry}
+                        international
+                        withCountryCallingCode
+                        countryCallingCodeEditable={false}
+                        limitMaxLength={true}
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        onKeyDown={handlePhoneKeyDown}
+                        required
+                        countrySelectComponent={() => null}
+                        className="phone-input-control"
+                      />
+                    </div>
                   </div>
                   {checkoutHintsEnabled && phone && !isPhoneValid ? (
                     <p className="mt-2 text-sm font-medium text-[#556822]">
@@ -3000,6 +3043,11 @@ const CheckoutPage = () => {
                 <PaymentForm
                   locale={locale}
                   t={t}
+                  onConfirmOrder={handleConfirmOrder}
+                  canConfirm={canConfirm}
+                  isPreparingPaymentIntent={isPreparingPaymentIntent}
+                  isPaymentFormComplete={isPaymentFormComplete}
+                  brandGreen={brandGreen}
                   paymentProcessing={paymentProcessing}
                   setPaymentProcessing={setPaymentProcessing}
                   paymentError={paymentError}
@@ -3153,25 +3201,6 @@ const CheckoutPage = () => {
                 
               </div>
 
-              <button
-                type="button"
-                onClick={handleConfirmOrder}
-                disabled={
-                  !canConfirm ||
-                  paymentProcessing ||
-                  isPreparingPaymentIntent ||
-                  !isPaymentFormComplete
-                }
-                className="w-full mt-8 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
-                style={{ backgroundColor: brandGreen }}
-              >
-                {paymentProcessing
-                  ? t('actions.paymentProcessing')
-                  : isPreparingPaymentIntent
-                  ? (t('actions.redirecting') || 'Preparing payment')
-                  : t('actions.confirmOrder')}
-              </button>
-
               {checkoutError ? (
                 <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
               ) : null}
@@ -3187,7 +3216,7 @@ const CheckoutPage = () => {
                         </p>
                         <p className="mt-1 text-sm font-semibold text-[#556822]">
                           {t('shipping.infoRelaySimple', {
-                            threshold: formatEurOrFallback(Number(shippingInfoZoneLayers.relay.freeShipping || 0)),
+                            threshold: formatCompactMoneyLabel(Number(shippingInfoZoneLayers.relay.freeShipping || 0)),
                           })}
                         </p>
                       </div>
@@ -3200,10 +3229,10 @@ const CheckoutPage = () => {
                         {showShippingInfoHomeReducedRow ? (
                           <p className="mt-1 text-sm font-semibold text-slate-800">
                             {t('shipping.infoHomeReducedSimple', {
-                              reducedPrice: formatEurOrFallback(
+                              reducedPrice: formatCompactMoneyLabel(
                                 Number(shippingInfoZoneLayers.home.discountedShippingFee || 0)
                               ),
-                              reducedThreshold: formatEurOrFallback(
+                              reducedThreshold: formatCompactMoneyLabel(
                                 Number(shippingInfoZoneLayers.home.discountedShipping || 0)
                               ),
                             })}
@@ -3212,7 +3241,7 @@ const CheckoutPage = () => {
                         {showShippingInfoHomeFreeRow ? (
                           <p className="mt-1 text-sm font-semibold text-[#556822]">
                             {t('shipping.infoHomeFreeSimple', {
-                              freeThreshold: formatEurOrFallback(Number(shippingInfoZoneLayers.home.freeShipping || 0)),
+                              freeThreshold: formatCompactMoneyLabel(Number(shippingInfoZoneLayers.home.freeShipping || 0)),
                             })}
                           </p>
                         ) : null}
@@ -3222,9 +3251,6 @@ const CheckoutPage = () => {
                 </div>
               ) : null}
 
-              <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
-                {t('securityNote')}
-              </p>
             </div>
           </aside>
         </div>
@@ -3383,14 +3409,23 @@ const CheckoutPage = () => {
         .phone-input-field {
           flex: 1;
           min-width: 0;
+          cursor: text;
+          display: flex;
+          align-items: center;
         }
 
-        .phone-input-field .PhoneInputCountry {
+        .phone-input-control {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .phone-input-control .PhoneInputCountry {
           display: none;
         }
 
-        .phone-input-field .PhoneInputInput {
+        .phone-input-control .PhoneInputInput {
           flex: 1;
+          width: 100%;
           min-width: 0;
           border: 0;
           outline: none;
