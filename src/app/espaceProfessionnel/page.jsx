@@ -9,6 +9,14 @@ import { getTranslatedProduct } from '@/lib/productTranslations';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+const isProductVisibleInProfessionalSpace = (product) => {
+  const status = String(product?.status || '').toUpperCase();
+  if (status && status !== 'ACTIVE') return false;
+  if (product?.isActive === false) return false;
+  if (product?.showInShop === false) return false;
+  return true;
+};
+
 const CrunchyVita = () => {
   const t = useTranslations('ProfessionalSpace');
   const locale = useLocale();
@@ -74,7 +82,7 @@ const CrunchyVita = () => {
         const productsList = Array.isArray(productsRes) ? productsRes : productsRes?.data || [];
 
         setCategories(categoriesList);
-        setProducts(productsList);
+        setProducts(productsList.filter(isProductVisibleInProfessionalSpace));
       } catch (err) {
         console.error('Failed to load categories/products:', err);
       } finally {
@@ -110,6 +118,7 @@ const CrunchyVita = () => {
   };
 
   const filteredProducts = products.filter((product) => {
+    if (!isProductVisibleInProfessionalSpace(product)) return false;
     if (activeTab === 'all') return true;
     const categoryIds = getProductCategoryIds(product);
     return categoryIds.includes(String(activeTab));
