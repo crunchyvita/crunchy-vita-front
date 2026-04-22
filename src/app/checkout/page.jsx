@@ -658,6 +658,13 @@ const CheckoutPage = () => {
     }
   }, [locale]);
 
+  const normalizeTypeaheadText = (value) =>
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
   const phoneCountryOptions = useMemo(() => {
     const lang = locale === 'fr' ? 'fr' : 'en';
     const collator = new Intl.Collator(lang, { sensitivity: 'base' });
@@ -674,6 +681,17 @@ const CheckoutPage = () => {
         return a.code.localeCompare(b.code);
       });
   }, [phoneCountryDisplayNames, locale]);
+
+  const filteredPhoneCountryOptions = useMemo(() => {
+    const query = normalizeTypeaheadText(phoneCountryTypeaheadQuery);
+    if (!query) return phoneCountryOptions;
+
+    return phoneCountryOptions.filter((option) => {
+      const normalizedName = normalizeTypeaheadText(option.name);
+      const normalizedCode = normalizeTypeaheadText(option.code);
+      return normalizedName.startsWith(query) || normalizedCode.startsWith(query);
+    });
+  }, [phoneCountryOptions, phoneCountryTypeaheadQuery]);
 
   const regionDisplayNames = useMemo(() => {
     try {
@@ -731,13 +749,6 @@ const CheckoutPage = () => {
     phoneCountryOptions.find((entry) => entry.code === phoneCountry)?.name || phoneCountry;
   const SelectedPhoneCountryFlag = flags?.[phoneCountry];
 
-  const normalizeTypeaheadText = (value) =>
-    String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
-
   const focusPhoneCountryOption = useCallback(
     (code, shouldFocus = true) => {
       const optionElement = phoneCountryMenuListRef.current?.querySelector(
@@ -774,10 +785,10 @@ const CheckoutPage = () => {
 
   const handlePhoneCountryTypeaheadInputChange = useCallback(
     (event) => {
-      const normalized = normalizeTypeaheadText(event.target.value || '');
-      setPhoneCountryTypeaheadQuery(normalized);
-      if (normalized) {
-        focusFirstMatchingPhoneCountry(normalized);
+      const nextValue = event.target.value || '';
+      setPhoneCountryTypeaheadQuery(nextValue);
+      if (nextValue) {
+        focusFirstMatchingPhoneCountry(nextValue);
       }
     },
     [focusFirstMatchingPhoneCountry]
@@ -811,12 +822,12 @@ const CheckoutPage = () => {
 
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
-        const currentIndex = phoneCountryOptions.findIndex((option) => option.code === phoneCountry);
+        const currentIndex = filteredPhoneCountryOptions.findIndex((option) => option.code === phoneCountry);
         const delta = event.key === 'ArrowDown' ? 1 : -1;
         const nextIndex = currentIndex === -1
           ? 0
-          : (currentIndex + delta + phoneCountryOptions.length) % phoneCountryOptions.length;
-        const nextOption = phoneCountryOptions[nextIndex];
+          : (currentIndex + delta + filteredPhoneCountryOptions.length) % filteredPhoneCountryOptions.length;
+        const nextOption = filteredPhoneCountryOptions[nextIndex];
         if (nextOption) {
           focusPhoneCountryOption(nextOption.code);
         }
@@ -825,14 +836,14 @@ const CheckoutPage = () => {
 
       if (event.key === 'Home') {
         event.preventDefault();
-        const firstOption = phoneCountryOptions[0];
+        const firstOption = filteredPhoneCountryOptions[0];
         if (firstOption) focusPhoneCountryOption(firstOption.code);
         return;
       }
 
       if (event.key === 'End') {
         event.preventDefault();
-        const lastOption = phoneCountryOptions[phoneCountryOptions.length - 1];
+        const lastOption = filteredPhoneCountryOptions[filteredPhoneCountryOptions.length - 1];
         if (lastOption) focusPhoneCountryOption(lastOption.code);
         return;
       }
@@ -849,8 +860,7 @@ const CheckoutPage = () => {
 
       if (event.key.length === 1 && /\S/.test(event.key)) {
         event.preventDefault();
-        const typed = normalizeTypeaheadText(event.key).charAt(0);
-        if (!typed) return;
+        const typed = event.key;
         const nextQuery = `${phoneCountryTypeaheadQuery}${typed}`;
         setPhoneCountryTypeaheadQuery(nextQuery);
         focusFirstMatchingPhoneCountry(nextQuery);
@@ -862,7 +872,7 @@ const CheckoutPage = () => {
       isPhoneCountryMenuOpen,
       phoneCountry,
       phoneCountryTypeaheadQuery,
-      phoneCountryOptions,
+      filteredPhoneCountryOptions,
     ]
   );
 
@@ -2133,26 +2143,32 @@ const CheckoutPage = () => {
                               aria-label={t('shipping.searchCountry') || 'Search country by first letter'}
                             />
                           </div>
-                          {phoneCountryOptions.map((option) => (
-                            <button
-                              key={option.code}
-                              data-country-code={option.code}
-                              type="button"
-                              className={`phone-country-option ${
-                                option.code === phoneCountry ? 'is-active' : ''
-                              }`}
-                              tabIndex={-1}
-                              onClick={() => handlePhoneCountrySelect(option.code)}
-                            >
-                              <span className="phone-country-flag">
-                                {(() => {
-                                  const Flag = flags?.[option.code];
-                                  return Flag ? <Flag title={option.name} /> : toFlagEmoji(option.code);
-                                })()}
-                              </span>
-                              <span className="phone-country-name">{option.name}</span>
-                            </button>
-                          ))}
+                          {filteredPhoneCountryOptions.length > 0 ? (
+                            filteredPhoneCountryOptions.map((option) => (
+                              <button
+                                key={option.code}
+                                data-country-code={option.code}
+                                type="button"
+                                className={`phone-country-option ${
+                                  option.code === phoneCountry ? 'is-active' : ''
+                                }`}
+                                tabIndex={-1}
+                                onClick={() => handlePhoneCountrySelect(option.code)}
+                              >
+                                <span className="phone-country-flag">
+                                  {(() => {
+                                    const Flag = flags?.[option.code];
+                                    return Flag ? <Flag title={option.name} /> : toFlagEmoji(option.code);
+                                  })()}
+                                </span>
+                                <span className="phone-country-name">{option.name}</span>
+                              </button>
+                            ))
+                          ) : (
+                            <p className="phone-country-empty-state">
+                              {t('shipping.noCountryFound') || 'No country found'}
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </div>
@@ -3404,6 +3420,13 @@ const CheckoutPage = () => {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .phone-country-empty-state {
+          margin: 0;
+          padding: 0.65rem 0.6rem;
+          color: #6b7280;
+          font-size: 0.82rem;
         }
 
         .phone-input-field {
