@@ -86,6 +86,13 @@ function AdminOrderDetailInner() {
 	const boxtal = order?.boxtal || {};
 	const boxtalShipment = boxtal?.shipment || null;
 	const tracked = shippingTracking || {};
+	const shippingLabelHref =
+		tracked?.shippingLabelProxyUrl ||
+		boxtal?.shippingLabelProxyUrl ||
+		tracked?.shippingLabelUrl ||
+		boxtal?.shippingLabelUrl ||
+		boxtalShipment?.labelUrl ||
+		null;
 
 	const itemCount = useMemo(() => {
 		const items = Array.isArray(order?.items) ? order.items : [];
@@ -224,9 +231,9 @@ function AdminOrderDetailInner() {
 										<span className="font-medium">Shipping status</span>{" "}
 										{tracked?.shippingStatus || boxtal?.shippingStatus || od("lineFallback")}
 									</p>
-									{(tracked?.shippingLabelUrl || boxtal?.shippingLabelUrl) ? (
+									{shippingLabelHref ? (
 										<a
-											href={tracked?.shippingLabelUrl || boxtal?.shippingLabelUrl}
+											href={shippingLabelHref}
 											target="_blank"
 											rel="noreferrer"
 											className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
