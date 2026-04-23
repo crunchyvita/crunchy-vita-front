@@ -25,7 +25,12 @@ export function normalizeCountryEntry(c) {
     typeof c === 'object' && c !== null
       ? String(c.label || c.name || '').trim()
       : '';
-  return { iso, label };
+  let currency = 'EUR';
+  if (typeof c === 'object' && c !== null && c.currency != null) {
+    const raw = String(c.currency).trim().toUpperCase();
+    if (/^[A-Z]{3}$/.test(raw)) currency = raw;
+  }
+  return { iso, label, currency };
 }
 
 const toNonNegative = (value, fallback) => {
@@ -102,6 +107,10 @@ export function resolveShippingPricingForCountry(shippingSettings, countryIso) {
   const base = normalizeBlock(shippingSettings || {}, defaultPricing());
   const zones = Array.isArray(shippingSettings?.zones) ? shippingSettings.zones : [];
 
+  if (!iso) {
+    return base;
+  }
+
   const zone =
     iso &&
     zones.find((z) => {
@@ -167,6 +176,82 @@ export function getPromoBadgeThresholds(shippingSettings) {
     relayFree: merged.relay.freeShipping,
     homeFree: merged.home.freeShipping,
   };
+}
+
+/**
+ * Zone that contains this ISO (no fallback to first zone — use for display-only UIs).
+ */
+export function findShippingZoneForCountry(shippingSettings, countryIso) {
+  const raw = String(countryIso || '').trim();
+  const iso = /^[A-Za-z]{2}$/.test(raw) ? raw.toUpperCase() : '';
+  if (!iso) return null;
+  const zones = Array.isArray(shippingSettings?.zones) ? shippingSettings.zones : [];
+  return (
+    zones.find((z) => {
+      const list = Array.isArray(z?.countries) ? z.countries : [];
+      return list.some((c) => zoneCountryIso(c) === iso);
+    }) || null
+  );
+}
+
+/**
+ * ISO 4217 for Stripe/display from zone country row (default EUR → eur).
+ */
+export function getCurrencyForCountryIso(shippingSettings, countryIso) {
+  const raw = String(countryIso || '').trim();
+  const iso = /^[A-Za-z]{2}$/.test(raw) ? raw.toUpperCase() : '';
+  if (!iso) return 'eur';
+  const zone = findShippingZoneForCountry(shippingSettings, iso);
+  if (!zone || !Array.isArray(zone.countries)) return 'eur';
+  const row = zone.countries.find((c) => zoneCountryIso(c) === iso);
+  if (!row) return 'eur';
+  const norm = normalizeCountryEntry(row);
+  const cur = String(norm?.currency || 'EUR').trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(cur) ? cur.toLowerCase() : 'eur';
+}
+
+/**
+ * Raw relay/home objects from the matched zone only (not merged with defaults).
+ */
+export function getZoneShippingLayersForCountry(shippingSettings, countryIso) {
+  const zone = findShippingZoneForCountry(shippingSettings, countryIso);
+  if (!zone) return { zone: null, relay: null, home: null };
+  return {
+    zone,
+    relay: zone.relay && typeof zone.relay === 'object' ? zone.relay : null,
+    home: zone.home && typeof zone.home === 'object' ? zone.home : null,
+  };
+}
+
+const finitePositive = (n) => {
+  const x = Number(n);
+  return Number.isFinite(x) && x > 0;
+};
+
+/** Sidebar: show relay free threshold line only if the zone defines it. */
+export function shouldShowShippingInfoRelay(zoneRelay) {
+  if (!zoneRelay) return false;
+  return finitePositive(zoneRelay.freeShipping);
+}
+
+/** Sidebar: show reduced-tier line only if the zone defines both discounted fields. */
+export function shouldShowShippingInfoHomeDiscounted(zoneHome) {
+  if (!zoneHome) return false;
+  if (
+    !Object.prototype.hasOwnProperty.call(zoneHome, 'discountedShipping') ||
+    !Object.prototype.hasOwnProperty.call(zoneHome, 'discountedShippingFee')
+  ) {
+    return false;
+  }
+  const th = Number(zoneHome.discountedShipping);
+  const fee = Number(zoneHome.discountedShippingFee);
+  return finitePositive(th) && Number.isFinite(fee) && fee >= 0;
+}
+
+/** Sidebar: show free-from threshold line only if the zone defines free shipping threshold. */
+export function shouldShowShippingInfoHomeFree(zoneHome) {
+  if (!zoneHome) return false;
+  return finitePositive(zoneHome.freeShipping);
 }
 
 export function flattenZoneCountryOptions(zones, displayNames) {

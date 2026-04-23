@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/navigation';
@@ -10,6 +10,7 @@ import {
   CardNumberElement,
   CardExpiryElement,
   CardCvcElement,
+  PaymentRequestButtonElement,
 } from '@stripe/react-stripe-js';
 import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
@@ -24,8 +25,19 @@ import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
 import {
   resolveShippingPricingForCountry,
   flattenZoneCountryOptions,
+  getZoneShippingLayersForCountry,
+  getCurrencyForCountryIso,
+  shouldShowShippingInfoRelay,
+  shouldShowShippingInfoHomeDiscounted,
+  shouldShowShippingInfoHomeFree,
 } from '@/lib/shippingZonePricing';
+import {
+  convertEurToDestinationMajor,
+  formatDestinationMoney,
+  fetchEurToDestinationRate,
+} from '@/lib/checkoutCurrencyDisplay';
 import { useAddressAutocomplete } from '@/lib/useAddressAutocomplete';
+import { attachGuestIdHeader } from '@/lib/guestId';
 import { getAddressCountryMismatchKey } from '@/lib/addressCountryConsistency';
 import PhoneInput, {
   getCountries,
@@ -34,6 +46,14 @@ import PhoneInput, {
   parsePhoneNumber,
 } from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
+
+/** Two-letter country of your Stripe account (Apple Pay / Payment Request). */
+const STRIPE_MERCHANT_COUNTRY = String(
+  process.env.NEXT_PUBLIC_STRIPE_MERCHANT_COUNTRY || 'FR'
+)
+  .trim()
+  .slice(0, 2)
+  .toUpperCase();
 
 // Helper to match Cart image logic
 const pickUrl = (v) => {
@@ -114,6 +134,11 @@ const getCartItemImagesLocal = (item) => {
 const PaymentForm = ({
   locale,
   t,
+  onConfirmOrder,
+  canConfirm,
+  isPreparingPaymentIntent,
+  isPaymentFormComplete,
+  brandGreen,
   paymentProcessing,
   setPaymentProcessing,
   paymentError,
@@ -175,7 +200,7 @@ const PaymentForm = ({
     setPaymentError('');
 
     try {
-      const clientSecret = await createPaymentIntent();
+      const { clientSecret } = await createPaymentIntent();
       const cardElement = elements.getElement(CardNumberElement);
 
       if (!cardElement) {
@@ -294,10 +319,191 @@ const PaymentForm = ({
         </div>
       )}
 
-      <p className="text-[11px] sm:text-xs text-gray-500 text-center">
-        {t('securityNote')}
-      </p>
+      <button
+        type="button"
+        onClick={onConfirmOrder}
+        disabled={
+          !canConfirm ||
+          paymentProcessing ||
+          isPreparingPaymentIntent ||
+          !isPaymentFormComplete
+        }
+        className="w-full mt-4 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+        style={{ backgroundColor: brandGreen }}
+      >
+        {paymentProcessing
+          ? t('actions.paymentProcessing')
+          : isPreparingPaymentIntent
+          ? (t('actions.redirecting') || 'Preparing payment')
+          : (t('actions.pay') || t('actions.confirmOrder'))}
+      </button>
     </form>
+  );
+};
+
+const ApplePayCheckoutButton = ({
+  t,
+  createPaymentIntent,
+  locale,
+  merchantCountry,
+  setPaymentProcessing,
+  setPaymentError,
+  disabled,
+}) => {
+  const stripe = useStripe();
+  const [busy, setBusy] = useState(false);
+  const [fallbackPaymentRequest, setFallbackPaymentRequest] = useState(null);
+
+  const handleApplePay = async () => {
+    if (!stripe || disabled || busy) return;
+    setBusy(true);
+    setPaymentError('');
+    setPaymentProcessing(true);
+    setFallbackPaymentRequest(null);
+
+    let prRef = null;
+    let onPaymentMethod = null;
+    let onCancel = null;
+
+    try {
+      const { clientSecret, amountMinor, currency } = await createPaymentIntent();
+
+      if (!clientSecret || amountMinor == null) {
+        throw new Error('Unable to start Apple Pay');
+      }
+
+      const cy = String(currency || 'eur').toLowerCase().slice(0, 3);
+      const pr = stripe.paymentRequest({
+        country: merchantCountry,
+        currency: cy,
+        total: { label: 'CrunchyVita', amount: amountMinor },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      });
+      prRef = pr;
+
+      onPaymentMethod = async (ev) => {
+        try {
+          const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: ev.paymentMethod.id,
+          });
+          if (confirmError) {
+            ev.complete('fail');
+            setPaymentError(confirmError.message || 'Payment failed');
+            setPaymentProcessing(false);
+          } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+            ev.complete('success');
+            window.location.href = `${locale ? `/${locale}` : ''}/checkout/succes?payment_intent=${encodeURIComponent(paymentIntent.id)}`;
+          } else {
+            ev.complete('fail');
+            setPaymentProcessing(false);
+          }
+        } catch (e) {
+          ev.complete('fail');
+          setPaymentError(e?.message || 'Payment failed');
+          setPaymentProcessing(false);
+        } finally {
+          setBusy(false);
+          if (prRef && onPaymentMethod) prRef.off('paymentmethod', onPaymentMethod);
+          if (prRef && onCancel) prRef.off('cancel', onCancel);
+        }
+      };
+
+      onCancel = () => {
+        setPaymentProcessing(false);
+        setBusy(false);
+        setFallbackPaymentRequest(null);
+        if (prRef && onPaymentMethod) prRef.off('paymentmethod', onPaymentMethod);
+        if (prRef && onCancel) prRef.off('cancel', onCancel);
+      };
+
+      pr.on('paymentmethod', onPaymentMethod);
+      pr.on('cancel', onCancel);
+
+      const can = await pr.canMakePayment();
+      if (!can?.applePay) {
+        pr.off('paymentmethod', onPaymentMethod);
+        pr.off('cancel', onCancel);
+        setPaymentError(t('payment.applePayUnavailable'));
+        setPaymentProcessing(false);
+        setBusy(false);
+        return;
+      }
+
+      try {
+        pr.show();
+      } catch {
+        setFallbackPaymentRequest(pr);
+        setPaymentProcessing(false);
+      }
+    } catch (err) {
+      setPaymentError(err?.message || 'Payment failed');
+      setPaymentProcessing(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (fallbackPaymentRequest) {
+    return (
+      <div className="mb-4 sm:mb-6 space-y-2">
+        <p className="text-xs text-gray-600 text-center">{t('payment.applePay')}</p>
+        <PaymentRequestButtonElement
+          options={{
+            paymentRequest: fallbackPaymentRequest,
+            style: {
+              paymentRequestButton: {
+                type: 'default',
+                theme: 'dark',
+                height: '48px',
+              },
+            },
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              fallbackPaymentRequest.off?.('paymentmethod');
+              fallbackPaymentRequest.off?.('cancel');
+            } catch {
+              // ignore
+            }
+            fallbackPaymentRequest.abort?.();
+            setFallbackPaymentRequest(null);
+            setPaymentProcessing(false);
+            setBusy(false);
+          }}
+          className="w-full text-xs text-gray-500 underline"
+        >
+          {t('payment.cancelWalletFallback')}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4 sm:mb-6">
+      <button
+        type="button"
+        onClick={handleApplePay}
+        disabled={disabled || busy}
+        className="w-full rounded-lg bg-black px-4 py-3 text-[15px] font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 min-h-[48px]"
+        aria-label={t('payment.applePay')}
+      >
+        {busy ? (
+          <Loader2 className="animate-spin shrink-0" size={20} aria-hidden />
+        ) : (
+          <img
+            src="/apple.svg"
+            alt=""
+            className="shrink-0 w-5 h-5"
+            aria-hidden="true"
+          />
+        )}
+        {t('payment.applePay')}
+      </button>
+    </div>
   );
 };
 
@@ -343,10 +549,15 @@ const CheckoutPage = () => {
   // Form states
   // ----------------------------
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(() => `+${getCountryCallingCode('FR')}`);
   const [phoneCountry, setPhoneCountry] = useState('FR');
   const [isPhoneCountryMenuOpen, setIsPhoneCountryMenuOpen] = useState(false);
+  const [phoneCountryTypeaheadQuery, setPhoneCountryTypeaheadQuery] = useState('');
   const phoneCountryMenuRef = useRef(null);
+  const phoneCountryTriggerRef = useRef(null);
+  const phoneCountryMenuListRef = useRef(null);
+  const phoneCountryTypeaheadInputRef = useRef(null);
+  const phoneInputFieldRef = useRef(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -355,7 +566,7 @@ const CheckoutPage = () => {
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
   /** ISO 3166-1 alpha-2 for home delivery */
-  const [countryIso, setCountryIso] = useState('FR');
+  const [countryIso, setCountryIso] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
   const countryMenuRef = useRef(null);
@@ -365,7 +576,7 @@ const CheckoutPage = () => {
   const [expressDelivery, setExpressDelivery] = useState(false);
 
   // Relay search + selection (ISO code for zone-based pricing + API)
-  const [relayCountryIso, setRelayCountryIso] = useState('FR');
+  const [relayCountryIso, setRelayCountryIso] = useState('');
   const [isRelayCountryDropdownOpen, setIsRelayCountryDropdownOpen] = useState(false);
   const [relayCountrySearchQuery, setRelayCountrySearchQuery] = useState('');
   const relayCountryMenuRef = useRef(null);
@@ -384,7 +595,14 @@ const CheckoutPage = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState(null);
   const [isPreparingPaymentIntent, setIsPreparingPaymentIntent] = useState(false);
+  /** Set when PaymentIntent is created: EUR snapshot + charge currency totals from API */
+  const [paymentChargeTotals, setPaymentChargeTotals] = useState(null);
   const [checkoutError, setCheckoutError] = useState('');
+  /** When true, show soft validation hints (address quote, phone format) — not on first paint. */
+  const [checkoutHintsEnabled, setCheckoutHintsEnabled] = useState(false);
+  const enableCheckoutHints = useCallback(() => {
+    setCheckoutHintsEnabled(true);
+  }, []);
   const [homeShippingOffers, setHomeShippingOffers] = useState([]);
   const [homeShippingMode, setHomeShippingMode] = useState('all');
   const [selectedHomeShippingOfferCode, setSelectedHomeShippingOfferCode] = useState('');
@@ -411,6 +629,18 @@ const CheckoutPage = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [isPaymentFormComplete, setIsPaymentFormComplete] = useState(false);
+  const [canUseApplePay, setCanUseApplePay] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (window.ApplePaySession && typeof window.ApplePaySession.canMakePayments === 'function') {
+        setCanUseApplePay(window.ApplePaySession.canMakePayments());
+      }
+    } catch {
+      setCanUseApplePay(false);
+    }
+  }, []);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   const quoteRequestRef = useRef(0);
@@ -428,15 +658,40 @@ const CheckoutPage = () => {
     }
   }, [locale]);
 
-  const phoneCountryOptions = useMemo(
-    () =>
-      getCountries().map((code) => ({
+  const normalizeTypeaheadText = (value) =>
+    String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+  const phoneCountryOptions = useMemo(() => {
+    const lang = locale === 'fr' ? 'fr' : 'en';
+    const collator = new Intl.Collator(lang, { sensitivity: 'base' });
+
+    return getCountries()
+      .map((code) => ({
         code,
         name: phoneCountryDisplayNames?.of(code) || code,
         callingCode: getCountryCallingCode(code),
-      })),
-    [phoneCountryDisplayNames]
-  );
+      }))
+      .sort((a, b) => {
+        const byName = collator.compare(a.name, b.name);
+        if (byName !== 0) return byName;
+        return a.code.localeCompare(b.code);
+      });
+  }, [phoneCountryDisplayNames, locale]);
+
+  const filteredPhoneCountryOptions = useMemo(() => {
+    const query = normalizeTypeaheadText(phoneCountryTypeaheadQuery);
+    if (!query) return phoneCountryOptions;
+
+    return phoneCountryOptions.filter((option) => {
+      const normalizedName = normalizeTypeaheadText(option.name);
+      const normalizedCode = normalizeTypeaheadText(option.code);
+      return normalizedName.startsWith(query) || normalizedCode.startsWith(query);
+    });
+  }, [phoneCountryOptions, phoneCountryTypeaheadQuery]);
 
   const regionDisplayNames = useMemo(() => {
     try {
@@ -494,6 +749,133 @@ const CheckoutPage = () => {
     phoneCountryOptions.find((entry) => entry.code === phoneCountry)?.name || phoneCountry;
   const SelectedPhoneCountryFlag = flags?.[phoneCountry];
 
+  const focusPhoneCountryOption = useCallback(
+    (code, shouldFocus = true) => {
+      const optionElement = phoneCountryMenuListRef.current?.querySelector(
+        `[data-country-code="${code}"]`
+      );
+
+      if (optionElement instanceof HTMLElement) {
+        optionElement.scrollIntoView({ block: 'nearest' });
+        if (shouldFocus) {
+          optionElement.focus({ preventScroll: true });
+        }
+      }
+    },
+    []
+  );
+
+  const focusFirstMatchingPhoneCountry = useCallback(
+    (query) => {
+      const normalizedQuery = normalizeTypeaheadText(query);
+      if (!normalizedQuery) return;
+
+      const match = phoneCountryOptions.find((option) => {
+        const normalizedName = normalizeTypeaheadText(option.name);
+        return normalizedName.startsWith(normalizedQuery);
+      });
+
+      if (match) {
+        // Keep focus in the typeahead input on mobile so the keyboard stays open.
+        focusPhoneCountryOption(match.code, false);
+      }
+    },
+    [focusPhoneCountryOption, phoneCountryOptions]
+  );
+
+  const handlePhoneCountryTypeaheadInputChange = useCallback(
+    (event) => {
+      const nextValue = event.target.value || '';
+      setPhoneCountryTypeaheadQuery(nextValue);
+      if (nextValue) {
+        focusFirstMatchingPhoneCountry(nextValue);
+      }
+    },
+    [focusFirstMatchingPhoneCountry]
+  );
+
+  const handlePhoneCountryTypeaheadInputKeyDown = useCallback(
+    (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsPhoneCountryMenuOpen(false);
+        phoneCountryTriggerRef.current?.focus();
+        return;
+      }
+
+      // Prevent parent listbox key handler from hijacking typed keys.
+      event.stopPropagation();
+    },
+    []
+  );
+
+  const handlePhoneCountryMenuKeyDown = useCallback(
+    (event) => {
+      if (!isPhoneCountryMenuOpen) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsPhoneCountryMenuOpen(false);
+        phoneCountryTriggerRef.current?.focus();
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const currentIndex = filteredPhoneCountryOptions.findIndex((option) => option.code === phoneCountry);
+        const delta = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex = currentIndex === -1
+          ? 0
+          : (currentIndex + delta + filteredPhoneCountryOptions.length) % filteredPhoneCountryOptions.length;
+        const nextOption = filteredPhoneCountryOptions[nextIndex];
+        if (nextOption) {
+          focusPhoneCountryOption(nextOption.code);
+        }
+        return;
+      }
+
+      if (event.key === 'Home') {
+        event.preventDefault();
+        const firstOption = filteredPhoneCountryOptions[0];
+        if (firstOption) focusPhoneCountryOption(firstOption.code);
+        return;
+      }
+
+      if (event.key === 'End') {
+        event.preventDefault();
+        const lastOption = filteredPhoneCountryOptions[filteredPhoneCountryOptions.length - 1];
+        if (lastOption) focusPhoneCountryOption(lastOption.code);
+        return;
+      }
+
+      if (event.key === 'Backspace') {
+        event.preventDefault();
+        const nextQuery = phoneCountryTypeaheadQuery.slice(0, -1);
+        setPhoneCountryTypeaheadQuery(nextQuery);
+        if (nextQuery) {
+          focusFirstMatchingPhoneCountry(nextQuery);
+        }
+        return;
+      }
+
+      if (event.key.length === 1 && /\S/.test(event.key)) {
+        event.preventDefault();
+        const typed = event.key;
+        const nextQuery = `${phoneCountryTypeaheadQuery}${typed}`;
+        setPhoneCountryTypeaheadQuery(nextQuery);
+        focusFirstMatchingPhoneCountry(nextQuery);
+      }
+    },
+    [
+      focusFirstMatchingPhoneCountry,
+      focusPhoneCountryOption,
+      isPhoneCountryMenuOpen,
+      phoneCountry,
+      phoneCountryTypeaheadQuery,
+      filteredPhoneCountryOptions,
+    ]
+  );
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (!phoneCountryMenuRef.current) return;
@@ -507,6 +889,19 @@ const CheckoutPage = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isPhoneCountryMenuOpen) {
+      setPhoneCountryTypeaheadQuery('');
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      phoneCountryTypeaheadInputRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusPhoneCountryOption, isPhoneCountryMenuOpen, phoneCountry]);
 
   useEffect(() => {
     const label = zoneCountryOptions.find((opt) => opt.iso === countryIso)?.label || countryIso;
@@ -574,6 +969,26 @@ const CheckoutPage = () => {
     })();
   }, [apiBase]);
 
+  const buildShippingFetchInit = (init = {}) => {
+    const headers = attachGuestIdHeader({
+      'Content-Type': 'application/json',
+      ...(typeof init.headers === 'object' && init.headers && !Array.isArray(init.headers) ? init.headers : {}),
+    });
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) headers.Authorization = `Bearer ${token}`;
+      } catch {
+        // ignore
+      }
+    }
+    return {
+      ...init,
+      credentials: 'include',
+      headers,
+    };
+  };
+
   const buildShippingUrls = (base, suffix) => {
     const normalizedBase = String(base || '').trim().replace(/\/+$/, '');
     const cleanSuffix = String(suffix || '').replace(/^\/+/, '');
@@ -594,9 +1009,10 @@ const CheckoutPage = () => {
   const fetchShippingWithFallback = async (suffix, fetchOptions) => {
     const urls = buildShippingUrls(apiBase, suffix);
     let lastResponse = null;
+    const merged = buildShippingFetchInit(fetchOptions || {});
 
     for (const url of urls) {
-      const response = await fetch(url, fetchOptions);
+      const response = await fetch(url, merged);
       if (response.status !== 404) {
         return response;
       }
@@ -616,11 +1032,13 @@ const CheckoutPage = () => {
     try {
       if (!apiBase) throw new Error('NEXT_PUBLIC_API_URL is missing');
 
+      const relayCc = String(relayCountryIso || '').trim().toUpperCase();
+
       const res = await fetchShippingWithFallback('relay-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          country: relayCountryIso,
+          country: relayCc,
           query: q,
           limit: 20,
         }),
@@ -646,10 +1064,16 @@ const CheckoutPage = () => {
       setRelayError(t('shipping.missingRelayQuery') || 'Veuillez saisir une adresse ou un code postal.');
       return;
     }
+    const relayCc = String(relayCountryIso || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(relayCc)) {
+      setRelayError(t('shipping.selectCountryForRelay') || 'Select a country for relay delivery first.');
+      return;
+    }
     await searchRelayPoints(q);
   };
 
   const applyHomeAddressSuggestion = (s) => {
+    enableCheckoutHints();
     setStreet(String(s.street || '').trim());
     setCity(String(s.city || '').trim());
     setPostalCode(String(s.postalCode || '').trim());
@@ -658,6 +1082,7 @@ const CheckoutPage = () => {
   };
 
   const applyRelayAddressSuggestion = (s) => {
+    enableCheckoutHints();
     const line = [s.postalCode, s.city].filter(Boolean).join(' ').trim();
     setRelayAddressQuery(
       line || String(s.shortLabel || s.displayName || '').trim().slice(0, 200)
@@ -672,6 +1097,7 @@ const CheckoutPage = () => {
   // 1) reverse geocode (recommended) OR
   // 2) call Boxtal if it supports search by coordinates
   const handleUseMyLocation = async () => {
+    enableCheckoutHints();
     setGeoError('');
     setRelayError('');
     setGeoLoading(true);
@@ -688,8 +1114,23 @@ const CheckoutPage = () => {
       });
 
       const { latitude, longitude } = pos.coords;
+      const lat = Number(latitude);
+      const lng = Number(longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        throw new Error('Invalid position');
+      }
 
       if (!apiBase) throw new Error('NEXT_PUBLIC_API_URL is missing');
+
+      const countryHint = String(relayCountryIso || '').trim().toUpperCase();
+      const payload = {
+        lat,
+        lng,
+        limit: 20,
+      };
+      if (/^[A-Z]{2}$/.test(countryHint)) {
+        payload.country = countryHint;
+      }
 
       setRelayLoading(true);
       setRelayPoints([]);
@@ -699,18 +1140,36 @@ const CheckoutPage = () => {
       const res = await fetchShippingWithFallback('relay-points/by-geo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          country: relayCountryIso,
-          lat: latitude,
-          lng: longitude,
-          limit: 20,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to load relay points');
 
       const points = Array.isArray(data?.points) ? data.points : [];
+      const detectedRaw = String(data?.detectedCountryIso || '').trim().toUpperCase();
+      const allowedIsos = new Set(zoneCountryOptions.map((o) => o.iso));
+
+      if (detectedRaw && !allowedIsos.has(detectedRaw)) {
+        setRelayPoints([]);
+        setRelayPage(1);
+        setRelayError(
+          t('shipping.geoOutsideZone', { country: detectedRaw }) ||
+            `Relay delivery is not available for your zone (${detectedRaw}).`
+        );
+        return;
+      }
+
+      if (detectedRaw && allowedIsos.has(detectedRaw)) {
+        setRelayCountryIso(detectedRaw);
+      }
+
+      const loc = data?.location;
+      if (loc && (loc.postalCode || loc.city)) {
+        const line = [loc.postalCode, loc.city].filter(Boolean).join(' ').trim();
+        if (line) setRelayAddressQuery(line);
+      }
+
       setRelayPoints(points);
       setRelayPage(1);
       if (points.length === 0) setRelayError(t('shipping.noRelayFound') || 'Aucun point relais trouvé.');
@@ -736,43 +1195,65 @@ const CheckoutPage = () => {
   const isPhoneValid = Boolean(phone) && isValidPhoneNumber(String(phone));
 
   const handlePhoneChange = (nextValue) => {
+    enableCheckoutHints();
     const normalized = String(nextValue || '');
-    setPhone(normalized);
+    const nextCallingCode = `+${getCountryCallingCode(phoneCountry)}`;
 
-    if (!normalized.startsWith('+')) return;
+    if (!normalized.trim()) {
+      setPhone(nextCallingCode);
+      return;
+    }
 
     try {
       const parsed = parsePhoneNumber(normalized);
-      const nextCountry = parsed?.country;
-      if (nextCountry && nextCountry !== phoneCountry) {
-        setPhoneCountry(nextCountry);
-      }
+      const nationalNumber = String(parsed?.nationalNumber || '').trim();
+      setPhone(nationalNumber ? `${nextCallingCode}${nationalNumber}` : nextCallingCode);
     } catch {
-      // Ignore partial input while typing.
+      const digitsOnly = normalized.replace(/\D/g, '');
+      const prefixDigits = nextCallingCode.replace(/\D/g, '');
+      const nationalDigits = digitsOnly.startsWith(prefixDigits)
+        ? digitsOnly.slice(prefixDigits.length)
+        : digitsOnly;
+      setPhone(nationalDigits ? `${nextCallingCode}${nationalDigits}` : nextCallingCode);
+    }
+  };
+
+  const handlePhoneKeyDown = (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    const prefix = `+${getCountryCallingCode(phoneCountry)}`;
+    const prefixLength = prefix.length;
+    const selectionStart = Number.isInteger(input.selectionStart) ? input.selectionStart : 0;
+    const selectionEnd = Number.isInteger(input.selectionEnd) ? input.selectionEnd : 0;
+
+    const selectionTouchesPrefix = selectionStart < prefixLength;
+    const selectionRemovesPrefix = selectionTouchesPrefix && selectionEnd <= prefixLength;
+
+    if (event.key === 'Backspace' && selectionStart <= prefixLength) {
+      event.preventDefault();
+      return;
+    }
+
+    if (event.key === 'Delete' && (selectionTouchesPrefix || selectionRemovesPrefix)) {
+      event.preventDefault();
+      return;
     }
   };
 
   const handlePhoneCountrySelect = (nextCountryCode) => {
+    enableCheckoutHints();
     const code = String(nextCountryCode || '').toUpperCase();
     if (!code) return;
 
     const nextCallingCode = `+${getCountryCallingCode(code)}`;
     setPhoneCountry(code);
     setIsPhoneCountryMenuOpen(false);
+    setPhoneCountryTypeaheadQuery('');
+    phoneCountryTriggerRef.current?.focus();
 
-    // Keep behavior explicit: selecting a country should immediately reflect its dialing code.
-    setPhone((current) => {
-      const currentValue = String(current || '').trim();
-      if (!currentValue) return nextCallingCode;
-
-      try {
-        const parsed = parsePhoneNumber(currentValue);
-        const nationalNumber = String(parsed?.nationalNumber || '').trim();
-        return nationalNumber ? `${nextCallingCode}${nationalNumber}` : nextCallingCode;
-      } catch {
-        return nextCallingCode;
-      }
-    });
+    // Reset any typed number when country changes and keep only the new calling code.
+    setPhone(nextCallingCode);
   };
 
   const isHomeAddressValid =
@@ -867,7 +1348,8 @@ const CheckoutPage = () => {
     t,
   ]);
 
-  const displayHomeQuoteError = homeQuotePrerequisiteMessage || homeAddressOfferError;
+  const displayHomeQuoteError =
+    (checkoutHintsEnabled && homeQuotePrerequisiteMessage) || homeAddressOfferError;
 
   const paymentStatus = searchParams.get('payment');
   const returnedSessionId = searchParams.get('session_id');
@@ -990,7 +1472,17 @@ const CheckoutPage = () => {
         throw new Error(response?.message || t('errors.sessionCreateFailed'));
       }
 
-      return response.data.clientSecret;
+      setPaymentChargeTotals(response?.data?.totals || null);
+
+      return {
+        clientSecret: response.data.clientSecret,
+        amountMinor: response.data.amountMinor,
+        currency: response.data.totals?.currency,
+        paymentIntentId: response.data.paymentIntentId,
+      };
+    } catch (err) {
+      setPaymentChargeTotals(null);
+      throw err;
     } finally {
       setIsPreparingPaymentIntent(false);
     }
@@ -1135,6 +1627,12 @@ const CheckoutPage = () => {
     homeOfferVerifiedKey === homeAddressVerificationKey &&
     !homeAddressOfferError;
 
+  const showHomeDeliveryPricingSkeleton =
+    deliveryType === 'home' &&
+    isHomeAddressValid &&
+    !homeQuotePrerequisiteMessage &&
+    homeOfferAvailabilityLoading;
+
   const RELAY_PAGE_SIZE = 4;
   const totalRelayPages = Math.max(1, Math.ceil(relayPoints.length / RELAY_PAGE_SIZE));
   const safeRelayPage = Math.min(relayPage, totalRelayPages);
@@ -1149,14 +1647,6 @@ const CheckoutPage = () => {
     if (c === 'UPSE') return 'pickup';
     if (c === 'CHRP') return 'chronopost';
     return c ? c.toLowerCase() : '';
-  };
-
-  const getRelayPriceLabel = () => {
-    const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
-    const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
-    const subtotalValue = Number(subtotal || 0);
-    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
-    return `${relayBelowPrice.toFixed(2)} EUR`;
   };
 
   const getRelayNumericPrice = (point) => {
@@ -1224,9 +1714,132 @@ const CheckoutPage = () => {
   }, [subtotal, displayedShipping]);
 
   const finalTotal = Math.max(0, Number(displayedTotal || 0) - Number(promoDiscount || 0));
-  const showHomeReducedShippingInfo =
-    Number(effectiveShippingRules?.home?.discountedShipping ?? 40) > 0 &&
-    Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9) > 0;
+
+  const destinationCountryIsoForCurrency = useMemo(() => {
+    if (deliveryType === 'relay') {
+      const rc = selectedRelay?.country;
+      if (typeof rc === 'string' && /^[A-Za-z]{2}$/.test(rc.trim())) {
+        return rc.trim().toUpperCase();
+      }
+      return String(relayCountryIso || '').trim().toUpperCase();
+    }
+    return String(countryIso || '').trim().toUpperCase();
+  }, [deliveryType, relayCountryIso, countryIso, selectedRelay]);
+
+  const summaryCurrency = useMemo(
+    () => getCurrencyForCountryIso(shippingSettings, destinationCountryIsoForCurrency),
+    [shippingSettings, destinationCountryIsoForCurrency]
+  );
+
+  const [eurToDestRate, setEurToDestRate] = useState(null);
+  const [fxLoading, setFxLoading] = useState(false);
+
+  useEffect(() => {
+    if (summaryCurrency === 'eur') {
+      setEurToDestRate(1);
+      setFxLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    setEurToDestRate(null);
+    setFxLoading(true);
+    fetchEurToDestinationRate(summaryCurrency.toUpperCase())
+      .then((r) => {
+        if (!cancelled) setEurToDestRate(r);
+      })
+      .catch(() => {
+        if (!cancelled) setEurToDestRate(null);
+      })
+      .finally(() => {
+        if (!cancelled) setFxLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [summaryCurrency]);
+
+  const formatEurInSummaryCurrency = useCallback(
+    (amountEur) => {
+      if (summaryCurrency === 'eur') {
+        return `${Number(amountEur || 0).toFixed(2)} €`;
+      }
+      if (fxLoading || eurToDestRate == null || !Number.isFinite(eurToDestRate)) {
+        return null;
+      }
+      const major = convertEurToDestinationMajor(amountEur, eurToDestRate, summaryCurrency);
+      if (major == null) return null;
+      return formatDestinationMoney(major, summaryCurrency, locale);
+    },
+    [summaryCurrency, eurToDestRate, fxLoading, locale]
+  );
+
+  const formatEurOrFallback = useCallback(
+    (amountEur) => {
+      const c = formatEurInSummaryCurrency(amountEur);
+      if (c != null) return c;
+      return `${Number(amountEur || 0).toFixed(2)} €`;
+    },
+    [formatEurInSummaryCurrency]
+  );
+
+  const formatCompactMoneyLabel = useCallback(
+    (amountEur) => {
+      const formatted = String(formatEurOrFallback(amountEur));
+      return formatted
+        .replace(/(\d+)([.,])(\d*?[1-9])0+(?=[^0-9]|$)/g, '$1$2$3')
+        .replace(/(\d+)([.,])0+(?=[^0-9]|$)/g, '$1');
+    },
+    [formatEurOrFallback]
+  );
+
+  const getRelayPriceLabel = useCallback(() => {
+    const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
+    const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
+    const subtotalValue = Number(subtotal || 0);
+    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
+    const formatted = formatEurInSummaryCurrency(relayBelowPrice);
+    if (formatted) return formatted;
+    return `${relayBelowPrice.toFixed(2)} EUR`;
+  }, [effectiveShippingRules, subtotal, formatEurInSummaryCurrency]);
+
+  useEffect(() => {
+    setPaymentChargeTotals(null);
+  }, [
+    subtotal,
+    displayedShipping,
+    promoDiscount,
+    promoCode,
+    countryIso,
+    relayCountryIso,
+    deliveryType,
+    expressDelivery,
+    selectedRelay,
+    summaryCurrency,
+  ]);
+
+  const paymentChargeLabel = useMemo(() => {
+    const pt = paymentChargeTotals;
+    if (!pt || !pt.currency || String(pt.currency).toLowerCase() === 'eur') return null;
+    const cur = String(pt.currency).toUpperCase();
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: cur }).format(
+        Number(pt.total || 0)
+      );
+    } catch {
+      return `${Number(pt.total || 0).toFixed(2)} ${cur}`;
+    }
+  }, [paymentChargeTotals, locale]);
+
+  const shippingInfoCountryIso = deliveryType === 'relay' ? relayCountryIso : countryIso;
+  const shippingInfoZoneLayers = useMemo(
+    () => getZoneShippingLayersForCountry(shippingSettings, shippingInfoCountryIso),
+    [shippingSettings, shippingInfoCountryIso]
+  );
+  const showShippingInfoRelayRow = shouldShowShippingInfoRelay(shippingInfoZoneLayers.relay);
+  const showShippingInfoHomeReducedRow = shouldShowShippingInfoHomeDiscounted(shippingInfoZoneLayers.home);
+  const showShippingInfoHomeFreeRow = shouldShowShippingInfoHomeFree(shippingInfoZoneLayers.home);
+  const showShippingInfoCardBody =
+    showShippingInfoRelayRow || showShippingInfoHomeReducedRow || showShippingInfoHomeFreeRow;
 
   const getOpeningDaysRows = (point) => {
     const openingDays = point?.raw?.parcelPoint?.openingDays || point?.raw?.parcelpoint?.openingDays;
@@ -1459,7 +2072,7 @@ const CheckoutPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Left Column: Forms */}
-          <div className="grow space-y-4 sm:space-y-6">
+          <div className="order-2 grow space-y-4 sm:space-y-6 lg:order-1">
             {/* Contact Information */}
             <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('contact.title')}</h2>
@@ -1471,7 +2084,10 @@ const CheckoutPage = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setEmail(e.target.value);
+                    }}
                     placeholder={t('contact.emailPlaceholder')}
                     required
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#556822] outline-none transition-all"
@@ -1485,6 +2101,7 @@ const CheckoutPage = () => {
                   <div className="phone-input">
                     <div className="phone-country-picker" ref={phoneCountryMenuRef}>
                       <button
+                        ref={phoneCountryTriggerRef}
                         type="button"
                         className="phone-country-trigger"
                         onClick={() => setIsPhoneCountryMenuOpen((open) => !open)}
@@ -1502,44 +2119,89 @@ const CheckoutPage = () => {
                         <span className="phone-country-arrow">▾</span>
                       </button>
                       {isPhoneCountryMenuOpen ? (
-                        <div className="phone-country-menu" role="listbox">
-                          {phoneCountryOptions.map((option) => (
-                            <button
-                              key={option.code}
-                              type="button"
-                              className={`phone-country-option ${
-                                option.code === phoneCountry ? 'is-active' : ''
-                              }`}
-                              onClick={() => handlePhoneCountrySelect(option.code)}
-                            >
-                              <span className="phone-country-flag">
-                                {(() => {
-                                  const Flag = flags?.[option.code];
-                                  return Flag ? <Flag title={option.name} /> : toFlagEmoji(option.code);
-                                })()}
-                              </span>
-                              <span className="phone-country-name">{option.name}</span>
-                            </button>
-                          ))}
+                        <div
+                          ref={phoneCountryMenuListRef}
+                          className="phone-country-menu"
+                          role="listbox"
+                          tabIndex={0}
+                          onKeyDown={handlePhoneCountryMenuKeyDown}
+                        >
+                          <div className="phone-country-typeahead-wrap">
+                            <input
+                              ref={phoneCountryTypeaheadInputRef}
+                              type="text"
+                              inputMode="text"
+                              autoCapitalize="none"
+                              autoCorrect="off"
+                              autoComplete="off"
+                              spellCheck={false}
+                              value={phoneCountryTypeaheadQuery}
+                              onChange={handlePhoneCountryTypeaheadInputChange}
+                              onKeyDown={handlePhoneCountryTypeaheadInputKeyDown}
+                              placeholder={t('shipping.searchCountry') || 'Tapez une lettre'}
+                              className="phone-country-typeahead"
+                              aria-label={t('shipping.searchCountry') || 'Search country by first letter'}
+                            />
+                          </div>
+                          {filteredPhoneCountryOptions.length > 0 ? (
+                            filteredPhoneCountryOptions.map((option) => (
+                              <button
+                                key={option.code}
+                                data-country-code={option.code}
+                                type="button"
+                                className={`phone-country-option ${
+                                  option.code === phoneCountry ? 'is-active' : ''
+                                }`}
+                                tabIndex={-1}
+                                onClick={() => handlePhoneCountrySelect(option.code)}
+                              >
+                                <span className="phone-country-flag">
+                                  {(() => {
+                                    const Flag = flags?.[option.code];
+                                    return Flag ? <Flag title={option.name} /> : toFlagEmoji(option.code);
+                                  })()}
+                                </span>
+                                <span className="phone-country-name">{option.name}</span>
+                              </button>
+                            ))
+                          ) : (
+                            <p className="phone-country-empty-state">
+                              {t('shipping.noCountryFound') || 'No country found'}
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </div>
 
-                    <PhoneInput
-                      country={phoneCountry}
-                      international
-                      withCountryCallingCode
-                      limitMaxLength={true}
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      placeholder={t('contact.phonePlaceholder') || '+33 6 00 00 00 00'}
-                      required
-                      countrySelectComponent={() => null}
+                    <div
+                      ref={phoneInputFieldRef}
                       className="phone-input-field"
-                    />
+                      onClick={(event) => {
+                        const target = event.target;
+                        if (target instanceof HTMLElement && target.closest('input')) return;
+                        const input = phoneInputFieldRef.current?.querySelector('input');
+                        if (input instanceof HTMLInputElement) {
+                          input.focus({ preventScroll: true });
+                        }
+                      }}
+                    >
+                      <PhoneInput
+                        country={phoneCountry}
+                        international
+                        withCountryCallingCode
+                        countryCallingCodeEditable={false}
+                        limitMaxLength={true}
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        onKeyDown={handlePhoneKeyDown}
+                        required
+                        countrySelectComponent={() => null}
+                        className="phone-input-control"
+                      />
+                    </div>
                   </div>
-                  {phone && !isPhoneValid ? (
-                    <p className="mt-2 text-sm text-red-600">
+                  {checkoutHintsEnabled && phone && !isPhoneValid ? (
+                    <p className="mt-2 text-sm font-medium text-[#556822]">
                       {t('contact.phoneInvalid') || 'Numero de telephone invalide'}
                     </p>
                   ) : null}
@@ -1626,7 +2288,10 @@ const CheckoutPage = () => {
                   <input
                     type="text"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setFirstName(e.target.value);
+                    }}
                     placeholder={t('shipping.firstNamePlaceholder')}
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
@@ -1639,7 +2304,10 @@ const CheckoutPage = () => {
                   <input
                     type="text"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      enableCheckoutHints();
+                      setLastName(e.target.value);
+                    }}
                     placeholder={t('shipping.lastNamePlaceholder')}
                     className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                   />
@@ -1660,7 +2328,10 @@ const CheckoutPage = () => {
                           aria-expanded={isCountryDropdownOpen}
                           value={countrySearchQuery}
                           onChange={(e) => {
-                            setCountrySearchQuery(e.target.value);
+                            enableCheckoutHints();
+                            const v = e.target.value;
+                            setCountrySearchQuery(v);
+                            if (!String(v).trim()) setCountryIso('');
                             setIsCountryDropdownOpen(true);
                           }}
                           onFocus={() => setIsCountryDropdownOpen(true)}
@@ -1676,6 +2347,7 @@ const CheckoutPage = () => {
                                   type="button"
                                   onMouseDown={(e) => e.preventDefault()}
                                   onClick={() => {
+                                    enableCheckoutHints();
                                     setCountryIso(opt.iso);
                                     setCountrySearchQuery(opt.label);
                                     setIsCountryDropdownOpen(false);
@@ -1711,6 +2383,7 @@ const CheckoutPage = () => {
                           aria-autocomplete="list"
                           aria-expanded={homeAddrMenuOpen && (homeAddressAutocomplete.suggestions.length > 0 || homeAddressAutocomplete.loading)}
                           onChange={(e) => {
+                            enableCheckoutHints();
                             const v = e.target.value;
                             setStreet(v);
                             homeAddressAutocomplete.scheduleSearch(v);
@@ -1776,7 +2449,10 @@ const CheckoutPage = () => {
                       <input
                         type="text"
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        onChange={(e) => {
+                          enableCheckoutHints();
+                          setCity(e.target.value);
+                        }}
                         placeholder={t('shipping.cityPlaceholder')}
                         className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
@@ -1788,7 +2464,10 @@ const CheckoutPage = () => {
                       <input
                         type="text"
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
+                        onChange={(e) => {
+                          enableCheckoutHints();
+                          setPostalCode(e.target.value);
+                        }}
                         placeholder={t('shipping.postalCodePlaceholder')}
                         className="w-full p-3 sm:p-4 bg-gray-50 border border-transparent rounded-lg focus:border-[#556822] outline-none"
                       />
@@ -1883,7 +2562,7 @@ const CheckoutPage = () => {
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-start gap-3 min-w-0">
                                           <span
-                                            className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                            className={`mt-1 h-5 w-5 min-h-5 min-w-5 aspect-square shrink-0 rounded-full border-2 flex items-center justify-center ${
                                               active ? 'border-[#556822]' : 'border-gray-300'
                                             }`}
                                           >
@@ -2012,7 +2691,10 @@ const CheckoutPage = () => {
                               aria-expanded={isRelayCountryDropdownOpen}
                               value={relayCountrySearchQuery}
                               onChange={(e) => {
-                                setRelayCountrySearchQuery(e.target.value);
+                                enableCheckoutHints();
+                                const v = e.target.value;
+                                setRelayCountrySearchQuery(v);
+                                if (!String(v).trim()) setRelayCountryIso('');
                                 setIsRelayCountryDropdownOpen(true);
                               }}
                               onFocus={() => setIsRelayCountryDropdownOpen(true)}
@@ -2028,6 +2710,7 @@ const CheckoutPage = () => {
                                       type="button"
                                       onMouseDown={(e) => e.preventDefault()}
                                       onClick={() => {
+                                        enableCheckoutHints();
                                         setRelayCountryIso(opt.iso);
                                         setRelayCountrySearchQuery(opt.label);
                                         setIsRelayCountryDropdownOpen(false);
@@ -2069,6 +2752,7 @@ const CheckoutPage = () => {
                                   (relayAddressAutocomplete.suggestions.length > 0 || relayAddressAutocomplete.loading)
                                 }
                                 onChange={(e) => {
+                                  enableCheckoutHints();
                                   const v = e.target.value;
                                   setRelayAddressQuery(v);
                                   relayAddressAutocomplete.scheduleSearch(v);
@@ -2175,7 +2859,7 @@ const CheckoutPage = () => {
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="flex items-start gap-3 min-w-0">
                                     <span
-                                      className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                      className={`mt-1 h-5 w-5 min-h-5 min-w-5 aspect-square shrink-0 rounded-full border-2 flex items-center justify-center ${
                                         active ? 'border-[#556822]' : 'border-gray-300'
                                       }`}
                                     >
@@ -2277,10 +2961,33 @@ const CheckoutPage = () => {
               {deliveryType === 'home' && (
                 <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                   {displayHomeQuoteError ? (
-                    <p className="text-sm text-red-600" role="alert">
+                    <p className="text-sm font-medium text-[#556822]" role="status">
                       {displayHomeQuoteError}
                     </p>
                   ) : null}
+                  {showHomeDeliveryPricingSkeleton && (
+                    <div
+                      className="space-y-2 sm:space-y-2.5"
+                      aria-busy="true"
+                      aria-label={t('shipping.title')}
+                    >
+                      {expressAvailable ? (
+                        <div className="rounded-lg border border-sky-100 bg-slate-50/80 p-2 sm:p-2.5 shadow-sm">
+                          <div
+                            className="h-9 rounded-md bg-slate-200/50 animate-pulse motion-reduce:animate-none sm:h-10"
+                            aria-hidden="true"
+                          />
+                        </div>
+                      ) : null}
+                      <div className="rounded-lg border border-[#556822]/20 bg-[#556822]/5 p-2 sm:p-2.5 shadow-sm">
+                        <div
+                          className="h-8 rounded-md bg-gray-200/45 animate-pulse motion-reduce:animate-none sm:h-9"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {shouldShowHomeDeliveryPricing && expressAvailable && (
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-100 bg-slate-50/80 p-3 sm:p-4">
                       <input
@@ -2310,7 +3017,7 @@ const CheckoutPage = () => {
                           </p>
                         </div>
                         <p className="text-lg font-black text-[#556822]">
-                          {Number(displayedShipping || 0).toFixed(2)} EUR
+                          {formatEurOrFallback(Number(displayedShipping || 0))}
                         </p>
                       </div>
                     </div>
@@ -2323,9 +3030,40 @@ const CheckoutPage = () => {
             <section className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('payment.title')}</h2>
               <div className="border border-gray-200 rounded-xl p-3 sm:p-6 bg-white">
+                {canUseApplePay ? (
+                  <>
+                    <ApplePayCheckoutButton
+                      t={t}
+                      createPaymentIntent={createPaymentIntent}
+                      locale={locale}
+                      merchantCountry={STRIPE_MERCHANT_COUNTRY}
+                      setPaymentProcessing={setPaymentProcessing}
+                      setPaymentError={setPaymentError}
+                      disabled={
+                        !canConfirm ||
+                        isPreparingPaymentIntent ||
+                        paymentProcessing ||
+                        cartItems.length === 0
+                      }
+                    />
+                    <div className="relative mb-4 sm:mb-6">
+                      <div className="absolute inset-0 flex items-center" aria-hidden>
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="bg-white px-2 text-gray-500">{t('payment.applePayOrCard')}</span>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
                 <PaymentForm
                   locale={locale}
                   t={t}
+                  onConfirmOrder={handleConfirmOrder}
+                  canConfirm={canConfirm}
+                  isPreparingPaymentIntent={isPreparingPaymentIntent}
+                  isPaymentFormComplete={isPaymentFormComplete}
+                  brandGreen={brandGreen}
                   paymentProcessing={paymentProcessing}
                   setPaymentProcessing={setPaymentProcessing}
                   paymentError={paymentError}
@@ -2340,8 +3078,8 @@ const CheckoutPage = () => {
           </div>
 
           {/* Right Column: Order Summary */}
-          <aside className="lg:w-100">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 sticky top-8">
+          <aside className="order-1 lg:order-2 lg:w-100">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 lg:sticky lg:top-8">
               <h2 className="text-xl font-black text-[#556822] mb-6 font-[agrandir]">{t('summary.title')}</h2>
 
               {/* Cart Items List */}
@@ -2401,15 +3139,17 @@ const CheckoutPage = () => {
                         {item.isFreeItem ? (
                           <div className="flex flex-col gap-1">
                             <p className="text-xs text-gray-400 line-through">
-                              {lineSubtotalFromCartItem({ ...item, isFreeItem: false }).toFixed(2)} €
+                              {formatEurOrFallback(lineSubtotalFromCartItem({ ...item, isFreeItem: false }))}
                             </p>
-                            <p className="text-sm font-black text-[#E10C69]">0 €</p>
+                            <p className="text-sm font-black text-[#E10C69]">
+                              {formatEurOrFallback(0)}
+                            </p>
                           </div>
                         ) : (
                           <>
                             <p className="text-xs text-gray-400">x {item.quantity}</p>
                             <p className="text-sm font-black text-[#E10C69]">
-                              {lineSubtotalFromCartItem(item).toFixed(2)} €
+                              {formatEurOrFallback(lineSubtotalFromCartItem(item))}
                             </p>
                           </>
                         )}
@@ -2441,85 +3181,92 @@ const CheckoutPage = () => {
 
               {/* Totals */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  {summaryCurrency !== 'eur' && fxLoading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#556822]" aria-hidden />
+                      <span>{t('summary.fxLoading')}</span>
+                    </>
+                  ) : summaryCurrency === 'eur' ? (
+                    <span>{t('summary.catalogEur')}</span>
+                  ) : (
+                    <span>{t('summary.pricesInCurrency', { currency: summaryCurrency.toUpperCase() })}</span>
+                  )}
+                </div>
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.subtotal')}</span>
-                  <span className="text-gray-900">{Number(subtotal).toFixed(2)} €</span>
+                  <span className="text-gray-900">{formatEurOrFallback(Number(subtotal || 0))}</span>
                 </div>
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>{t('summary.shipping')}</span>
-                  <span className="text-gray-900">{Number(isShippingReady ? displayedShipping : 0).toFixed(2)} €</span>
+                  <span className="text-gray-900">
+                    {formatEurOrFallback(Number(isShippingReady ? displayedShipping : 0))}
+                  </span>
                 </div>
                 <div className="flex justify-between text-xl font-black pt-4">
                   <span className="text-[#556822] font-[agrandir]">{t('summary.total')}</span>
                   <div className="text-right leading-tight">
                     {promoDiscount > 0 && (
-                      <div className="text-xs font-semibold text-gray-400 line-through">{Number(displayedTotal).toFixed(2)} €</div>
+                      <div className="text-xs font-semibold text-gray-400 line-through">
+                        {formatEurOrFallback(Number(displayedTotal))}
+                      </div>
                     )}
-                    <span className="text-[#E10C69]">{finalTotal.toFixed(2)} €</span>
+                    <span className="text-[#E10C69]">{formatEurOrFallback(finalTotal)}</span>
                   </div>
                 </div>
+                
               </div>
-
-              <button
-                type="button"
-                onClick={handleConfirmOrder}
-                disabled={
-                  !canConfirm ||
-                  paymentProcessing ||
-                  isPreparingPaymentIntent ||
-                  !isPaymentFormComplete
-                }
-                className="w-full mt-8 py-4 rounded-md text-white font-black text-lg shadow-lg shadow-green-900/20 hover:scale-[1.02] transition-transform active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
-                style={{ backgroundColor: brandGreen }}
-              >
-                {paymentProcessing
-                  ? t('actions.paymentProcessing')
-                  : isPreparingPaymentIntent
-                  ? (t('actions.redirecting') || 'Preparing payment')
-                  : t('actions.confirmOrder')}
-              </button>
 
               {checkoutError ? (
                 <p className="text-sm text-red-600 mt-3">{checkoutError}</p>
               ) : null}
 
-              <div className="mt-4 rounded-xl border border-[#556822]/15 bg-white p-4 text-left shadow-sm">
-                <p className="text-xs font-black uppercase tracking-wider text-[#556822]">{t('shipping.infoCardTitle')}</p>
-                <div className="mt-3 space-y-3">
-                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                      {t('shipping.infoLabels.pickupPoint')}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#556822]">
-                      {t('shipping.infoRelaySimple', {
-                        threshold: Number(effectiveShippingRules?.relay?.freeShipping ?? 40).toFixed(0),
-                      })}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                      {t('shipping.infoLabels.homeDelivery')}
-                    </p>
-                    {showHomeReducedShippingInfo ? (
-                      <p className="mt-1 text-sm font-semibold text-slate-800">
-                        {t('shipping.infoHomeReducedSimple', {
-                          reducedPrice: Number(effectiveShippingRules?.home?.discountedShippingFee ?? 4.9).toFixed(2),
-                          reducedThreshold: Number(effectiveShippingRules?.home?.discountedShipping ?? 40).toFixed(0),
-                        })}
-                      </p>
+              {showShippingInfoCardBody ? (
+                <div className="mt-4 rounded-xl border border-[#556822]/15 bg-white p-4 text-left shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-wider text-[#556822]">{t('shipping.infoCardTitle')}</p>
+                  <div className="mt-3 space-y-3">
+                    {showShippingInfoRelayRow ? (
+                      <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          {t('shipping.infoLabels.pickupPoint')}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[#556822]">
+                          {t('shipping.infoRelaySimple', {
+                            threshold: formatCompactMoneyLabel(Number(shippingInfoZoneLayers.relay.freeShipping || 0)),
+                          })}
+                        </p>
+                      </div>
                     ) : null}
-                    <p className="text-sm font-semibold text-[#556822]">
-                      {t('shipping.infoHomeFreeSimple', {
-                        freeThreshold: Number(effectiveShippingRules?.home?.freeShipping ?? 60).toFixed(0),
-                      })}
-                    </p>
+                    {showShippingInfoHomeReducedRow || showShippingInfoHomeFreeRow ? (
+                      <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          {t('shipping.infoLabels.homeDelivery')}
+                        </p>
+                        {showShippingInfoHomeReducedRow ? (
+                          <p className="mt-1 text-sm font-semibold text-slate-800">
+                            {t('shipping.infoHomeReducedSimple', {
+                              reducedPrice: formatCompactMoneyLabel(
+                                Number(shippingInfoZoneLayers.home.discountedShippingFee || 0)
+                              ),
+                              reducedThreshold: formatCompactMoneyLabel(
+                                Number(shippingInfoZoneLayers.home.discountedShipping || 0)
+                              ),
+                            })}
+                          </p>
+                        ) : null}
+                        {showShippingInfoHomeFreeRow ? (
+                          <p className="mt-1 text-sm font-semibold text-[#556822]">
+                            {t('shipping.infoHomeFreeSimple', {
+                              freeThreshold: formatCompactMoneyLabel(Number(shippingInfoZoneLayers.home.freeShipping || 0)),
+                            })}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
-              </div>
+              ) : null}
 
-              <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
-                {t('securityNote')}
-              </p>
             </div>
           </aside>
         </div>
@@ -2603,6 +3350,30 @@ const CheckoutPage = () => {
           box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
         }
 
+        .phone-country-typeahead-wrap {
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          padding: 0.45rem 0.5rem;
+          border-bottom: 1px solid #e5e7eb;
+          background: #ffffff;
+        }
+
+        .phone-country-typeahead {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          border-radius: 0.4rem;
+          padding: 0.35rem 0.5rem;
+          font-size: 0.82rem;
+          outline: none;
+          text-transform: uppercase;
+        }
+
+        .phone-country-typeahead:focus {
+          border-color: #556822;
+          box-shadow: 0 0 0 1px #556822;
+        }
+
         .phone-country-option {
           width: 100%;
           border: 0;
@@ -2651,17 +3422,33 @@ const CheckoutPage = () => {
           text-overflow: ellipsis;
         }
 
+        .phone-country-empty-state {
+          margin: 0;
+          padding: 0.65rem 0.6rem;
+          color: #6b7280;
+          font-size: 0.82rem;
+        }
+
         .phone-input-field {
           flex: 1;
           min-width: 0;
+          cursor: text;
+          display: flex;
+          align-items: center;
         }
 
-        .phone-input-field .PhoneInputCountry {
+        .phone-input-control {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .phone-input-control .PhoneInputCountry {
           display: none;
         }
 
-        .phone-input-field .PhoneInputInput {
+        .phone-input-control .PhoneInputInput {
           flex: 1;
+          width: 100%;
           min-width: 0;
           border: 0;
           outline: none;

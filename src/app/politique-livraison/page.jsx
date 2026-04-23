@@ -26,6 +26,12 @@ export default function PolitiqueLivraison() {
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('preparation.p2')}
           </p>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
+            {t('preparation.p3')}
+          </p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+            {t('preparation.p4')}
+          </p>
         </section>
 
         {/* En cas d'absence */}
@@ -34,8 +40,11 @@ export default function PolitiqueLivraison() {
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('absence.p1')}
           </p>
-          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('absence.p2')}
+          </p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+            {t('absence.p3')}
           </p>
         </section>
 
@@ -45,8 +54,11 @@ export default function PolitiqueLivraison() {
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('missingInfo.p1')}
           </p>
-          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('missingInfo.p2')}
+          </p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+            {t('missingInfo.p3')}
           </p>
         </section>
 
@@ -59,8 +71,25 @@ export default function PolitiqueLivraison() {
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('issues.p2')}
           </p>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
+            {t('issues.p3')}
+          </p>
           <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            {t('issues.p3')}{' '}
+            {t('issues.p4')}{' '}
+            <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700 font-semibold">
+              contact@crunchyvita.com
+            </a>
+          </p>
+        </section>
+
+        {/* Frais et offre de livraison */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('fees.title')}</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
+            {t('fees.p1')}
+          </p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
+            {t('fees.p2')}{' '}
             <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700 font-semibold">
               contact@crunchyvita.com
             </a>

@@ -443,9 +443,9 @@
       "rows": {
         "energy": "Energy",
         "fat": "Fat",
-        "saturatedFat": "Saturated fat",
+        "saturatedFat": "of which saturated",
         "carbohydrates": "Carbohydrates",
-        "sugars": "Sugars",
+        "sugars": "of which sugars",
         "protein": "Protein",
         "salt": "Salt",
         "fiber": "Dietary fiber",
@@ -531,7 +531,7 @@
     "title": "Legal notice",
     "siteUse": {
       "title": "Use of the site",
-      "body": "Access to and use of the site www.crunchyvita.fr are subject to the Terms of Sale, these Legal Notices, and the Privacy Policy."
+      "body": "Access to and use of the site www.crunchyvita.com are subject to the Terms of Sale, these Legal Notices, and the Privacy Policy."
     },
     "publisher": {
       "title": "Site publisher",
@@ -549,7 +549,7 @@
     },
     "host": {
       "title": "Site host",
-      "intro": "The site www.crunchyvita.fr is hosted by:",
+      "intro": "The site www.crunchyvita.com is hosted by:",
       "name": "OVHcloud",
       "address1": "2 rue Kellermann",
       "address2": "59100 Roubaix - France",
@@ -559,7 +559,7 @@
   },
   "PrivacyPolicy": {
     "title": "Privacy Policy",
-    "intro": "This Privacy Policy explains how your personal information is collected, used, and shared when you visit the site crunchyvita.fr or make a purchase there.",
+    "intro": "This Privacy Policy explains how your personal information is collected, used, and shared when you visit the site crunchyvita.com or make a purchase there.",
     "collected": {
       "title": "Personal information collected",
       "p1": "When you visit the site, we automatically collect certain information about your device, including your web browser, your IP address, your time zone, and some of the cookies installed on your device.",
@@ -630,27 +630,37 @@
   "ShippingPolicy": {
     "title": "Shipping Policy",
     "preparation": {
-      "title": "Preparation and dispatch",
-      "p1": "Packages are prepared and shipped within 48 hours of the order (excluding Saturdays, Sundays, and public holidays). Once the package is handed to the carrier, you receive a confirmation email with the tracking number.",
-      "p2": "During high-activity periods, the preparation time may be extended to 72 hours. Delivery is handled by Mondial Relay, delivering orders to the customer's home, workplace, or a pickup point."
+      "title": "Preparation and shipping",
+      "p1": "Orders placed on www.crunchyvita.com are prepared and dispatched within an indicative period of 48 business hours from validation, excluding Saturdays, Sundays, and public holidays.",
+      "p2": "As soon as the parcel is handed over to the carrier, the Customer receives a shipping confirmation email including, where applicable, a tracking number to follow the shipment.",
+      "p3": "During periods of high activity, the preparation time may exceptionally be extended to 72 business hours.",
+      "p4": "Delivery is organized via the Boxtal platform, which allows CrunchyVita to select a partner carrier according to the chosen delivery method, destination, and options available at the time of order. Orders may be delivered to the Customer's home, workplace, or a pickup point, depending on the option selected during purchase."
     },
     "absence": {
       "title": "In case of absence",
-      "p1": "If the customer is absent at the time of delivery, a delivery notice will be left and the carrier will contact them.",
-      "p2": "The customer can also leave specific instructions for the courier. If the parcel is not collected within the allotted time, it will be returned to our warehouse."
+      "p1": "If the Customer is absent at the time of home delivery, a delivery notice may be left by the carrier, or the Customer may be contacted according to the carrier's procedures.",
+      "p2": "Where the delivery method allows it, the Customer may also provide delivery instructions to the carrier.",
+      "p3": "If the parcel is not collected within the allotted time, especially at a pickup point, it may be returned to our warehouse."
     },
     "missingInfo": {
       "title": "Missing information or incomplete details",
-      "p1": "The customer must provide all information necessary for proper delivery (exact address, phone number, access code, etc.).",
-      "p2": "If this information is missing, our company will not be liable for delivery failure. Products will be returned to our warehouse and the customer must contact customer service to arrange a new delivery, which will be billed to the customer."
+      "p1": "The Customer must provide all information required for proper shipment of the order, including: full address, phone number, name, access code, floor, or any other useful delivery detail.",
+      "p2": "In the event of an error, omission, or incomplete information preventing delivery, our company cannot be held liable for the inability to deliver the order under the planned conditions.",
+      "p3": "The parcel may then be returned to our warehouse. The Customer must contact customer service to arrange a new shipment, which may be re-invoiced to the Customer."
     },
     "issues": {
       "title": "Delivery issues",
-      "p1": "Products travel at our company's risk, except in special cases.",
-      "p2": "The customer must check the package condition and the number of products upon receipt. Any reservation (damage, missing product, damaged packaging) must be noted on the delivery slip, which the customer must keep a copy of.",
-      "p3": "Any complaint regarding delivery must be made within 3 working days after receipt of the products, by email to:"
+      "p1": "Products are shipped at our company's risk, except in specific cases related to a Customer fault, an incorrect address, or missing information provided at the time of order.",
+      "p2": "Upon receipt, the Customer must check the condition of the parcel and the number of delivered products.",
+      "p3": "Any reservation related to delivery (damaged parcel, missing product, damaged packaging, opened parcel, etc.) must be stated precisely to the carrier or on any delivery document provided at receipt, and the Customer must keep proof.",
+      "p4": "Any complaint regarding delivery must be submitted within 3 working days after receipt of the products, by email to the following address:"
     },
-    "promo": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases!"
+    "fees": {
+      "title": "Shipping fees and delivery offer",
+      "p1": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases may be offered depending on the conditions displayed on www.crunchyvita.com at the time of order. This statement currently appears in the Terms of Sale available on the site.",
+      "p2": "Any complaint regarding delivery must be submitted within 3 working days after receipt of the products, by email to:"
+    },
+    "promo": "Free delivery in France to pickup points from 40EUR of purchases!"
   },
   "ReturnPolicy": {
     "title": "Return Policy",
@@ -694,7 +704,7 @@
     },
     "article1": {
       "title": "Article 1 - Purpose of the site",
-      "body": "The website www.crunchyvita.fr ( the \"Site\") is an e-commerce site that offers online sales of freeze-dried fruit packs (hereafter the \"Products\"). The Site allows the User, notably through an Account whose operating conditions they will set. The Site is accessible free of charge to any person with Internet access. All costs related to this access (hardware, software, Internet connection) are borne exclusively by the User, who is solely responsible for the proper functioning of their equipment and access or network."
+      "body": "The website www.crunchyvita.com ( the \"Site\") is an e-commerce site that offers online sales of freeze-dried fruit packs (hereafter the \"Products\"). The Site allows the User, notably through an Account whose operating conditions they will set. The Site is accessible free of charge to any person with Internet access. All costs related to this access (hardware, software, Internet connection) are borne exclusively by the User, who is solely responsible for the proper functioning of their equipment and access or network."
     },
     "article2": {
       "title": "Article 2 - Acceptance of the CGU",
@@ -740,7 +750,7 @@
   },
   "CGV": {
     "title": "Terms of Sale (CGV)",
-    "updated": "ALTEORA - www.crunchyvita.fr | Updated in 2026",
+    "updated": "ALTEORA - www.crunchyvita.com | Updated in 2026",
     "preamble": {
       "title": "Preamble",
       "body": "This Preamble is an integral part of the Terms of Sale."
@@ -754,7 +764,7 @@
     },
     "article2": {
       "title": "Article 2. Purpose",
-      "body": "The Seller's activity is the online sale of products under the CrunchyVita brand (freeze-dried fruits) via the site www.crunchyvita.fr."
+      "body": "The Seller's activity is the online sale of products under the CrunchyVita brand (freeze-dried fruits) via the site www.crunchyvita.com."
     },
     "article2_1": {
       "title": "Article 2.1. Precautions for use",
@@ -767,7 +777,7 @@
         "item2": "Buyer: any individual wishing to make a purchase on the Site.",
         "item3": "Product: any product offered for sale, subject to available stock.",
         "item4": "Delivery: transfer to the Buyer of the physical possession or control of the Product.",
-        "item5": "Site: www.crunchyvita.fr."
+        "item5": "Site: www.crunchyvita.com."
       }
     },
     "article4": {
@@ -793,7 +803,7 @@
     "article7": {
       "title": "Article 7. Delivery",
       "p1": "Delivery is made to the address provided by the Buyer.",
-      "p2": "Free delivery in France to Chronopost pickup points from 40 EUR of purchases.",
+      "p2": "Free delivery in France to  pickup points from 40 EUR of purchases.",
       "p3": "Parcel tracking is communicated by email."
     },
     "article8": {
@@ -937,6 +947,8 @@
       "useMyLocation": "Use my location",
       "country": "Country / region",
       "searchCountry": "Search countries...",
+      "countryStartTyping": "Type to search for a country.",
+      "selectCountryForRelay": "Select a country for relay delivery first.",
       "noCountriesFound": "No countries found",
       "relayAddress": "Address / Postal code",
       "relayPlaceholder": "e.g. 75001 Paris",
@@ -963,6 +975,7 @@
       "geoDenied": "Permission denied. Enable location in your browser.",
       "geoUnavailable": "Position unavailable. Try again.",
       "geoTimeout": "Timeout. Try again.",
+      "geoOutsideZone": "Your location is outside our relay delivery zones ({country}).",
       "methodTitle": "Delivery method",
       "methodHome": "Home delivery",
       "methodExpress": "Express delivery",
@@ -975,9 +988,9 @@
         "pickupPoint": "Pickup point",
         "homeDelivery": "Home delivery"
       },
-      "infoRelaySimple": "FREE from {threshold} € of purchases",
-      "infoHomeReducedSimple": "{reducedPrice} € from {reducedThreshold} € of purchases",
-      "infoHomeFreeSimple": "Free from {freeThreshold} € of purchases",
+      "infoRelaySimple": "FREE from {threshold} of purchases",
+      "infoHomeReducedSimple": "{reducedPrice} from {reducedThreshold} of purchases",
+      "infoHomeFreeSimple": "Free from {freeThreshold} of purchases",
       "infoRelay": "Relay point: FREE from {threshold} EUR",
       "infoHome": "Home delivery: {reducedPrice} EUR from {reducedThreshold} EUR | Free from {freeThreshold} EUR",
       "validationHome": "Fill email + first/last name + address + city + postal code.",
@@ -994,6 +1007,10 @@
     },
     "payment": {
       "title": "Payment",
+      "applePay": "Pay",
+      "applePayOrCard": "Or pay with card",
+      "cancelWalletFallback": "Cancel",
+      "applePayUnavailable": "Apple Pay is not available on this device or browser. Use the card form below.",
       "creditCard": "Credit Card",
       "nameOnCard": "Name on card",
       "nameOnCardPlaceholder": "e.g. Houda Gh",
@@ -1014,7 +1031,11 @@
       "qty": "Qty",
       "promoCodeLabel": "Promo code",
       "promoPlaceholder": "Enter coupon code",
-      "applyPromo": "Apply Coupon"
+      "applyPromo": "Apply Coupon",
+      "catalogEur": "Catalog in EUR",
+      "pricesInCurrency": "Estimate in {currency}",
+      "fxLoading": "Loading exchange rate…",
+      "stripeCharge": "Card charge (live rate)"
     },
     "actions": {
       "confirmOrder": "Confirm Order",

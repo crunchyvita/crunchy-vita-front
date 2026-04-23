@@ -8,6 +8,10 @@ import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { orderAPI } from '@/lib/api';
+import {
+  formatOrderLineTotalForDisplay,
+  formatOrderTotalForDisplay,
+} from '@/lib/orderDisplayAmounts';
 
 const statusStyle = {
   pending: { dot: 'bg-amber-400', label: 'pending' },
@@ -30,17 +34,6 @@ function shopHrefForLine(line) {
   if (pid) return `/shop/${pid}`;
   if (pkid) return `/shop/packages/${pkid}`;
   return '/shop';
-}
-
-function formatMoney(amount, currency = 'eur') {
-  const cur = (currency || 'eur').toUpperCase();
-  try {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: cur }).format(
-      Number(amount) || 0
-    );
-  } catch {
-    return `€${Number(amount || 0).toFixed(2)}`;
-  }
 }
 
 const pulse = 'animate-pulse rounded-md bg-gray-200/80';
@@ -271,7 +264,7 @@ function OrdersContent() {
                           {t('totalAmountLabel')}
                         </p>
                         <p className="text-lg font-black text-[#E10C69] tabular-nums">
-                          {formatMoney(order.totalAmount, order.currency)}
+                          {formatOrderTotalForDisplay(order)}
                         </p>
                       </div>
 
@@ -317,7 +310,7 @@ function OrdersContent() {
                             </p>
                             <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                               <span className="font-black text-[#E10C69] tabular-nums">
-                                {formatMoney(line.lineTotal, order.currency)}
+                                {formatOrderLineTotalForDisplay(order, line, i)}
                               </span>
                             </p>
                           </div>

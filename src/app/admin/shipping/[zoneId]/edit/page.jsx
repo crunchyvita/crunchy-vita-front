@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { 
@@ -20,6 +20,12 @@ const zoneIdentifier = (zone) => String(zone?._id ?? zone?.id ?? "");
 const parseIsoInput = (raw) => {
   const t = String(raw || "").trim().toUpperCase();
   if (/^[A-Z]{2}$/.test(t)) return t;
+  return "";
+};
+
+const parseCurrencyInput = (raw) => {
+  const t = String(raw || "").trim().toUpperCase();
+  if (/^[A-Z]{3}$/.test(t)) return t;
   return "";
 };
 
@@ -42,6 +48,7 @@ function countryDisplayLabel(row, displayNames) {
 
 export default function AdminShippingZoneDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const zoneId = params?.zoneId ? decodeURIComponent(String(params.zoneId)) : "";
   const t = useTranslations("admin.shippingDetail");
   const tcom = useTranslations("admin.common");
@@ -62,6 +69,7 @@ export default function AdminShippingZoneDetailPage() {
 
   const [newCountryLabel, setNewCountryLabel] = useState("");
   const [newCountryIso, setNewCountryIso] = useState("");
+  const [newCountryCurrency, setNewCountryCurrency] = useState("");
   const [submittingCountry, setSubmittingCountry] = useState(false);
   const [countryFormError, setCountryFormError] = useState("");
   const [search, setSearch] = useState("");
@@ -69,6 +77,7 @@ export default function AdminShippingZoneDetailPage() {
   const [editingIso, setEditingIso] = useState("");
   const [editLabel, setEditLabel] = useState("");
   const [editIso, setEditIso] = useState("");
+  const [editCurrency, setEditCurrency] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
   const [countryToDelete, setCountryToDelete] = useState(null);
@@ -164,7 +173,10 @@ export default function AdminShippingZoneDetailPage() {
     setSaving(true);
     try {
       const ok = await persistCurrentZone(zone);
-      if (ok) toast.success(t("saved"));
+      if (ok) {
+        toast.success(t("saved"));
+        router.replace("/admin/shipping");
+      }
     } finally {
       setSaving(false);
     }
@@ -207,13 +219,23 @@ export default function AdminShippingZoneDetailPage() {
       toast.error(t("duplicateCountryGlobal"));
       return;
     }
+    const currencyRaw = parseCurrencyInput(newCountryCurrency);
+    if (!currencyRaw) {
+      setCountryFormError(t("invalidCurrency"));
+      toast.error(t("invalidCurrency"));
+      return;
+    }
     setCountryFormError("");
     setSubmittingCountry(true);
     try {
-      const ok = await persistCurrentZone({ ...zone, countries: [...cur, { iso, label }] });
+      const ok = await persistCurrentZone({
+        ...zone,
+        countries: [...cur, { iso, label, currency: currencyRaw }],
+      });
       if (ok) {
         setNewCountryLabel("");
         setNewCountryIso("");
+        setNewCountryCurrency("");
       } else {
         setCountryFormError(t("saveError"));
       }
@@ -226,12 +248,14 @@ export default function AdminShippingZoneDetailPage() {
     setEditingIso(row.iso);
     setEditLabel(row.label || "");
     setEditIso(row.iso);
+    setEditCurrency(String(row.currency || "").trim().toUpperCase());
   };
 
   const cancelEdit = () => {
     setEditingIso("");
     setEditLabel("");
     setEditIso("");
+    setEditCurrency("");
     setSavingEdit(false);
   };
 
@@ -258,11 +282,16 @@ export default function AdminShippingZoneDetailPage() {
       toast.error(t("duplicateCountryGlobal"));
       return;
     }
+    const currencyRaw = parseCurrencyInput(editCurrency);
+    if (!currencyRaw) {
+      toast.error(t("invalidCurrency"));
+      return;
+    }
     setSavingEdit(true);
     try {
       const ok = await persistCurrentZone({
         ...zone,
-        countries: [...others, { iso, label }],
+        countries: [...others, { iso, label, currency: currencyRaw }],
       });
       if (ok) cancelEdit();
     } finally {
@@ -419,7 +448,7 @@ export default function AdminShippingZoneDetailPage() {
               </div>
               
               <div className="border-b border-slate-200 px-6 py-4">
-                <form onSubmit={handleAddCountry} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <form onSubmit={handleAddCountry} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <input
                     type="text"
                     value={newCountryLabel}
@@ -428,7 +457,7 @@ export default function AdminShippingZoneDetailPage() {
                       if (countryFormError) setCountryFormError("");
                     }}
                     placeholder={t("countryNamePlaceholder")}
-                    className={`col-span-1 sm:col-span-1 ${inputBaseClass}`}
+                    className={`lg:col-span-1 ${inputBaseClass}`}
                   />
                   <input
                     type="text"
@@ -441,10 +470,23 @@ export default function AdminShippingZoneDetailPage() {
                     maxLength={2}
                     className={`${inputBaseClass} uppercase`}
                   />
+                  <input
+                    type="text"
+                    value={newCountryCurrency}
+                    onChange={(e) => {
+                      setNewCountryCurrency(e.target.value.toUpperCase().slice(0, 3));
+                      if (countryFormError) setCountryFormError("");
+                    }}
+                    placeholder={t("currencyPlaceholder")}
+                    maxLength={3}
+                    className={`${inputBaseClass} font-mono uppercase`}
+                    aria-label={t("currencyColumn")}
+                    required
+                  />
                   <button
                     type="submit"
                     disabled={submittingCountry}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#556822] px-4 text-sm font-semibold text-white transition hover:bg-[#4c611e] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#556822] px-4 text-sm font-semibold text-white transition hover:bg-[#4c611e] disabled:cursor-not-allowed disabled:opacity-50 sm:col-span-2 lg:col-span-1"
                   >
                     {submittingCountry ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                     {t("addCountry")}
@@ -472,6 +514,7 @@ export default function AdminShippingZoneDetailPage() {
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">{t("countryNameColumn")}</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">{t("isoCodeColumn")}</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">{t("currencyColumn")}</th>
                         <th className="px-4 py-3 text-right" />
                       </tr>
                     </thead>
@@ -496,6 +539,21 @@ export default function AdminShippingZoneDetailPage() {
                                 maxLength={2}
                               />
                             ) : <span className="text-slate-500 font-mono">{row.iso}</span>}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingIso === row.iso ? (
+                              <input
+                                value={editCurrency}
+                                onChange={(e) => setEditCurrency(e.target.value.toUpperCase().slice(0, 3))}
+                                className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-2 font-mono text-sm uppercase text-slate-800 outline-none focus:border-[#556822] focus:ring-2 focus:ring-[#556822]/20"
+                                maxLength={3}
+                                aria-label={t("currencyColumn")}
+                              />
+                            ) : (
+                              <span className="font-mono text-slate-600">
+                                {String(row.currency || "").toUpperCase()}
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-right">
                              {editingIso === row.iso ? (

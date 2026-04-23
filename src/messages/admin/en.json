@@ -139,7 +139,7 @@
     "loadError": "Failed to load",
     "paymentIntent": "Payment reference",
     "order": "Order",
-    "amount": "Amount",
+    "amount": "Amount (EUR)",
     "empty": "No paid checkout sessions"
   },
   "shipping": {
@@ -209,13 +209,16 @@
     "addCountry": "Add country",
     "edit": "Edit",
     "invalidCountry": "Enter a valid 2-letter ISO country code",
+    "invalidCurrency": "Enter a valid 3-letter ISO currency code",
     "duplicateCountry": "This country already exists in this zone.",
     "duplicateCountryGlobal": "This country already exists in another zone. ",
     "generalSettings": "General Settings",
     "promoBadgeZoneLabel": "Promo Badge Zone",
     "promoBadgeZoneDesc": "Show promotional shipping badge for this specific zone.",
     "countryNameColumn": "Country Name",
-    "isoCodeColumn": "ISO Code"
+    "isoCodeColumn": "ISO Code",
+    "currencyColumn": "Currency (ISO 4217)",
+    "currencyPlaceholder": "EUR"
   },
   "dashboard": {
     "stats": {

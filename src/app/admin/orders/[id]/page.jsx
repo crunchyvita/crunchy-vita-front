@@ -9,6 +9,9 @@ import { orderAPI } from "@/lib/api";
 import { ArrowLeft } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+/** Back-office: montants catalogue toujours en EUR (indépendant de la devise Stripe). */
+const ADMIN_MONEY_CURRENCY = "EUR";
+
 function formatMoney(amount, currency = "eur", localeTag = "fr-FR") {
 	try {
 		return new Intl.NumberFormat(localeTag, {
@@ -46,6 +49,7 @@ function AdminOrderDetailInner() {
 	const id = params?.id;
 
 	const [order, setOrder] = useState(null);
+	const [shippingTracking, setShippingTracking] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 
@@ -59,6 +63,14 @@ function AdminOrderDetailInner() {
 				const res = await orderAPI.getAdminById(id);
 				if (res?.success) {
 					setOrder(res.data || null);
+					try {
+						const trackingRes = await orderAPI.getAdminShippingTracking(id);
+						if (trackingRes?.success) {
+							setShippingTracking(trackingRes.data || null);
+						}
+					} catch {
+						setShippingTracking(null);
+					}
 				} else {
 					setError(res?.message || od("loadError"));
 				}
@@ -73,6 +85,14 @@ function AdminOrderDetailInner() {
 	const shippingAddress = order?.shippingAddress || null;
 	const boxtal = order?.boxtal || {};
 	const boxtalShipment = boxtal?.shipment || null;
+	const tracked = shippingTracking || {};
+	const shippingLabelHref =
+		tracked?.shippingLabelProxyUrl ||
+		boxtal?.shippingLabelProxyUrl ||
+		tracked?.shippingLabelUrl ||
+		boxtal?.shippingLabelUrl ||
+		boxtalShipment?.labelUrl ||
+		null;
 
 	const itemCount = useMemo(() => {
 		const items = Array.isArray(order?.items) ? order.items : [];
@@ -132,9 +152,9 @@ function AdminOrderDetailInner() {
 												<tr key={idx}>
 													<td className="px-3 py-3">{lineDisplayName(line, od("lineFallback"))}</td>
 													<td className="px-3 py-3">{line?.quantity || 1}</td>
-													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), order?.currency, numberLocale)}</td>
+													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), ADMIN_MONEY_CURRENCY, numberLocale)}</td>
 													<td className="px-3 py-3 text-right font-medium">
-														{formatMoney(line?.lineTotal, order?.currency, numberLocale)}
+														{formatMoney(line?.lineTotal, ADMIN_MONEY_CURRENCY, numberLocale)}
 													</td>
 												</tr>
 											))}
@@ -145,19 +165,19 @@ function AdminOrderDetailInner() {
 								<div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm">
 									<div className="flex justify-between text-slate-600">
 										<span>{od("subtotal")}</span>
-										<span>{formatMoney(order.subtotalAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.subtotalAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
 										<span>{od("shipping")}</span>
-										<span>{formatMoney(order.shippingAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.shippingAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-600">
 										<span>{od("discount")}</span>
-										<span>{formatMoney(order.discountAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.discountAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 									<div className="flex justify-between text-slate-900 font-semibold pt-2 border-t border-slate-100">
 										<span>{od("total")}</span>
-										<span>{formatMoney(order.totalAmount, order.currency, numberLocale)}</span>
+										<span>{formatMoney(order.totalAmount, ADMIN_MONEY_CURRENCY, numberLocale)}</span>
 									</div>
 								</div>
 							</div>
@@ -196,25 +216,29 @@ function AdminOrderDetailInner() {
 									{boxtal?.shippingPrice != null ? (
 										<p className="text-sm text-slate-700">
 											<span className="font-medium">{od("shipping")}</span>{" "}
-											{formatMoney(boxtal.shippingPrice, boxtalShipment?.selectedOffer?.currency || order.currency, numberLocale)}
+											{formatMoney(boxtal.shippingPrice, ADMIN_MONEY_CURRENCY, numberLocale)}
 										</p>
 									) : null}
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("boxtalRef")}</span>{" "}
-										{boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
+										{tracked?.boxtalOrderRef || boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
 									</p>
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("carrierTracking")}</span>{" "}
-										{boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
+										{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
 									</p>
-									{boxtalShipment?.trackingUrl ? (
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">Shipping status</span>{" "}
+										{tracked?.shippingStatus || boxtal?.shippingStatus || od("lineFallback")}
+									</p>
+									{shippingLabelHref ? (
 										<a
-											href={boxtalShipment.trackingUrl}
+											href={shippingLabelHref}
 											target="_blank"
 											rel="noreferrer"
-											className="text-sm text-[#556822] hover:underline inline-block mt-2"
+											className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
 										>
-											{od("trackingLink")}
+											Shipping label PDF
 										</a>
 									) : null}
 								</div>

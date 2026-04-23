@@ -111,7 +111,7 @@ function AdminCheckoutInner() {
                       <td className="px-3 py-4 text-right font-semibold tabular-nums">
                         {new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
                           style: 'currency',
-                          currency: (s.currency || 'eur').toUpperCase(),
+                          currency: 'EUR',
                         }).format(Number(s.totalAmount) || 0)}
                       </td>
                     </tr>

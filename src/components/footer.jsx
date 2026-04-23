@@ -99,7 +99,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="/politique-retour" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.returns')}</Link></li>
               <li><Link href="/politique-livraison" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.shipping')}</Link></li>
-              <li><Link href="/cgv/#paiement" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('help.payment')}</Link></li>
             </ul>
           </div>
 

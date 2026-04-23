@@ -458,6 +458,10 @@ export const orderAPI = {
     const suffix = q.toString() ? `?${q.toString()}` : '';
     return apiRequest(`/orders/admin/${id}/shipping-offers${suffix}`, { method: 'GET' });
   },
+  getAdminShippingOffers: async (id) =>
+    apiRequest(`/orders/admin/${id}/shipping-offers`, { method: 'GET' }),
+  getAdminShippingTracking: async (id) =>
+    apiRequest(`/orders/admin/${id}/shipping-tracking`, { method: 'GET' }),
   selectAdminShippingOffer: async (id, payload) =>
     apiRequest(`/orders/admin/${id}/shipping-offer`, {
       method: 'PUT',
