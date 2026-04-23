@@ -452,8 +452,12 @@ export const orderAPI = {
       body: JSON.stringify({ status }),
     }),
   getAdminById: async (id) => apiRequest(`/orders/admin/${id}`, { method: 'GET' }),
-  getAdminShippingOffers: async (id) =>
-    apiRequest(`/orders/admin/${id}/shipping-offers`, { method: 'GET' }),
+  getAdminShippingOffers: async (id, params = {}) => {
+    const q = new URLSearchParams();
+    if (params.shippingBoxId) q.set('shippingBoxId', String(params.shippingBoxId));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/orders/admin/${id}/shipping-offers${suffix}`, { method: 'GET' });
+  },
   selectAdminShippingOffer: async (id, payload) =>
     apiRequest(`/orders/admin/${id}/shipping-offer`, {
       method: 'PUT',
@@ -523,6 +527,35 @@ export const shippingAPI = {
       signal: options.signal,
     });
   },
+};
+
+export const shippingBoxAPI = {
+  list: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.limit != null) q.set('limit', String(params.limit));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/shipping/boxes${suffix}`, { method: 'GET' });
+  },
+
+  getById: async (id) => apiRequest(`/shipping/boxes/${id}`, { method: 'GET' }),
+
+  create: async (payload) =>
+    apiRequest('/shipping/boxes', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  update: async (id, payload) =>
+    apiRequest(`/shipping/boxes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  remove: async (id) =>
+    apiRequest(`/shipping/boxes/${id}`, {
+      method: 'DELETE',
+    }),
 };
 
 // Contact/Message API functions

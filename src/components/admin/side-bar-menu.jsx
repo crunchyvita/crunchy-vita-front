@@ -11,6 +11,7 @@ import {
 import {
   ArrowUpDown,
   BarChart3,
+  Box,
   Boxes,
   CreditCard,
   Home,
@@ -47,6 +48,7 @@ const NAV_GROUPS = [
       { labelKey: "products", href: "/admin/products", icon: Boxes },
       { labelKey: "categories", href: "/admin/categories", icon: Tag },
       { labelKey: "packages", href: "/admin/package", icon: Package },
+      { labelKey: "boxes", href: "/admin/boxes", icon: Box },
       { labelKey: "stock", href: "/admin/stock", icon: ShoppingCart },
       { labelKey: "preferredItem", href: "/admin/preferred-item", icon: Heart },
     ],

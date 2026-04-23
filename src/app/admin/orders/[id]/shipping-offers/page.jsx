@@ -5,7 +5,7 @@ import { Link, useRouter } from '@/navigation';
 import { useParams } from 'next/navigation';
 import AdminHeader from '@/components/admin/header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { orderAPI } from '@/lib/api';
+import { orderAPI, shippingBoxAPI } from '@/lib/api';
 import { classifyHomeOfferMode, getCarrierLogo } from '@/lib/shippingOfferUi';
 import { ArrowLeft, Loader2, MapPin, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -85,6 +85,9 @@ function InnerPage() {
   const [relayPage, setRelayPage] = useState(1);
   const [shippingOfferLocked, setShippingOfferLocked] = useState(false);
   const [parcelSnapshot, setParcelSnapshot] = useState(null);
+  const [shippingBoxes, setShippingBoxes] = useState([]);
+  const [selectedShippingBoxId, setSelectedShippingBoxId] = useState('');
+  const [boxesLoading, setBoxesLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -92,8 +95,13 @@ function InnerPage() {
       try {
         setOrderLoading(true);
         setOffersLoading(true);
+        setBoxesLoading(true);
         setError('');
         setSavedCodeMissing(false);
+
+        const boxesRes = await shippingBoxAPI.list({ limit: 100 });
+        if (!boxesRes?.success) throw new Error(boxesRes?.message || 'Unable to load shipping boxes');
+        setShippingBoxes(Array.isArray(boxesRes.data) ? boxesRes.data : []);
 
         const orderRes = await orderAPI.getAdminById(id);
         if (!orderRes?.success) throw new Error(orderRes?.message || 'Unable to load order');
@@ -110,6 +118,7 @@ function InnerPage() {
         const nextPoints = offersRes?.data?.relayPoints || [];
         const dType = String(offersRes?.data?.deliveryType || o?.deliveryType || 'home');
         setParcelSnapshot(offersRes?.data?.parcelSnapshot || null);
+        setSelectedShippingBoxId(String(offersRes?.data?.selectedShippingBox?.id || ''));
 
         const savedCode =
           o?.boxtal?.shippingOfferCode ||
@@ -159,9 +168,35 @@ function InnerPage() {
         setOrderLoading(false);
       } finally {
         setOffersLoading(false);
+        setBoxesLoading(false);
       }
     })();
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !selectedShippingBoxId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setOffersLoading(true);
+        const offersRes = await orderAPI.getAdminShippingOffers(id, { shippingBoxId: selectedShippingBoxId });
+        if (!offersRes?.success) throw new Error(offersRes?.message || 'Unable to load shipping options');
+        if (cancelled) return;
+        const nextOffers = offersRes?.data?.offers || [];
+        const nextPoints = offersRes?.data?.relayPoints || [];
+        setParcelSnapshot(offersRes?.data?.parcelSnapshot || null);
+        setOffers(nextOffers);
+        setRelayPoints(nextPoints);
+      } catch (e) {
+        if (!cancelled) setError(e.message || 'Unable to load shipping options');
+      } finally {
+        if (!cancelled) setOffersLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, selectedShippingBoxId]);
 
   const filteredOffers = useMemo(() => {
     const sorted = [...offers].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
@@ -209,6 +244,7 @@ function InnerPage() {
   );
 
   const persistOfferSelection = async () => {
+    if (!selectedShippingBoxId) throw new Error('Select a shipping box first');
     if (deliveryType === 'relay') {
       if (!selectedRelayPoint) throw new Error('Select a relay point');
       const relayOfferCode = String(selectedRelayPoint.shippingOfferCode || '').trim();
@@ -219,6 +255,7 @@ function InnerPage() {
         shippingOfferId: selectedRelayPoint.shippingOfferId || null,
         carrier: selectedRelayPoint.carrier || null,
         relayPoint: relayRest,
+        shippingBoxId: selectedShippingBoxId,
       });
       return;
     }
@@ -229,6 +266,7 @@ function InnerPage() {
       shippingOfferId: selectedOffer.shippingOfferId || null,
       carrier: selectedOffer.carrier || null,
       relayPoint: null,
+      shippingBoxId: selectedShippingBoxId,
     });
   };
 
@@ -260,7 +298,7 @@ function InnerPage() {
 
   const canSaveHome = Boolean(selectedOfferCode && selectedOffer);
   const canSaveRelay = Boolean(selectedRelayPoint?.shippingOfferCode);
-  const canSave = deliveryType === 'relay' ? canSaveRelay : canSaveHome;
+  const canSave = Boolean(selectedShippingBoxId) && (deliveryType === 'relay' ? canSaveRelay : canSaveHome);
   const interactive = !shippingOfferLocked;
 
   return (
@@ -321,6 +359,47 @@ function InnerPage() {
               </ul>
             </div>
           ) : null}
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">{ts('shippingBoxTitle')}</h2>
+            <p className="text-xs text-slate-500">{ts('shippingBoxHint')}</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {boxesLoading ? (
+              <div className="text-sm text-slate-500">{ts('loadingBoxes')}</div>
+            ) : shippingBoxes.length === 0 ? (
+              <div className="text-sm text-slate-500">{ts('noBoxes')}</div>
+            ) : (
+              shippingBoxes.map((box) => {
+                const active = String(box._id) === String(selectedShippingBoxId);
+                return (
+                  <button
+                    key={box._id}
+                    type="button"
+                    disabled={!interactive}
+                    onClick={() => interactive && setSelectedShippingBoxId(String(box._id))}
+                    className={`rounded-xl border p-4 text-left transition ${
+                      active ? 'border-[#556822] bg-[#556822]/5 ring-2 ring-[#556822]/30' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    } ${!interactive ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  >
+                    {active ? (
+                      <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#556822] text-white">
+                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                      </span>
+                    ) : null}
+                    <p className="font-bold text-slate-900 uppercase">{box.code}</p>
+                    <p className="text-sm text-slate-600">{box.label}</p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      {Number(box.internalWidth).toFixed(0)} × {Number(box.internalHeight).toFixed(0)} × {Number(box.internalDepth).toFixed(0)} cm
+                    </p>
+                    <p className="text-xs text-slate-500">{Number(box.emptyWeight).toFixed(3)} kg</p>
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
 
         {orderLoading && (
