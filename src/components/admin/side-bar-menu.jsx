@@ -46,6 +46,7 @@ const NAV_GROUPS = [
     items: [
       { labelKey: "products", href: "/admin/products", icon: Boxes },
       { labelKey: "categories", href: "/admin/categories", icon: Tag },
+      { labelKey: "boxes", href: "/admin/boxes", icon: Package },
       { labelKey: "packages", href: "/admin/package", icon: Package },
       { labelKey: "stock", href: "/admin/stock", icon: ShoppingCart },
       { labelKey: "preferredItem", href: "/admin/preferred-item", icon: Heart },

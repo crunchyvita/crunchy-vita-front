@@ -133,7 +133,7 @@ export default function Footer() {
         <div className="pt-2 text-center">
           <div className="mb-4 flex items-center justify-center gap-4">
             <a
-              href="#"
+              href="https://www.facebook.com/profile.php?id=61585718055254" target="_blank"
               aria-label="Facebook"
               className="text-gray-900 hover:text-[#556822] transition"
             >
@@ -146,7 +146,7 @@ export default function Footer() {
               />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/crunchyvita/" target="_blank"
               aria-label="Instagram"
               className="text-gray-900 hover:text-[#556822] transition"
             >
@@ -159,7 +159,7 @@ export default function Footer() {
               />
             </a>
             <a
-              href="#"
+              href="https://www.tiktok.com/@crunchyvita" target="_blank"
               aria-label="TikTok"
               className="text-gray-900 hover:text-[#556822] transition"
             >
@@ -172,7 +172,7 @@ export default function Footer() {
               />
             </a>
             <a
-              href="#"
+              href=" https://www.linkedin.com/in/alteora-france-798a6b36a/"target="_blank"
               aria-label="LinkedIn"
               className="text-gray-900 hover:text-[#556822] transition"
             >

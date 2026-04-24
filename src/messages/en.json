@@ -162,6 +162,10 @@
         "card3": {
           "title": "Organic excellence",
           "desc": "All our fruits come from organic farming."
+        },
+        "card4": {
+          "title": "Solidarity packaging in France",
+          "desc": "Our packs are prepared in France by an ESAT. A local, human and supportive choice that reflects CrunchyVita's values."
         }
       }
     },

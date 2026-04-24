@@ -27,8 +27,8 @@ async function apiRequest(endpoint, options = {}) {
   
   const defaultHeaders = {};
 
-  // Only set JSON content type when body is not FormData
-  if (!(options.body instanceof FormData)) {
+  // Only set JSON content type when a non-FormData body exists
+  if (options.body != null && !(options.body instanceof FormData)) {
     defaultHeaders["Content-Type"] = "application/json";
   }
 
@@ -452,8 +452,12 @@ export const orderAPI = {
       body: JSON.stringify({ status }),
     }),
   getAdminById: async (id) => apiRequest(`/orders/admin/${id}`, { method: 'GET' }),
-  getAdminShippingOffers: async (id) =>
-    apiRequest(`/orders/admin/${id}/shipping-offers`, { method: 'GET' }),
+  getAdminShippingOffers: async (id, params = {}) => {
+    const q = new URLSearchParams();
+    if (params.shippingBoxId) q.set('shippingBoxId', String(params.shippingBoxId));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/orders/admin/${id}/shipping-offers${suffix}`, { method: 'GET' });
+  },
   getAdminShippingTracking: async (id) =>
     apiRequest(`/orders/admin/${id}/shipping-tracking`, { method: 'GET' }),
   selectAdminShippingOffer: async (id, payload) =>
@@ -524,6 +528,42 @@ export const shippingAPI = {
       method: 'GET',
       signal: options.signal,
     });
+  },
+};
+
+export const shippingBoxAPI = {
+  list: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.limit != null) q.set('limit', String(params.limit));
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return apiRequest(`/shipping-boxes${suffix}`, { method: 'GET' });
+  },
+  getById: async (id) => apiRequest(`/shipping-boxes/${id}`, { method: 'GET' }),
+  create: async (payload) =>
+    apiRequest('/shipping-boxes', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  update: async (id, payload) =>
+    apiRequest(`/shipping-boxes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  remove: async (id) => {
+    try {
+      return await apiRequest(`/shipping-boxes/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      const status = Number(error?.status || 0);
+      if ([404, 405, 415, 500, 501].includes(status)) {
+        return apiRequest(`/shipping-boxes/${id}/delete`, {
+          method: 'POST',
+        });
+      }
+      throw error;
+    }
   },
 };
 

@@ -162,6 +162,10 @@
         "card3": {
           "title": "Excellence BIO",
           "desc": "Tous nos fruits sont issus de l'agriculture biologique."
+        },
+        "card4": {
+          "title": "Conditionnement solidaire en France",
+          "desc": "Nos paquets sont conditionnes en France par un ESAT. Un choix local, humain et solidaire, fidele aux valeurs de CrunchyVita."
         }
       }
     },

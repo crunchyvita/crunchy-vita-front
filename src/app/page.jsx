@@ -22,7 +22,8 @@ import {
   Truck,
   ShieldCheck,
   Headset,
-  Banana
+  Banana,
+  Handshake,
 } from 'lucide-react';
 
 // --- Variantes d'animation ---
@@ -393,7 +394,7 @@ export default function Home() {
            
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 ">
             {[
               { 
                 icon: <Ban size={40} />, 
@@ -412,6 +413,12 @@ export default function Home() {
                 title: t('commitments.cards.card3.title'), 
                 desc: t('commitments.cards.card3.desc'),
                 color: "bg-[#EF8EB8]" 
+              },
+              {
+                icon: <Handshake size={40} />,
+                title: t('commitments.cards.card4.title'),
+                desc: t('commitments.cards.card4.desc'),
+                color: "bg-[#EF8EB8]"
               }
             ].map((item, index) => (
               <motion.div 
@@ -431,11 +438,11 @@ export default function Home() {
                   {item.icon}
                 </motion.div>
 
-                <h3 className="mb-4 text-2xl lg:text-3xl font-black text-[#556822] uppercase tracking-tight group-hover:text-[#E10C69] transition-colors" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
+                <h3 className="mb-3 text-lg lg:text-2xl font-black text-[#556822] uppercase tracking-tight group-hover:text-[#E10C69] transition-colors" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
                   {item.title}
                 </h3>
                 
-                <p className="text-gray-600 text-base lg:text-lg leading-relaxed font-medium" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
+                <p className="text-gray-600 text-sm lg:text-base leading-relaxed font-medium" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
                   {item.desc}
                 </p>
 

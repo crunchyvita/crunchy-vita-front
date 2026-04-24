@@ -213,6 +213,10 @@ function AdminOrderDetailInner() {
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("offer")}</span> {boxtal?.shippingOfferCode || od("lineFallback")}
 									</p>
+									<p className="text-sm text-slate-700">
+										<span className="font-medium">{od("shippingBoxCode")}</span>{" "}
+										{boxtal?.selectedShippingBoxCode || od("lineFallback")}
+									</p>
 									{boxtal?.shippingPrice != null ? (
 										<p className="text-sm text-slate-700">
 											<span className="font-medium">{od("shipping")}</span>{" "}
