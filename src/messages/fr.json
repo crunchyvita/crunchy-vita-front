@@ -305,6 +305,7 @@
   },
   "Contact": {
     "title": "Une question ?",
+    "titleAccent": "Contactez-nous",
     "subtitle": "Notre equipe est a votre ecoute pour repondre a toutes vos questions sur nos produits et notre demarche.",
     "type": {
       "individual": "Particulier",
