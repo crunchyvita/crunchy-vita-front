@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link } from "@/navigation";
 import { useParams } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { orderAPI } from "@/lib/api";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 /** Back-office: montants catalogue toujours en EUR (indépendant de la devise Stripe). */
@@ -52,6 +52,10 @@ function AdminOrderDetailInner() {
 	const [shippingTracking, setShippingTracking] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const [expandedPackages, setExpandedPackages] = useState({});
+
+	const togglePackage = (idx) =>
+		setExpandedPackages((prev) => ({ ...prev, [idx]: !prev[idx] }));
 
 	useEffect(() => {
 		if (!id) return;
@@ -147,18 +151,67 @@ function AdminOrderDetailInner() {
 												<th className="px-3 py-2 font-medium text-right">{od("colLineTotal")}</th>
 											</tr>
 										</thead>
-										<tbody className="divide-y divide-slate-100 text-slate-700">
-											{(order.items || []).map((line, idx) => (
-												<tr key={idx}>
-													<td className="px-3 py-3">{lineDisplayName(line, od("lineFallback"))}</td>
-													<td className="px-3 py-3">{line?.quantity || 1}</td>
-													<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), ADMIN_MONEY_CURRENCY, numberLocale)}</td>
-													<td className="px-3 py-3 text-right font-medium">
-														{formatMoney(line?.lineTotal, ADMIN_MONEY_CURRENCY, numberLocale)}
-													</td>
-												</tr>
-											))}
-										</tbody>
+									<tbody className="text-slate-700">
+										{(order.items || []).map((line, idx) => {
+											const isPackage = line?.type === "package";
+											const selectedProds = Array.isArray(line?.selectedProducts)
+												? line.selectedProducts.filter(Boolean)
+												: [];
+											const hasSelected = isPackage && selectedProds.length > 0;
+											const isExpanded = Boolean(expandedPackages[idx]);
+
+											return (
+												<Fragment key={idx}>
+													<tr className={isPackage ? "bg-slate-50" : ""}>
+														<td className="px-3 py-3">
+															<div className="flex items-center gap-2">
+																{hasSelected ? (
+																	<button
+																		type="button"
+																		onClick={() => togglePackage(idx)}
+																		className="shrink-0 rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+																		aria-label={isExpanded ? "Collapse" : "Expand"}
+																	>
+																		{isExpanded ? (
+																			<ChevronDown className="h-4 w-4" />
+																		) : (
+																			<ChevronRight className="h-4 w-4" />
+																		)}
+																	</button>
+																) : isPackage ? (
+																	<span className="inline-block h-4 w-5 shrink-0" />
+																) : null}
+																<span>{lineDisplayName(line, od("lineFallback"))}</span>
+															</div>
+														</td>
+														<td className="px-3 py-3">{line?.quantity || 1}</td>
+														<td className="px-3 py-3">{formatMoney(lineUnitPrice(line), ADMIN_MONEY_CURRENCY, numberLocale)}</td>
+														<td className="px-3 py-3 text-right font-medium">
+															{formatMoney(line?.lineTotal, ADMIN_MONEY_CURRENCY, numberLocale)}
+														</td>
+													</tr>
+
+													{isExpanded && hasSelected &&
+														selectedProds.map((sp, spIdx) => (
+															<tr
+																key={`${idx}-sp-${spIdx}`}
+																className="border-t-0"
+															>
+																<td className="py-2 pl-11 pr-3 text-xs text-slate-600">
+																	<span className="font-medium">
+																		{sp?.name || od("lineFallback")}
+																	</span>
+																</td>
+																<td className="px-3 py-2 text-xs text-slate-600">{sp?.quantity ?? 1}</td>
+																<td className="px-3 py-2 text-xs text-slate-400">—</td>
+																<td className="px-3 py-2 text-right text-xs text-slate-400">—</td>
+															</tr>
+														))
+													}
+												</Fragment>
+											);
+										})}
+									</tbody>
 									</table>
 								</div>
 
