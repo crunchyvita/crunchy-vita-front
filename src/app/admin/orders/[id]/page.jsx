@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { orderAPI } from "@/lib/api";
-import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 /** Back-office: montants catalogue toujours en EUR (indépendant de la devise Stripe). */
@@ -53,9 +53,35 @@ function AdminOrderDetailInner() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [expandedPackages, setExpandedPackages] = useState({});
+	const [refreshing, setRefreshing] = useState(false);
+	const [refreshMessage, setRefreshMessage] = useState("");
+	const [refreshError, setRefreshError] = useState("");
 
 	const togglePackage = (idx) =>
 		setExpandedPackages((prev) => ({ ...prev, [idx]: !prev[idx] }));
+
+	const handleRefreshShippingStatus = async () => {
+		try {
+			setRefreshing(true);
+			setRefreshMessage("");
+			setRefreshError("");
+
+			const res = await orderAPI.refreshAdminShippingStatus(id);
+			
+			if (res?.success) {
+				setOrder(res.order || null);
+				setRefreshMessage(res.message || "✓ Status refreshed successfully");
+				// Auto-clear message after 5 seconds
+				setTimeout(() => setRefreshMessage(""), 5000);
+			} else {
+				setRefreshError(res?.message || "Failed to refresh status");
+			}
+		} catch (err) {
+			setRefreshError(err.message || "Error refreshing status");
+		} finally {
+			setRefreshing(false);
+		}
+	};
 
 	useEffect(() => {
 		if (!id) return;
@@ -262,7 +288,35 @@ function AdminOrderDetailInner() {
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-									<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("boxtal")}</h3>
+								<div className="flex items-center justify-between mb-3">
+									<h3 className="text-sm font-semibold text-slate-900">{od("boxtal")}</h3>
+									<button
+										type="button"
+										onClick={handleRefreshShippingStatus}
+										disabled={refreshing}
+										className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
+											refreshing
+												? "bg-slate-100 text-slate-500 cursor-not-allowed"
+												: "bg-blue-50 text-blue-700 hover:bg-blue-100"
+										}`}
+										title="Refresh shipping status from Boxtal"
+									>
+										<RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+										{refreshing ? "Refreshing..." : "Refresh"}
+									</button>
+								</div>
+
+								{refreshMessage && (
+									<div className="mb-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-700 border border-green-200">
+										{refreshMessage}
+									</div>
+								)}
+
+								{refreshError && (
+									<div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 border border-red-200">
+										{refreshError}
+									</div>
+								)}
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("offer")}</span> {boxtal?.shippingOfferCode || od("lineFallback")}
 									</p>
