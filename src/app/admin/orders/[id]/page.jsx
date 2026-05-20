@@ -90,12 +90,12 @@ function AdminOrderDetailInner() {
 	const boxtal = order?.boxtal || {};
 	const boxtalShipment = boxtal?.shipment || null;
 	const tracked = shippingTracking || {};
+	// Always use the server-side proxy URL — the raw Boxtal label URL
+	// (documents.envoimoinscher.com) requires HTTP Basic Auth and cannot
+	// be opened directly from the browser.
 	const shippingLabelHref =
 		tracked?.shippingLabelProxyUrl ||
 		boxtal?.shippingLabelProxyUrl ||
-		tracked?.shippingLabelUrl ||
-		boxtal?.shippingLabelUrl ||
-		boxtalShipment?.labelUrl ||
 		null;
 
 	const itemCount = useMemo(() => {
@@ -288,6 +288,27 @@ function AdminOrderDetailInner() {
 										<span className="font-medium">Shipping status</span>{" "}
 										{tracked?.shippingStatus || boxtal?.shippingStatus || od("lineFallback")}
 									</p>
+									{/* etat: authoritative Boxtal tracking state (CMD/ENV/LIV/ANN) */}
+									{(tracked?.etat || boxtal?.etat) && (
+										<p className="text-sm text-slate-700">
+											<span className="font-medium">Etat Boxtal</span>{" "}
+											<span className={
+												({
+													LIV: "text-green-700 font-semibold",
+													ENV: "text-blue-700 font-semibold",
+													CMD: "text-amber-700 font-semibold",
+													ANN: "text-red-700 font-semibold",
+												})[tracked?.etat || boxtal?.etat] || "text-slate-700"
+											}>
+												{({
+													LIV: "LIV – Livré",
+													ENV: "ENV – En acheminement",
+													CMD: "CMD – Commande passée",
+													ANN: "ANN – Annulée",
+												})[tracked?.etat || boxtal?.etat] || (tracked?.etat || boxtal?.etat)}
+											</span>
+										</p>
+									)}
 									{shippingLabelHref ? (
 										<a
 											href={shippingLabelHref}
