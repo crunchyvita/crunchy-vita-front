@@ -66,18 +66,33 @@ function AdminOrderDetailInner() {
 			setRefreshMessage("");
 			setRefreshError("");
 
-			const res = await orderAPI.refreshAdminShippingStatus(id);
-			
-			if (res?.success) {
-				setOrder(res.order || null);
-				setRefreshMessage(res.message || "✓ Status refreshed successfully");
-				// Auto-clear message after 5 seconds
-				setTimeout(() => setRefreshMessage(""), 5000);
-			} else {
-				setRefreshError(res?.message || "Failed to refresh status");
+			// Attempt a live Boxtal API query; ignore errors – webhooks are the
+			// primary update mechanism and the V1 API rarely supports direct polling.
+			let apiNote = null;
+			try {
+				const res = await orderAPI.refreshAdminShippingStatus(id);
+				if (res?.success) {
+					apiNote = res.message || null;
+				}
+				// reason === 'endpoint_not_supported' is expected; silently fall through.
+			} catch {
+				// Network or unexpected error from the Boxtal poll – still re-read DB.
 			}
+
+			// Always re-fetch the full order (includes boxtal.etat) and the tracking
+			// snapshot from our DB so the UI reflects any webhook-updated state.
+			const [orderRes, trackingRes] = await Promise.all([
+				orderAPI.getAdminById(id),
+				orderAPI.getAdminShippingTracking(id),
+			]);
+
+			if (orderRes?.success) setOrder(orderRes.data || null);
+			if (trackingRes?.success) setShippingTracking(trackingRes.data || null);
+
+			setRefreshMessage(apiNote || "✓ Statut mis à jour depuis la base de données");
+			setTimeout(() => setRefreshMessage(""), 5000);
 		} catch (err) {
-			setRefreshError(err.message || "Error refreshing status");
+			setRefreshError(err.message || "Erreur lors de la mise à jour du statut");
 		} finally {
 			setRefreshing(false);
 		}
@@ -148,21 +163,21 @@ function AdminOrderDetailInner() {
 
 				{!loading && !error && order && (
 					<>
-						<div className="flex items-center justify-between">
-							<div>
-								<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
-									{od("invoice", { invoice: order.invoiceNumber || "-" })}
-									<span className="rounded-full bg-blue-100 px-2 text-xs font-medium text-blue-700">
-										{od("itemsBadge", { count: itemCount })}
-									</span>
-								</div>
-								<p className="text-sm text-slate-500">
-									{od("createdAt", {
-										datetime: order.createdAt ? new Date(order.createdAt).toLocaleString(numberLocale) : "-",
-									})}
-								</p>
-							</div>
+					<div className="flex items-center justify-between">
+						<div>
+						<div className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
+							{od("invoice", { invoice: order.invoiceNumber || "-" })}
+							<span className="rounded-full bg-blue-100 px-2 text-xs font-medium text-blue-700">
+								{od("itemsBadge", { count: itemCount })}
+							</span>
 						</div>
+							<p className="text-sm text-slate-500">
+								{od("createdAt", {
+									datetime: order.createdAt ? new Date(order.createdAt).toLocaleString(numberLocale) : "-",
+								})}
+							</p>
+						</div>
+					</div>
 
 						<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 							<div className="lg:col-span-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -330,49 +345,46 @@ function AdminOrderDetailInner() {
 											{formatMoney(boxtal.shippingPrice, ADMIN_MONEY_CURRENCY, numberLocale)}
 										</p>
 									) : null}
+								<p className="text-sm text-slate-700">
+									<span className="font-medium">{od("boxtalRef")}</span>{" "}
+									{tracked?.boxtalOrderRef || boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
+								</p>
+								<p className="text-sm text-slate-700">
+									<span className="font-medium">{od("carrierTracking")}</span>{" "}
+									{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
+								</p>
+
+							{/* etat: authoritative Boxtal tracking state (CMD/ENV/LIV/ANN) */}
+							{(() => {
+								const etat = tracked?.etat || boxtal?.etat || null;
+								if (!etat) return null;
+								const ETAT_LABEL = {
+									LIV: { text: "LIV – Livré",            cls: "text-green-700 font-semibold" },
+									ENV: { text: "ENV – En acheminement", cls: "text-blue-700 font-semibold"  },
+									CMD: { text: "CMD – Commande passée",  cls: "text-amber-700 font-semibold" },
+									ANN: { text: "ANN – Annulée",          cls: "text-red-700 font-semibold"   },
+								};
+								const info = ETAT_LABEL[etat] || null;
+								return (
 									<p className="text-sm text-slate-700">
-										<span className="font-medium">{od("boxtalRef")}</span>{" "}
-										{tracked?.boxtalOrderRef || boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
+										<span className="font-medium">Etat Boxtal&nbsp;</span>
+										<span className={info ? info.cls : "font-semibold"}>
+											{info ? info.text : etat}
+										</span>
 									</p>
-									<p className="text-sm text-slate-700">
-										<span className="font-medium">{od("carrierTracking")}</span>{" "}
-										{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
-									</p>
-									<p className="text-sm text-slate-700">
-										<span className="font-medium">Shipping status</span>{" "}
-										{tracked?.shippingStatus || boxtal?.shippingStatus || od("lineFallback")}
-									</p>
-									{/* etat: authoritative Boxtal tracking state (CMD/ENV/LIV/ANN) */}
-									{(tracked?.etat || boxtal?.etat) && (
-										<p className="text-sm text-slate-700">
-											<span className="font-medium">Etat Boxtal</span>{" "}
-											<span className={
-												({
-													LIV: "text-green-700 font-semibold",
-													ENV: "text-blue-700 font-semibold",
-													CMD: "text-amber-700 font-semibold",
-													ANN: "text-red-700 font-semibold",
-												})[tracked?.etat || boxtal?.etat] || "text-slate-700"
-											}>
-												{({
-													LIV: "LIV – Livré",
-													ENV: "ENV – En acheminement",
-													CMD: "CMD – Commande passée",
-													ANN: "ANN – Annulée",
-												})[tracked?.etat || boxtal?.etat] || (tracked?.etat || boxtal?.etat)}
-											</span>
-										</p>
-									)}
-									{shippingLabelHref ? (
-										<a
-											href={shippingLabelHref}
-											target="_blank"
-											rel="noreferrer"
-											className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
-										>
-											Shipping label PDF
-										</a>
-									) : null}
+								);
+							})()}
+
+								{shippingLabelHref ? (
+									<a
+										href={shippingLabelHref}
+										target="_blank"
+										rel="noreferrer"
+										className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
+									>
+										Shipping label PDF
+									</a>
+								) : null}
 								</div>
 							</div>
 						</div>
