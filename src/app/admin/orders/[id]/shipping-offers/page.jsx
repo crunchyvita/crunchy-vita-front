@@ -111,7 +111,7 @@ function InnerPage() {
         if (!orderRes?.success) throw new Error(orderRes?.message || 'Unable to load order');
         if (latestLoadRequestRef.current !== requestId) return;
         const o = orderRes.data || {};
-        const savedShippingBoxId = String(o?.boxtal?.selectedShippingBoxId || '').trim();
+        const savedShippingBoxId = String(o?.boxtal?.selectedOffer?.shippingBoxId || o?.boxtal?.selectedShippingBoxId || '').trim();
         const dTypeEarly = String(o?.deliveryType || 'home');
         setOrder(o);
         setDeliveryType(dTypeEarly);

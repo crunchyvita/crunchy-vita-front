@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { orderAPI } from "@/lib/api";
-import { ArrowLeft, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 /** Back-office: montants catalogue toujours en EUR (indépendant de la devise Stripe). */
@@ -53,50 +53,9 @@ function AdminOrderDetailInner() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [expandedPackages, setExpandedPackages] = useState({});
-	const [refreshing, setRefreshing] = useState(false);
-	const [refreshMessage, setRefreshMessage] = useState("");
-	const [refreshError, setRefreshError] = useState("");
 
 	const togglePackage = (idx) =>
 		setExpandedPackages((prev) => ({ ...prev, [idx]: !prev[idx] }));
-
-	const handleRefreshShippingStatus = async () => {
-		try {
-			setRefreshing(true);
-			setRefreshMessage("");
-			setRefreshError("");
-
-			// Attempt a live Boxtal API query; ignore errors – webhooks are the
-			// primary update mechanism and the V1 API rarely supports direct polling.
-			let apiNote = null;
-			try {
-				const res = await orderAPI.refreshAdminShippingStatus(id);
-				if (res?.success) {
-					apiNote = res.message || null;
-				}
-				// reason === 'endpoint_not_supported' is expected; silently fall through.
-			} catch {
-				// Network or unexpected error from the Boxtal poll – still re-read DB.
-			}
-
-			// Always re-fetch the full order (includes boxtal.etat) and the tracking
-			// snapshot from our DB so the UI reflects any webhook-updated state.
-			const [orderRes, trackingRes] = await Promise.all([
-				orderAPI.getAdminById(id),
-				orderAPI.getAdminShippingTracking(id),
-			]);
-
-			if (orderRes?.success) setOrder(orderRes.data || null);
-			if (trackingRes?.success) setShippingTracking(trackingRes.data || null);
-
-			setRefreshMessage(apiNote || "✓ Statut mis à jour depuis la base de données");
-			setTimeout(() => setRefreshMessage(""), 5000);
-		} catch (err) {
-			setRefreshError(err.message || "Erreur lors de la mise à jour du statut");
-		} finally {
-			setRefreshing(false);
-		}
-	};
 
 	useEffect(() => {
 		if (!id) return;
@@ -129,7 +88,7 @@ function AdminOrderDetailInner() {
 
 	const shippingAddress = order?.shippingAddress || null;
 	const boxtal = order?.boxtal || {};
-	const boxtalShipment = boxtal?.shipment || null;
+	const selectedOffer = boxtal?.selectedOffer || null;
 	const tracked = shippingTracking || {};
 	// Always use the server-side proxy URL — the raw Boxtal label URL
 	// (documents.envoimoinscher.com) requires HTTP Basic Auth and cannot
@@ -303,41 +262,13 @@ function AdminOrderDetailInner() {
 								</div>
 
 								<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-								<div className="flex items-center justify-between mb-3">
-									<h3 className="text-sm font-semibold text-slate-900">{od("boxtal")}</h3>
-									<button
-										type="button"
-										onClick={handleRefreshShippingStatus}
-										disabled={refreshing}
-										className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
-											refreshing
-												? "bg-slate-100 text-slate-500 cursor-not-allowed"
-												: "bg-blue-50 text-blue-700 hover:bg-blue-100"
-										}`}
-										title="Refresh shipping status from Boxtal"
-									>
-										<RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
-										{refreshing ? "Refreshing..." : "Refresh"}
-									</button>
-								</div>
-
-								{refreshMessage && (
-									<div className="mb-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-700 border border-green-200">
-										{refreshMessage}
-									</div>
-								)}
-
-								{refreshError && (
-									<div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 border border-red-200">
-										{refreshError}
-									</div>
-								)}
+								<h3 className="text-sm font-semibold text-slate-900 mb-3">{od("boxtal")}</h3>
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("offer")}</span> {boxtal?.shippingOfferCode || od("lineFallback")}
 									</p>
 									<p className="text-sm text-slate-700">
 										<span className="font-medium">{od("shippingBoxCode")}</span>{" "}
-										{boxtal?.selectedShippingBoxCode || od("lineFallback")}
+										{selectedOffer?.shippingBoxCode || od("lineFallback")}
 									</p>
 									{boxtal?.shippingPrice != null ? (
 										<p className="text-sm text-slate-700">
@@ -347,11 +278,11 @@ function AdminOrderDetailInner() {
 									) : null}
 								<p className="text-sm text-slate-700">
 									<span className="font-medium">{od("boxtalRef")}</span>{" "}
-									{tracked?.boxtalOrderRef || boxtal?.reference || boxtalShipment?.reference || order?.boxtalOrderReference || od("lineFallback")}
+									{tracked?.boxtalOrderRef || boxtal?.reference || od("lineFallback")}
 								</p>
 								<p className="text-sm text-slate-700">
 									<span className="font-medium">{od("carrierTracking")}</span>{" "}
-									{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || boxtalShipment?.trackingNumber || order?.trackingNumber || od("lineFallback")}
+									{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || od("lineFallback")}
 								</p>
 
 							{/* etat: authoritative Boxtal tracking state (CMD/ENV/LIV/ANN) */}
