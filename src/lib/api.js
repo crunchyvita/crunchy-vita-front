@@ -467,8 +467,6 @@ export const orderAPI = {
     }),
   validateAdminShippingOffer: async (id) =>
     apiRequest(`/orders/admin/${id}/shipping-offer/validate`, { method: 'POST' }),
-  refreshAdminShippingStatus: async (id) =>
-    apiRequest(`/orders/admin/${id}/refresh-shipping-status`, { method: 'GET' }),
   getAdminDashboardStats: async (params = {}) => {
     const q = new URLSearchParams();
     if (params.trend) q.set('trend', String(params.trend));

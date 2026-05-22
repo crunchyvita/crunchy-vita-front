@@ -90,13 +90,6 @@ function AdminOrderDetailInner() {
 	const boxtal = order?.boxtal || {};
 	const selectedOffer = boxtal?.selectedOffer || null;
 	const tracked = shippingTracking || {};
-	// Always use the server-side proxy URL — the raw Boxtal label URL
-	// (documents.envoimoinscher.com) requires HTTP Basic Auth and cannot
-	// be opened directly from the browser.
-	const shippingLabelHref =
-		tracked?.shippingLabelProxyUrl ||
-		boxtal?.shippingLabelProxyUrl ||
-		null;
 
 	const itemCount = useMemo(() => {
 		const items = Array.isArray(order?.items) ? order.items : [];
@@ -280,10 +273,6 @@ function AdminOrderDetailInner() {
 									<span className="font-medium">{od("boxtalRef")}</span>{" "}
 									{tracked?.boxtalOrderRef || boxtal?.reference || od("lineFallback")}
 								</p>
-								<p className="text-sm text-slate-700">
-									<span className="font-medium">{od("carrierTracking")}</span>{" "}
-									{tracked?.trackingNumber || boxtal?.carrierTrackingNumber || od("lineFallback")}
-								</p>
 
 							{/* etat: authoritative Boxtal tracking state (CMD/ENV/LIV/ANN) */}
 							{(() => {
@@ -306,16 +295,6 @@ function AdminOrderDetailInner() {
 								);
 							})()}
 
-								{shippingLabelHref ? (
-									<a
-										href={shippingLabelHref}
-										target="_blank"
-										rel="noreferrer"
-										className="text-sm text-[#556822] hover:underline inline-block mt-2 ml-3"
-									>
-										Shipping label PDF
-									</a>
-								) : null}
 								</div>
 							</div>
 						</div>
