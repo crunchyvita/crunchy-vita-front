@@ -54,6 +54,7 @@ function StatInsight({ changePct, suffix, emptyHint }) {
     return <p className="text-xs text-slate-400 mt-1">{emptyHint}</p>;
   }
   const capped = Math.max(-100, Math.min(100, Number(changePct)));
+  const rounded = Math.round(Math.abs(capped));
   const up = capped > 0;
   const flat = capped === 0;
   const color = flat ? 'text-slate-500' : up ? 'text-emerald-600' : 'text-rose-600';
@@ -61,7 +62,7 @@ function StatInsight({ changePct, suffix, emptyHint }) {
   return (
     <p className={`text-xs font-semibold mt-1 flex items-center gap-1 flex-wrap ${color}`}>
       <span>{arrow}</span>
-      <span>{flat ? '0' : Math.abs(capped)}%</span>
+      <span>{flat ? '0' : rounded}%</span>
       {suffix ? <span className="font-normal text-slate-500">{suffix}</span> : null}
     </p>
   );
