@@ -7,13 +7,12 @@ import AdminHeader from "@/components/admin/header";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { 
   ArrowLeft, Check, Loader2, Pencil, Plus, Search, Trash2, X, 
-  Package, Home, Truck, BadgePercent, Globe 
+  Package, Home, BadgePercent, Globe 
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { normalizeCountryEntry } from "@/lib/shippingZonePricing";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { zonesAPI } from "@/lib/api";
 
 const zoneIdentifier = (zone) => String(zone?._id ?? zone?.id ?? "");
 
@@ -85,21 +84,22 @@ export default function AdminShippingZoneDetailPage() {
   const [editingZoneName, setEditingZoneName] = useState(false);
   const [zoneNameDraft, setZoneNameDraft] = useState("");
   const [promoBadgeZoneId, setPromoBadgeZoneId] = useState(null);
+
   const inputBaseClass =
     "block w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#556822] focus:ring-2 focus:ring-[#556822]/20";
 
+  // ── Load ───────────────────────────────────────────────────────────────────
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/settings`, { credentials: "include" });
-      const data = await res.json();
-      const list = data?.data?.shippingSettings?.zones;
-      if (!data.success || !Array.isArray(list)) {
+      const data = await zonesAPI.list();
+      if (!data.success || !Array.isArray(data.data?.zones)) {
         toast.error(t("loadError"));
         return;
       }
+      const list = data.data.zones;
       setZones(list);
-      setPromoBadgeZoneId(data?.data?.promoBadgeZoneId ?? null);
+      setPromoBadgeZoneId(data.data.promoBadgeZoneId ?? null);
       const found = list.find((z) => zoneIdentifier(z) === String(zoneId));
       if (found) {
         const countries = dedupeCountries(found.countries || []);
@@ -118,54 +118,43 @@ export default function AdminShippingZoneDetailPage() {
     load();
   }, [load]);
 
+  // ── Persist helpers ────────────────────────────────────────────────────────
   const sanitizeZone = (z) => ({
     ...z,
     name: String(z.name || "").trim() || "Zone",
     countries: dedupeCountries(Array.isArray(z.countries) ? z.countries : []),
   });
 
-  const persistZones = async (nextZones, nextPromoBadgeZoneId = promoBadgeZoneId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error(t("unauth"));
-      return false;
-    }
-    const res = await fetch(`${API_URL}/settings`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        shippingSettings: { zones: nextZones },
-        promoBadgeZoneId: nextPromoBadgeZoneId,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.success) {
-      toast.error(data.error || t("saveError"));
-      return false;
-    }
-    const list = data.data?.shippingSettings?.zones;
-    if (Array.isArray(list)) {
-      setZones(list);
-      setPromoBadgeZoneId(data?.data?.promoBadgeZoneId ?? nextPromoBadgeZoneId ?? null);
-      const found = list.find((z) => zoneIdentifier(z) === String(zoneId));
-      if (found) {
-        const countries = dedupeCountries(found.countries || []);
-        setZone({ ...JSON.parse(JSON.stringify(found)), countries });
-      } else {
-        setZone(null);
-      }
-    }
-    return true;
-  };
-
-  const persistCurrentZone = async (nextZone) => {
+  /**
+   * Sends the current zone to PUT /api/settings/zones/:zoneId.
+   * Always includes the current promoBadgeZoneId so it is persisted atomically.
+   */
+  const persistCurrentZone = async (nextZone, nextPromoBadgeZoneId = promoBadgeZoneId) => {
     const sanitized = sanitizeZone(nextZone);
-    const nextZones = zones.map((z) => (zoneIdentifier(z) === zoneIdentifier(sanitized) ? sanitized : z));
-    return persistZones(nextZones, promoBadgeZoneId);
+    try {
+      const data = await zonesAPI.update(zoneIdentifier(sanitized), {
+        name: sanitized.name,
+        countries: sanitized.countries,
+        relay: sanitized.relay,
+        home: sanitized.home,
+        promoBadgeZoneId: nextPromoBadgeZoneId,
+      });
+      if (Array.isArray(data.data?.zones)) {
+        setZones(data.data.zones);
+        setPromoBadgeZoneId(data.data.promoBadgeZoneId ?? null);
+        const found = data.data.zones.find((z) => zoneIdentifier(z) === String(zoneId));
+        if (found) {
+          const countries = dedupeCountries(found.countries || []);
+          setZone({ ...JSON.parse(JSON.stringify(found)), countries });
+        } else {
+          setZone(null);
+        }
+      }
+      return true;
+    } catch (err) {
+      toast.error(err.message || t("saveError"));
+      return false;
+    }
   };
 
   const handleSavePricing = async () => {
@@ -182,6 +171,7 @@ export default function AdminShippingZoneDetailPage() {
     }
   };
 
+  // ── Country list ───────────────────────────────────────────────────────────
   const filteredCountries = useMemo(() => {
     const rows = Array.isArray(zone?.countries) ? zone.countries : [];
     if (!search.trim()) return rows;
@@ -299,13 +289,8 @@ export default function AdminShippingZoneDetailPage() {
     }
   };
 
-  const openDeleteModal = (row) => {
-    setCountryToDelete(row);
-  };
-
-  const closeDeleteModal = () => {
-    setCountryToDelete(null);
-  };
+  const openDeleteModal = (row) => setCountryToDelete(row);
+  const closeDeleteModal = () => setCountryToDelete(null);
 
   const confirmDeleteCountry = async () => {
     if (!countryToDelete || !zone || deletingIso) return;
@@ -321,6 +306,7 @@ export default function AdminShippingZoneDetailPage() {
     }
   };
 
+  // ── Zone name editing ──────────────────────────────────────────────────────
   const startEditZoneName = () => {
     setZoneNameDraft(String(zone?.name || ""));
     setEditingZoneName(true);
@@ -345,14 +331,12 @@ export default function AdminShippingZoneDetailPage() {
       const n = value === "" ? "" : Number(value);
       return {
         ...prev,
-        [section]: {
-          ...(prev[section] || {}),
-          [key]: n,
-        },
+        [section]: { ...(prev[section] || {}), [key]: n },
       };
     });
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <>
@@ -432,10 +416,9 @@ export default function AdminShippingZoneDetailPage() {
         {/* 2-Column Main Content */}
         <div className="grid gap-8 lg:grid-cols-5">
           
-          {/* LEFT SIDE:  Pays List */}
+          {/* LEFT SIDE: Countries List */}
           <div className="space-y-6 lg:col-span-3">
 
-            {/* List Pays (top Left) */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -560,9 +543,10 @@ export default function AdminShippingZoneDetailPage() {
                                <div className="inline-flex items-center gap-1.5">
                                 <button
                                   onClick={handleSaveEdit}
-                                  className="rounded-md p-1.5 text-emerald-600 transition hover:bg-emerald-50"
+                                  disabled={savingEdit}
+                                  className="rounded-md p-1.5 text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
                                 >
-                                  <Check className="h-4 w-4"/>
+                                  {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4"/>}
                                 </button>
                                 <button
                                   onClick={cancelEdit}
@@ -597,10 +581,10 @@ export default function AdminShippingZoneDetailPage() {
             </div>
           </div>
 
-          {/* RIGHT SIDE: Livraison à domicile + Point Relais */}
+          {/* RIGHT SIDE: Pricing & settings */}
           <div className="space-y-6 lg:col-span-2">
 
-            {/* General Settings (Top Right) */}
+            {/* Promo badge toggle */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-200 px-6 py-4">
                 <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -629,7 +613,7 @@ export default function AdminShippingZoneDetailPage() {
               </div>
             </div>
             
-            {/* Livraison à domicile (Top Right) */}
+            {/* Home delivery pricing */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-200 px-6 py-4">
                 <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -680,20 +664,20 @@ export default function AdminShippingZoneDetailPage() {
                     className={inputBaseClass}
                   />
                 </div>
-                <div >
+                <div>
                   <label className="mb-1 block text-xs font-semibold text-[#64748b]">{t("expressAddon")}</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={zone.home?.express ?? ""}
-                      onChange={(e) => updateNested("home", "express", e.target.value)}
-                      className={inputBaseClass} 
-                    />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={zone.home?.express ?? ""}
+                    onChange={(e) => updateNested("home", "express", e.target.value)}
+                    className={inputBaseClass} 
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Point Relais (Bottom Right) */}
+            {/* Relay point pricing */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-200 px-6 py-4">
                 <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">

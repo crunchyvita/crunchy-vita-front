@@ -760,6 +760,46 @@ export const adminManagementAPI = {
     }),
 };
 
+export const settingsAPI = {
+  get: async () => apiRequest('/settings', { method: 'GET' }),
+
+  update: async (payload) =>
+    apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+};
+
+export const zonesAPI = {
+  /** List all zones + promoBadgeZoneId. Public. */
+  list: async () => apiRequest('/settings/zones', { method: 'GET' }),
+
+  /** Get a single zone by its _id. Public. */
+  getById: async (zoneId) =>
+    apiRequest(`/settings/zones/${encodeURIComponent(zoneId)}`, { method: 'GET' }),
+
+  /** Create a zone. Admin only. */
+  create: async (name) =>
+    apiRequest('/settings/zones', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }),
+
+  /**
+   * Update a zone. Admin only.
+   * payload: { name?, countries?, relay?, home?, promoBadgeZoneId? }
+   */
+  update: async (zoneId, payload) =>
+    apiRequest(`/settings/zones/${encodeURIComponent(zoneId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  /** Delete a zone. Admin only. Auto-clears promoBadgeZoneId if needed. */
+  remove: async (zoneId) =>
+    apiRequest(`/settings/zones/${encodeURIComponent(zoneId)}`, { method: 'DELETE' }),
+};
+
 export const reportAPI = {
   getOverview: async () => apiRequest('/reports/admin/overview', { method: 'GET' }),
 

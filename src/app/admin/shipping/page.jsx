@@ -7,8 +7,7 @@ import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { Eye, Loader2, MapPin, MoreVertical, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { zonesAPI } from "@/lib/api";
 
 const defaultShippingState = () => ({
   relay: { freeShipping: 40, StandarShippingFee: 4.9 },
@@ -41,19 +40,16 @@ export default function AdminShippingZonesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/settings`, { credentials: "include" });
-      const data = await res.json();
-      if (!data.success || !data.data?.shippingSettings) {
+      const data = await zonesAPI.list();
+      if (!data.success || !Array.isArray(data.data?.zones)) {
         toast.error(t("loadError"));
         return;
       }
-      const s = data.data.shippingSettings;
-      setShippingSettings({
-        relay: s.relay || defaultShippingState().relay,
-        home: s.home || defaultShippingState().home,
-        zones: Array.isArray(s.zones) ? s.zones : [],
-        promoBadgeZoneId: data.data?.promoBadgeZoneId ?? s.promoBadgeZoneId ?? null,
-      });
+      setShippingSettings((prev) => ({
+        ...prev,
+        zones: data.data.zones,
+        promoBadgeZoneId: data.data.promoBadgeZoneId ?? null,
+      }));
     } catch {
       toast.error(t("loadError"));
     } finally {
@@ -83,52 +79,6 @@ export default function AdminShippingZonesPage() {
     return zones.filter((z) => (z.name || "").toLowerCase().includes(q));
   }, [shippingSettings.zones, search]);
 
-  const saveShippingPatch = async (patch) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error(t("unauth"));
-      return false;
-    }
-    try {
-      const res = await fetch(`${API_URL}/settings`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          shippingSettings: (() => {
-            const next = { ...patch };
-            delete next.promoBadgeZoneId;
-            return next;
-          })(),
-          ...(Object.prototype.hasOwnProperty.call(patch, 'promoBadgeZoneId')
-            ? { promoBadgeZoneId: patch.promoBadgeZoneId }
-            : {}),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) {
-        toast.error(data.error || t("saveError"));
-        return false;
-      }
-      if (data.data?.shippingSettings) {
-        const s = data.data.shippingSettings;
-        setShippingSettings({
-          relay: s.relay || defaultShippingState().relay,
-          home: s.home || defaultShippingState().home,
-          zones: Array.isArray(s.zones) ? s.zones : [],
-          promoBadgeZoneId: data.data?.promoBadgeZoneId ?? s.promoBadgeZoneId ?? null,
-        });
-      }
-      return true;
-    } catch {
-      toast.error(t("saveError"));
-      return false;
-    }
-  };
-
   const handleCreateZone = async (event) => {
     event?.preventDefault?.();
     const name = newZoneName.trim();
@@ -148,16 +98,23 @@ export default function AdminShippingZonesPage() {
     setZoneFormError("");
     if (submittingZone) return;
     setSubmittingZone(true);
-    const zones = [...(shippingSettings.zones || [])];
-    zones.push({
-      name,
-      countries: [],
-    });
-    const ok = await saveShippingPatch({ zones });
-    setSubmittingZone(false);
-    if (ok) {
+    try {
+      const data = await zonesAPI.create(name);
+      if (!data.success) {
+        toast.error(data.error || t("saveError"));
+        return;
+      }
+      setShippingSettings((prev) => ({
+        ...prev,
+        zones: data.data.zones,
+        promoBadgeZoneId: data.data.promoBadgeZoneId ?? null,
+      }));
       setNewZoneName("");
       toast.success(t("zoneCreated"));
+    } catch (err) {
+      toast.error(err.message || t("saveError"));
+    } finally {
+      setSubmittingZone(false);
     }
   };
 
@@ -165,19 +122,23 @@ export default function AdminShippingZonesPage() {
     if (!zoneToDelete || deletingId) return;
     const id = zoneIdentifier(zoneToDelete);
     setDeletingId(id);
-    const zones = (shippingSettings.zones || []).filter((z) => zoneIdentifier(z) !== id);
-    let promoBadgeZoneId = shippingSettings.promoBadgeZoneId;
-    if (String(promoBadgeZoneId) === String(id)) {
-      promoBadgeZoneId = null;
-    }
-    const ok = await saveShippingPatch({
-      zones,
-      promoBadgeZoneId,
-    });
-    setDeletingId("");
-    if (ok) {
+    try {
+      const data = await zonesAPI.remove(id);
+      if (!data.success) {
+        toast.error(data.error || t("saveError"));
+        return;
+      }
+      setShippingSettings((prev) => ({
+        ...prev,
+        zones: data.data.zones,
+        promoBadgeZoneId: data.data.promoBadgeZoneId ?? null,
+      }));
       setZoneToDelete(null);
       toast.success(t("zoneDeleted"));
+    } catch (err) {
+      toast.error(err.message || t("saveError"));
+    } finally {
+      setDeletingId("");
     }
   };
 
@@ -335,7 +296,6 @@ export default function AdminShippingZonesPage() {
         isDeleting={!!deletingId}
         cancelButtonLabel={tcom("cancel")}
       />
-
     </>
   );
 }

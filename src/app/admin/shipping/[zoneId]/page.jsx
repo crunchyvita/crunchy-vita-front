@@ -4,12 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/navigation";
 import { useParams } from "next/navigation";
 import AdminHeader from "@/components/admin/header";
-import { ArrowLeft, Loader2, Pencil, Globe, Home, Package, Truck } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil, Globe, Home, Package } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { normalizeCountryEntry } from "@/lib/shippingZonePricing";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { zonesAPI } from "@/lib/api";
 
 const zoneIdentifier = (zone) => String(zone?._id ?? zone?.id ?? "");
 
@@ -49,17 +48,19 @@ export default function AdminShippingZoneViewPage() {
 	const load = useCallback(async () => {
 		setLoading(true);
 		try {
-			const res = await fetch(`${API_URL}/settings`, { credentials: "include" });
-			const data = await res.json();
-			const zones = data?.data?.shippingSettings?.zones;
-			if (!data.success || !Array.isArray(zones)) {
+			const data = await zonesAPI.getById(zoneId);
+			const found = data?.data ?? null;
+			setZone(
+				found
+					? { ...JSON.parse(JSON.stringify(found)), countries: dedupeCountries(found.countries || []) }
+					: null,
+			);
+		} catch (err) {
+			if (err?.status === 404) {
+				setZone(null);
+			} else {
 				toast.error(t("loadError"));
-				return;
 			}
-			const found = zones.find((item) => zoneIdentifier(item) === String(zoneId));
-			setZone(found ? { ...JSON.parse(JSON.stringify(found)), countries: dedupeCountries(found.countries || []) } : null);
-		} catch {
-			toast.error(t("loadError"));
 		} finally {
 			setLoading(false);
 		}
