@@ -630,6 +630,17 @@
     "contact": {
       "title": "Contact us",
       "body": "For any question, complaint, claim, or request related to your personal data, you can write to:"
+    },
+    "mobileApp": {
+      "title": "Mobile Application",
+      "intro": "This policy also applies to the CrunchyVita mobile application . The app may collect the following data:",
+      "items": {
+        "item1": "Account information (name, email address, password)",
+        "item2": "Profile photos (only with your explicit permission)",
+        "item3": "Permission to receive push notifications (only with your  permission)",
+        "item4":"Location access (only with your  permission, to locate nearby pickup points)."
+      },
+      "stripe": "Payments are processed securely by Stripe. We do not store your bank card details on our servers."
     }
   },
   "ShippingPolicy": {
