@@ -712,141 +712,362 @@
       "p2": "Nous procederons au remboursement de votre article retourne dans les plus brefs delais apres sa reception. Le credit sur votre compte bancaire sera effectif dans un delai de 7 a 10 jours ouvres."
     }
   },
-  "CGU": {
-    "title": "Conditions Generales d'Utilisation (CGU)",
-    "intro": {
-      "title": "Conditions d'utilisation",
-      "body": "Les presentes conditions generales d'utilisation (ci-apres les \"CGU\") ont pour objet de definir les modalites et conditions d'acces et d'utilisation du site internet et du Compte - tels que definis ci-apres - mis a disposition par la societe Alteora, societe par actions simplifiee au capital de 10 000 euros, immatriculee au Registre du commerce et des societes d'Antibes sous le numero 903112952, dont le siege social est situe a 1460 Chemin des Terriers Batiment B-04 06600 Antibes (ci-apres la \"Vendeur\"), ainsi que les droits et obligations de toute personne physique ou juridique susceptible d'exploiter commercialement ou professionnellement, ou d'en droit franchise, accedant, visitant et/ou utilisant le site, quel que soit le reseau ou le moyen utilise (ci-apres l'\"Utilisateur\")."
-    },
-    "article1": {
-      "title": "Article 1 - Objet du site",
-      "body": "Le site www.crunchyvita.com (ci-apres le \"Site\") est un site marchand qui propose la vente en ligne de paquets de fruits lyophilises (ci-apres les \"Produits\"). Le Site permet a l'Utilisateur, notamment aux moyens d'un Compte dont il fixera les conditions de fonctionnement. Le Site est accessible gratuitement a toute personne disposant d'un acces a Internet. Tous les frais lies a cet acces (materiel, logiciel, connexion internet) sont a la charge exclusive de l'Utilisateur, lequel est seul responsable du bon fonctionnement de son equipement et de son acces ou reseau."
-    },
-    "article2": {
-      "title": "Article 2 - Acceptation des CGU",
-      "p1": "L'acces et l'utilisation du Site et/ou du Compte impliquent l'acceptation pleine et entiere des presentes CGU par l'Utilisateur, sans restriction ni reserve.",
-      "p2": "En acceptation de ces conditions et dans le cas contraire le Vendeur repousse l'utilisation l'Utilisateur recevra le CGU et les accepter. En cas de desaccord, il doit immediatement cesser d'utiliser le Site.",
-      "p3": "Le Vendeur se reserve le droit de modifier les CGU a tout moment et depuis une version en vigueur, disponible sur le Site."
-    },
-    "article3": {
-      "title": "Article 3 - Creation et utilisation du Compte",
-      "p1": "Pour acceder au Compte, l'Utilisateur doit creer un compte qui lui permettra notamment de renseigner ses informations de livraison, d'effectuer un paiement, de suivre ses commandes et de gerer d'eventuels retours.",
-      "p2": "La creation de identifiants de connexion (adresse e-mail et mot de passe) sont strictement personnels et confidentiels. L'Utilisateur s'engage a les conserver secrets et a ne pas les communiquer a des tiers."
-    },
-    "article4": {
-      "title": "Article 4 - Disponibilite du Site",
-      "body": "Le site est accessible 24h/24, 7j/7, sauf en cas de force majeure, d'evenement hors du controle du Vendeur ou d'interruptions necessaires a des operations de maintenance, de mise a jour ou pour toute autre raison technique."
-    },
-    "article5": {
-      "title": "Article 5 - Garanties et responsabilites",
-      "p1": "Le Vendeur s'efforce de maintenir le Site a jour et de diffuser des informations fiables, toutefois, il ne garantit ni l'exactitude, ni l'exhaustivite, ni l'actualite des contenus.",
-      "p2": "Le site est mis a disposition \"en l'etat\" - sans aucune garantie implicite ou explicite."
-    },
-    "article6": {
-      "title": "Article 6 - Liens hypertextes",
-      "body": "Le Site peut contenir des liens vers des sites tiers. Le Vendeur n'exerce aucun controle sur ces sites et decline toute responsabilite quant a leur contenu, produits, services ou donnees."
-    },
-    "article7": {
-      "title": "Article 7 - Propriete intellectuelle",
-      "body": "Le Site, sa structure, ses contenus, marques, logos, bases de donnees et tout autre element protege sont la propriete exclusive du Vendeur ou de tiers ayant autorise son exploitation."
-    },
-    "article8": {
-      "title": "Article 8 - Duree",
-      "body": "Les CGU s'appliquent a compter de leur acceptation par l'Utilisateur et pendant toute la duree d'utilisation du Site et/ou du Compte."
-    },
-    "article9": {
-      "title": "Article 9 - Droit applicable",
-      "body": "Les CGU sont soumises au droit francais. En cas de litige, les parties s'efforceront de trouver une solution amiable. A defaut, les tribunaux francais seront competents."
-    },
-    "article10": {
-      "title": "Article 10 - Contact",
-      "p1": "par email :",
-      "p2": "par courrier : Alteora, 1460 Chemin des Terriers Batiment B-04 06600 Antibes"
-    }
+ "CGU": {
+  "title": "Conditions Générales d'Utilisation (CGU)",
+  "intro": {
+    "title": "Préambule",
+    "body": "crunchyvita est une plate-forme web, disponible à l’adresse https://www.crunchyvita.com/fr (le « Site »).\n\nCe Site est édité par Alteora, SAS au capital de 10000.0 euros, ayant son siège social situé au 1460 Chemin des Terriers, 06600 Antibes, France et immatriculé au registre du commerce et des sociétés de Antibes sous le numéro d’identification 993112952, (ci-après « l’Editeur »). crunchyvita est accessibles aux utilisateurs (le ou les « Utilisateurs »).\n\ncrunchyvita est hébergé par OVH, dont le siège social est situé au 2 Rue Kellermann, 59100 Roubaix, France. Cet hébergeur peut être contacté à cette adresse électronique : dpo@ovh.com.\n\nL’objet des présentes Conditions Générales d’Utilisation (les « Conditions » ou prises dans leur ensemble, le « Contrat ») est de définir les termes et les conditions régissant les relations entre les Utilisateurs et Alteora. En cas de non-respect des termes des présentes Conditions, Alteora se réserve le droit de prendre toute mesure de nature à préserver ses intérêts et notamment à en assurer l'exécution.\n\nL’accès et l’utilisation du site sont soumis à l’acceptation et au respect des présentes Conditions Générales d’Utilisation.\n\nL’Éditeur se réserve le droit de modifier, à tout moment et sans préavis, le Site et des services ainsi que les présentes CGU, notamment pour s’adapter aux évolutions du Site par la mise à disposition de nouvelles fonctionnalités ou la suppression ou la modification de fonctionnalités existantes. Il est donc conseillé à l’Utilisateur de se référer avant toute navigation à la dernière version des Conditions Générales d’Utilisation accessible à tout moment sur le Site.\n\nLes présentes Conditions Générales d’Utilisation s’appliquent, en tant que de besoin, à toute déclinaison ou extension du Site sur les réseaux sociaux et/ou communautaires existants ou à venir."
   },
+
+  "article1": {
+    "title": "Article 1er : Objet du site",
+    "body": "Le Site permet à l’Utilisateur d’accéder notamment aux services suivants : Vendre des fruits lyophilisés (le ou les « Service(s) »).\n\nAlteora, selon les présentes Conditions, accorde aux Utilisateurs un droit d’accès limité révocable, non exclusif, non cessible aux Services à titre strictement personnel. Toute utilisation de la plate-forme contraire à sa finalité est strictement interdite et constitue un manquement aux présentes dispositions."
+  },
+
+  "article2": {
+    "title": "Article 2 : Accès au site",
+    "body": "Pour être éligible au Service, l’Utilisateur peut être une personne physique ou morale.\n\nAlteora se réserve le droit de suspendre ou de refuser un accès d’un ou plusieurs Utilisateurs au Site."
+  },
+
+  "article3": {
+    "title": "Article 3 : Gestion du site",
+    "body": "L’Editeur met en œuvre des solutions techniques nécessaires afin de permettre un accès continu au site pour l’Utilisateur. Toutefois il se réserve la possibilité de limiter ou suspendre l’accès à tout ou partie du Site à tout moment, et sans préavis. Une telle interruption pourra notamment être rendue nécessaire pour des raisons de maintenances du site ou de son contenu, ou pour toute autre raison jugée nécessaire au bon fonctionnement du site par l’Editeur.\n\nL’utilisation de la Plateforme requiert une connexion et un navigateur internet. La plateforme est accessible à l’adresse suivante : https://www.crunchyvita.com/fr.\n\nTous matériels et logiciels nécessaires à l’accès à la Plateforme et à l’utilisation des Services restent exclusivement à la charge de l’Utilisateur."
+  },
+
+  "article4": {
+    "title": "Article 4 : Contact",
+    "body": "L’utilisateur a la possibilité de contacter l’Editeur pour tout question ou demande d’information concernant le Site, ou tout signalement de contenu ou d’activités illicites par mail à l’adresse contact@crunchyvita.com."
+  },
+
+  "article5": {
+    "title": "Article 5 : Utilisation des services de la plateforme",
+    "subtitle1": "1.1 Obligations des utilisateurs",
+    "intro": "Les Utilisateurs s’interdisent :",
+    "list": [
+      "de transmettre, publier, distribuer, enregistrer ou détruire tout matériel, en particulier les contenus de crunchyvita, en violation des lois ou réglementations en vigueur concernant la collecte, le traitement ou le transfert d'informations personnelles ;",
+      "de diffuser des données, informations, ou contenus à caractère diffamatoire, injurieux, obscène, offensant, violent ou incitant à la violence, ou à caractère politique, raciste ou xénophobe et de manière générale tout contenu qui serait contraire aux lois et règlements en vigueur ou aux bonnes mœurs ;",
+      "de référencer ou créer des liens vers tout contenu ou information disponible depuis les sites de crunchyvita, sauf accord exprès, préalable et écrit de Alteora ;",
+      "d’utiliser des informations, contenus ou toutes données présentes sur le Site afin de proposer un service considéré comme concurrentiel à crunchyvita ;",
+      "de vendre, échanger ou monnayer des informations, contenus ou données présentes sur la plateforme ou des Service proposés par la Plateforme, sans l’accord expresse et écrit de Alteora ;",
+      "de pratiquer de l’ingénierie inversée (Reverse Engineering), décompiler, désassembler, déchiffrer ou autrement tenter d’obtenir le code source en relation avec toute propriété intellectuelle sous-jacente utilisée pour fournir tout ou partie des Services ;",
+      "d’utiliser des logiciels ou appareils manuels ou automates, robots de codage ou autres moyens pour accéder, explorer, extraire ou indexer toute page du Site ;",
+      "de mettre en danger ou essayer de mettre en danger la sécurité numérique de crunchyvita. Cela comprend les tentatives de contrôler, scanner ou tester la vulnérabilité du système ou réseau ou de violer des mesures de sécurité ou d’authentification sans une autorisation préalable expresse ;",
+      "de contrefaire ou d’utiliser les produits, les logos, les marques ou tout autre élément protégé par les droits de propriété intellectuel de Alteora ;",
+      "de simuler l’apparence ou le fonctionnement du Site, en procédant par exemple à un effet miroir ;",
+      "de perturber ou troubler, directement ou indirectement crunchyvita, ou imposer une charge disproportionnée sur l’infrastructure du Site, ou de tenter de transmettre ou d’activer des virus informatiques via ou sur le Site ;"
+    ],
+    "outro": "Il est rappelé que les violations de la sécurité du système ou du réseau peuvent conduire à des poursuites civiles et pénales. Alteora vérifie l’absence de telle violation et peut faire appel aux autorités judiciaires pour poursuivre, le cas échéant, des Utilisateurs ayant participé à de telles violations.\n\nLes Utilisateurs s’engagent à utiliser le Site de manière loyale, conformément à sa finalité et aux dispositions légales, réglementaires, aux présentes Conditions et aux usages en vigueur.",
+    "subtitle2": "1.2 Compte clients des utilisateurs",
+    "body2": "L’Editeur réserve certains services de crunchyvita aux Utilisateurs ayant procédé à leur inscription sur le site, cela concerne notamment les services payants. Lors de son inscription, l’Utilisateur s’engage à fournir des informations valables et sincères. Il s’engage notamment à fournir à l’Editeur une adresse mail afin que ce dernier puisse lui communiquer des informations.\n\nToute information communiquée par mail de l’Editeur à l’Utilisateur sera réputée avoir été lue par ce dernier.\n\nTout utilisateur régulièrement inscrit sur le Site pourra demander la suppression de son compte client, l’Editeur s’engage à supprimer les comptes clients pour lesquels il aura reçu une telle demande.\n\nLes données personnelles des clients sont supprimées au bout de 36 mois sans que le client ne se soit connecté."
+  },
+
+  "article6": {
+    "title": "Article 6 : Propriété intellectuelle",
+    "body": "L’ensemble du contenu du Site, notamment les designs, textes, graphiques, images, vidéos, informations, logos, icônes-boutons, logiciels, fichiers audio et autres appartient à Alteora, lequel est seul titulaire de l’intégralité des droits de propriété intellectuelle y afférents.\n\nToute représentation et/ou reproduction et/ou exploitation partielle ou totale des contenus et Services proposés par crunchyvita, par quelque procédé que ce soit, sans l'autorisation préalable et écrite de Alteora, est strictement interdite et serait susceptible de donner lieu à des poursuites judiciaires."
+  },
+
+  "article7": {
+    "title": "Article 7 : Données à caractère personnelles",
+    "body": "Toutes les données à caractère personnel dont dispose Alteora sont recueillies légalement et loyalement selon les modalités de la politique de confidentialité accessible à cette adresse : https://www.crunchyvita.com/fr/politique-confidentialite.\n\nCes données sont fournies par les Utilisateurs qui acceptent de manière volontaire et expresse les présentes Conditions autorisant Alteora à traiter, divulguer ou transférer ces données à tout tiers cela afin de permettre (i) à l’Utilisateur de profiter pleinement des Services et des fonctions proposés par le Site, (ii) prévenir toute fraude et /ou (iii) à des fins statistiques.\n\nLes données à caractère personnel sont stockées par Alteora en vue de leur traitement dans le cadre de l’utilisation des Services. Elles sont conservées aussi longtemps que nécessaire pour l’apport des Services et fonctions offerts par le Site.\n\nL’Utilisateur reste toujours propriétaire des informations le concernant qu’il transmet à Alteora. Il dispose, conformément à la loi n° 78-17 du 6 janvier 1978 selon sa version consolidée au 24 mars 2020, d’un droit d’accès, de rectification et de suppression des données à caractère personnel le concernant, ainsi que du droit de s’opposer à la communication de ces données à des tiers pour de justes motifs.\n\nL’Utilisateur pourra exercer ses droits en écrivant à l’adresse électronique suivante : contact@crunchyvita.com.\n\nUne réponse à la requête de l’Utilisateur lui sera adressée dans un délai de 30 jours."
+  },
+
+  "article8": {
+    "title": "Article 8 : Responsabilité",
+    "body": "Il est rappelé que les données publiées par les Utilisateurs et les informations partagées par ces derniers peuvent être captées et exploitées par d’autres Utilisateurs ou des tiers. En ce sens, Alteora ne garantit pas le respect de la propriété de ces données, il incombe à l’Utilisateur de prendre l’ensemble des dispositions nécessaires afin que soit préservée la propriété de ses données.\n\nAlteora ne garantit pas le fonctionnement sans interruption ou sans erreur de fonctionnement des Services, en particulier, la responsabilité de Alteora ne saurait être engagée en cas d’interruption d’accès à la Plateforme en raison d’opérations de maintenance, de mises à jour ou d’améliorations techniques.\n\nEn tout état de cause, Alteora ne saurait en aucune circonstance être responsable au titre des pertes ou dommages indirects ou imprévisibles de l’Utilisateur ou de tout tiers, ce qui inclut notamment tout gain manqué, tout investissement malheureux, inexactitude ou corruption de fichiers ou données, préjudice d’image ou commercial, perte de chiffre d’affaires ou bénéfice, perte de clientèle ou perte de chance lié à quelque titre et sur quelque fondement que ce soit.\n\nEn outre, Alteora ne saurait être responsable de tout retard ou inexécution du présent Contrat justifié par un cas de force majeure, telle qu’elle est définie par la jurisprudence des cours et tribunaux français."
+  },
+
+  "article9": {
+    "title": "Article 9 : Convention de preuves",
+    "body": "Les systèmes et fichiers informatiques font foi dans les rapports entre Alteora et l’Utilisateur.\n\nAinsi, Alteora pourra valablement produire dans le cadre de toute procédure, aux fins de preuve les données, fichiers, programmes, enregistrements ou autres éléments, reçus, émis ou conservés au moyen des systèmes informatiques exploités, sur tous supports numériques ou analogiques, et s’en prévaloir sauf erreur manifeste."
+  },
+
+  "article10": {
+    "title": "Article 10 : Indivisibilité",
+    "body": "Le fait que l’une quelconque des dispositions du Contrat soit ou devienne illégale ou inapplicable n’affectera en aucune façon la validité ou l’applicabilité des autres stipulations du Contrat."
+  },
+
+  "article11": {
+    "title": "Article 11 : Règlement des différents",
+    "body": "La conclusion, l’interprétation et la validité du présent Contrat sont régis par la loi française, quel que soit le pays d’origine de l’Utilisateur ou le pays depuis lequel l’Utilisateur accède à crunchyvita et nonobstant les principes de conflits de lois.\n\nDans l’hypothèse où un différend portant sur la validité, l’exécution ou l’interprétation du présent Contrat et serait porté devant les juridictions civiles, il sera soumis à la compétence exclusive des tribunaux français auquel il est fait expressément attribution de compétence, même en cas de référé ou de pluralité de défendeurs.\n\nL’Utilisateur est informé qu’il peut en tout état de cause recourir à une médiation conventionnelle ou à tout mode alternatif de règlement des différends (conciliation par exemple) en cas de contestation."
+  },
+
+  "article12": {
+    "title": "Article 12 : Durée des conditions générales d’utilisations",
+    "body": "Les présentes conditions générales d’utilisation sont conclues pour une durée indéterminée, l’Utilisateur est tenu de les respecter à compter du début de son utilisation des Services.\n\nL’Editeur se réserve la possibilité de modifier ce document à tout moment et sans préavis. Les utilisateurs seront informés de chaque mise à jour du document."
+  }
+},
   "CGV": {
-    "title": "Conditions Generales de Vente (CGV)",
-    "updated": "ALTEORA - www.crunchyvita.com | Mise a jour le 2026",
-    "preamble": {
-      "title": "Preambule",
-      "body": "Le present Preambule fait partie integrante des Conditions generales de Vente."
-    },
+    "title": "Conditions Générales de Vente",
+
     "article1": {
-      "title": "Article 1. Parties au present acte",
-      "items": {
-        "item1": "1) La Societe ALTEORA : Societe par actions simplifiee au capital de 10 000 euros, immatriculee au Registre du commerce et des societes d'Antibes sous le numero 903112952, dont le siege social est situe a 1460 Chemin des Terriers Batiment B-04 06600 Antibes et ayant comme numero de l'IVA FR0793931952, ci-apres denommee la \"Vendeur\".",
-        "item2": "2) Toute personne physique souhaitant realiser un achat sur le site internet du Vendeur, ci-apres denommee \"Acheteur\"."
-      }
+      "title": "Article 1. Les Parties",
+      "p1": "Le terme « Prestataire » désigne la société Alteora, SAS au capital de 10 000 euros, immatriculée au Registre du Commerce et des Sociétés de Antibes sous le numéro RCS 993112952, et dont le siège social est situé 1460 Chemin des Terriers, 06600 Antibes, France, dont le représentant légal est Houssem BEN MESSAOUD.",
+      "p2": "Le Prestataire est une entreprise spécialisée notamment dans la vente de fruits lyophilisés biologiques.",
+      "p3": "Le terme « Client » désigne toute personne morale ou physique, ayant requis les compétences du Prestataire.",
+      "p4": "Le terme « Tiers » désigne toute personne physique ou morale non-partie à ces Conditions Générales de Vente (« CGV »)."
     },
+
     "article2": {
-      "title": "Article 2. Objet",
-      "body": "Le Vendeur a pour activite la vente en ligne des produits sous la marque CrunchyVita (Fruits lyophilises) via le site www.crunchyvita.com."
+      "title": "Article 2. Généralités",
+      "p1": "Les présentes CGV ont pour objet de définir les droits et obligations des Parties lors de la réalisation de prestations de services réalisées par le Prestataire pour le Client dans le cadre de ses activités.",
+      "p2": "Les présentes Conditions Générales de Vente s'appliquent à tout contrat conclu entre le Prestataire et le Client, dans le cadre de la fourniture de prestations de services (les « Services ») telles que définies dans le devis validé par le Client.",
+      "p3": "Les Services peuvent être fournis soit à distance, soit dans les locaux du Client, au choix du Prestataire et du Client.",
+      "p4": "Les CGV sont systématiquement adressées ou remises à chaque Client avant la passation de toute commande (la « Commande »). En conséquence, le fait de passer Commande implique l'adhésion entière et sans réserve du Client à ces CGV, à l'exclusion de tous autres documents en sa possession tels que prospectus, catalogues ou plaquettes publicitaires émis par le Prestataire, lesquels n'auront qu'une valeur indicative et non contractuelle.",
+      "p5": "En cas de contradiction entre des dispositions du devis et les présentes CGV, les dispositions concernées du devis prévaudront sur les CGV.",
+      "p6": "Ces CGV régissent intégralement les relations entre le Prestataire et le Client. Aucune condition générale d'achat ne pourra prévaloir ni être opposée par le Client au Prestataire et aucune condition particulière communiquée par le Client au Prestataire ne peut prévaloir sur les CGV, sauf acceptation formelle et écrite du Prestataire.",
+      "p7": "Toute réserve concernant les CGV, avancée par le Client sera, donc, à défaut d'acceptation expresse par le Prestataire, inopposable à ce dernier, quel que soit le moment où elle aura pu être portée à sa connaissance.",
+      "p8": "Toutes dispositions dérogeant aux présentes CGV devront résulter d'un accord exprès des Parties, reflété dans les Commandes confirmées par le Prestataire ou tout autre document faisant foi de l'accord des deux Parties.",
+      "p9": "Le fait que le Prestataire ne se prévale pas à un moment donné d'une quelconque condition des présentes CGV ne peut être interprété comme valant renonciation à se prévaloir ultérieurement de quelconque desdites conditions.",
+      "p10": "Le Prestataire se réserve le droit de modifier ces CGV, les Services et les tarifs à tout moment et sans préavis. Ces modifications n'auront aucune incidence sur les Commandes en cours.",
+      "p11": "Les CGV s'appliquent aux seuls professionnels à l'exclusion des consommateurs. A ce titre, le Client reconnaît avoir la qualité de professionnel, conformément aux dispositions du Code de la consommation applicables."
     },
-    "article2_1": {
-      "title": "Article 2.1. Precautions d'usage",
-      "body": "Les paquets CrunchyVita doivent etre conserves dans leur sachet bien referme afin de preserver leur texture croquante. Meme remplis, ils restent consommables, avis d'une texture puis le sac."
-    },
+
     "article3": {
-      "title": "Article 3. Definitions",
-      "items": {
-        "item1": "Vendeur : ALTEORA, societe par actions simplifiee immatriculee au RCS d'Antibes sous le no 903112952.",
-        "item2": "Acheteur : toute personne physique souhaitant realiser un achat sur le Site.",
-        "item3": "Produit : tout produit propose a la vente, dans la limite des stocks disponibles.",
-        "item4": "Livraison : transferer a l'Acheteur de la possession physique ou du controle du Produit.",
-        "item5": "Site : www.crunchyvita.com."
-      }
+      "title": "Article 3. Conclusion du Contrat",
+      "p1": "Sauf convention contraire dans le devis, le Contrat est réputé formé et prend effet entre les Parties à la date de signature du devis par le client.",
+      "p2": "Aucun changement ni aucune modification du Contrat, notamment sur les caractéristiques des Services, ne sera pris en considération s'il n'a pas été accepté par écrit par le Prestataire.",
+      "p3": "Cette disposition ne peut être remplacée par un accord verbal.",
+      "p4": "A défaut de dispositions spécifiques dans le devis, les délais d'exécution des Services sont communiqués au Client à titre indicatif. Les délais de réalisation des Services ne sont en aucun cas garantis par le Prestataire ni ne peuvent engager sa responsabilité, ni entraîner une obligation de payer une quelconque indemnité ou pénalité de retard, ni justifier l'annulation de la Commande en cause."
     },
+
     "article4": {
-      "title": "Article 4. Prix",
-      "p1": "Les prix sont indiques en euros TTC (toutes taxes comprises), hors frais de traitement et d'expedition.",
-      "p2": "Le Vendeur peut modifier ses prix a tout moment, mais le tarif applique est celui en vigueur lors de la validation de la commande."
+      "title": "Article 4. Obligations des Parties",
+      "p1": "D'une façon générale, le Client et le Prestataire s'engagent à collaborer activement afin d'assurer la bonne exécution du Contrat. Chacune des Parties s'engage à communiquer toutes les difficultés dont elle aurait connaissance au fur et à mesure de l'avancement du projet, pour permettre à l'autre Partie de prendre les décisions nécessaires.",
+      "p2": "Le Client s'engage à fournir des informations justes et sincères et s'engage aussi à prévenir le Prestataire de tout changement concernant les informations, données, documentations fournies.",
+      "p3": "Le Client sera seul responsable des éventuels dysfonctionnements qui pourraient résulter d'informations erronées. Le Client doit maintenir une adresse e-mail et une adresse postale valides.",
+      "clientObligations": {
+        "title": "a) Obligations du Client",
+        "intro1": "Le Client déclare expressément avoir reçu du Prestataire toutes les informations et tous les conseils nécessaires à la réalisation des Services et renonce à rechercher la responsabilité du Prestataire de ce fait.",
+        "intro2": "Pour permettre au Prestataire de réaliser sa mission, le Client s'engage à :",
+        "items": {
+          "item1": "Collaborer étroitement avec le Prestataire et fournir toute information, documentation, prestation, et tous moyens utiles pour la réalisation des Services et s'engage à mettre à disposition du Prestataire tous les éléments permettant de satisfaire à son obligation, incluant le personnel dédié à la bonne réalisation des Services.",
+          "item2": "Établir un cahier des charges détaillé qui ne subira plus de modification, sauf accord des Parties, après avoir été approuvé par le Prestataire. Au besoin, le Prestataire pourra intervenir dans l'élaboration du cahier des charges, conjointement avec le Client. Dans le cas où des modifications impliqueraient un remaniement substantiel du cahier des charges initial, ces dernières seront facturées en sus du devis initial.",
+          "item3": "Remettre au Prestataire le devis (daté, signé et tamponné).",
+          "item4": "Fournir tous les éléments documentaires, graphiques et textuels nécessaires à la bonne réalisation du Contrat (notamment dans les bons formats exploitables en fonction des supports visés), le Client s'engage à fournir toutes les informations légales à ajouter dans les documents et endosse la responsabilité de fournir le contenu des documents qu'il édite.",
+          "item5": "Disposer des droits nécessaires sur les éléments fournis ci-dessus.",
+          "item6": "Collaborer activement à la réussite du projet en apportant au Prestataire dans les délais préalablement définis toutes les informations et tous les documents nécessaires à la bonne appréhension des besoins et à la bonne exécution des Services.",
+          "item7": "Se conformer strictement aux préconisations techniques et aux suggestions artistiques faites par le Prestataire.",
+          "item8": "Garantir le Prestataire contre toute action qui pourrait lui être intentée du fait du caractère des données ou informations (textes, images, sons) qui auraient été fournies ou choisies par le Client.",
+          "item9": "Régler dans les délais prédéfinis dans le devis et dans les présentes CGV, les sommes dues au Prestataire.",
+          "item10": "Informer le Prestataire d'une éventuelle mise en concurrence avec d'autres prestataires.",
+          "item11": "S'assurer de la mise à disposition de tous les moyens nécessaires pour permettre au Prestataire de réaliser les Services dans ses locaux et/ou à distance."
+        },
+        "outro1": "Avant chaque intervention du Prestataire, le Client s'engage à réaliser toutes les procédures de sauvegarde nécessaires à la protection et à la sauvegarde de ses données, programmes et fichiers informatiques.",
+        "outro2": "Enfin, le Client fait son affaire et est seul responsable des lois et réglementations applicables aux Services notamment au regard de la protection des droits de propriété intellectuelle, mentions légales, protection des données personnelles, protection des mineurs (si applicable) et droit de la consommation (si applicable)."
+      },
+      "prestataireObligations": {
+        "title": "b) Obligations du Prestataire",
+        "intro": "Dans le cadre des présentes CGV et la réalisation des Services, le Prestataire s'engage à se donner tous les moyens nécessaires et à mettre tout en œuvre pour la réalisation de sa mission dans les règles de l'art. Cette obligation ne saurait constituer une obligation de résultat, le Prestataire ne fournissant les Services que dans le cadre d'une obligation de moyen.",
+        "items": {
+          "item1": "Le Prestataire garantit que les créations sont juridiquement disponibles et ne sont pas grevées de droit des tiers pour les utilisations prévues au titre du Contrat.",
+          "item2": "Le Prestataire s'engage à informer de manière régulière le Client de l'avancée de la réalisation du projet et ce, notamment, au travers de validations soumises au Client dans le planning tel que prévu dans le devis."
+        }
+      }
     },
+
     "article5": {
-      "title": "Article 5. Commande",
-      "intro": "Pour passer commande, l'Acheteur doit fournir :",
-      "items": {
-        "item1": "Adresse e-mail",
-        "item2": "Prenom et nom",
-        "item3": "Adresse postale",
-        "item4": "Numero de telephone",
-        "item5": "Informations de paiement"
-      }
+      "title": "Article 5. Modalités d'exécution des Services et livraison des livrables",
+      "p1": "Le Client s'engage à fournir au Prestataire sous forme exploitable l'ensemble des documents nécessaires à la réalisation des Services confiés au Prestataire.",
+      "p2": "Toute modification ultérieure ou demande complémentaire demandée par le Client fera l'objet d'une facturation supplémentaire.",
+      "p3": "La réalisation des Services confiés au Prestataire dépendant directement du respect par le Client de ses propres obligations, les Parties reconnaissent expressément que les délais de livraison visés au devis sont donnés à titre purement indicatif et sans garantie.",
+      "p4": "Un retard sur les délais indiqués ne pourra donc donner lieu au paiement de dommages et intérêts, ni autoriser le Client à résilier le Contrat où refuser la livraison des Services."
     },
+
     "article6": {
-      "title": "Article 6. Paiement",
-      "body": "Le paiement s'effectue au moment de la commande, par carte bancaire (Carte Bleue, Visa, Mastercard, etc.) via Stripe."
+      "title": "Article 6. Prix",
+      "p1": "Les conditions tarifaires du Prestataire relatives à la fourniture des Services sont prévues dans le devis du Prestataire.",
+      "p2": "Les prix sont donnés à titre indicatif et sont donc susceptibles de variation. Le prix facturé est celui prévu dans la Commande validée par le Prestataire.",
+      "p3": "Les prix des Services sont exprimés et payables en Euros et sont exprimés hors taxe sur la valeur ajoutée et hors toute autre taxe, le Client étant responsable du paiement desdites taxes.",
+      "p4": "Les prix des Services n'incluent pas les éventuels frais de déplacement ou d'hébergement qui pourraient être facturés en sus par le Prestataire au Client selon les modalités indiquées dans le devis."
     },
+
     "article7": {
-      "title": "Article 7. Livraison",
-      "p1": "La livraison est effectuee a l'adresse indiquee par l'Acheteur.",
-      "p2": "Livraison offerte en France en point relais  des 40EUR d'achats.",
-      "p3": "Suivi colis communique par e-mail."
+      "title": "Article 7. Conditions de paiement",
+      "p1": "L'acceptation du devis et de la Commande du Client qui en découle, doit s'accompagner du paiement d'un acompte tel qu'indiqué dans le devis.",
+      "p2": "Le versement de l'acompte conditionnera la mise en œuvre des Services. Le paiement de l'acompte pourra être effectué sous forme de chèque, de virement, ou de prélèvement automatique à l'ordre du Prestataire.",
+      "p3": "Le paiement du solde des Services doit être effectué dans un délai de trente (30) jours à compter de la date de la facture émise par le Prestataire et pourra être effectué sous forme de chèque, de virement, ou de prélèvement automatique à l'ordre du Prestataire.",
+      "p4": "Aucun escompte n'est prévu en cas de paiement anticipé."
     },
+
     "article8": {
-      "title": "Article 8. Retractation",
-      "p1": "Conformement a l'article L221-18 du Code de la consommation, l'Acheteur dispose de 14 jours a compter de la reception pour se retracter. Les frais de retour sont a la charge de l'Acheteur.",
-      "returnAddressLabel": "Adresse de retour :",
-      "returnAddress": "ALTEORA, 1460 Chemin des Terriers Batiment B-04 06600 Antibes.",
-      "p2": "Le remboursement est effectue sous 14 jours, via le meme moyen de paiement."
+      "title": "Article 8. Pénalités de retard",
+      "p1": "En cas de non-paiement à l'échéance, toute somme due fera courir des pénalités de retard. Celles-ci courent à compter du jour suivant la date d'échéance figurant sur la facture et jusqu'au jour du paiement effectif et intégral de la somme. Le taux des pénalités de retard est fixé à trois fois le taux d'intérêt légal en vigueur.",
+      "p2": "Ces pénalités de retard sont exigibles de plein droit et sans qu'un rappel par le Prestataire ne soit nécessaire.",
+      "p3": "Le Client sera également débiteur de plein droit d'une indemnité forfaitaire minimum de recouvrement de quarante (40) euros des sommes dues par le Client au Prestataire.",
+      "p4": "Enfin, en cas de retard de paiement, le Prestataire se réserve le droit de suspendre ou de surseoir à l'exécution des Services prévus dans la Commande dont le paiement fait l'objet du retard."
     },
+
     "article9": {
-      "title": "Article 9. Garanties",
-      "intro": "Les Produits beneficient de :",
-      "items": {
-        "item1": "La garantie legale de conformite (articles L217-4 et suivants du Code de la consommation)",
-        "item2": "De la garantie contre les vices caches (articles 1641 et suivants du Code civil)"
+      "title": "Article 9. Frais Annexes",
+      "p1": "Les divers éléments éventuellement nécessaires à la réalisation des Services du Prestataire et ne relevant pas de ses offres ne sont pas compris dans les prix indiqués.",
+      "p2": "Sont à facturer en sus : les modifications demandées par le Client en cours de réalisation, si elles impliquent un remaniement du projet."
+    },
+
+    "article10": {
+      "title": "Article 10. Résiliation",
+      "p1": "Le Prestataire peut mettre fin aux Services fournis au Client en cas de manquement par le Client à ses obligations au titre du Contrat, non réparé dans un délai de quinze (15) jours à compter de la notification par le Prestataire de ce manquement par lettre recommandée avec accusé de réception, indépendamment de la possibilité pour le Prestataire de demander le paiement de dommages et intérêts.",
+      "p2": "Le Prestataire peut également mettre fin au Contrat en cas de non-paiement de la ou des facture(s) non acquittée(s) par le Client.",
+      "p3": "En cas de rupture du Contrat avant son terme par le Client, celui-ci s'engage formellement à régulariser et rétribuer les montants relatifs au calendrier en cours, aux postes réalisés ou en cours de réalisation, ainsi qu'aux services complémentaires effectués. Les fichiers et données sources créés et utilisés par le Prestataire ne sauraient dès lors être revendiqués par le Client sans une contribution financière. L'acompte déjà versé restera acquis par le Prestataire, constituant un dédommagement pour le travail entrepris."
+    },
+
+    "article11": {
+      "title": "Article 11. Propriété intellectuelle",
+      "p1": "Les logiciels, données, documentations, procédés, méthodologies, technologies et documents appartenant au Prestataire (ci-après « Droits de Propriété Intellectuelle ») utilisés dans le cadre de la mise en œuvre des Services restent la propriété exclusive du Prestataire.",
+      "p2": "Le Prestataire concède au Client, le cas échéant et dans la limite strictement nécessaire à l'exécution des Services, à titre personnel, non exclusif et non-transférable, le droit d'utiliser lesdits Droits de Propriété Intellectuelle pour la durée de réalisation des Services.",
+      "p3": "Les œuvres créées par le Prestataire pour le Client, dans le cadre de l'exécution du Contrat, demeurent la propriété entière et exclusive du Prestataire tant que les factures émises par le Prestataire ne sont pas entièrement acquittées par le Client.",
+      "p4": "Après encaissement des factures par le Prestataire, celui-ci cède au Client l'ensemble des droits de propriété intellectuelle sur les œuvres créées spécifiquement et à la demande du Client, dans le cadre de l'exécution du Contrat, pour leur durée de protection et pour le monde entier.",
+      "p5": "En particulier, le Prestataire cède au Client les droits suivants :",
+      "reproductionTitle": "Le droit de reproduction comprend notamment, et de manière non exhaustive :",
+      "reproductionItems": {
+        "item1": "Le droit de reproduire et/ou faire reproduire les œuvres créées en nombre illimité, par tout procédé et sur tout support actuel ou futur, et notamment graphique, magnétique, numérique ou électronique (interactif ou non) ;",
+        "item2": "Le droit de mettre en circulation et d'exploiter les œuvres créées, commercialement ou non, les reproductions ainsi réalisées, en nombre illimité, à titre gratuit ou onéreux, et ce quelle qu'en soit la destination."
+      },
+      "representationTitle": "Le droit de représentation comprend notamment, et de manière non exhaustive :",
+      "representationItems": {
+        "item1": "Le droit de diffuser et de communiquer à tout public les éléments, supports, composants des œuvres créées, par tout procédé de représentation connu ou inconnu à ce jour, pour toute utilisation quelle qu'elle soit ;",
+        "item2": "La diffusion des œuvres créées par tout moyen, notamment par voie hertzienne, câble-satellite ainsi que par tout réseau, et plus généralement par tout moyen de transmission de données numérisées ou non."
+      },
+      "p6": "Dans le cadre de la fourniture des Services et en tant que de besoin, le Client concède également au Prestataire un droit d'utilisation de ses logiciels, données et documents, à titre personnel, gratuit, non exclusif et non transférable pour la durée de réalisation des Services.",
+      "p7": "Le Client s'engage à obtenir de tous tiers, si besoin est, le droit de concéder au Prestataire les droits d'utilisation des logiciels, données et équipements appartenant à ces tiers pour les besoins de la fourniture des Services.",
+      "marques": {
+        "title": "a) Marques et dénominations sociales",
+        "p1": "Toute utilisation par le Client des dénominations sociales, marques et signes distincts appartenant au Prestataire est strictement prohibée sauf en cas d'accord exprès et préalable du Prestataire. En cas d'accord exprès et préalable du Prestataire, ce dernier concède alors au Client un droit strictement personnel, non exclusif, et non transférable d'utiliser ses dénominations sociales, marques et signes distincts, dans le monde entier et pour toute la durée de validité du Contrat.",
+        "p2": "Le Prestataire est quant à lui autorisé à utiliser la dénomination sociale/la marque du Client dans le cadre de ses activités à des fins de promotion commerciale.",
+        "p3": "Le Prestataire se réserve également le droit de mentionner les réalisations effectuées pour le Client sur ses documents de communication externe, de publicité (site internet, portfolio, etc.) et lors de démarchages de prospection commerciale."
+      },
+      "droitMoral": {
+        "title": "b) Droit moral",
+        "p1": "Le Prestataire se réserve la possibilité d'inclure dans la réalisation des Services une mention commerciale indiquant clairement sa contribution, assortie lorsque le support le permet d'un lien hypertexte pointant vers le site Internet et tout support de communication du Prestataire."
+      },
+      "garantieEviction": {
+        "title": "c) Garantie d'éviction",
+        "p1": "Le Prestataire garantit le Client contre toute action, réclamation, revendication ou opposition de la part de toute personne invoquant un droit de propriété intellectuelle auxquels la fourniture des Services aurait porté atteinte, sous réserve que le Client informe le Prestataire, dès qu'il en a connaissance, de toute demande, réclamation ou instance présentée ou engagée pour un tel motif, par voie judiciaire ou extra-judiciaire. Le Client s'engage à apporter au Prestataire, tous les documents et renseignements en sa possession ainsi que toute l'assistance requise qui pourraient être nécessaires à sa défense.",
+        "intro": "En cas d'atteinte avérée aux droits d'un tiers, le Prestataire pourra, à son choix :",
+        "items": {
+          "item1": "obtenir toute concession de licence ou autorisation pour permettre au Client de continuer à utiliser les Services ;",
+          "item2": "fournir une solution de remplacement permettant au Client de pouvoir utiliser les Services conformément à la Commande ;",
+          "item3": "si aucune des deux possibilités n'est réalisable, rembourser le Client des sommes versées au titre des Services, déduction faite des sommes déjà payées par le Client pour la période d'utilisation effective des Services."
+        },
+        "p2": "Le Prestataire n'aura aucune obligation d'indemnisation ou autre obligation au titre d'une action en contrefaçon ayant pour origine (a) une utilisation des Services autrement que conformément au Contrat, (b) une combinaison des Services avec d'autres services ou matériels non fournis par le Prestataire.",
+        "p3": "Concernant les logiciels, données ou documents utilisés par le Prestataire dans le cadre de la fourniture des Services, dont le Client a acquis les droits d'utilisation auprès de tiers ou dont il est propriétaire, le Client garantit le Prestataire de toutes les conséquences ou suites dommageables que le Prestataire aurait à subir au titre de l'utilisation desdits logiciels, données ou documents contre toute action de la part d'une personne revendiquant un droit de propriété intellectuelle ou se fondant sur une demande en concurrence déloyale et/ou parasitisme sur ces logiciels, données ou documents."
       }
     },
-    "article10": {
-      "title": "Article 10. Litiges",
-      "intro": "En cas de litige :",
+
+    "article12": {
+      "title": "Article 12. Garanties",
+      "p1": "Le Prestataire garantit que les Services sont fournis de manière substantiellement conforme à la Commande.",
+      "p2": "Sauf disposition légale contraire, toute autre garantie, expresse ou implicite est exclue.",
+      "p3": "Le Prestataire ne peut être tenu d'aucune garantie notamment lorsque le Client a modifié ou fait modifier les Services ou a utilisé d'autres services que les Services fournis par le Prestataire, sans son accord préalable et écrit ou lorsque le Client ou des tiers sont intervenus sur les éléments des Services sans l'accord préalable du Prestataire."
+    },
+
+    "article13": {
+      "title": "Article 13. Responsabilités",
+      "p1": "La responsabilité du Prestataire est limitée aux seuls dommages directs et résultant d'un défaut des Services ou de la violation du Contrat, même si le défaut en question était prévisible au moment de la Commande.",
+      "p2": "En aucun cas, le Prestataire ne sera tenu pour responsable des dommages indirects, accessoires ou particuliers tels que définis par la jurisprudence des tribunaux français, notamment, le coût de l'obtention de services de substitution, pertes de bénéfices, de données ou périodes d'immobilisation, que sa responsabilité soit contractuelle ou délictuelle et qu'elle ait ou non son fondement dans l'utilisation ou le fonctionnement des Services, même si le Prestataire a averti le Client de la possibilité de tels dommages.",
+      "p3": "En cas de manquement quelconque du Prestataire dans l'exécution de ses obligations (défaut d'exécution ou mauvaise exécution), le Client devra en faire part à celui-ci dans le délai de huit (8) jours ouvrés à compter de la constatation du manquement par lettre recommandée avec accusé de réception. A défaut, le manquement sera inopposable au Prestataire.",
+      "p4": "Dans l'hypothèse où le Client aurait signé un procès-verbal de réception des Services et/ou la maquette de la ou les créations ou a validé la réception des Services et/ou la maquette, par tout moyen et notamment par l'utilisation des Services et/ou la maquette, le Prestataire sera réputé avoir réalisé ses obligations de manière conforme au Contrat. Le Client sera alors réputé avoir renoncé irrévocablement à toutes réclamation de plein droit à ce titre.",
+      "p5": "Par ailleurs, le Prestataire ne peut être tenu pour responsable de l'inexécution du Contrat en cas de force majeure telle que définie à l'article 14, et en cas de dommages du fait d'un tiers ou imputables à une mauvaise utilisation ou une utilisation non-conforme par le Client des Services, en violation des prescriptions du Prestataire ou des règles de l'art.",
+      "p6": "Hormis les dommages corporels ou décès, et sauf en cas de négligence grossière ou de faute intentionnelle causant un dommage direct prouvé ou en cas de manquement à une obligation essentielle du Contrat la vidant de sa substance, le Client reconnaît que la responsabilité du Prestataire est limitée au montant versé pour les Services en cause."
+    },
+
+    "article14": {
+      "title": "Article 14. Force Majeure",
+      "p1": "Les Parties ne peuvent être considérées comme responsables ou ayant failli à leurs obligations contractuelles, lorsque le défaut d'exécution des obligations respectives a pour origine la force majeure telle que définie par la jurisprudence des tribunaux français. Le Contrat entre les parties est suspendu jusqu'à l'extinction des causes ayant engendrées la force majeure. La force majeure prend en compte des faits ou circonstances irrésistibles, extérieurs aux parties, imprévisibles et indépendants de la volonté des parties, malgré tous les efforts raisonnablement possibles pour les empêcher.",
+      "p2": "La Partie touchée par un événement de force majeure en avisera l'autre Partie dans les cinq (5) jours ouvrables suivant la date à laquelle elle en aura eu connaissance. Les deux Parties conviendront alors des conditions dans lesquelles l'exécution du Contrat sera poursuivie."
+    },
+
+    "article15": {
+      "title": "Article 15. Travail dissimulé",
+      "p1": "Le Prestataire déclare être immatriculé au RCS ou Répertoire des Métiers, ainsi qu'auprès de l'URSSAF et que ses immatriculations couvrent expressément toutes ses activités pour l'exécution des Services définis dans le devis et/ou la Commande.",
+      "p2": "Dans le respect des articles L 8221-1 et suivants du Code du travail et conformément à l'article D 8222-5 du même code, le Prestataire s'engage à remettre au Client lors de la conclusion du Contrat, et tous les six mois jusqu'à la fin de son exécution, les documents suivants :",
       "items": {
-        "item1": "L'Acheteur contacte le service client (contact@crunchyvita.com)",
-        "item2": "A defaut de reponse, il peut saisir le Mediateur de l'e-commerce de la FEVAD (www.mediateur-fevad.fr)",
-        "item3": "A defaut d'accord, competence est attribuee aux tribunaux francais"
+        "item1": "une attestation de vigilance délivrée par l'URSSAF, en cours de validité, attestant du respect de ses obligations sociales ;",
+        "item2": "un document officiel justifiant de son immatriculation, tel qu'un extrait K ou Kbis, ou un extrait d'immatriculation au Registre national des entreprises (RNE), le cas échéant ;",
+        "item3": "une attestation sur l'honneur établie par le Prestataire, certifiant que le travail est réalisé par des salariés employés régulièrement eu égard aux articles D.8222-5, D.8222-7 et D.8222-8 du Code du travail."
+      }
+    },
+
+    "article16": {
+      "title": "Article 16. Assurance",
+      "p1": "Chacune des Parties s'engage à maintenir en vigueur, pendant toute la durée de réalisation du Contrat, auprès d'une compagnie d'assurance notoirement solvable, une police d'assurance garantissant les dommages pouvant survenir à ses biens et personnel, ainsi qu'une police couvrant sa responsabilité professionnelle, de manière à couvrir les conséquences pécuniaires des dommages corporels, matériels et immatériels dont elles auraient à répondre, causés par tout événement et qui serait le fait de ses collaborateurs et/ou sociétés partenaires éventuels lors de l'exécution du Contrat."
+    },
+
+    "article17": {
+      "title": "Article 17. Confidentialité",
+      "p1": "Chaque Partie s'engage, tant en son propre compte que pour le compte de ses employés et sociétés partenaires, à préserver la confidentialité des informations confidentielles échangées (les « Informations Confidentielles »). Sont réputées Informations Confidentielles, toutes les informations quels qu'en soient la nature, la forme ou le support, auxquelles chaque Partie aura accès dans le cadre de l'exécution du Contrat, et notamment sans que cette liste soit limitative, tous moyens mis à la disposition du Prestataire au Client et du Client au Prestataire, toute donnée technique, industrielle, financière ou commerciale, ou toute autre information et tous documents relatifs aux activités de chaque Partie. Les Informations Confidentielles ne couvrent pas les documents, données ou autres informations qui sont :",
+      "exclusions": {
+        "item1": "connus par l'une des Parties sur une base non-confidentielle avant leur divulgation par l'autre Partie ;",
+        "item2": "tombés ou qui tomberont dans le domaine public au jour de leur divulgation ;",
+        "item3": "légitimement obtenus d'un tiers non tenu par une obligation de confidentialité ;",
+        "item4": "développés de façon indépendante par la Partie réceptrice qui n'a eu accès à aucune information de la Partie divulgatrice ;",
+        "item5": "divulgués en vertu d'une disposition législative ou réglementaire."
+      },
+      "intro2": "Chaque Partie s'engage :",
+      "commitments": {
+        "item1": "à appliquer aux Informations Confidentielles les mêmes mesures de protection que celles qu'elle applique à ses propres informations confidentielles ;",
+        "item2": "à ne communiquer les Informations Confidentielles qu'à ses seuls employés et collaborateurs amenés à les connaître dans le cadre de la réalisation des Services ;",
+        "item3": "à ne pas divulguer, publier ou transmettre à des tiers les Informations Confidentielles, sous quelque forme que ce soit, sans l'accord préalable écrit de l'autre Partie ;",
+        "item4": "à n'utiliser les Informations Confidentielles que pour les seuls besoins de réalisation des Services."
+      }
+    },
+
+    "article18": {
+      "title": "Article 18. Non sollicitation",
+      "p1": "Chacune des Parties renonce, sauf accord écrit préalable, à faire directement ou indirectement des offres d'engagement à un collaborateur de l'autre Partie ayant travaillé dans le cadre des Services, objet du présent Contrat, ou à le prendre à son service, sous quelque statut que ce soit. Cette renonciation est valable pour une durée de deux (2) ans à compter de la fin du présent Contrat."
+    },
+
+    "article19": {
+      "title": "Article 19. Données personnelles",
+      "p1": "Conformément aux dispositions de la Loi Informatique et Libertés n° 78-17 du 6 janvier 1978 telle que modifiée, le Client dispose de la qualité de responsable de traitement dans le cadre de l'exécution du Contrat.",
+      "p2": "Le Prestataire agissant au nom et pour le compte du Client dans le traitement des données personnelles qui lui sont communiquées par le Client, il dispose de la qualité de sous-traitant.",
+      "p3": "A ce titre, le Prestataire s'engage à prendre les mesures nécessaires afin d'assurer la protection, la sécurité et la confidentialité des données personnelles qui lui sont transmises par le Client."
+    },
+
+    "article20": {
+      "title": "Article 20. Modifications des CGV et cession du Contrat",
+      "p1": "Le Prestataire peut décider de céder ou transférer les droits ou obligations que lui confère le présent Contrat sous réserve que le Client bénéficie des Services dans les mêmes conditions.",
+      "p2": "Le Prestataire se réserve le droit de modifier les présentes CGV et d'en notifier le Client. Si une modification substantielle des termes des CGV n'est pas acceptable par le Client, celui-ci dispose d'un délai de quinze (15) jours à compter de la notification par le Prestataire des modifications pour en informer le Prestataire. En cas de désaccord des Parties sur ces modifications, les Parties pourront résilier le Contrat.",
+      "p3": "A l'expiration de ce délai de quinze (15) jours, les modifications des CGV seront définitivement considérées comme acceptées par le Client."
+    },
+
+    "article21": {
+      "title": "Article 21. Droit applicable et juridictions compétentes",
+      "p1": "La loi du Contrat est la Loi Française. Les parties conviennent expressément que la Convention de Vienne sur la vente internationale de marchandises en date du 11 avril 1980 n'est pas applicable au Contrat.",
+      "p2": "En cas de différend entre les Parties, celles-ci tenteront de trouver une solution amiable à ce différend dans un délai de trente jours à compter de la notification du différend de la Partie en demande à l'autre Partie par lettre recommandée avec accusé de réception.",
+      "p3": "A défaut de solution amiable trouvée entre les Parties, le litige sera soumis à la connaissance du Tribunal de commerce territorialement compétent."
+    },
+
+    "article22": {
+      "title": "Article 22. Refus",
+      "p1": "Le Prestataire se réserve le droit de ne pas accepter une Commande de la part du Client lorsque le Prestataire a déjà rencontré des problèmes de paiement (non-paiement ou retard de paiement) avec le Client pour une ou plusieurs Commande(s) précédente(s)."
+    },
+
+    "article23": {
+      "title": "Article 23. Sous-traitance",
+      "p1": "Le Prestataire a la faculté de sous-traiter tout ou partie de la réalisation des Services à des sous-traitants. Dans ce cas, le Prestataire demeure responsable de la réalisation des Services vis-à-vis du Client."
+    },
+
+    "article24": {
+      "title": "Article 24. Dispositions générales",
+      "documentsAnterieurs": {
+        "title": "a) Documents antérieurs ou autres accords",
+        "p1": "Le Contrat se substitue à tout autre document antérieur, à tout autre accord écrit ou verbal en relation avec le même objet, à l'exception du devis, de la Commande et prévaut sur toute disposition contraire qui pourrait être contenue dans les documents émanant du Client."
+      },
+      "autonomieClauses": {
+        "title": "b) Autonomie des clauses",
+        "p1": "Si l'une quelconque disposition de ces CGV ou son application à toute personne ou circonstance est jugée nulle, cette nullité ne concernera pas les autres dispositions ou applications de ces CGV, qui resteront en vigueur, séparément de la disposition jugée nulle. A cette fin, les dispositions de ces CGV sont déclarées autonomes."
+      },
+      "notification": {
+        "title": "c) Notification",
+        "p1": "Toute notification devra être faite par écrit et être soit remise en mains propres, soit adressée par lettre recommandée avec accusé de réception, soit faite par acte extra judiciaire à l'adresse indiquée dans la commande."
+      },
+      "langue": {
+        "title": "d) Langue du Contrat",
+        "p1": "Le Contrat est rédigé en langue française. Une traduction en langue étrangère peut être fournie à titre d'information. En cas de contradiction, seule la version française fera foi entre les Parties."
       }
     }
-  },
+},
+
   "Profile": {
     "title": "Parametres du profil",
     "subtitle": "Gerez les informations et preferences de votre compte",

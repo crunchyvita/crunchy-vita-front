@@ -713,140 +713,337 @@
     }
   },
   "CGU": {
-    "title": "Terms of Use (CGU)",
-    "intro": {
-      "title": "Conditions of use",
-      "body": "These general terms of use (\"CGU\") define the terms and conditions of access to and use of the website and the Account - as defined below - made available by the company Alteora, a simplified joint-stock company with share capital of 10,000 euros, registered with the Trade and Companies Register of Antibes under number 903112952, with registered office at 1460 Chemin des Terriers Building B-04 06600 Antibes (hereafter the \"Seller\"), as well as the rights and obligations of any individual or legal entity likely to commercially or professionally operate, or as a franchisee, accessing, visiting and/or using the site, regardless of the network or means used (hereafter the \"User\")."
-    },
-    "article1": {
-      "title": "Article 1 - Purpose of the site",
-      "body": "The website www.crunchyvita.com ( the \"Site\") is an e-commerce site that offers online sales of freeze-dried fruit packs (hereafter the \"Products\"). The Site allows the User, notably through an Account whose operating conditions they will set. The Site is accessible free of charge to any person with Internet access. All costs related to this access (hardware, software, Internet connection) are borne exclusively by the User, who is solely responsible for the proper functioning of their equipment and access or network."
-    },
-    "article2": {
-      "title": "Article 2 - Acceptance of the CGU",
-      "p1": "Access to and use of the Site and/or the Account imply full and unconditional acceptance of these CGU by the User.",
-      "p2": "By accepting these conditions, the User agrees to them; otherwise, the User must stop using the Site immediately.",
-      "p3": "The Seller reserves the right to modify the CGU at any time, with the current version available on the Site."
-    },
-    "article3": {
-      "title": "Article 3 - Creation and use of the Account",
-      "p1": "To access the Account, the User must create one, which will allow them to provide delivery information, make payments, track orders, and manage potential returns.",
-      "p2": "Login credentials (email address and password) are strictly personal and confidential. The User agrees to keep them secret and not communicate them to third parties."
-    },
-    "article4": {
-      "title": "Article 4 - Site availability",
-      "body": "The site is accessible 24/7, except in case of force majeure, events beyond the Seller's control, or interruptions required for maintenance, updates, or any other technical reason."
-    },
-    "article5": {
-      "title": "Article 5 - Warranties and liabilities",
-      "p1": "The Seller strives to keep the Site up to date and provide reliable information; however, it does not guarantee the accuracy, completeness, or timeliness of the content.",
-      "p2": "The site is provided \"as is\" - without any implied or express warranty."
-    },
-    "article6": {
-      "title": "Article 6 - Hyperlinks",
-      "body": "The Site may contain links to third-party sites. The Seller has no control over these sites and disclaims any responsibility for their content, products, services, or data."
-    },
-    "article7": {
-      "title": "Article 7 - Intellectual property",
-      "body": "The Site, its structure, content, trademarks, logos, databases, and any other protected elements are the exclusive property of the Seller or third parties who have authorized its use."
-    },
-    "article8": {
-      "title": "Article 8 - Duration",
-      "body": "These CGU apply from the time they are accepted by the User and for the entire duration of use of the Site and/or the Account."
-    },
-    "article9": {
-      "title": "Article 9 - Applicable law",
-      "body": "These CGU are governed by French law. In the event of a dispute, the parties will endeavor to find an amicable solution. Failing that, French courts will have jurisdiction."
-    },
-    "article10": {
-      "title": "Article 10 - Contact",
-      "p1": "by email:",
-      "p2": "by mail: Alteora, 1460 Chemin des Terriers Building B-04 06600 Antibes"
-    }
+  "title": "Terms of Use",
+  "intro": {
+    "title": "Preamble",
+    "body": "crunchyvita is a web platform, available at https://www.crunchyvita.com/en (the \"Site\").\n\nThis Site is published by Alteora, a SAS (simplified joint-stock company) with a share capital of 10,000.0 euros, whose registered office is located at 1460 Chemin des Terriers, 06600 Antibes, France, and registered with the Antibes Trade and Companies Register under identification number 993112952 (hereinafter the \"Publisher\"). crunchyvita is accessible to users (the \"User\" or \"Users\").\n\ncrunchyvita is hosted by OVH, whose registered office is located at 2 Rue Kellermann, 59100 Roubaix, France. This host can be contacted at the following email address: dpo@ovh.com.\n\nThe purpose of these Terms of Use (the \"Terms\" or, taken as a whole, the \"Agreement\") is to define the terms and conditions governing the relationship between Users and Alteora. In the event of non-compliance with these Terms, Alteora reserves the right to take any measures necessary to protect its interests, including ensuring their enforcement.\n\nAccess to and use of the Site are subject to acceptance of and compliance with these Terms of Use.\n\nThe Publisher reserves the right to modify, at any time and without prior notice, the Site, the Services, and these Terms of Use, in particular to adapt to changes in the Site through the addition of new features or the removal or modification of existing features.\n\nUsers are therefore advised to consult the latest version of the Terms of Use, available at any time on the Site, before browsing.\n\nThese Terms of Use also apply, as needed, to any variation or extension of the Site on existing or future social and/or community networks."
   },
+
+  "article1": {
+    "title": "Article 1: Purpose of the Site",
+    "body": "The Site allows the User to access, in particular, the following services: Selling freeze-dried fruit (the \"Service\" or \"Services\").\n\nUnder these Terms, Alteora grants Users a revocable, non-exclusive, non-transferable, limited right of access to the Services for strictly personal use. Any use of the platform contrary to its purpose is strictly prohibited and constitutes a breach of these provisions."
+  },
+
+  "article2": {
+    "title": "Article 2: Access to the Site",
+    "body": "To be eligible for the Service, the User may be an individual or a legal entity.\n\nAlteora reserves the right to suspend or refuse access to the Site to one or more Users."
+  },
+
+  "article3": {
+    "title": "Article 3: Site Management",
+    "body": "The Publisher implements the technical solutions necessary to provide continuous access to the Site for the User. However, it reserves the right to limit or suspend access to all or part of the Site at any time, without prior notice. Such an interruption may in particular be necessary for maintenance of the Site or its content, or for any other reason deemed necessary by the Publisher for the proper functioning of the Site.\n\nUse of the Platform requires an internet connection and browser. The platform is accessible at the following address: https://www.crunchyvita.com/en.\n\nAll hardware and software necessary to access the Platform and use the Services remain the sole responsibility of the User."
+  },
+
+  "article4": {
+    "title": "Article 4: Contact",
+    "body": "The User may contact the Publisher for any question or request for information regarding the Site, or to report any illegal content or activity, by email at contact@crunchyvita.com."
+  },
+
+  "article5": {
+    "title": "Article 5: Use of the Platform's Services",
+    "subtitle1": "1.1 User Obligations",
+    "intro": "Users shall not:",
+    "list": [
+      "transmit, publish, distribute, save, or destroy any material, in particular crunchyvita content, in violation of applicable laws or regulations regarding the collection, processing, or transfer of personal information;",
+      "disseminate data, information, or content that is defamatory, insulting, obscene, offensive, violent, or that incites violence, or that is political, racist, or xenophobic in nature, and more generally any content contrary to applicable laws and regulations or to accepted standards of decency;",
+      "reference or create links to any content or information available from crunchyvita's sites, except with the express, prior, and written consent of Alteora;",
+      "use information, content, or any data present on the Site in order to offer a service considered competitive with crunchyvita;",
+      "sell, exchange, or monetize information, content, or data present on the platform or Services offered by the Platform, without the express written consent of Alteora;",
+      "engage in reverse engineering, decompiling, disassembling, decrypting, or otherwise attempting to obtain the source code related to any underlying intellectual property used to provide all or part of the Services;",
+      "use software, manual or automated devices, coding robots, or other means to access, explore, extract, or index any page of the Site;",
+      "endanger or attempt to endanger the digital security of crunchyvita. This includes attempts to control, scan, or test the vulnerability of the system or network, or to violate security or authentication measures without prior express authorization;",
+      "counterfeit or use the products, logos, trademarks, or any other element protected by Alteora's intellectual property rights;",
+      "simulate the appearance or functioning of the Site, for example by mirroring it;",
+      "disrupt or interfere, directly or indirectly, with crunchyvita, or impose a disproportionate burden on the Site's infrastructure, or attempt to transmit or activate computer viruses via or on the Site;"
+    ],
+    "outro": "It is hereby noted that violations of system or network security may lead to civil and criminal prosecution. Alteora verifies the absence of such violations and may call upon judicial authorities to prosecute, where applicable, Users who have participated in such violations.\n\nUsers agree to use the Site fairly, in accordance with its purpose and applicable legal and regulatory provisions, these Terms, and prevailing practices.",
+    "subtitle2": "1.2 User Customer Accounts",
+    "body2": "The Publisher reserves certain crunchyvita services for Users who have registered on the Site; this applies in particular to paid services. When registering, the User agrees to provide valid and truthful information. In particular, the User agrees to provide the Publisher with an email address so that the latter can communicate information to them.\n\nAny information communicated by email from the Publisher to the User shall be deemed to have been read by the User.\n\nAny User duly registered on the Site may request the deletion of their customer account; the Publisher undertakes to delete customer accounts for which it has received such a request.\n\nCustomers' personal data is deleted after 36 months of account inactivity."
+  },
+
+  "article6": {
+    "title": "Article 6: Intellectual Property",
+    "body": "All content on the Site, including designs, text, graphics, images, videos, information, logos, icons/buttons, software, audio files, and other elements, belongs to Alteora, which is the sole holder of all related intellectual property rights.\n\nAny representation and/or reproduction and/or exploitation, whether partial or total, of the content and Services offered by crunchyvita, by any means whatsoever, without the prior written authorization of Alteora, is strictly prohibited and may result in legal proceedings."
+  },
+
+  "article7": {
+    "title": "Article 7: Personal Data",
+    "body": "All personal data held by Alteora is collected lawfully and fairly in accordance with the privacy policy available at: https://www.crunchyvita.com/en/privacy-policy.\n\nThis data is provided by Users who voluntarily and expressly accept these Terms, authorizing Alteora to process, disclose, or transfer this data to any third party in order to (i) allow the User to fully enjoy the Services and features offered by the Site, (ii) prevent fraud, and/or (iii) for statistical purposes.\n\nPersonal data is stored by Alteora for processing purposes in connection with the use of the Services. It is retained for as long as necessary to provide the Services and features offered by the Site.\n\nThe User remains the owner of the information concerning them that they transmit to Alteora. In accordance with Law No. 78-17 of January 6, 1978, as consolidated on March 24, 2020, the User has the right to access, rectify, and delete personal data concerning them, as well as the right to object to the disclosure of this data to third parties for legitimate reasons.\n\nThe User may exercise their rights by writing to the following email address: contact@crunchyvita.com.\n\nA response to the User's request will be sent within 30 days."
+  },
+
+  "article8": {
+    "title": "Article 8: Liability",
+    "body": "It is hereby noted that data published by Users and information shared by them may be captured and used by other Users or third parties. In this regard, Alteora does not guarantee the protection of ownership of such data; it is the User's responsibility to take all necessary measures to protect the ownership of their data.\n\nAlteora does not guarantee uninterrupted or error-free operation of the Services; in particular, Alteora's liability cannot be engaged in the event of interruption of access to the Platform due to maintenance operations, updates, or technical improvements.\n\nIn any event, Alteora shall under no circumstances be liable for indirect or unforeseeable losses or damages suffered by the User or any third party, including without limitation any loss of profit, unsuccessful investment, inaccuracy or corruption of files or data, damage to image or business, loss of revenue or profit, loss of clientele, or loss of opportunity, on any basis whatsoever.\n\nFurthermore, Alteora shall not be liable for any delay or failure to perform this Agreement justified by a case of force majeure, as defined by French case law."
+  },
+
+  "article9": {
+    "title": "Article 9: Evidence Agreement",
+    "body": "Computer systems and files constitute valid evidence in the relationship between Alteora and the User.\n\nAccordingly, Alteora may validly produce, as evidence in any proceeding, the data, files, programs, records, or other elements received, sent, or stored by means of the computer systems used, on any digital or analog media, and may rely on such evidence unless a manifest error is shown."
+  },
+
+  "article10": {
+    "title": "Article 10: Severability",
+    "body": "The fact that any provision of the Agreement is or becomes illegal or unenforceable shall not in any way affect the validity or enforceability of the other provisions of the Agreement."
+  },
+
+  "article11": {
+    "title": "Article 11: Dispute Resolution",
+    "body": "The conclusion, interpretation, and validity of this Agreement are governed by French law, regardless of the User's country of origin or the country from which the User accesses crunchyvita, and notwithstanding conflict of law principles.\n\nIn the event of a dispute concerning the validity, performance, or interpretation of this Agreement brought before civil courts, it shall be submitted to the exclusive jurisdiction of the French courts, to which jurisdiction is expressly granted, even in cases of summary proceedings or multiple defendants.\n\nThe User is informed that they may, in any case, resort to conventional mediation or any alternative dispute resolution method (such as conciliation) in the event of a dispute."
+  },
+
+  "article12": {
+    "title": "Article 12: Duration of the Terms of Use",
+    "body": "These Terms of Use are entered into for an indefinite period; the User is required to comply with them from the start of their use of the Services.\n\nThe Publisher reserves the right to modify this document at any time and without prior notice. Users will be informed of each update to the document."
+  }
+},
   "CGV": {
-    "title": "Terms of Sale (CGV)",
-    "updated": "ALTEORA - www.crunchyvita.com | Updated in 2026",
-    "preamble": {
-      "title": "Preamble",
-      "body": "This Preamble is an integral part of the Terms of Sale."
-    },
+   "title": "General Terms and Conditions of Sale",
     "article1": {
-      "title": "Article 1. Parties to this agreement",
-      "items": {
-        "item1": "1) The company ALTEORA: Simplified joint-stock company with share capital of 10,000 euros, registered with the Trade and Companies Register of Antibes under number 903112952, with registered office at 1460 Chemin des Terriers Building B-04 06600 Antibes and VAT number FR0793931952, hereafter referred to as the \"Seller\".",
-        "item2": "2) Any individual wishing to make a purchase on the Seller's website, hereafter referred to as the \"Buyer\"."
-      }
+      "title": "Article 1. The Parties",
+      "p1": "The term \"Service Provider\" refers to the company Alteora, a French simplified joint-stock company (SAS) with share capital of 10,000 euros, registered with the Trade and Companies Register of Antibes under RCS number 993112952, with its registered office located at 1460 Chemin des Terriers, 06600 Antibes, France, and whose legal representative is Houssem BEN MESSAOUD.",
+      "p2": "The Service Provider is a company specializing in particular in the sale of organic freeze-dried fruits.",
+      "p3": "The term \"Client\" refers to any legal entity or individual who has engaged the Service Provider's services.",
+      "p4": "The term \"Third Party\" refers to any individual or legal entity that is not a party to these General Terms and Conditions of Sale (\"GTC\")."
     },
     "article2": {
-      "title": "Article 2. Purpose",
-      "body": "The Seller's activity is the online sale of products under the CrunchyVita brand (freeze-dried fruits) via the site www.crunchyvita.com."
-    },
-    "article2_1": {
-      "title": "Article 2.1. Precautions for use",
-      "body": "CrunchyVita packs must be kept in their tightly sealed pouch to preserve their crunchy texture. Even when filled, they remain edible, according to texture and bag condition."
+      "title": "Article 2. General Provisions",
+      "p1": "The purpose of these GTC is to define the rights and obligations of the Parties in connection with the services provided by the Service Provider to the Client as part of its activities.",
+      "p2": "These General Terms and Conditions of Sale apply to any contract entered into between the Service Provider and the Client for the provision of services (the \"Services\") as defined in the quote approved by the Client.",
+      "p3": "The Services may be provided either remotely or at the Client's premises, at the discretion of the Service Provider and the Client.",
+      "p4": "The GTC are systematically sent or delivered to each Client before any order is placed (the \"Order\"). Consequently, placing an Order implies the Client's full and unreserved acceptance of these GTC, to the exclusion of any other documents in the Client's possession such as brochures, catalogs, or advertising materials issued by the Service Provider, which are for indicative purposes only and have no contractual value.",
+      "p5": "In the event of a contradiction between the provisions of the quote and these GTC, the relevant provisions of the quote shall prevail over the GTC.",
+      "p6": "These GTC fully govern the relationship between the Service Provider and the Client. No general purchasing conditions may prevail or be enforced against the Service Provider by the Client, and no specific conditions communicated by the Client to the Service Provider may prevail over the GTC, unless formally accepted in writing by the Service Provider.",
+      "p7": "Any reservation regarding the GTC raised by the Client will therefore, absent express acceptance by the Service Provider, be unenforceable against the Service Provider, regardless of when it may have been brought to its attention.",
+      "p8": "Any provisions deviating from these GTC must result from an express agreement between the Parties, reflected in Orders confirmed by the Service Provider or any other document evidencing the agreement of both Parties.",
+      "p9": "The fact that the Service Provider does not invoke any provision of these GTC at a given time may not be interpreted as a waiver of its right to invoke such provision at a later time.",
+      "p10": "The Service Provider reserves the right to modify these GTC, the Services, and the pricing at any time and without prior notice. Such modifications will have no effect on Orders in progress.",
+      "p11": "These GTC apply only to professionals, to the exclusion of consumers. As such, the Client acknowledges having professional status, in accordance with the applicable provisions of the French Consumer Code."
     },
     "article3": {
-      "title": "Article 3. Definitions",
-      "items": {
-        "item1": "Seller: ALTEORA, simplified joint-stock company registered with the Antibes Trade and Companies Register under number 903112952.",
-        "item2": "Buyer: any individual wishing to make a purchase on the Site.",
-        "item3": "Product: any product offered for sale, subject to available stock.",
-        "item4": "Delivery: transfer to the Buyer of the physical possession or control of the Product.",
-        "item5": "Site: www.crunchyvita.com."
-      }
+      "title": "Article 3. Formation of the Contract",
+      "p1": "Unless otherwise agreed in the quote, the Contract is deemed formed and takes effect between the Parties on the date the quote is signed by the Client.",
+      "p2": "No change or modification to the Contract, in particular regarding the characteristics of the Services, will be taken into account unless it has been accepted in writing by the Service Provider.",
+      "p3": "This provision cannot be replaced by a verbal agreement.",
+      "p4": "In the absence of specific provisions in the quote, the timeframes for performing the Services are communicated to the Client for informational purposes only. Timeframes for completing the Services are in no way guaranteed by the Service Provider and cannot give rise to liability on its part, nor create an obligation to pay any compensation or late penalty, nor justify cancellation of the Order in question."
     },
     "article4": {
-      "title": "Article 4. Price",
-      "p1": "Prices are indicated in euros, including taxes, excluding processing and shipping fees.",
-      "p2": "The Seller may modify prices at any time, but the applicable rate is the one in effect at the time the order is validated."
+      "title": "Article 4. Obligations of the Parties",
+      "p1": "Generally speaking, the Client and the Service Provider agree to actively collaborate to ensure the proper performance of the Contract. Each Party undertakes to communicate any difficulties it becomes aware of as the project progresses, to enable the other Party to make the necessary decisions.",
+      "p2": "The Client agrees to provide accurate and truthful information and also agrees to notify the Service Provider of any change concerning the information, data, or documentation provided.",
+      "p3": "The Client will be solely responsible for any malfunctions that may result from incorrect information. The Client must maintain a valid email address and postal address.",
+      "clientObligations": {
+        "title": "a) Client Obligations",
+        "intro1": "The Client expressly declares having received from the Service Provider all information and advice necessary for the performance of the Services and waives any right to hold the Service Provider liable in this regard.",
+        "intro2": "To enable the Service Provider to carry out its mission, the Client agrees to:",
+        "items": {
+          "item1": "Work closely with the Service Provider and provide all information, documentation, services, and any resources useful for the performance of the Services, including dedicating the personnel needed for the proper completion of the Services.",
+          "item2": "Establish a detailed specification document that will not be subject to further modification, except by agreement of the Parties, once it has been approved by the Service Provider. If necessary, the Service Provider may take part in drawing up the specification document jointly with the Client. Where modifications involve a substantial overhaul of the initial specification document, such modifications will be invoiced in addition to the initial quote.",
+          "item3": "Provide the Service Provider with the quote (dated, signed, and stamped).",
+          "item4": "Provide all documentary, graphic, and textual materials necessary for the proper performance of the Contract (in particular in usable formats suited to the intended media); the Client undertakes to provide all legal information required to be included in the documents and bears sole responsibility for the content of any documents it edits.",
+          "item5": "Hold the necessary rights over the materials provided above.",
+          "item6": "Actively collaborate toward the success of the project by providing the Service Provider, within previously agreed timeframes, with all information and documents necessary for a proper understanding of the requirements and the proper performance of the Services.",
+          "item7": "Strictly comply with the technical recommendations and creative suggestions made by the Service Provider.",
+          "item8": "Indemnify the Service Provider against any action that may be brought against it due to the nature of data or information (text, images, sound) provided or selected by the Client.",
+          "item9": "Pay the amounts owed to the Service Provider within the timeframes set out in the quote and in these GTC.",
+          "item10": "Inform the Service Provider of any competitive bidding process involving other service providers.",
+          "item11": "Ensure that all resources necessary to allow the Service Provider to perform the Services at its own premises and/or remotely are made available."
+        },
+        "outro1": "Before each intervention by the Service Provider, the Client agrees to carry out all backup procedures necessary to protect and safeguard its data, programs, and computer files.",
+        "outro2": "Finally, the Client is solely responsible for compliance with the laws and regulations applicable to the Services, in particular with regard to the protection of intellectual property rights, legal notices, protection of personal data, protection of minors (where applicable), and consumer law (where applicable)."
+      },
+      "prestataireObligations": {
+        "title": "b) Service Provider Obligations",
+        "intro": "Under these GTC and in performing the Services, the Service Provider agrees to use all necessary means and to make every effort to carry out its mission in accordance with best practice. This does not constitute an obligation of result, the Service Provider providing the Services only under a best-efforts obligation.",
+        "items": {
+          "item1": "The Service Provider guarantees that the creations are legally available and free of any third-party rights for the uses contemplated under the Contract.",
+          "item2": "The Service Provider undertakes to regularly inform the Client of the progress of the project, in particular through approvals submitted to the Client in accordance with the schedule set out in the quote."
+        }
+      }
     },
     "article5": {
-      "title": "Article 5. Order",
-      "intro": "To place an order, the Buyer must provide:",
-      "items": {
-        "item1": "Email address",
-        "item2": "First and last name",
-        "item3": "Postal address",
-        "item4": "Phone number",
-        "item5": "Payment information"
-      }
+      "title": "Article 5. Performance of the Services and Delivery of Deliverables",
+      "p1": "The Client agrees to provide the Service Provider, in a usable format, with all documents necessary for the performance of the Services entrusted to the Service Provider.",
+      "p2": "Any subsequent modification or additional request made by the Client will be subject to additional invoicing.",
+      "p3": "Since the performance of the Services entrusted to the Service Provider depends directly on the Client fulfilling its own obligations, the Parties expressly acknowledge that the delivery timeframes indicated in the quote are given for purely indicative purposes and without guarantee.",
+      "p4": "A delay beyond the indicated timeframes therefore cannot give rise to damages, nor authorize the Client to terminate the Contract or refuse delivery of the Services."
     },
     "article6": {
-      "title": "Article 6. Payment",
-      "body": "Payment is made at the time of order, by bank card (Carte Bleue, Visa, Mastercard, etc.) via Stripe."
+      "title": "Article 6. Price",
+      "p1": "The Service Provider's pricing conditions relating to the provision of the Services are set out in the Service Provider's quote.",
+      "p2": "Prices are given for indicative purposes and are therefore subject to change. The price invoiced is the one specified in the Order approved by the Service Provider.",
+      "p3": "The prices of the Services are expressed and payable in Euros and are exclusive of value added tax and any other tax, the Client being responsible for payment of such taxes.",
+      "p4": "The prices of the Services do not include any travel or accommodation expenses, which may be invoiced by the Service Provider to the Client in addition, according to the terms set out in the quote."
     },
     "article7": {
-      "title": "Article 7. Delivery",
-      "p1": "Delivery is made to the address provided by the Buyer.",
-      "p2": "Free delivery in France to  pickup points from 40 EUR of purchases.",
-      "p3": "Parcel tracking is communicated by email."
+      "title": "Article 7. Payment Terms",
+      "p1": "Acceptance of the quote and the resulting Client Order must be accompanied by payment of a deposit as indicated in the quote.",
+      "p2": "Payment of the deposit is a condition for the commencement of the Services. The deposit may be paid by check, bank transfer, or direct debit made out to the Service Provider.",
+      "p3": "Payment of the balance for the Services must be made within thirty (30) days of the date of the invoice issued by the Service Provider and may be made by check, bank transfer, or direct debit made out to the Service Provider.",
+      "p4": "No discount is available for early payment."
     },
     "article8": {
-      "title": "Article 8. Withdrawal",
-      "p1": "In accordance with Article L221-18 of the French Consumer Code, the Buyer has 14 days from receipt to withdraw. Return shipping costs are borne by the Buyer.",
-      "returnAddressLabel": "Return address:",
-      "returnAddress": "ALTEORA, 1460 Chemin des Terriers Building B-04 06600 Antibes.",
-      "p2": "The refund is issued within 14 days using the same payment method."
+      "title": "Article 8. Late Payment Penalties",
+      "p1": "In the event of non-payment by the due date, any amount owed will accrue late payment penalties. These penalties run from the day following the due date shown on the invoice until the amount is paid in full. The rate of late payment penalties is set at three times the legal interest rate in effect.",
+      "p2": "These late payment penalties are due automatically, without any reminder from the Service Provider being necessary.",
+      "p3": "The Client will also automatically owe a minimum flat-rate collection fee of forty (40) euros on amounts owed by the Client to the Service Provider.",
+      "p4": "Finally, in the event of late payment, the Service Provider reserves the right to suspend or postpone performance of the Services covered by the Order for which payment is overdue."
     },
     "article9": {
-      "title": "Article 9. Warranties",
-      "intro": "The Products benefit from:",
-      "items": {
-        "item1": "The legal warranty of conformity (articles L217-4 and following of the French Consumer Code)",
-        "item2": "The warranty against hidden defects (articles 1641 and following of the French Civil Code)"
-      }
+      "title": "Article 9. Additional Costs",
+      "p1": "Various items that may be necessary for the performance of the Service Provider's Services but that fall outside its offerings are not included in the prices indicated.",
+      "p2": "The following are to be invoiced in addition: modifications requested by the Client during performance, where they involve reworking the project."
     },
     "article10": {
-      "title": "Article 10. Disputes",
-      "intro": "In case of a dispute:",
+      "title": "Article 10. Termination",
+      "p1": "The Service Provider may terminate the Services provided to the Client in the event of a breach by the Client of its obligations under the Contract, not remedied within fifteen (15) days of notification of such breach by the Service Provider by registered letter with acknowledgment of receipt, without prejudice to the Service Provider's ability to seek damages.",
+      "p2": "The Service Provider may also terminate the Contract in the event of non-payment of any unpaid invoice(s) by the Client.",
+      "p3": "In the event the Contract is terminated early by the Client, the Client formally agrees to settle and pay the amounts relating to the current schedule, to work performed or in progress, as well as to any additional services carried out. The source files and data created and used by the Service Provider may not therefore be claimed by the Client without financial compensation. Any deposit already paid will remain the property of the Service Provider, as compensation for the work undertaken."
+    },
+    "article11": {
+      "title": "Article 11. Intellectual Property",
+      "p1": "The software, data, documentation, processes, methodologies, technologies, and documents belonging to the Service Provider (hereinafter \"Intellectual Property Rights\") used in the performance of the Services remain the exclusive property of the Service Provider.",
+      "p2": "The Service Provider grants the Client, where applicable and strictly to the extent necessary for the performance of the Services, a personal, non-exclusive, and non-transferable right to use such Intellectual Property Rights for the duration of the Services.",
+      "p3": "Works created by the Service Provider for the Client, in the course of performing the Contract, remain the entire and exclusive property of the Service Provider until the invoices issued by the Service Provider have been paid in full by the Client.",
+      "p4": "Once the invoices have been paid, the Service Provider assigns to the Client all intellectual property rights over the works created specifically at the Client's request, in the course of performing the Contract, for their full term of protection and worldwide.",
+      "p5": "In particular, the Service Provider assigns the following rights to the Client:",
+      "reproductionTitle": "The right of reproduction includes, in particular and on a non-exhaustive basis:",
+      "reproductionItems": {
+        "item1": "The right to reproduce and/or have reproduced the works created in unlimited quantities, by any means and on any medium, whether current or future, including graphic, magnetic, digital, or electronic (interactive or otherwise);",
+        "item2": "The right to distribute and exploit the works created, whether commercially or not, and the reproductions thus made, in unlimited quantities, free of charge or for consideration, for any purpose whatsoever."
+      },
+      "representationTitle": "The right of public performance/communication includes, in particular and on a non-exhaustive basis:",
+      "representationItems": {
+        "item1": "The right to broadcast and communicate to the public the elements, media, and components of the works created, by any means of communication known or unknown to date, for any use whatsoever;",
+        "item2": "The distribution of the works created by any means, in particular by broadcast, cable-satellite, and any network, and more generally by any means of transmitting data, whether digitized or not."
+      },
+      "p6": "In connection with the provision of the Services and as needed, the Client also grants the Service Provider a right to use its software, data, and documents, on a personal, free of charge, non-exclusive, and non-transferable basis, for the duration of the Services.",
+      "p7": "The Client agrees to obtain from any third parties, where necessary, the right to grant the Service Provider the rights to use software, data, and equipment belonging to such third parties for the purposes of providing the Services.",
+      "marques": {
+        "title": "a) Trademarks and Company Names",
+        "p1": "Any use by the Client of the company names, trademarks, and distinctive signs belonging to the Service Provider is strictly prohibited except with the Service Provider's prior express agreement. Where such prior express agreement is given, the Service Provider grants the Client a strictly personal, non-exclusive, and non-transferable right to use its company names, trademarks, and distinctive signs, worldwide and for the full duration of the Contract.",
+        "p2": "The Service Provider, for its part, is authorized to use the Client's company name/trademark as part of its activities for commercial promotion purposes.",
+        "p3": "The Service Provider also reserves the right to mention work carried out for the Client in its external communications and advertising materials (website, portfolio, etc.) and during commercial prospecting."
+      },
+      "droitMoral": {
+        "title": "b) Moral Rights",
+        "p1": "The Service Provider reserves the right to include, in the performance of the Services, a commercial mention clearly indicating its contribution, accompanied where the medium allows by a hyperlink pointing to the Service Provider's website and any communication materials."
+      },
+      "garantieEviction": {
+        "title": "c) Warranty Against Eviction",
+        "p1": "The Service Provider guarantees the Client against any action, claim, demand, or opposition from any person invoking an intellectual property right allegedly infringed by the provision of the Services, provided that the Client informs the Service Provider, as soon as it becomes aware of it, of any demand, claim, or proceeding brought on such grounds, whether judicial or extrajudicial. The Client agrees to provide the Service Provider with all documents and information in its possession, as well as any assistance required for its defense.",
+        "intro": "In the event of a proven infringement of a third party's rights, the Service Provider may, at its discretion:",
+        "items": {
+          "item1": "obtain any license or authorization to enable the Client to continue using the Services;",
+          "item2": "provide a replacement solution enabling the Client to use the Services in accordance with the Order;",
+          "item3": "if neither option is feasible, refund the Client the amounts paid for the Services, less amounts already paid by the Client for the period of actual use of the Services."
+        },
+        "p2": "The Service Provider will have no obligation to indemnify or any other obligation regarding an infringement action arising from (a) use of the Services other than in accordance with the Contract, or (b) combination of the Services with other services or materials not provided by the Service Provider.",
+        "p3": "With regard to software, data, or documents used by the Service Provider in providing the Services, for which the Client has acquired usage rights from third parties or which it owns, the Client indemnifies the Service Provider against any consequences or damages the Service Provider may suffer as a result of using such software, data, or documents, in connection with any action brought by a person claiming an intellectual property right or based on unfair competition and/or free-riding claims relating to such software, data, or documents."
+      }
+    },
+    "article12": {
+      "title": "Article 12. Warranties",
+      "p1": "The Service Provider warrants that the Services are provided in substantial conformity with the Order.",
+      "p2": "Unless otherwise required by law, any other warranty, express or implied, is excluded.",
+      "p3": "The Service Provider shall not be bound by any warranty, in particular where the Client has modified or had the Services modified, or has used services other than those provided by the Service Provider, without its prior written consent, or where the Client or third parties have intervened on elements of the Services without the Service Provider's prior consent."
+    },
+    "article13": {
+      "title": "Article 13. Liability",
+      "p1": "The Service Provider's liability is limited solely to direct damages resulting from a defect in the Services or a breach of the Contract, even if such defect was foreseeable at the time of the Order.",
+      "p2": "Under no circumstances will the Service Provider be held liable for indirect, incidental, or special damages, as defined by French case law, including in particular the cost of obtaining substitute services, loss of profits, loss of data, or downtime, whether liability is contractual or tortious and whether or not it arises from the use or operation of the Services, even if the Service Provider has been advised of the possibility of such damages.",
+      "p3": "In the event of any failure by the Service Provider to perform its obligations (non-performance or improper performance), the Client must notify the Service Provider within eight (8) business days of discovering the failure, by registered letter with acknowledgment of receipt. Failing this, the failure will not be enforceable against the Service Provider.",
+      "p4": "If the Client has signed an acceptance report for the Services and/or the mock-up(s) of the creation(s), or has validated acceptance of the Services and/or the mock-up by any means, in particular through use of the Services and/or the mock-up, the Service Provider will be deemed to have performed its obligations in accordance with the Contract. The Client will then be deemed to have irrevocably waived any claim as of right in this respect.",
+      "p5": "Furthermore, the Service Provider cannot be held liable for non-performance of the Contract in the event of force majeure as defined in Article 14, or for damages caused by a third party or attributable to improper or non-compliant use of the Services by the Client, in breach of the Service Provider's instructions or accepted best practice.",
+      "p6": "Except for personal injury or death, and except in the case of gross negligence or willful misconduct causing proven direct damage, or a breach of an essential obligation of the Contract depriving it of its substance, the Client acknowledges that the Service Provider's liability is limited to the amount paid for the Services in question."
+    },
+    "article14": {
+      "title": "Article 14. Force Majeure",
+      "p1": "Neither Party may be held liable or considered to have failed to fulfill its contractual obligations where the failure to perform its respective obligations results from force majeure as defined by French case law. The Contract between the parties is suspended until the causes of the force majeure event cease. Force majeure includes irresistible facts or circumstances, external to the parties, unforeseeable, and beyond the parties' control, despite all reasonably possible efforts to prevent them.",
+      "p2": "The Party affected by a force majeure event will notify the other Party within five (5) business days of becoming aware of it. The Parties will then agree on the conditions under which performance of the Contract will continue."
+    },
+    "article15": {
+      "title": "Article 15. Undeclared Work",
+      "p1": "The Service Provider declares that it is registered with the Trade and Companies Register or the Trade Directory, as well as with URSSAF, and that its registrations expressly cover all of its activities for the performance of the Services defined in the quote and/or the Order.",
+      "p2": "In accordance with Articles L 8221-1 et seq. of the French Labor Code and Article D 8222-5 of the same Code, the Service Provider agrees to provide the Client, upon conclusion of the Contract and every six months until the end of its performance, with the following documents:",
       "items": {
-        "item1": "The Buyer contacts customer service (contact@crunchyvita.com)",
-        "item2": "If no response, they may contact the FEVAD e-commerce mediator (www.mediateur-fevad.fr)",
-        "item3": "If no agreement, jurisdiction is assigned to French courts"
+        "item1": "a current URSSAF compliance certificate (attestation de vigilance) attesting to compliance with its social obligations;",
+        "item2": "an official document evidencing its registration, such as a Kbis extract or an extract from the National Business Register (RNE), where applicable;",
+        "item3": "a sworn statement by the Service Provider certifying that the work is carried out by employees hired in accordance with Articles D.8222-5, D.8222-7, and D.8222-8 of the French Labor Code."
+      }
+    },
+    "article16": {
+      "title": "Article 16. Insurance",
+      "p1": "Each Party agrees to maintain, for the entire duration of the Contract, with a reputable and solvent insurance company, an insurance policy covering damage that may occur to its property and personnel, as well as a professional liability policy, so as to cover the financial consequences of any bodily, material, or intangible damage for which it may be liable, caused by any event attributable to its employees and/or any partner companies during the performance of the Contract."
+    },
+    "article17": {
+      "title": "Article 17. Confidentiality",
+      "p1": "Each Party agrees, on its own behalf and on behalf of its employees and partner companies, to preserve the confidentiality of the confidential information exchanged (the \"Confidential Information\"). Confidential Information means all information of any nature, form, or medium, to which each Party has access in connection with the performance of the Contract, including, without limitation, any resources made available by the Service Provider to the Client and by the Client to the Service Provider, any technical, industrial, financial, or commercial data, or any other information and documents relating to the activities of each Party. Confidential Information does not cover documents, data, or other information that:",
+      "exclusions": {
+        "item1": "were already known to one of the Parties on a non-confidential basis before disclosure by the other Party;",
+        "item2": "are or will fall into the public domain as of the date of disclosure;",
+        "item3": "were legitimately obtained from a third party not bound by a confidentiality obligation;",
+        "item4": "were independently developed by the receiving Party without access to any information from the disclosing Party;",
+        "item5": "are disclosed pursuant to a legal or regulatory provision."
+      },
+      "intro2": "Each Party agrees:",
+      "commitments": {
+        "item1": "to apply to the Confidential Information the same protective measures it applies to its own confidential information;",
+        "item2": "to disclose the Confidential Information only to its employees and staff who need to know it for the performance of the Services;",
+        "item3": "not to disclose, publish, or transmit the Confidential Information to third parties, in any form whatsoever, without the other Party's prior written consent;",
+        "item4": "to use the Confidential Information only for the purposes of performing the Services."
+      }
+    },
+    "article18": {
+      "title": "Article 18. Non-Solicitation",
+      "p1": "Each Party agrees, unless otherwise agreed in writing, not to directly or indirectly make employment offers to a staff member of the other Party who has worked on the Services covered by this Contract, or to hire such person in any capacity whatsoever. This waiver applies for a period of two (2) years from the end of this Contract."
+    },
+    "article19": {
+      "title": "Article 19. Personal Data",
+      "p1": "In accordance with the French Data Protection Act No. 78-17 of January 6, 1978, as amended, the Client acts as data controller in connection with the performance of the Contract.",
+      "p2": "As the Service Provider acts on behalf of the Client in processing the personal data communicated to it by the Client, it acts as data processor.",
+      "p3": "As such, the Service Provider agrees to take the necessary measures to ensure the protection, security, and confidentiality of the personal data transmitted to it by the Client."
+    },
+    "article20": {
+      "title": "Article 20. Amendment of the GTC and Assignment of the Contract",
+      "p1": "The Service Provider may decide to assign or transfer the rights or obligations granted to it under this Contract, provided that the Client continues to benefit from the Services under the same conditions.",
+      "p2": "The Service Provider reserves the right to amend these GTC and to notify the Client thereof. If a substantial amendment to the terms of the GTC is not acceptable to the Client, the Client has fifteen (15) days from notification of the amendments by the Service Provider to inform the Service Provider. In the event the Parties disagree on such amendments, the Parties may terminate the Contract.",
+      "p3": "Upon expiry of this fifteen (15) day period, the amendments to the GTC will be deemed definitively accepted by the Client."
+    },
+    "article21": {
+      "title": "Article 21. Governing Law and Jurisdiction",
+      "p1": "The Contract is governed by French law. The parties expressly agree that the Vienna Convention on Contracts for the International Sale of Goods of April 11, 1980 does not apply to the Contract.",
+      "p2": "In the event of a dispute between the Parties, they will attempt to reach an amicable resolution within thirty days of notification of the dispute by the requesting Party to the other Party by registered letter with acknowledgment of receipt.",
+      "p3": "Failing an amicable resolution between the Parties, the dispute will be submitted to the competent Commercial Court."
+    },
+    "article22": {
+      "title": "Article 22. Refusal",
+      "p1": "The Service Provider reserves the right not to accept an Order from the Client where the Service Provider has previously encountered payment issues (non-payment or late payment) with the Client in connection with one or more previous Order(s)."
+    },
+    "article23": {
+      "title": "Article 23. Subcontracting",
+      "p1": "The Service Provider may subcontract all or part of the performance of the Services to subcontractors. In such case, the Service Provider remains responsible for the performance of the Services to the Client."
+    },
+    "article24": {
+      "title": "Article 24. General Provisions",
+      "documentsAnterieurs": {
+        "title": "a) Prior Documents or Other Agreements",
+        "p1": "The Contract supersedes any prior document and any other written or verbal agreement relating to the same subject matter, with the exception of the quote and the Order, and prevails over any contrary provision that may be contained in documents originating from the Client."
+      },
+      "autonomieClauses": {
+        "title": "b) Severability",
+        "p1": "If any provision of these GTC, or its application to any person or circumstance, is held to be invalid, such invalidity will not affect the other provisions or applications of these GTC, which will remain in effect independently of the provision held invalid. To this end, the provisions of these GTC are deemed severable."
+      },
+      "notification": {
+        "title": "c) Notice",
+        "p1": "Any notice must be made in writing and either delivered by hand, sent by registered letter with acknowledgment of receipt, or served by extrajudicial process to the address indicated in the order."
+      },
+      "langue": {
+        "title": "d) Language of the Contract",
+        "p1": "The Contract is drafted in French. A translation into a foreign language may be provided for informational purposes. In the event of any discrepancy, only the French version will be binding between the Parties."
       }
     }
   },
+  
   "Profile": {
     "title": "Profile Settings",
     "subtitle": "Manage your account information and preferences",
