@@ -8,81 +8,58 @@ import '../fonts.css';
 export default function MentionsLegales() {
   const t = useTranslations('LegalMentions');
 
+  const renderParagraphs = (text) =>
+    text.split('\n\n').map((paragraph, index) => (
+      <p key={index} className="text-slate-700 leading-8 text-justify mb-3 font-[maison-neue-book]">
+        {paragraph}
+      </p>
+    ));
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <HeaderAndBreadcrumbs />
-      
-      {/* Main Content */}
+
       <main className="flex-1 max-w-4xl mx-auto px-6 lg:px-8 py-16 w-full">
         <h1 className="text-4xl font-bold text-slate-900 mb-12 font-[agrandir]">{t('title')}</h1>
 
-        {/* Utilisation du site */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('siteUse.title')}</h2>
-          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">
-            {t('siteUse.body')}
-          </p>
-        </section>
-
-        {/* Éditeur du site */}
+        {/* Identification de l'éditeur */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('publisher.title')}</h2>
-          <p className="text-slate-700 font-semibold mb-4">{t('publisher.company')}</p>
-          <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              {t('publisher.line1')}
-              <br />
-              {t('publisher.line2')}
-              <br />
-              {t('publisher.line3')}
-              <br />
-              {t('publisher.line4')}
-              <br />
-              {t('publisher.line5')}
-              <br />
-              <span className="font-semibold">{t('publisher.emailLabel')}</span>{' '}
-              <a href="mailto:contact@crunchyvita.com" className="text-green-600 hover:text-green-700">
-                contact@crunchyvita.com
-              </a>
-            </p>
-          </div>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('publisher.intro')}</p>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('publisher.director')}</p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">{t('publisher.contact')}</p>
         </section>
 
-        {/* Directeur de la publication */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('director.title')}</h2>
-          <p className="text-slate-700 font-[maison-neue-book]">
-            {t('director.body')}
-          </p>
-        </section>
-
-        {/* Hébergeur du site */}
+        {/* Hébergeur du site internet */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('host.title')}</h2>
-          <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              {t('host.intro')}{' '}
-              <span className="text-slate-700 mb-2 font-semibold">{t('host.name')}</span>
-            </p>
-            <p className="text-slate-700 mb-2 font-[maison-neue-book] ">
-              {t('host.address1')}
-            </p>
-            <p className="text-slate-700 mb-2 font-[maison-neue-book]">
-              {t('host.address2')}
-            </p>
-            <p className="text-slate-700 mb-4 font-[maison-neue-book]">
-              {t('host.phone')}
-            </p>
-            <p className="text-slate-700">
-              <span className="font-semibold">{t('host.websiteLabel')}</span>{' '}
-              <a href="https://www.ovhcloud.com" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700">
-                www.ovhcloud.com
-              </a>
-            </p>
-          </div>
+          <p className="text-slate-700 leading-relaxed mb-2 font-[maison-neue-book]">{t('host.intro')}</p>
+          <p className="text-slate-700 leading-relaxed mb-2 font-[maison-neue-book]">{t('host.email')}</p>
+          <p className="text-slate-700 leading-relaxed font-[maison-neue-book]">{t('host.phone')}</p>
         </section>
 
-      
+        {/* Cookies */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('cookies.title')}</h2>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('cookies.intro')}</p>
+          <div className="mb-4">{renderParagraphs(t('cookies.definition'))}</div>
+          <p className="text-slate-700 leading-relaxed mb-4 italic font-[maison-neue-book]">{t('cookies.source')}</p>
+          <div>{renderParagraphs(t('cookies.purpose'))}</div>
+        </section>
+
+        {/* Respect de la propriété intellectuelle */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">
+            {t('intellectualProperty.title')}
+          </h2>
+          <div>{renderParagraphs(t('intellectualProperty.body'))}</div>
+        </section>
+
+        {/* Liens hypertextes */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('hyperlinks.title')}</h2>
+          <div>{renderParagraphs(t('hyperlinks.body'))}</div>
+        </section>
       </main>
 
       <Footer />

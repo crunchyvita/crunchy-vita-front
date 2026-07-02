@@ -532,115 +532,178 @@
       "itemQuantity": "Quantite : {count}"
     }
   },
-  "LegalMentions": {
-    "title": "Mentions legales",
-    "siteUse": {
-      "title": "Utilisation du site",
-      "body": "L'acces et l'utilisation du site www.crunchyvita.com sont soumis au respect des Conditions Generales de Vente, des presentes Mentions legales et de la Politique de Confidentialite."
-    },
-    "publisher": {
-      "title": "Editeur du site",
-      "company": "ALTEORA",
-      "line1": "Societe par actions simplifiee au capital de 25 000 euros",
-      "line2": "Immatriculee au Registre du Commerce et des Societes d'Antibes sous le numero 903 112 952",
-      "line3": "Siege social: 1460 Chemin des Terriers Batiment B-04 06600 Antibes, France",
-      "line4": "Numero de l'IVA intracommunautaire : FR0793531952",
-      "line5": "Telephone : +33 7 45 15 07 88",
-      "emailLabel": "E-mail :"
-    },
-    "director": {
-      "title": "Directeur de la publication",
-      "body": "Le directeur de la publication est Monsieur HOUSSEM BEN MESSAOUD."
-    },
-    "host": {
-      "title": "Hebergeur du site",
-      "intro": "Le site www.crunchyvita.com est heberge par :",
-      "name": "OVHcloud",
-      "address1": "2 rue Kellermann",
-      "address2": "59100 Roubaix - France",
-      "phone": "Telephone : 1007",
-      "websiteLabel": "Site web :"
-    }
+"LegalMentions": {
+  "title": "Mentions légales",
+  "publisher": {
+    "title": "Identification de l'éditeur",
+    "intro": "Le site crunchyvita (ci-après « le Site »), accessible à l'adresse https://www.crunchyvita.com/fr/ est édité par la société Alteora (ci-après « l'Éditeur »), SAS au capital de 10 000,0 euros, dont le siège social est situé 1460 Chemin des Terriers, 06600 Antibes, France. Il est immatriculé au RCS de Antibes sous le numéro 993112952. TVA intracommunautaire n° FR 67993112952.",
+    "director": "Directeur de la publication : Houssem BEN MESSAOUD",
+    "contact": "L'Éditeur peut être contacté à l'adresse mail contact@crunchyvita.com ou au numéro 07 45 15 07 88."
   },
-  "PrivacyPolicy": {
-    "title": "Politique de Confidentialite",
-    "intro": "La presente Politique de confidentialite aborde la maniere dont vos informations personnelles sont recueillies, utilisees et partagees lorsque vous consultez le site crunchyvita.com ou y effectuez un achat.",
-    "collected": {
-      "title": "Informations personnelles recueillies",
-      "p1": "Lorsque vous visitez le site, nous collectons automatiquement certaines informations concernant votre appareil, notamment votre navigateur web, votre adresse IP, votre fuseau horaire ainsi que certains cookies installes sur votre appareil.",
-      "p2": "En outre, lors de votre navigation, nous recueillons des informations sur :",
+  "host": {
+    "title": "Hébergeur du site internet",
+    "intro": "Le site crunchyvita est hébergé par OVH, 2 Rue Kellermann, 59100 Roubaix, France.",
+    "email": "L'hébergeur est joignable par mail à l'adresse suivante : dpo@ovh.com.",
+    "phone": "Il est également joignable au numéro suivant : 09 72 10 10 07."
+  },
+  "cookies": {
+    "title": "Cookies",
+    "intro": "Le Site peut avoir recours à la technique des « cookies » telle que définie par la CNIL de la manière suivante :",
+    "definition": "« Un cookie est un petit fichier stocké par un serveur dans le terminal (ordinateur, téléphone, etc.) d'un utilisateur et associé à un domaine web (c'est-à-dire dans la majorité des cas à l'ensemble des pages d'un même site web). Ce fichier est automatiquement renvoyé lors de contacts ultérieurs avec le même domaine.\n\nLes cookies ont de multiples usages : ils peuvent servir à mémoriser votre identifiant client auprès d'un site marchand, le contenu courant de votre panier d'achat, la langue d'affichage de la page web, un identifiant permettant de tracer votre navigation à des fins statistiques ou publicitaires, etc. »",
+    "source": "Information issue du site officiel de la CNIL (https://www.cnil.fr/fr/glossaire)",
+    "purpose": "Ces cookies ont pour objectif de faciliter la navigation de l'utilisateur et d'améliorer la qualité du service proposé, en collectant des informations statistiques et relatives au trafic.\n\nL'utilisation de ces cookies est portée à la connaissance de l'utilisateur par le biais d'un bandeau lui demandant son consentement. Si l'utilisateur y consent, ce consentement est considéré comme valide pour une durée maximale de treize (13) mois.\n\nSi l'utilisateur ne consent pas à l'utilisation des cookies, l'Éditeur ne pourra lui garantir une expérience optimale sur le Site.\n\nLes cookies suivants sont utilisés sur le Site : guestId."
+  },
+  "intellectualProperty": {
+    "title": "Respect de la propriété intellectuelle",
+    "body": "Toutes les marques, photographies, textes, commentaires, illustrations, images animées ou non, séquences vidéo, sons, ainsi que toutes les applications informatiques qui pourraient être utilisées pour faire fonctionner le Site, et plus généralement tous les éléments reproduits ou utilisés sur le Site, sont protégés par les lois en vigueur au titre de la propriété intellectuelle.\n\nIls sont la propriété pleine et entière de l'Éditeur ou de ses partenaires, sauf mentions particulières. Toute reproduction, représentation, utilisation ou adaptation, sous quelque forme que ce soit, de tout ou partie de ces éléments, y compris les applications informatiques, sans l'accord préalable et écrit de l'Éditeur, sont strictement interdites. Le fait pour l'Éditeur de ne pas engager de procédure dès la prise de connaissance de ces utilisations non autorisées ne vaut pas acceptation desdites utilisations et renonciation aux poursuites.\n\nSeule l'utilisation pour un usage privé dans un cercle de famille est autorisée et toute autre utilisation est constitutive de contrefaçon et/ou d'atteinte aux droits voisins, sanctionnées par le Code de la propriété intellectuelle.\n\nLa reprise de tout ou partie de ce contenu nécessite l'autorisation préalable de l'Éditeur ou du titulaire des droits sur ce contenu."
+  },
+  "hyperlinks": {
+    "title": "Liens hypertextes",
+    "body": "Le Site peut contenir des liens hypertextes donnant accès à d'autres sites web édités et gérés par des tiers et non par l'Éditeur. L'Éditeur ne pourra être tenu responsable directement ou indirectement dans le cas où lesdits sites tiers ne respecteraient pas les dispositions légales.\n\nLa création de liens hypertextes vers le Site ne peut être faite qu'avec l'autorisation écrite et préalable de l'Éditeur."
+  }
+},
+ "PrivacyPolicy": {
+    "title": "Politique de confidentialité de crunchyvita",
+    "updated": "Document mis à jour le 26/06/2026",
+    "intro": {
+      "p1": "Alteora (« Alteora », « notre », « nous » et « nos ») et nos partenaires respectent votre vie privée. Nous vous demandons de bien vouloir lire attentivement la présente politique de confidentialité pour comprendre comment sont collectées, traitées et conservées vos données personnelles lors de votre utilisation du présent site internet crunchyvita, accessible via l'url https://www.crunchyvita.com/fr.",
+      "p2": "Le terme « données personnelles » désigne toute information se rapportant à une personne physique et permettant de l'identifier, directement ou indirectement, à partir d'une seule donnée ou du croisement d'un ensemble de données. Cela inclut des éléments comme le nom, l'adresse, l'adresse e-mail, les données de localisation, les identifiants en ligne, etc.",
+      "p3": "L'ensemble des données personnelles collectées sur le présent site internet sont traitées sous la responsabilité de la société Alteora, SAS au capital social de 10 000 €, immatriculée au Registre du Commerce et des Sociétés de Antibes sous le numéro 993112952, et ayant son siège social 1460 Chemin des Terriers, 06600 Antibes, France et dans le respect de la loi n° 78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés, dans sa version actuelle, ainsi que le règlement (UE) 2016/679 du 27 avril 2016 relatif à la protection des personnes physiques à l'égard du traitement des données à caractère personnel et à la libre circulation de ces données.",
+      "p4": "Au sens de la réglementation applicable aux données personnelles, Alteora est donc responsable de traitement."
+    },
+    "toc": {
+      "title": "Cette politique de confidentialité décrit :",
       "items": {
-        "item1": "Les pages visitees (produits consultes)",
-        "item2": "Les sites ou termes de recherche qui vous ont conduit vers le site",
-        "item3": "La maniere dont vous interagissez avec le site"
+        "item1": "Comment Alteora utilise vos données personnelles",
+        "item2": "Comment Alteora partage vos données personnelles",
+        "item3": "Comment Alteora protège vos données personnelles",
+        "item4": "Où Alteora héberge et transfère vos données personnelles",
+        "item5": "Comment vous pouvez exercer vos droits relatifs à vos données personnelles",
+        "item6": "Les mises à jour de la politique de confidentialité",
+        "item7": "Comment nous contacter"
       }
     },
-    "cookies": {
-      "title": "Cookies utilises",
-      "required": {
-        "title": "1. Cookies strictement necessaires",
-        "body": "Ces cookies sont indispensables au fonctionnement du site et du processus de commande. Ils ne necessitent pas de consentement prealable."
+    "section1": {
+      "title": "I. Comment Alteora utilise vos données personnelles",
+      "intro": "Alteora peut utiliser vos données personnelles aux fins suivantes :",
+      "items": {
+        "item1": "créer votre compte client sur le présent site internet",
+        "item2": "gérer les commandes de produits et/ou services",
+        "item3": "procéder aux actions nécessaires à la gestion de contrats, factures et suivi de la relation client",
+        "item4": "publier et gérer vos avis et/ou commentaires laissés sur le site internet",
+        "item5": "répondre à votre demande de contact effectuée à partir de notre site internet",
+        "item6": "établir un programme de fidélité",
+        "item7": "vous proposer des publicités et un contenu adapté",
+        "item8": "constituer un fichier d'utilisateurs, de prospects et de clients",
+        "item9": "élaborer des statistiques commerciales et de fréquentation",
+        "item10": "gérer les impayés et litiges éventuels",
+        "item11": "respecter nos obligations légales"
       },
-      "technical": {
-        "title": "2. Cookies techniques",
-        "body": "Ces cookies assurent le fonctionnement general du site (navigation, securite, acces aux espaces securises)."
-      },
-      "analytics": {
-        "title": "3. Cookies de mesure d'audience",
-        "body": "Ces cookies permettent d'analyser la frequentation du site afin d'en ameliorer les performances. Ils ne sont disposes qu'apres consentement de l'utilisateur."
-      },
-      "marketing": {
-        "title": "4. Cookies marketing",
-        "body": "Ces cookies peuvent etre utilises a des fins publicitaires ou de remarketing. Ils sont disposes uniquement avec le consentement explicite de l'utilisateur."
+      "p1": "Les données collectées sont nécessaires à l'exécution du contrat passé avec Alteora lorsque vous utilisez notre site internet afin de commander les produits et/ou services disponibles à la vente sur le site.",
+      "p2": "Lorsque vous nous fournissez volontairement des données personnelles, la collecte de vos données personnelles est fondée sur l'intérêt légitime suivant : mieux répondre à vos demandes d'information.",
+      "p3": "Le traitement de vos données personnelles afin de vous envoyer notre newsletter est, en revanche, basé uniquement sur votre consentement à recevoir notre newsletter, que vous pouvez retirer à tout moment. Si vous ne consentez pas à l'envoi de la newsletter, veuillez noter que cela ne vous empêchera pas de créer votre compte client et de passer des commandes sur notre site internet.",
+      "legalBasis": {
+        "title": "Base légale",
+        "intro": "Le traitement de vos données repose sur :",
+        "items": {
+          "item1": "votre consentement (article 6(1)(a) du règlement européen 2016/679 (règlement général sur la protection des données - RGPD) pour l'envoi de la newsletter,",
+          "item2": "sur l'exécution d'un contrat ou de mesures précontractuelles (article 6(1)(b) du RGPD), lorsqu'il s'agit de vous fournir des produits ou services via notre site.",
+          "item3": "Certains traitements peuvent également reposer sur l'article 6(1)(f) du RGPD, lorsque le traitement est nécessaire aux fins des intérêts légitimes poursuivis par Alteora sauf si les droits et libertés fondamentaux de la personne concernée prévalent. Cela peut notamment concerner l'amélioration de nos services, la gestion de la relation client ou la lutte contre la fraude."
+        }
       }
     },
-    "cookieManagement": {
-      "title": "Gestion et parametrage des cookies",
-      "p1": "Lors de votre premiere visite sur le site, un bandeau de gestion des cookies vous informe de l'utilisation et vous permet d'accepter tous les cookies, de refuser les non necessaires ou de personnaliser vos preferences.",
-      "p2": "Vous pouvez modifier vos choix a tout moment via le lien \"Gerer mes cookies\" disponible sur le site.",
-      "p3": "Duree de conservation : les cookies sont conserves pour une duree maximale de 13 mois, conformement aux recommandations de la CNIL."
-    },
-    "use": {
-      "title": "Utilisation des informations personnelles",
-      "intro": "Nous utilisons vos informations personnelles pour :",
+    "section2": {
+      "title": "II. Comment Alteora partage vos données personnelles",
+      "p1": "Au sein de Alteora, et au regard de chaque finalité de traitement, les données personnelles vous concernant sont collectées, traitées et stockées par le personnel habilité de Alteora, uniquement dans le cadre de leurs compétences respectives, et notamment par le service client, le département marketing et le département informatique.",
+      "p2": "Nous ne partageons pas les données personnelles avec d'autres entreprises, organisations et personnes, à moins que l'une des circonstances suivantes s'applique :",
       "items": {
-        "item1": "Traiter vos commandes (paiement, expedition, facturation, confirmation)",
-        "item2": "Communiquer avec vous",
-        "item3": "Evaluer les fraudes ou risques potentiels",
-        "item4": "Vous transmettre, si vous l'avez accepte, des informations sur nos offres relatives a nos produits et services"
-      }
-    },
-    "sharing": {
-      "title": "Partage des informations personnelles",
-      "intro": "Nous partageons vos informations personnelles avec des tiers qui nous aident dans notre traitement :",
-      "items": {
-        "item1": "OVH (hebergement de la boutique en ligne)",
-        "item2": "Google Analytics (analyse de l'utilisation du site)"
-      }
-    },
-    "rights": {
-      "title": "Vos droits",
-      "intro": "Si vous etes resident(e) de l'Espace economique europeen, vous disposez des droits suivants :",
-      "items": {
-        "item1": "Acces a vos informations personnelles",
-        "item2": "Correction, mise a jour ou suppression de vos donnees"
+        "item1": "le partage avec consentement préalable : après avoir obtenu votre consentement, Alteora partagera les informations que vous avez autorisées avec les tiers ou catégories de tiers spécifiques renseignés à l'occasion de la collecte de votre consentement.",
+        "item2": "le partage avec nos prestataires : Alteora peut également divulguer vos informations à des entreprises qui fournissent des services pour nous ou en notre nom. Ces prestataires de services comprennent des entreprises qui proposent des services informatiques tels notamment notre hébergeur ou notre prestataire d'envoi d'emails, des services de livraison de nos produits, ou qui proposent des activités marketing pour notre compte. Ces prestataires de services peuvent utiliser vos informations uniquement dans le but de vous fournir des services au nom de Alteora.",
+        "item3": "en exécution d'une obligation légale, le partage conformément aux lois et à la réglementation : Alteora peut partager vos informations comme le stipulent les lois et la réglementation, afin de résoudre les différends d'ordre juridique, ou comme le stipulent les autorités judiciaires ou administratives en vertu de la loi."
       },
-      "outro": "Pour exercer ces droits, contactez-nous aux coordonnees indiquees ci-dessous."
+      "p3": "Alteora s'assurera de la légalité de tout partage des données personnelles via des clauses de traitement de données avec les entreprises avec lesquelles vos données personnelles sont partagées, les obligeant à se conformer à cette politique de confidentialité et à prendre les mesures de sécurité et confidentialité appropriées lors du traitement de données à caractère personnel."
     },
-    "contact": {
-      "title": "Nous contacter",
-      "body": "Pour toute question, plainte, reclamation ou demande liee a vos donnees personnelles, vous pouvez nous ecrire a :"
-    },
-    "mobileApp": {
-      "title": "Application Mobile",
-      "intro": "Cette politique s'applique également à l'application mobile CrunchyVita. L'application peut collecter les données suivantes :",
+    "section3": {
+      "title": "III. Comment Alteora protège vos données personnelles",
+      "p1": "Alteora attache une grande importance à la sécurité de vos données personnelles et a adopté des pratiques courantes de l'industrie afin de protéger vos données personnelles et d'éviter l'accès non autorisé, la divulgation, l'utilisation, la modification, les dommages ou la perte de ces informations.",
+      "p2": "Nous avons par ailleurs pris les précautions utiles afin de préserver, par notre hébergeur, la sécurité et la confidentialité des données, et notamment empêcher qu'elles ne soient déformées, endommagées ou communiquées à des personnes non autorisées.",
+      "intro": "Alteora adopte également les mesures organisationnelles suivantes :",
       "items": {
-        "item1": "Informations de compte (nom, adresse e-mail, mot de passe)",
-        "item2": "Photos de profil (uniquement avec votre autorisation explicite)",
-        "item3": "Autorisation d'envoi de notifications push (uniquement avec votre autorisation)",
-        "item4": "Données de localisation (uniquement avec votre autorisation  afin de localiser les points relais à proximité)"
+        "item1": "nous adoptons des mesures raisonnables et réalisables afin de veiller à ce que les données personnelles recueillies soient minimes et pertinentes selon ce qui est nécessaire, eu égard aux fins pour lesquelles elles sont traitées ;",
+        "item2": "nous conservons vos données personnelles pendant la durée qui est strictement nécessaire au regard de la finalité du traitement, à moins que la conservation de vos données soit requise ou permise par la loi. À titre d'exemple, nous conservons les données liées à l'exécution de vos commandes pour la durée requise par la loi au titre de conservation des dossiers comptables, à savoir au maximum 10 ans à compter de l'exercice concerné ; et",
+        "item3": "nous déployons les mécanismes de contrôle d'accès afin de s'assurer que seul le personnel habilité peut accéder à vos données personnelles ;"
       },
-      "stripe": "Les paiements sont traités de manière sécurisée par Stripe. Nous ne stockons pas vos coordonnées bancaires sur nos serveurs."
+      "outro": "en cas de violation des données personnelles, Alteora respectera les exigences légales et réglementaires applicables à la notification des violations de données personnelles auprès des autorités de contrôle compétentes et/ou des personnes concernées."
+    },
+    "section4": {
+      "title": "IV. Où Alteora héberge et transfère vos données personnelles",
+      "p1": "Vos données personnelles seront hébergées au sein des infrastructures d'hébergement de notre hébergeur, OVH, situé en France."
+    },
+    "section5": {
+      "title": "V. Comment vous pouvez gérer vos droits relatifs à vos données personnelles",
+      "p1": "Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition concernant le traitement de vos données personnelles ainsi que du droit de définir des directives relatives au sort de vos données après votre mort et du droit à la portabilité de vos données personnelles.",
+      "p2": "La CNIL définit une donnée personnelle comme « toute information se rapportant à une personne physique identifiée ou identifiable. Mais parce qu'elles concernent des personnes, celles-ci doivent en conserver la maîtrise ».",
+      "p3": "Vous disposez également d'un droit de recours auprès de la Commission Nationale Informatique et Libertés pour la France et auprès d'une autorité de contrôle compétente pour tout autre État membre selon votre résidence habituelle, votre lieu de travail ou le lieu où la violation de vos droits aurait été commise si vous estimez que le traitement de vos données ne respecte pas les textes applicables. Ce recours pourra être exercé sans préjudice de tout autre recours devant une juridiction administrative ou juridictionnelle qui constitue également un droit dont vous disposez.",
+      "p4": "Vous pouvez nous contacter à tout moment aux adresses indiquées dans la rubrique « Comment nous contacter » ci-dessous afin d'exercer vos droits en matière de données personnelles dans les conditions posées par la réglementation applicable. Vous devez indiquer quel droit vous entendez exercer ainsi que l'ensemble des précisions nécessaires pour que nous puissions répondre à votre demande.",
+      "p5": "Ces droits s'exercent dans les conditions posées par la réglementation applicable.",
+      "rights": {
+        "access": {
+          "title": "Le droit d'accès",
+          "body": "signifie que vous pouvez nous demander à tout moment de vous indiquer si nous traitons des données personnelles vous concernant et, le cas échéant, de vous indiquer quelles sont les données personnelles concernées ainsi que les caractéristiques du ou des traitements effectués."
+        },
+        "rectification": {
+          "title": "Le droit de rectification",
+          "body": "signifie que vous pouvez nous demander la rectification de vos données personnelles lorsqu'elles sont inexactes. Vous pouvez également demander à ce que vos données personnelles, dès lors qu'incomplètes, soient complétées dans la mesure où cela est pertinent au regard de la finalité du traitement en cause."
+        },
+        "erasure": {
+          "title": "Le droit à l'effacement",
+          "intro": "signifie que vous pouvez demander d'effacer vos données personnelles notamment lorsque :",
+          "items": {
+            "item1": "leur conservation n'est plus nécessaire au regard des finalités pour lesquelles elles ont été collectées ;",
+            "item2": "vos données personnelles sont traitées sur le fondement de votre consentement, vous souhaitez retirer ce consentement, et il n'existe pas d'autre fondement juridique susceptible de justifier le traitement ;",
+            "item3": "vous vous êtes opposé au traitement de vos données personnelles et vous souhaitez en conséquence qu'elles soient effacées ;",
+            "item4": "vos données personnelles ont fait l'objet d'un traitement illicite ;",
+            "item5": "vos données personnelles doivent être effacées pour respecter une obligation légale qui est prévue soit par le droit de l'Union Européenne soit par le droit français."
+          }
+        },
+        "limitation": {
+          "title": "Le droit à la limitation",
+          "intro": "signifie que vous pouvez nous demander de procéder à la limitation du traitement de vos données personnelles :",
+          "items": {
+            "item1": "lorsque vous contestez l'exactitude de vos données personnelles pendant une durée nous permettant de vérifier l'exactitude de celles-ci ;",
+            "item2": "lorsque suite à un traitement établi comme non conforme, vous préférez la limitation du traitement à l'effacement complet de vos données personnelles ;",
+            "item3": "lorsque nous n'avons plus besoin de vos données personnelles aux fins du traitement mais que celles-ci vous sont encore nécessaires pour la constatation, l'exercice ou la défense de droits en justice ;",
+            "item4": "lorsque vous vous êtes opposé au traitement de vos données personnelles et vous souhaitez une limitation du traitement pendant la durée nous permettant de vérifier si le motif légitime que vous invoquez se justifie."
+          },
+          "outro": "La limitation du traitement signifie que le traitement de vos données personnelles s'entendra alors du seul stockage de vos données personnelles correspondantes. Nous n'effectuerons alors plus aucune autre opération sur les données personnelles considérées."
+        },
+        "opposition": {
+          "title": "Le droit d'opposition",
+          "body": "signifie que vous pouvez vous opposer au traitement de vos données personnelles, lorsque ce traitement est fondé sur la poursuite de l'intérêt légitime de Alteora. Le droit d'opposition s'exerce sous réserve de justifier d'un motif légitime tenant à votre situation particulière. Nous cesserons alors le traitement en cause sauf s'il existe des motifs légitimes et impérieux en justifiant la poursuite en conformité avec la réglementation applicable."
+        },
+        "postMortem": {
+          "title": "Le droit de définir des directives relatives au sort de vos données après votre mort",
+          "body": "vous permet de faire connaître vos instructions concernant la conservation, l'effacement et la communication de vos données personnelles après votre décès."
+        },
+        "portability": {
+          "title": "Le droit à la portabilité",
+          "body": "signifie que vous pouvez nous demander, dans les conditions posées par la réglementation applicable, de recevoir vos données personnelles dans un format structuré, couramment utilisé et lisible par machine, et de vous les transmettre, ou de nous demander de les transmettre directement à un tiers de votre choix lorsque cela est juridiquement et techniquement possible."
+        }
+      },
+      "p6": "Lorsque nous traitons vos données personnelles sur la base de votre consentement, vous disposez enfin de la faculté de retirer votre consentement à tout moment en vous adressant aux adresses indiquées dans la rubrique « Comment nous contacter » ou en cliquant sur le lien de désabonnement présent dans chacune de nos communications.",
+      "p7": "Toutefois, le retrait de votre consentement ne remet pas en cause la validité du traitement effectué avant ce retrait."
+    },
+    "section6": {
+      "title": "VI. Les mises à jour de cette politique de confidentialité",
+      "p1": "Alteora se réserve le droit à tout moment de modifier ou mettre à jour, en tout ou en partie, la présente politique de confidentialité, en raison de la modification de la réglementation applicable en matière de protection des données personnelles ou des traitements de données effectués.",
+      "p2": "Toute modification substantielle de la politique de confidentialité vous sera notifiée par e-mail lorsque vous nous avez communiqué une adresse mail valide et sera publiée sur le site internet. Nous vous recommandons de prendre régulièrement connaissance de la présente politique de confidentialité afin d'avoir une parfaite connaissance de nos engagements en matière de sécurité et de protection de vos données personnelles."
+    },
+    "section7": {
+      "title": "VII. Comment nous contacter",
+      "p1": "Si vous avez des questions, des commentaires ou des suggestions, veuillez nous contacter en visitant la page contactez-nous ou en les soumettant à contact@crunchyvita.com.",
+      "p2": "Vous pouvez également nous écrire par courrier postal à : Alteora, 1460 Chemin des Terriers, 06600 Antibes, France.",
+      "p3": "Si vous n'êtes pas satisfait de la réponse apportée par Alteora à une demande d'exercice de droits conformément à l'article V ci-dessus ou que vous souhaitez signaler une atteinte à la réglementation applicable en matière de protection des données, vous disposez du droit d'introduire une réclamation auprès de la CNIL par courrier (CNIL - 3 Place de Fontenoy - TSA 80715 - 75334 PARIS CEDEX 07) ou sur son site Internet (www.cnil.fr), ou auprès de l'autorité de protection des données du pays dans lequel vous résidez ou travaillez habituellement.",
+      "email": "contact@crunchyvita.com"
     }
   },
   "ShippingPolicy": {
