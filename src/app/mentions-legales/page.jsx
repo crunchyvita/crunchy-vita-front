@@ -1,5 +1,4 @@
 'use client';
-
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { useTranslations } from 'next-intl';
