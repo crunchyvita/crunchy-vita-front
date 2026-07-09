@@ -174,10 +174,3 @@ The API client is configured in `src/lib/api.js`:
 
 
 
-## License
-
-Proprietary - All rights reserved
-
-## Support
-
-For issues and questions, contact the development team.
