@@ -34,6 +34,11 @@ export const metadata = {
   alternates: {
     canonical: "https://www.crunchyvita.com",
   },
+  verification: {
+    other: {
+      "facebook-domain-verification": "9ld5api4kva9efydx8d9f4d1rjz6kz",
+    },
+  },
   openGraph: {
     title: "Crunchy Vita – Fruits Lyophilisés Naturels",
     description:
