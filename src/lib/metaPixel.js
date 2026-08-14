@@ -15,6 +15,7 @@ export function trackMetaPixelEvent(eventName, metaContentId, params = {}) {
     content_type: "product",
     content_ids: [metaContentId],
     ...params,
+    ...(params.currency ? { currency: params.currency.toUpperCase() } : {}),
   });
 }
 
@@ -46,5 +47,6 @@ export function trackMetaPurchaseEvent(items, params = {}) {
     content_type: "product",
     content_ids: contentIds,
     ...params,
+    ...(params.currency ? { currency: params.currency.toUpperCase() } : {}),
   });
 }
