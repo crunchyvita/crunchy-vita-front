@@ -20,6 +20,7 @@ import AddedToCartModal from '@/components/AddedToCartModal';
 import NutritionTable from '@/components/NutritionTable';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslatedProduct } from '@/lib/productTranslations';
+import { trackMetaPixelEvent } from '@/lib/metaPixel';
 import { hasNutritionData } from '@/lib/nutrition';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
@@ -275,6 +276,14 @@ export default function ProductDetailPage() {
     return 0;
   }, [product]);
 
+  useEffect(() => {
+    if (!product?._id) return;
+    trackMetaPixelEvent('ViewContent', product.metaContentId, {
+      value: productPrice,
+      currency: 'eur',
+    });
+  }, [product?._id, product?.metaContentId, productPrice]);
+
   const availableStock = useMemo(() => {
     if (!product || !product.stock) {
       console.log('[useMemo availableStock] No product or stock, returning 0');
@@ -353,7 +362,12 @@ export default function ProductDetailPage() {
       setTimeout(() => setShowStockAlert(false), 3000);
       return;
     }
-    
+
+    trackMetaPixelEvent('AddToCart', product.metaContentId, {
+      value: productPrice * quantity,
+      currency: 'eur',
+    });
+
     setAddedToCart(true);
     
     // Show cart modal instead of redirecting

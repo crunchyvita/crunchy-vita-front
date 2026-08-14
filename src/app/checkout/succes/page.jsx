@@ -7,6 +7,7 @@ import Link from 'next/link';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { paymentAPI } from '@/lib/api';
+import { trackMetaPurchaseEvent } from '@/lib/metaPixel';
 import { useAuth } from '@/context/AuthContext';
 import { CheckCircle2, Gift } from 'lucide-react';
 
@@ -136,6 +137,17 @@ export default function CheckoutSuccessPage() {
   const total = display?.totalAmount ?? data?.totalAmount ?? 0;
   /** Sans `displayAmounts`, les montants restent en EUR catalogue même si `currency` Stripe était autre (anciennes commandes). */
   const currency = display?.currency ?? 'eur';
+
+  useEffect(() => {
+    const orderId = data?.orderId;
+    if (!orderId || typeof window === 'undefined') return;
+
+    const dedupeKey = `meta_purchase_fired_${orderId}`;
+    if (sessionStorage.getItem(dedupeKey)) return;
+
+    trackMetaPurchaseEvent(items, { value: total, currency });
+    sessionStorage.setItem(dedupeKey, '1');
+  }, [data?.orderId, items, total, currency]);
 
   const shipName = String(data?.customerName || '').trim() || '—';
 

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/navigation';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { useCart } from '@/hooks/useCart';
+import { trackMetaPixelEvent } from '@/lib/metaPixel';
 import {
   X, ChevronLeft, ChevronRight, Plus, Minus,
   ShoppingCart, Heart, ShieldCheck, Truck,
@@ -103,6 +104,14 @@ export default function ProductDetailModal({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || !product?._id) return;
+    trackMetaPixelEvent('ViewContent', product.metaContentId, {
+      value: productPrice,
+      currency: 'eur',
+    });
+  }, [isOpen, product?._id, product?.metaContentId, productPrice]);
+
   if (!isOpen || !product) return null;
 
   // Handlers
@@ -125,6 +134,11 @@ export default function ProductDetailModal({
       setTimeout(() => setShowStockAlert(false), 3000);
       return;
     }
+
+    trackMetaPixelEvent('AddToCart', product.metaContentId, {
+      value: productPrice * quantity,
+      currency: 'eur',
+    });
 
     // Show success message
     setAddedToCart(true);
