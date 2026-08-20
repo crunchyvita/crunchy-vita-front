@@ -6,6 +6,7 @@ import { Heart, Loader2, AlertCircle, ShoppingCart, Package, ArrowRight, Star } 
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
+import { getPreviousPrice } from '@/lib/productPricing';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale, useTranslations } from 'next-intl';
 import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
@@ -262,7 +263,14 @@ export default function FavoritesPage() {
                                                     <div className="mb-3">
                                                         <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
                                                         <div className="flex items-center justify-between">
-                                                            <h4 className="font-black text-[#E10C69] text-xl">{price.toFixed(2)} €</h4>
+                                                            <div className="flex items-baseline gap-2">
+                                                                <h4 className="font-black text-[#E10C69] text-xl">{price.toFixed(2)} €</h4>
+                                                                {getPreviousPrice(product) && (
+                                                                    <span className="text-sm text-gray-400 line-through">
+                                                                        {getPreviousPrice(product).toFixed(2)} €
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
 

@@ -6,6 +6,7 @@ import { useRouter } from '@/navigation';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { useCart } from '@/hooks/useCart';
 import { trackMetaPixelEvent } from '@/lib/metaPixel';
+import { getPreviousPrice } from '@/lib/productPricing';
 import {
   X, ChevronLeft, ChevronRight, Plus, Minus,
   ShoppingCart, Heart, ShieldCheck, Truck,
@@ -286,6 +287,11 @@ export default function ProductDetailModal({
 
             <p className="text-xl sm:text-3xl font-black text-[#E10c69] mb-3 sm:mb-6 font-[Erica One]">
               {productPrice.toFixed(2)} €
+              {getPreviousPrice(product) && (
+                <span className="text-sm sm:text-base text-gray-400 line-through font-medium ml-1.5 sm:ml-2">
+                  {getPreviousPrice(product).toFixed(2)} €
+                </span>
+              )}
               <span className="text-[11px] sm:text-sm text-gray-400 font-medium ml-1.5 sm:ml-2 uppercase font-[Maison Neue Book]">{t('perUnit')}</span>
             </p>
 

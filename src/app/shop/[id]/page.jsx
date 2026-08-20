@@ -21,6 +21,7 @@ import NutritionTable from '@/components/NutritionTable';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import { trackMetaPixelEvent } from '@/lib/metaPixel';
+import { getPreviousPrice } from '@/lib/productPricing';
 import { hasNutritionData } from '@/lib/nutrition';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 
@@ -786,9 +787,9 @@ export default function ProductDetailPage() {
                 <span className="text-3xl sm:text-4xl font-[Agrandir] font-bold text-[#E10c69]">
                   {productPrice.toFixed(2)} €
                 </span>
-                {product.originalPrice && Number(product.originalPrice) > productPrice && (
+                {getPreviousPrice(product) && (
                   <span className="text-sm text-gray-400 line-through">
-                    {Number(product.originalPrice).toFixed(2)} €
+                    {getPreviousPrice(product).toFixed(2)} €
                   </span>
                 )}
               </div>
