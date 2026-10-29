@@ -400,6 +400,15 @@
     "addedToCart": "Ajouté au panier !"
   },
   "ProductDetail": {
+    "meta": {
+      "title": "{name} – sans sucre ajouté",
+      "description": "{name} : fruit lyophilisé bio, 100 % fruit et sans sucre ajouté. {details} Un encas sain et croquant, livré en France.",
+      "category": "Fruits lyophilisés bio"
+    },
+    "related": {
+      "title": "Vous aimerez aussi",
+      "viewProduct": "Voir le produit"
+    },
     "errors": {
       "loginRequired": "Veuillez vous connecter pour soumettre un avis",
       "reviewRequired": "Veuillez fournir une note ou un commentaire (ou les deux)",
@@ -489,6 +498,10 @@
     }
   },
   "PackageDetail": {
+    "meta": {
+      "title": "{name} – coffret de fruits lyophilisés bio",
+      "description": "{name} : coffret de fruits lyophilisés bio et sans sucre ajouté signé Crunchy Vita. {details}"
+    },
     "errors": {
       "loadPack": "Echec du chargement du pack",
       "loadProducts": "Echec du chargement des produits",

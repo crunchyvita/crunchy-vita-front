@@ -4,11 +4,11 @@ import Header from '@/components/header';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 /** Public site: sticky header + breadcrumb strip below (not inside `<nav>`). */
-export default function HeaderAndBreadcrumbs() {
+export default function HeaderAndBreadcrumbs({ currentLabel } = {}) {
   return (
     <>
       <Header />
-      <Breadcrumbs />
+      <Breadcrumbs currentLabel={currentLabel} />
     </>
   );
 }

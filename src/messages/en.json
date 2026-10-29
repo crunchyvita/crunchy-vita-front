@@ -400,6 +400,15 @@
     "addedToCart": "Added to cart!"
   },
   "ProductDetail": {
+    "meta": {
+      "title": "{name} – no added sugar",
+      "description": "{name}: organic freeze-dried fruit, 100% fruit with no added sugar. {details} A healthy, crunchy snack shipped from France.",
+      "category": "Organic freeze-dried fruit"
+    },
+    "related": {
+      "title": "You may also like",
+      "viewProduct": "View product"
+    },
     "errors": {
       "loginRequired": "Please sign in to submit a review",
       "reviewRequired": "Please provide a rating or a comment (or both)",
@@ -489,6 +498,10 @@
     }
   },
   "PackageDetail": {
+    "meta": {
+      "title": "{name} – organic freeze-dried fruit box",
+      "description": "{name}: a box of organic freeze-dried fruit with no added sugar by Crunchy Vita. {details}"
+    },
     "errors": {
       "loadPack": "Failed to load the pack",
       "loadProducts": "Failed to load products",
