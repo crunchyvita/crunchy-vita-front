@@ -7,12 +7,14 @@ import JsonLd from '@/components/seo/JsonLd';
 import { buildMetadata } from '@/lib/seo';
 import { breadcrumbJsonLd } from '@/lib/productSeo';
 import { getPublicProducts } from '@/lib/serverApi';
+import { isComplete } from '@/lib/placeholder';
 
 const PATH = '/fruits-lyophilises-bio';
 // Keys match both the message keys and a word in the French product name.
 const FRUITS = ['fraise', 'mangue', 'banane', 'ananas', 'myrtille'];
 const USES = ['snack', 'breakfast', 'dessert', 'kids'];
-const FAQ_COUNT = 7;
+const FAQ_COUNT = 9;
+const SHIPPING_FAQ = 7;
 
 export async function generateMetadata({ params }) {
   const { locale } = await params;
@@ -31,10 +33,13 @@ export default async function OrganicFreezeDriedFruitPage({ params }) {
     getPublicProducts().catch(() => []),
   ]);
 
-  const faq = Array.from({ length: FAQ_COUNT }, (_, i) => ({
-    question: t(`faq.q${i + 1}`),
-    answer: t(`faq.a${i + 1}`),
-  }));
+  // Answers still marked [À COMPLÉTER] are left out until the real data is filled in.
+  const certifier = t('faq.a4Certifier');
+  const faq = Array.from({ length: FAQ_COUNT }, (_, i) => {
+    const n = i + 1;
+    const answer = n === 4 && isComplete(certifier) ? `${t('faq.a4')} ${certifier}` : t(`faq.a${n}`);
+    return { n, question: t(`faq.q${n}`), answer };
+  }).filter(({ question, answer }) => isComplete(question) && isComplete(answer));
 
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -118,15 +123,15 @@ export default async function OrganicFreezeDriedFruitPage({ params }) {
         <section aria-labelledby="category-faq" className="max-w-3xl">
           <h2 id="category-faq" className={sectionTitle}>{t('faqTitle')}</h2>
           <div className="divide-y divide-[#556822]/10 bg-white rounded-2xl shadow-sm border border-[#E1FBD9]">
-            {faq.map(({ question, answer }, i) => (
-              <details key={i} className="group p-5 sm:p-6">
+            {faq.map(({ n, question, answer }) => (
+              <details key={n} className="group p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-start justify-between gap-4 font-black text-[#556822]">
                   <h3 className="text-base sm:text-lg">{question}</h3>
                   <span aria-hidden="true" className="text-[#E10C69] text-xl leading-none transition-transform group-open:rotate-45">+</span>
                 </summary>
                 <p className="mt-3 text-gray-700 leading-relaxed">
                   {answer}
-                  {i === FAQ_COUNT - 1 && (
+                  {n === SHIPPING_FAQ && (
                     <>
                       {' '}
                       <Link href="/politique-livraison" className="font-bold text-[#E10C69] hover:underline">

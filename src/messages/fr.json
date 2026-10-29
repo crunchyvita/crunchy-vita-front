@@ -1727,12 +1727,17 @@
       "a3": "Non. Nos sachets contiennent uniquement du fruit, sans sucre ajouté, sans conservateur, sans colorant et sans arôme. Le goût sucré vient uniquement des sucres naturellement présents dans le fruit.",
       "q4": "Vos fruits sont-ils bio ?",
       "a4": "Oui, tous nos fruits sont issus de l'agriculture biologique et certifiés bio.",
+      "a4Certifier": "Organisme certificateur : [À COMPLÉTER : nom et code, ex. FR-BIO-XX].",
       "q5": "Comment conserver les fruits lyophilisés ?",
       "a5": "Au sec et à température ambiante. Une fois le sachet ouvert, refermez-le bien ou transférez les fruits dans un bocal hermétique : au contact de l'humidité, ils perdent leur croquant.",
       "q6": "Où sont conditionnés vos fruits ?",
       "a6": "Nos sachets sont conditionnés en France par un ESAT (établissement et service d'aide par le travail) : un choix local, humain et solidaire.",
       "q7": "Comment sont livrées les commandes ?",
-      "a7": "Vous pouvez choisir la livraison en point relais ou à domicile. Les délais et tarifs sont détaillés dans notre politique de livraison."
+      "a7": "Vous pouvez choisir la livraison en point relais ou à domicile. Les délais et tarifs sont détaillés dans notre politique de livraison.",
+      "q8": "D'où viennent vos fruits ?",
+      "a8": "[À COMPLÉTER : pays ou région d'origine de chaque fruit]",
+      "q9": "Combien de temps se conservent vos fruits lyophilisés ?",
+      "a9": "[À COMPLÉTER : durée de conservation (DDM) indiquée sur les sachets]"
     },
     "shippingLink": "Voir la politique de livraison",
     "ctaTitle": "Envie de varier les plaisirs ?",
