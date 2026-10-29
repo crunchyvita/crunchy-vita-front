@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import JsonLd from "@/components/seo/JsonLd";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { clientMessages } from "@/lib/adminI18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -123,7 +124,7 @@ export default async function RootLayout({ children }) {
             alt=""
           />
         </noscript>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={clientMessages(messages)}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
