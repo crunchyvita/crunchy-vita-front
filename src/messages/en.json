@@ -405,9 +405,9 @@
   },
   "ProductDetail": {
     "meta": {
-      "title": "{name} – no added sugar",
-      "description": "{name}: organic freeze-dried fruit, 100% fruit with no added sugar. {details} A healthy, crunchy snack shipped from France.",
-      "category": "Organic freeze-dried fruit"
+      "title": "{name}",
+      "description": "{name} by Crunchy Vita. {details} Price, nutrition facts and customer reviews on the product page.",
+      "category": "Freeze-dried fruit"
     },
     "related": {
       "title": "You may also like",
@@ -503,8 +503,8 @@
   },
   "PackageDetail": {
     "meta": {
-      "title": "{name} – organic freeze-dried fruit box",
-      "description": "{name}: a box of organic freeze-dried fruit with no added sugar by Crunchy Vita. {details}"
+      "title": "{name} – freeze-dried fruit box",
+      "description": "{name}: a box of Crunchy Vita freeze-dried fruit. {details}"
     },
     "errors": {
       "loadPack": "Failed to load the pack",
@@ -1603,7 +1603,7 @@
     },
     "shop": {
       "title": "Organic freeze-dried fruit shop",
-      "description": "Shop our organic freeze-dried fruit with no added sugar: strawberry, mango, banana, pineapple and blueberry, in single bags or boxes. Healthy snacks shipped from France."
+      "description": "Shop our organic freeze-dried fruit with no added sugar: strawberry, mango, banana, pineapple and blueberry, in single bags or boxes. Healthy, crunchy snacks."
     },
     "about": {
       "title": "About us: freeze-drying and our mission",
