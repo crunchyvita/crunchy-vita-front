@@ -19,6 +19,7 @@
     "languageFrench": "French"
   },
   "Breadcrumbs": {
+    "category": "Organic freeze-dried fruit",
     "ariaLabel": "Breadcrumb",
     "home": "Home",
     "shop": "Shop",
@@ -78,6 +79,7 @@
       "line3": " Antibes, France"
     },
     "nav": {
+      "organicFruit": "Organic freeze-dried fruit",
       "title": "Navigation",
       "home": "Home",
       "products": "Our products",
@@ -1646,5 +1648,72 @@
     "article": {
       "fallbackDescription": "An article from the Crunchy Vita blog about healthy snacks and organic freeze-dried fruit."
     }
+  },
+  "Category": {
+    "meta": {
+      "title": "Organic freeze-dried fruit: strawberry, mango, banana",
+      "description": "Discover our organic freeze-dried fruit, 100% fruit with no added sugar: strawberry, mango, banana, pineapple and blueberry. A healthy, crunchy snack packed in France."
+    },
+    "breadcrumb": "Organic freeze-dried fruit",
+    "title": "Organic freeze-dried fruit, no added sugar",
+    "intro": "Crunchy, light and full of flavour: Crunchy Vita freeze-dried fruit comes from organic farming and contains nothing but fruit. No added sugar, no preservatives, no colourings, no flavourings. Freeze-drying removes the water from the fruit at low temperature, so it keeps its colour and taste and becomes ultra-crunchy. Strawberry, mango, banana, pineapple or blueberry: pick your favourite healthy snack and take it anywhere.",
+    "productsTitle": "Our organic freeze-dried fruit",
+    "fruitsTitle": "One fruit, one texture, zero added sugar",
+    "fruits": {
+      "fraise": {
+        "name": "Organic freeze-dried strawberry",
+        "text": "Tangy strawberry slices that melt in your mouth after the crunch. Perfect on yoghurt, porridge or straight from the bag."
+      },
+      "mangue": {
+        "name": "Organic freeze-dried mango",
+        "text": "The sweet, exotic taste of mango in a crunchy bite. An ideal fruity snack at the office or after sport."
+      },
+      "banane": {
+        "name": "Organic freeze-dried banana",
+        "text": "Light, naturally sweet banana slices that kids and grown-ups both love."
+      },
+      "ananas": {
+        "name": "Organic freeze-dried pineapple",
+        "text": "Bright, sunny pineapple pieces to enjoy as they are or sprinkle over a dessert."
+      },
+      "myrtille": {
+        "name": "Organic freeze-dried blueberries",
+        "text": "Whole, intense and crunchy blueberries that add colour to your bowls and cereal."
+      }
+    },
+    "seeProduct": "View product",
+    "lyoTitle": "Why choose freeze-dried fruit?",
+    "lyoP1": "Freeze-drying is a preservation technique that removes water from fruit by sublimation, at low temperature. Unlike heat drying, it preserves the shape, colour and taste of the fresh fruit.",
+    "lyoP2": "The result: an ultra-light, crunchy dried fruit that keeps easily and travels anywhere, with no need for added sugar or preservatives.",
+    "lyoLink": "Learn more about freeze-drying",
+    "usesTitle": "How to enjoy freeze-dried fruit",
+    "uses": {
+      "snack": "As a healthy snack at any time of day: at work, on a hike or after sport.",
+      "breakfast": "In yoghurt, a bowl, porridge or cereal for a fruity breakfast.",
+      "dessert": "As a topping on desserts, ice cream, cakes or pancakes.",
+      "kids": "In children's snack boxes: 100% fruit, no added sugar."
+    },
+    "faqTitle": "Frequently asked questions",
+    "faq": {
+      "q1": "What is freeze-dried fruit?",
+      "a1": "It is fruit whose water has been removed by freeze-drying: the fruit is frozen, then the ice turns directly into vapour at low temperature. It becomes light and crunchy while keeping its shape, colour and taste.",
+      "q2": "How is it different from dried or dehydrated fruit?",
+      "a2": "Conventional drying uses heat: the fruit becomes chewy, changes colour and loses some of its aroma. Freeze-drying happens at low temperature, so the fruit stays crunchy and close to fresh fruit in taste and colour.",
+      "q3": "Does your freeze-dried fruit contain added sugar?",
+      "a3": "No. Our bags contain only fruit, with no added sugar, preservatives, colourings or flavourings. The sweetness comes only from the sugars naturally present in the fruit.",
+      "q4": "Is your fruit organic?",
+      "a4": "Yes, all our fruit comes from organic farming and is certified organic.",
+      "q5": "How should I store freeze-dried fruit?",
+      "a5": "In a dry place at room temperature. Once the bag is open, close it tightly or move the fruit to an airtight jar: moisture makes it lose its crunch.",
+      "q6": "Where is your fruit packed?",
+      "a6": "Our bags are packed in France by an ESAT, a sheltered workshop employing people with disabilities: a local, human and inclusive choice.",
+      "q7": "How are orders delivered?",
+      "a7": "You can choose pickup-point or home delivery. Delivery times and rates are detailed in our shipping policy."
+    },
+    "shippingLink": "See the shipping policy",
+    "ctaTitle": "Fancy a bit of variety?",
+    "ctaText": "Build your own box of organic freeze-dried fruit and enjoy discounts.",
+    "ctaShop": "Browse the whole shop",
+    "ctaPacks": "Discover our boxes"
   }
 }

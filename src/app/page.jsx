@@ -352,7 +352,7 @@ export default function Home() {
                 className="group relative h-87.5 lg:h-112.5 rounded-[2.5rem] lg:rounded-[3.5rem] overflow-hidden border-4 border-white shadow-lg"
               >
                 <Image src={item.image} alt={item.desc} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                <Link href="/shop" className="absolute inset-0 z-10" aria-label={`${t('products.title')} : ${item.desc}`} />
+                <Link href="/fruits-lyophilises-bio" className="absolute inset-0 z-10" aria-label={`${t('products.title')} : ${item.desc}`} />
                 <div className="absolute inset-0 bg-linear-to-t from-[#556822]/90 via-transparent to-transparent opacity-70" />
                 <div className="absolute bottom-0 p-6 lg:p-8 w-full">
                   <p className="text-white font-black uppercase italic text-lg lg:text-xl leading-tight" style={{ fontFamily: 'Maison Neue, sans-serif' }}>

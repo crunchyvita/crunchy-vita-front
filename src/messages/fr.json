@@ -19,6 +19,7 @@
     "languageFrench": "Francais"
   },
   "Breadcrumbs": {
+    "category": "Fruits lyophilisés bio",
     "ariaLabel": "Fil d'Ariane",
     "home": "Accueil",
     "shop": "Boutique",
@@ -78,6 +79,7 @@
       "line3": " Antibes, France"
     },
     "nav": {
+      "organicFruit": "Fruits lyophilisés bio",
       "title": "Navigation",
       "home": "Accueil",
       "products": "Nos produits",
@@ -1670,5 +1672,72 @@
     "article": {
       "fallbackDescription": "Un article du blog Crunchy Vita sur les encas sains et les fruits lyophilisés bio."
     }
+  },
+  "Category": {
+    "meta": {
+      "title": "Fruits lyophilisés bio : fraise, mangue, banane, ananas",
+      "description": "Découvrez nos fruits lyophilisés bio, 100 % fruit et sans sucre ajouté : fraise, mangue, banane, ananas et myrtilles. Un snack sain et croquant, conditionné en France."
+    },
+    "breadcrumb": "Fruits lyophilisés bio",
+    "title": "Fruits lyophilisés bio, sans sucre ajouté",
+    "intro": "Croquants, légers et pleins de goût : les fruits lyophilisés Crunchy Vita sont issus de l'agriculture biologique et ne contiennent que du fruit. Ni sucre ajouté, ni conservateur, ni colorant, ni arôme. La lyophilisation retire l'eau du fruit à basse température : il garde sa couleur, sa saveur et devient ultra-croquant. Fraise, mangue, banane, ananas ou myrtilles, choisissez votre encas sain préféré, à emporter partout.",
+    "productsTitle": "Nos fruits lyophilisés bio",
+    "fruitsTitle": "Un fruit, une texture, zéro sucre ajouté",
+    "fruits": {
+      "fraise": {
+        "name": "Fraise lyophilisée bio",
+        "text": "Des tranches de fraise acidulées qui fondent en bouche après le croquant. Parfaites sur un yaourt, un porridge ou directement du sachet."
+      },
+      "mangue": {
+        "name": "Mangue lyophilisée bio",
+        "text": "Le goût exotique et doux de la mangue, en version croquante. Un encas fruité idéal au bureau ou après le sport."
+      },
+      "banane": {
+        "name": "Banane lyophilisée bio",
+        "text": "Des tranches de banane légères et naturellement douces, qui plaisent aux petits comme aux grands."
+      },
+      "ananas": {
+        "name": "Ananas lyophilisé bio",
+        "text": "Des morceaux d'ananas au goût vif et ensoleillé, à croquer tels quels ou à parsemer sur un dessert."
+      },
+      "myrtille": {
+        "name": "Myrtilles lyophilisées bio",
+        "text": "Des myrtilles entières, intenses et croquantes, qui apportent de la couleur à vos bowls et à vos céréales."
+      }
+    },
+    "seeProduct": "Voir le produit",
+    "lyoTitle": "Pourquoi choisir des fruits lyophilisés ?",
+    "lyoP1": "La lyophilisation est une technique de conservation qui retire l'eau du fruit par sublimation, à basse température. Contrairement au séchage par la chaleur, elle préserve la forme, la couleur et le goût du fruit frais.",
+    "lyoP2": "Résultat : un fruit sec ultra-léger et croquant, qui se conserve facilement et se transporte partout, sans avoir besoin d'ajouter de sucre ni de conservateur.",
+    "lyoLink": "En savoir plus sur la lyophilisation",
+    "usesTitle": "Comment déguster vos fruits lyophilisés ?",
+    "uses": {
+      "snack": "En snack sain, à tout moment de la journée : au travail, en randonnée ou après le sport.",
+      "breakfast": "Dans un yaourt, un bowl, un porridge ou des céréales pour un petit-déjeuner fruité.",
+      "dessert": "En topping sur vos desserts, glaces, gâteaux ou crêpes.",
+      "kids": "Dans le goûter des enfants : 100 % fruit, sans sucre ajouté."
+    },
+    "faqTitle": "Questions fréquentes",
+    "faq": {
+      "q1": "Qu'est-ce qu'un fruit lyophilisé ?",
+      "a1": "C'est un fruit dont on a retiré l'eau par lyophilisation : le fruit est congelé, puis l'eau passe directement de l'état de glace à l'état de vapeur, à basse température. Il devient léger et croquant tout en gardant sa forme, sa couleur et son goût.",
+      "q2": "Quelle différence avec un fruit séché ou déshydraté ?",
+      "a2": "Le séchage classique utilise la chaleur : le fruit devient moelleux, change de couleur et perd une partie de ses arômes. La lyophilisation se fait à basse température : le fruit reste croquant et proche du fruit frais en goût et en couleur.",
+      "q3": "Vos fruits lyophilisés contiennent-ils du sucre ajouté ?",
+      "a3": "Non. Nos sachets contiennent uniquement du fruit, sans sucre ajouté, sans conservateur, sans colorant et sans arôme. Le goût sucré vient uniquement des sucres naturellement présents dans le fruit.",
+      "q4": "Vos fruits sont-ils bio ?",
+      "a4": "Oui, tous nos fruits sont issus de l'agriculture biologique et certifiés bio.",
+      "q5": "Comment conserver les fruits lyophilisés ?",
+      "a5": "Au sec et à température ambiante. Une fois le sachet ouvert, refermez-le bien ou transférez les fruits dans un bocal hermétique : au contact de l'humidité, ils perdent leur croquant.",
+      "q6": "Où sont conditionnés vos fruits ?",
+      "a6": "Nos sachets sont conditionnés en France par un ESAT (établissement et service d'aide par le travail) : un choix local, humain et solidaire.",
+      "q7": "Comment sont livrées les commandes ?",
+      "a7": "Vous pouvez choisir la livraison en point relais ou à domicile. Les délais et tarifs sont détaillés dans notre politique de livraison."
+    },
+    "shippingLink": "Voir la politique de livraison",
+    "ctaTitle": "Envie de varier les plaisirs ?",
+    "ctaText": "Composez votre coffret de fruits lyophilisés bio et profitez de réductions.",
+    "ctaShop": "Voir toute la boutique",
+    "ctaPacks": "Découvrir les coffrets"
   }
 }

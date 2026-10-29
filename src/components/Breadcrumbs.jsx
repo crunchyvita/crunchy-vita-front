@@ -20,6 +20,7 @@ const STATIC_SEGMENTS = {
   'espace-professionnel': 'professional',
   espaceProfessionnel: 'professional',
   'about-us': 'about',
+  'fruits-lyophilises-bio': 'category',
   cgv: 'cgv',
   cgu: 'cgu',
   'mentions-legales': 'legalNotice',

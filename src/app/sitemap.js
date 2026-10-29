@@ -6,6 +6,7 @@ export const revalidate = 3600;
 
 const STATIC_PAGES = [
   { path: '/', changeFrequency: 'weekly', priority: 1 },
+  { path: '/fruits-lyophilises-bio', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/shop', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/about-us', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/blogs', changeFrequency: 'weekly', priority: 0.6 },

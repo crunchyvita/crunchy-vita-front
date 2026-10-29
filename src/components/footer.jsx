@@ -87,6 +87,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="/" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.home')}</Link></li>
               <li><Link href="/shop" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.products')}</Link></li>
+              <li><Link href="/fruits-lyophilises-bio" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.organicFruit')}</Link></li>
               <li><Link href="/#engagements" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.commitments')}</Link></li>
               <li><Link href="/contact" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.contact')}</Link></li>
               <li><Link href="/blogs" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('nav.blog')}</Link></li>
