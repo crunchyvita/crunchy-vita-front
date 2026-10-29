@@ -11,7 +11,8 @@ import { useBreadcrumbOverride } from "@/context/BreadcrumbContext";
 
 const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-export default function BlogDetailPage() {
+// `initialBlog` comes from the server page so the article is in the initial HTML.
+export default function BlogDetailClient({ initialBlog = null }) {
   const params = useParams();
   const blogId = params?.id;
 
@@ -19,13 +20,13 @@ export default function BlogDetailPage() {
   const locale = useLocale();
   const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
-  const [blog, setBlog] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [blog, setBlog] = useState(initialBlog);
+  const [loading, setLoading] = useState(!initialBlog);
   const [error, setError] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
-    if (blogId) fetchBlog();
+    if (blogId && !initialBlog) fetchBlog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blogId]);
 
@@ -117,7 +118,7 @@ export default function BlogDetailPage() {
 
   return (
     <>
-      <HeaderAndBreadcrumbs />
+      <HeaderAndBreadcrumbs currentLabel={title} />
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-6 py-12">
           <article className="max-w-4xl mx-auto">

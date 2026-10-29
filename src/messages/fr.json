@@ -12,7 +12,7 @@
     "wishlist": "Favoris",
     "account": "Compte",
     "dashboard": "Tableau de bord",
-    "logout": "Se deconnecter",
+    "logout": "Se déconnecter",
     "signIn": "Se connecter",
     "language": "Langue",
     "languageEnglish": "Anglais",
@@ -54,7 +54,7 @@
     "nav": {
       "home": "Accueil",
       "products": "Nos produits",
-      "freezeDriedFruits": "Fruit lyophilise",
+      "freezeDriedFruits": "Fruit lyophilisé",
       "espace professionnel": "Espace professionnel",
       "commitments": "Nos engagements",
       "blog": "Blog",
@@ -66,11 +66,11 @@
     "languageEnglish": "Anglais",
     "languageFrench": "Francais",
     "account": "Compte",
-    "logout": "Se deconnecter",
+    "logout": "Se déconnecter",
     "signIn": "Se connecter"
   },
   "Footer": {
-    "about": "Fruits lyophilises bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.",
+    "about": "Fruits lyophilisés bio, croquants et 100% naturels. Le snack sain qui vous accompagne au quotidien.",
     "email": "contact@crunchyvita.com",
   
     "address": {
@@ -93,71 +93,73 @@
     },
     "brand": {
       "title": "CrunchyVita",
-      "about": "A propos de nous",
+      "about": "À propos de nous",
       "lyo": "La lyophilisation",
       "b2b": "Clients Professionnels B2B",
       "collab": "Collaboration & Sponsoring"
     },
     "legal": {
-      "title": "Informations legales",
-      "mentions": "Mentions legales",
+      "title": "Informations légales",
+      "mentions": "Mentions légales",
       "cgu": "CGU",
       "cgv": "CGV",
-      "privacy": "Politique de confidentialite"
+      "privacy": "Politique de confidentialité"
     },
     "newsletter": {
       "title": "Newsletter",
-      "description": "Inscrivez-vous pour recevoir nos offres exclusives et nouveautes.",
+      "description": "Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.",
       "placeholder": "Votre email",
       "loading": "Inscription...",
       "submit": "S'inscrire"
     },
-    "copyright": " 2026 CrunchyVita - ALTEORA SAS. Tous droits reserves."
+    "copyright": " 2026 CrunchyVita - ALTEORA SAS. Tous droits réservés."
   },
   "Home": {
     "hero": {
+      "kicker": "Fruits lyophilisés bio, sans sucre ajouté",
+      "imageAlt": "Sachets Crunchy Vita de myrtilles, mangue, ananas, banane et fraise bio lyophilisées",
       "titleLine1": "Croquez la nature",
       "titleLine2": "avec",
       "brand": "CrunchyVita",
-      "subtitle": "Naturellement croquant, irresistiblement bon",
-      "ctaDiscover": "Decouvrir nos produits",
-      "ctaJoin": "Rejoindre la communaute"
+      "subtitle": "Naturellement croquant, irrésistiblement bon",
+      "ctaDiscover": "Découvrir nos produits",
+      "ctaJoin": "Rejoindre la communauté"
     },
     "why": {
       "title": "Pourquoi choisir CrunchyVita ?",
       "cards": {
         "card1": { "title": "100% fruits", "desc": "Uniquement des fruits, rien d'autre." },
-        "card2": { "title": "Certifie BIO", "desc": "Des fruits selectionnes avec soin." },
-        "card3": { "title": "Ultra-croquant", "desc": "Une texture unique, naturellement sucree." },
-        "card4": { "title": "Pratique", "desc": "A emporter partout : travail, sport, ecole." }
+        "card2": { "title": "Certifié BIO", "desc": "Des fruits sélectionnés avec soin." },
+        "card3": { "title": "Ultra-croquant", "desc": "Une texture unique, naturellement sucrée." },
+        "card4": { "title": "Pratique", "desc": "A emporter partout : travail, sport, école." }
       }
     },
     "products": {
-      "title": "Nos fruits lyophilises",
+      "title": "Nos fruits lyophilisés",
       "cards": {
         "card1": "Dans un yaourt ou un bowl",
-        "card2": "En snack sain a tout moment",
+        "card2": "En snack sain à tout moment",
         "card3": "En topping sur vos desserts",
-        "card4": "Ideal pour petits et grands"
+        "card4": "Idéal pour petits et grands"
       }
     },
     "favorite": {
-      "titleLine1": "Le prefere de",
+      "titleLine1": "Le préféré de",
       "titleLine2": "nos clients",
-      "description": "Decouvrez notre coffret decouverte, le mix parfait pour gouter a l'explosion de saveurs CrunchyVita.",
-      "cta": "Decouvrir le coffret",
+      "description": "Découvrez notre coffret découverte, le mix parfait pour goûter à l'explosion de saveurs CrunchyVita.",
+      "cta": "Découvrir le coffret",
       "imageAlt": "Coffret CrunchyVita avec fruits volants"
     },
     "commitments": {
       "title": "Nos engagements",
       "cards": {
         "card1": {
-          "title": "Zero Additifs",
-          "desc": "Ni conservateurs, ni colorants, ni aromes artificiels. Juste la purete brute du fruit lyophilise."
+          "title": "Zéro Additifs",
+          "desc": "Ni conservateurs, ni colorants, ni arômes artificiels. Juste la pureté brute du fruit lyophilisé."
         },
         "card2": {
           "title": "Sucre Naturel",
-          "desc": "Zero sucre ajoute. Seulement le sucre naturel des fruits BIO."
+          "desc": "Zéro sucre ajouté. Seulement le sucre naturel des fruits BIO."
         },
         "card3": {
           "title": "Excellence BIO",
@@ -165,14 +167,14 @@
         },
         "card4": {
           "title": "Conditionnement solidaire en France",
-          "desc": "Nos paquets sont conditionnes en France par un ESAT. Un choix local, humain et solidaire, fidele aux valeurs de CrunchyVita."
+          "desc": "Nos paquets sont conditionnes en France par un ESAT. Un choix local, humain et solidaire, fidèle aux valeurs de CrunchyVita."
         }
       }
     },
     "roulette": {
       "title": "Tournez pour gagner !",
-      "subtitle": "Tentez votre chance et obtenez un code de reduction exclusif",
-      "description": "Tournez notre roulette et remportez des lots incroyables ! Obtenez des reductions instantanees, des produits gratuits ou des packs exclusifs.",
+      "subtitle": "Tentez votre chance et obtenez un code de réduction exclusif",
+      "description": "Tournez notre roulette et remportez des lots incroyables ! Obtenez des réductions instantanées, des produits gratuits ou des packs exclusifs.",
       "limit": "Un tirage par adresse email. Les codes sont valides 30 jours."
     },
     "ticker": {
@@ -187,12 +189,12 @@
     }
   },
   "PreferredItem": {
-    "titleLine1": "Le prefere de",
+    "titleLine1": "Le préféré de",
     "titleLine2": "nos clients",
     "label": "PRODUIT",
-    "description": "Decouvrez notre selection preferee, le mix parfait pour gouter a l'explosion de saveurs CrunchyVita.",
-    "cta": "Decouvrir le produit",
-    "imageAlt": "CrunchyVita - Nos produits preferes"
+    "description": "Découvrez notre sélection préférée, le mix parfait pour goûter à l'explosion de saveurs CrunchyVita.",
+    "cta": "Découvrir le produit",
+    "imageAlt": "CrunchyVita - Nos produits préférés"
   },
   "ProfessionalSpace": {
     "hero": {
@@ -280,45 +282,45 @@
     }
   },
   "AboutUs": {
-    "title": "A propos de nous",
+    "title": "À propos de nous",
     "lyo": {
       "title": "La lyophilisation",
-      "p1": "La lyophilisation est une technique de conservation qui consiste a retirer l'eau d'un produit par sublimation. Cette technique permet de preserver au maximum les qualites nutritionnelles, le gout et la texture des fruits frais.",
-      "p2": "Contrairement aux techniques traditionnelles comme le sechage par la chaleur, la lyophilisation s'effectue a basse temperature, ce qui permet de conserver jusqu'a 97% des vitamines et mineraux presents dans le fruit frais.",
-      "p3": "Le resultat ? Des fruits ultra-croquants, naturellement sucres, legers et faciles a conserver, tout en gardant leur saveur intense et leurs bienfaits nutritionnels."
+      "p1": "La lyophilisation est une technique de conservation qui consiste à retirer l'eau d'un produit par sublimation. Cette technique permet de préserver au maximum les qualités nutritionnelles, le gout et la texture des fruits frais.",
+      "p2": "Contrairement aux techniques traditionnelles comme le séchage par la chaleur, la lyophilisation s'effectue à basse température, ce qui permet de conserver jusqu'a 97% des vitamines et mineraux présents dans le fruit frais.",
+      "p3": "Le résultat ? Des fruits ultra-croquants, naturellement sucrés, légers et faciles à conserver, tout en gardant leur saveur intense et leurs bienfaits nutritionnels."
     },
     "mission": {
       "title": "Notre mission",
-      "p1": "Chez CrunchyVita, nous croyons que le snacking peut etre a la fois delicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutes ni conservateurs, a base de fruits frais de qualite.",
-      "p2": "Nous selectionnons nos fruits avec soin, issus de cultures biologiques certifiees, pour vous offrir le meilleur de la nature dans chaque sachet."
+      "p1": "Chez CrunchyVita, nous croyons que le snacking peut être à la fois délicieux et sain. Notre mission est de proposer des encas 100% naturels, sans sucres ajoutés ni conservateurs, à base de fruits frais de qualité.",
+      "p2": "Nous sélectionnons nos fruits avec soin, issus de cultures biologiques certifiées, pour vous offrir le meilleur de la nature dans chaque sachet."
     },
     "collab": {
       "title": "Collaboration & Sponsoring",
-      "p1": "Vous etes un influenceur, youtubeur ou professionnel du bien-etre ? Nous serions ravis de collaborer avec vous !",
-      "p2": "Pour toute demande de partenariat ou de sponsoring, contactez-nous a :"
+      "p1": "Vous êtes un influenceur, youtubeur ou professionnel du bien-être ? Nous serions ravis de collaborer avec vous !",
+      "p2": "Pour toute demande de partenariat ou de sponsoring, contactez-nous à :"
     },
     "b2b": {
       "title": "Clients Professionnels B2B",
-      "p1": "Vous etes un professionnel (hotel, restaurant, salle de sport, magasin bio...) et souhaitez proposer nos produits a vos clients ?",
-      "p2": "Contactez notre equipe commerciale pour decouvrir nos offres dediees aux professionnels :"
+      "p1": "Vous êtes un professionnel (hotel, restaurant, salle de sport, magasin bio...) et souhaitez proposer nos produits à vos clients ?",
+      "p2": "Contactez notre équipe commerciale pour découvrir nos offres dédiées aux professionnels :"
     }
   },
   "Contact": {
     "title": "Une question ?",
     "titleAccent": "Contactez-nous",
-    "subtitle": "Notre equipe est a votre ecoute pour repondre a toutes vos questions sur nos produits et notre demarche.",
+    "subtitle": "Notre équipe est à votre écoute pour répondre à toutes vos questions sur nos produits et notre démarche.",
     "type": {
       "individual": "Particulier",
       "business": "Professionnel"
     },
-    "success": "Message envoye avec succes ! Nous vous repondrons tres bientot.",
+    "success": "Message envoyé avec succès ! Nous vous répondrons très bientot.",
     "fields": {
       "name": {
         "label": "Votre nom *",
         "placeholder": "Votre nom complet"
       },
       "company": {
-        "label": "Societe *",
+        "label": "Société *",
         "placeholder": "Nom de votre entreprise"
       },
       "subject": {
@@ -345,28 +347,28 @@
   },
   "Blogs": {
     "hero": {
-      "title": "Le blog du bien-etre :",
-      "subtitle": "Astuces, alimentation & sante"
+      "title": "Le blog du bien-être :",
+      "subtitle": "Astuces, alimentation & santé"
     },
-    "recent": "Articles recents",
+    "recent": "Articles récents",
     "readMore": "Lire plus...",
     "allArticles": "Tous les articles",
     "empty": {
       "title": "Aucun article disponible pour le moment.",
-      "subtitle": "Revenez bientot pour decouvrir nos nouveaux articles !"
+      "subtitle": "Revenez bientot pour découvrir nos nouveaux articles !"
     }
   },
   "BlogDetail": {
     "errors": {
-      "fetchFailed": "Echec de la recuperation de l'article",
-      "loadFailed": "Echec du chargement de l'article",
+      "fetchFailed": "Échec de la récupération de l'article",
+      "loadFailed": "Échec du chargement de l'article",
       "notFoundTitle": "Article introuvable",
-      "notFoundDescription": "Cet article n'existe pas ou a ete supprime."
+      "notFoundDescription": "Cet article n'existe pas ou a été supprimé."
     }
   },
   "Shop": {
     "search": {
-      "placeholder": "Rechercher par nom de produit, tag ou categorie...",
+      "placeholder": "Rechercher par nom de produit, tag ou catégorie...",
       "resultsProducts": "Trouve {count} produit(s) pour \"{query}\"",
       "resultsPackages": "Trouve {count} coffret(s) pour \"{query}\""
     },
@@ -375,14 +377,14 @@
       "packages": "Crunchy Packs"
     },
     "heading": {
-      "productsTitle": "La Boutique",
+      "productsTitle": "Nos fruits lyophilisés bio",
       "packagesTitle": "Les Coffrets",
-      "productsSubtitle": "Le meilleur des fruits lyophilises, sans aucun additif.",
-      "packagesSubtitle": "Composez votre mix parfait et profitez de reductions exclusives."
+      "productsSubtitle": "Le meilleur des fruits lyophilisés, sans aucun additif.",
+      "packagesSubtitle": "Composez votre mix parfait et profitez de réductions exclusives."
     },
     "packages": {
-      "descriptionFallback": "Une selection gourmande et craquante pour vos moments de plaisir.",
-      "discover": "Decouvrir le pack"
+      "descriptionFallback": "Une sélection gourmande et craquante pour vos moments de plaisir.",
+      "discover": "Découvrir le pack"
     },
     "products": {
       "viewProduct": "Voir le produit"
@@ -391,9 +393,9 @@
   "ProductModal": {
     "noImages": "Aucune image disponible",
     "noReviews": "Aucun avis pour le moment",
-    "perUnit": "par unite",
+    "perUnit": "par unité",
     "stockMax": "Stock maximum atteint ",
-    "quantity": "Quantite",
+    "quantity": "Quantité",
     "totalPrice": "Prix total",
     "outOfStock": "Rupture de stock",
     "addToCart": "Ajouter au panier",
@@ -412,13 +414,13 @@
     "errors": {
       "loginRequired": "Veuillez vous connecter pour soumettre un avis",
       "reviewRequired": "Veuillez fournir une note ou un commentaire (ou les deux)",
-      "ratingRange": "La note doit etre entre 1 et 5",
-      "submitFailed": "Echec de la soumission de l'avis",
+      "ratingRange": "La note doit être entre 1 et 5",
+      "submitFailed": "Échec de la soumission de l'avis",
       "productNotFound": "Produit non trouve",
-      "invalidProductData": "Donnees produit invalides"
+      "invalidProductData": "Données produit invalides"
     },
     "success": {
-      "submitted": "Avis envoye avec succes !"
+      "submitted": "Avis envoyé avec succès !"
     },
     "breadcrumb": {
       "shop": "Boutique",
@@ -426,26 +428,26 @@
     },
     "descriptionFallback": "Aucune description disponible.",
     "quantity": {
-      "label": "Quantite",
-      "maxReached": "Quantite maximale atteinte pour ce produit"
+      "label": "Quantité",
+      "maxReached": "Quantité maximale atteinte pour ce produit"
     },
     "total": {
       "label": "Total:"
     },
     "buttons": {
-      "backToShop": "Retour a la boutique",
+      "backToShop": "Retour à la boutique",
       "addToPack": "Ajouter au pack",
       "addToCart": "Ajouter au panier",
       "outOfStock": "Rupture de stock",
       "addToWishlist": "Ajouter aux favoris"
     },
     "comparison": {
-      "title": "Du fruit frais au fruit lyophilise",
-      "subtitle": "Decouvrez la transformation de nos fruits",
+      "title": "Du fruit frais au fruit lyophilisé",
+      "subtitle": "Découvrez la transformation de nos fruits",
       "freshAlt": "Fruit frais",
       "freshLabel": "Fruit Frais",
-      "lyoAlt": "Fruit lyophilise",
-      "lyoLabel": "Fruit Lyophilise",
+      "lyoAlt": "Fruit lyophilisé",
+      "lyoLabel": "Fruit Lyophilisé",
       "slide": "Glissez pour comparer"
     },
     "nutrition": {
@@ -455,12 +457,12 @@
       "per100gHeader": "100 g",
       "perServingFallback": "1 portion",
       "rows": {
-        "energy": "Energie",
-        "fat": "Matieres grasses",
+        "energy": "Énergie",
+        "fat": "Matières grasses",
         "saturatedFat": "Dont acides gras saturés",
         "carbohydrates": "Glucides",
         "sugars": "Dont sucres",
-        "protein": "Proteines",
+        "protein": "Protéines",
         "salt": "Sel",
         "fiber": "Fibres alimentaires",
         "vitaminC": "Vitamine C",
@@ -471,8 +473,8 @@
     },
     "reviews": {
       "title": "Avis clients",
-      "writeTitle": "Ecrire un avis",
-      "placeholder": "Qu'avez-vous pense de la qualite ?",
+      "writeTitle": "Écrire un avis",
+      "placeholder": "Qu'avez-vous pense de la qualité ?",
       "anonymous": {
         "label": "Publier en anonyme",
         "hidden": "Votre nom sera masque",
@@ -481,14 +483,14 @@
       "submitting": "Envoi en cours...",
       "submit": "Publier l'avis",
       "emptyTitle": "Aucun avis pour le moment",
-      "emptySubtitleLoggedIn": "Soyez le premier a donner votre avis !",
+      "emptySubtitleLoggedIn": "Soyez le premier à donner votre avis !",
       "emptySubtitleLoggedOut": "Connectez-vous pour laisser un avis",
       "anonymousName": "Anonymous",
       "loadMore": "Voir plus d'avis"
     },
     "delete": {
       "title": "Supprimer votre avis ?",
-      "description": "Cette action est permanente. Votre avis sera definitivement supprime.",
+      "description": "Cette action est permanente. Votre avis sera définitivement supprimé.",
       "cancel": "Annuler",
       "confirm": "Supprimer",
       "deleting": "Suppression..."
@@ -503,37 +505,37 @@
       "description": "{name} : coffret de fruits lyophilisés bio et sans sucre ajouté signé Crunchy Vita. {details}"
     },
     "errors": {
-      "loadPack": "Echec du chargement du pack",
-      "loadProducts": "Echec du chargement des produits",
-      "loadFailed": "Echec du chargement",
-      "outOfStock": "Ce produit est en rupture de stock et ne peut pas etre ajoute.",
+      "loadPack": "Échec du chargement du pack",
+      "loadProducts": "Échec du chargement des produits",
+      "loadFailed": "Échec du chargement",
+      "outOfStock": "Ce produit est en rupture de stock et ne peut pas être ajouté.",
       "maxProducts": "Limite atteinte : Maximum {max} produits.",
-      "selectAtLeastOne": "Selectionnez au moins un produit.",
-      "selectionOutOfStock": "Certains produits de votre selection sont en rupture de stock.",
+      "selectAtLeastOne": "Sélectionnez au moins un produit.",
+      "selectionOutOfStock": "Certains produits de votre sélection sont en rupture de stock.",
       "addToCart": "Erreur lors de l'ajout."
     },
     "success": {
-      "addedToCart": "Ajoute au panier !"
+      "addedToCart": "Ajouté au panier !"
     },
     "loading": "Chargement...",
-    "backToShop": "Retour a la boutique",
+    "backToShop": "Retour à la boutique",
     "title": "Votre",
-    "descriptionFallback": "Selectionnez vos produits preferes et profitez de votre remise exclusive.",
+    "descriptionFallback": "Sélectionnez vos produits préférés et profitez de votre remise exclusive.",
     "quantity": {
-      "maxReached": "Quantite maximale atteinte pour ce produit"
+      "maxReached": "Quantité maximale atteinte pour ce produit"
     },
     "buttons": {
       "outOfStock": "Rupture de stock",
       "remove": "Retirer",
       "addToPack": "Ajouter au pack",
-      "viewDetails": "Voir details",
-      "validate": "Valider ma selection"
+      "viewDetails": "Voir détails",
+      "validate": "Valider ma sélection"
     },
     "summary": {
       "title": "Apercu",
       "productsCount": "{count} Produits",
-      "reset": "Reinitialiser",
-      "capacity": "Capacite du pack",
+      "reset": "Réinitialiser",
+      "capacity": "Capacité du pack",
       "total": "Total Brut",
       "discount": "Remise Pack ({percent}%)",
       "toPay": "A Payer"
@@ -541,8 +543,8 @@
     "fixed": {
       "notAvailable": "Ce coffret n'est pas disponible car un ou plusieurs produits sont en rupture de stock.",
       "addToCart": "Ajouter au panier",
-      "quantity": "Quantite",
-      "itemQuantity": "Quantite : {count}"
+      "quantity": "Quantité",
+      "itemQuantity": "Quantité : {count}"
     }
   },
 "LegalMentions": {
@@ -722,35 +724,35 @@
   "ShippingPolicy": {
     "title": "Politique de Livraison",
     "preparation": {
-      "title": "Preparation et expedition",
-      "p1": "Les commandes passees sur www.crunchyvita.com sont preparees et expediees dans un delai indicatif de 48 heures ouvrees a compter de leur validation, hors samedis, dimanches et jours feries.",
-      "p2": "Des que le colis est remis au transporteur, le Client recoit un e-mail de confirmation d'expedition comprenant, le cas echeant, un numero de suivi permettant de suivre l'acheminement de la commande.",
-      "p3": "En periode de forte activite, le delai de preparation peut exceptionnellement etre porte a 72 heures ouvrees.",
-      "p4": "La livraison est organisee via la plateforme Boxtal, qui permet a CrunchyVita de selectionner un transporteur partenaire selon le mode de livraison choisi, la destination et les options disponibles au moment de la commande. Les commandes peuvent etre livrees a domicile, sur le lieu de travail du Client ou en point relais, selon l'offre retenue lors de l'achat."
+      "title": "Préparation et expédition",
+      "p1": "Les commandes passées sur www.crunchyvita.com sont préparées et expédiées dans un délai indicatif de 48 heures ouvrées à compter de leur validation, hors samedis, dimanches et jours fériés.",
+      "p2": "Des que le colis est remis au transporteur, le Client reçoit un e-mail de confirmation d'expédition comprenant, le cas échéant, un numéro de suivi permettant de suivre l'acheminement de la commande.",
+      "p3": "En période de forte activité, le délai de préparation peut exceptionnellement être porté à 72 heures ouvrées.",
+      "p4": "La livraison est organisée via la plateforme Boxtal, qui permet à CrunchyVita de sélectionner un transporteur partenaire selon le mode de livraison choisi, la destination et les options disponibles au moment de la commande. Les commandes peuvent être livrées à domicile, sur le lieu de travail du Client ou en point relais, selon l'offre retenue lors de l'achat."
     },
     "absence": {
       "title": "En cas d'absence",
-      "p1": "En cas d'absence du Client au moment de la livraison a domicile, un avis de passage pourra etre laisse par le transporteur, ou le Client pourra etre contacte selon les modalites prevues par celui-ci.",
-      "p2": "Lorsque le mode de livraison le permet, le Client peut egalement transmettre des instructions de livraison au transporteur.",
-      "p3": "En cas de non-retrait du colis dans les delais impartis, notamment en point relais, le colis pourra etre retourne a notre entrepot."
+      "p1": "En cas d'absence du Client au moment de la livraison à domicile, un avis de passage pourra être laissé par le transporteur, ou le Client pourra être contacté selon les modalités prévues par celui-ci.",
+      "p2": "Lorsque le mode de livraison le permet, le Client peut également transmettre des instructions de livraison au transporteur.",
+      "p3": "En cas de non-retrait du colis dans les délais impartis, notamment en point relais, le colis pourra être retourné à notre entrepôt."
     },
     "missingInfo": {
-      "title": "Absence d'informations ou coordonnees incompletes",
-      "p1": "Le Client est tenu de fournir l'ensemble des informations necessaires au bon acheminement de sa commande, notamment : adresse complete, numero de telephone, nom, code d'acces, etage, ou toute precision utile a la livraison.",
-      "p2": "En cas d'erreur, d'omission ou d'informations incompletes empechant la livraison, notre societe ne pourra etre tenue responsable de l'impossibilite de livrer la commande dans les conditions prevues.",
-      "p3": "Le colis pourra alors etre retourne a notre entrepot. Le Client devra contacter le service client afin d'organiser une nouvelle expedition, laquelle pourra lui etre refacturee."
+      "title": "Absence d'informations ou coordonnées incomplètes",
+      "p1": "Le Client est tenu de fournir l'ensemble des informations nécessaires au bon acheminement de sa commande, notamment : adresse complete, numéro de téléphone, nom, code d'accès, étage, ou toute précision utile à la livraison.",
+      "p2": "En cas d'erreur, d'omission ou d'informations incomplètes empêchant la livraison, notre société ne pourra être tenue responsable de l'impossibilité de livrer la commande dans les conditions prévues.",
+      "p3": "Le colis pourra alors être retourné à notre entrepôt. Le Client devra contacter le service client afin d'organiser une nouvelle expédition, laquelle pourra lui être refacturée."
     },
     "issues": {
-      "title": "Problemes de livraison",
-      "p1": "Les produits voyagent aux risques et perils de notre societe, sauf cas particulier lie a une faute du Client, a une adresse erronee, ou a un defaut d'information transmis lors de la commande.",
-      "p2": "Au moment de la reception, le Client est tenu de verifier l'etat du colis ainsi que le nombre de produits livres.",
-      "p3": "Toute reserve relative a la livraison (colis endommage, produit manquant, emballage deteriore, colis ouvert, etc.) devra etre formulee de maniere precise aupres du transporteur ou sur tout justificatif de livraison remis au moment de la reception, et le Client devra en conserver une preuve.",
-      "p4": "Toute reclamation relative a la livraison devra etre adressee dans un delai de 3 jours ouvres suivant la reception des produits, par e-mail a l'adresse suivante :"
+      "title": "Problèmes de livraison",
+      "p1": "Les produits voyagent aux risques et périls de notre société, sauf cas particulier lié à une faute du Client, à une adresse erronée, ou à un défaut d'information transmis lors de la commande.",
+      "p2": "Au moment de la réception, le Client est tenu de vérifier l'état du colis ainsi que le nombre de produits livres.",
+      "p3": "Toute réserve relative à la livraison (colis endommagé, produit manquant, emballage détérioré, colis ouvert, etc.) devra être formulée de manière précise auprès du transporteur ou sur tout justificatif de livraison remis au moment de la réception, et le Client devra en conserver une preuve.",
+      "p4": "Toute réclamation relative à la livraison devra être adressée dans un délai de 3 jours ouvrés suivant la réception des produits, par e-mail à l'adresse suivante :"
     },
     "fees": {
       "title": "Frais et offre de livraison",
-      "p1": "La livraison offerte en France en point relais Chronopost des 40 EUR d'achats peut etre proposee selon les conditions affichees sur www.crunchyvita.com au moment de la commande. Cette mention figure actuellement dans les CGV visibles sur le site.",
-      "p2": "Toute reclamation concernant la livraison doit etre formulee dans un delai de 3 jours ouvres suivant la reception des produits, par e-mail a :"
+      "p1": "La livraison offerte en France en point relais Chronopost des 40 EUR d'achats peut être proposée selon les conditions affichées sur www.crunchyvita.com au moment de la commande. Cette mention figure actuellement dans les CGV visibles sur le site.",
+      "p2": "Toute réclamation concernant la livraison doit être formulée dans un délai de 3 jours ouvrés suivant la réception des produits, par e-mail à :"
     },
     "promo": "Livraison offerte en France en point relais des 40EUR d'achats !"
   },
@@ -758,41 +760,41 @@
     "title": "Politique de Retour",
     "returnSection": {
       "title": "Retour",
-      "p1": "Aupres de notre societe, le Client pourra retourner le ou les produits concernes (dans leur etat d'origine et accompagnes de l'ensemble des documents commerciaux joints a la livraison).",
-      "p2": "Les frais de retour sont a la charge du Client, sauf dans le cas ou le produit presenterait un defaut de fabrication ou ne correspondrait pas a la commande initiale. Seul le prix du ou des produits retournes sera rembourse. Le remboursement s'effectuera dans les meilleurs delais et au plus tard dans les 14 jours suivant la reception des produits par notre societe, le remboursement sera effectue selon le mode de paiement choisi lors de l'achat.",
-      "p3": "Le droit de retractation peut s'exercer des la passation de la commande, apres reception de la livraison des produits par le Client. Les criteres sont rapportes aux deux origines initiales et dans un etat permettant leur remise en vente. Aussi la societe se reserve le droit de refuser les produits ne remplissant pas ces conditions de retour et de les renvoyer au Client."
+      "p1": "Auprès de notre société, le Client pourra retourner le ou les produits concernés (dans leur état d'origine et accompagnés de l'ensemble des documents commerciaux joints à la livraison).",
+      "p2": "Les frais de retour sont à la charge du Client, sauf dans le cas ou le produit présenterait un défaut de fabrication ou ne correspondrait pas à la commande initiale. Seul le prix du ou des produits retournés sera remboursé. Le remboursement s'effectuera dans les meilleurs délais et au plus tard dans les 14 jours suivant la réception des produits par notre société, le remboursement sera effectué selon le mode de paiement choisi lors de l'achat.",
+      "p3": "Le droit de rétractation peut s'exercer des la passation de la commande, après réception de la livraison des produits par le Client. Les critères sont rapportés aux deux origines initiales et dans un état permettant leur remise en vente. Aussi la société se reserve le droit de refuser les produits ne remplissant pas ces conditions de retour et de les renvoyer au Client."
     },
     "procedure": {
-      "title": "Procedure de retour",
-      "intro": "Afin d'assurer le traitement optimal de votre retour, merci de suivre la procedure suivante :",
+      "title": "Procédure de retour",
+      "intro": "Afin d'assurer le traitement optimal de votre retour, merci de suivre la procédure suivante :",
       "steps": {
         "step1": {
-          "title": "1. Contacter le service client par email a contact@crunchyvita.com",
-          "body": "en precisant le numero de la facture et les produits concernes."
+          "title": "1. Contacter le service client par email à contact@crunchyvita.com",
+          "body": "en précisant le numéro de la facture et les produits concernés."
         },
         "step2": {
-          "title": "2. Preparer les produits concernes",
-          "body": "dans leur emballage d'origine, accompagnes de la facture."
+          "title": "2. Préparer les produits concernés",
+          "body": "dans leur emballage d'origine, accompagnés de la facture."
         },
         "step3": {
-          "title": "3. Retourner le colis a l'adresse suivante :",
-          "address": "ALTEORA, 1460 Chemin des Terriers Batiment B-04 06600 Antibes.",
-          "note": "Le colis doit etre depose dans un bureau de poste dans un delai de 14 jours a compter de la date d'autorisation de retour."
+          "title": "3. Retourner le colis à l'adresse suivante :",
+          "address": "ALTEORA, 1460 Chemin des Terriers Bâtiment B-04 06600 Antibes.",
+          "note": "Le colis doit être déposé dans un bureau de poste dans un délai de 14 jours à compter de la date d'autorisation de retour."
         }
       },
-      "outro": "A reception de votre colis, notre service qualite verifiera l'integrite du retour et les conditions d'acceptation. Si les conditions sont respectees, nous procederons au remboursement ou au remplacement et a l'envoi des produits dans un delai de 3 a 5 jours ouvres a compter de la prise en charge de votre retour par notre entrepot."
+      "outro": "A réception de votre colis, notre service qualité vérifiera l'intégrité du retour et les conditions d'acceptation. Si les conditions sont respectées, nous procederons au remboursement ou au remplacement et à l'envoi des produits dans un délai de 3 à 5 jours ouvrés à compter de la prise en charge de votre retour par notre entrepôt."
     },
     "refund": {
       "title": "Remboursement",
-      "p1": "Les remboursements sont effectues selon la methode de paiement et la devise utilisees lors de l'achat.",
-      "p2": "Nous procederons au remboursement de votre article retourne dans les plus brefs delais apres sa reception. Le credit sur votre compte bancaire sera effectif dans un delai de 7 a 10 jours ouvres."
+      "p1": "Les remboursements sont effectués selon la méthode de paiement et la devise utilisées lors de l'achat.",
+      "p2": "Nous procederons au remboursement de votre article retourné dans les plus brefs délais après sa réception. Le crédit sur votre compte bancaire sera effectif dans un délai de 7 à 10 jours ouvrés."
     }
   },
  "CGU": {
   "title": "Conditions Générales d'Utilisation (CGU)",
   "intro": {
     "title": "Préambule",
-    "body": "crunchyvita est une plate-forme web, disponible à l’adresse https://www.crunchyvita.com/fr (le « Site »).\n\nCe Site est édité par Alteora, SAS au capital de 10000.0 euros, ayant son siège social situé au 1460 Chemin des Terriers, 06600 Antibes, France et immatriculé au registre du commerce et des sociétés de Antibes sous le numéro d’identification 993112952, (ci-après « l’Editeur »). crunchyvita est accessibles aux utilisateurs (le ou les « Utilisateurs »).\n\ncrunchyvita est hébergé par OVH, dont le siège social est situé au 2 Rue Kellermann, 59100 Roubaix, France. Cet hébergeur peut être contacté à cette adresse électronique : dpo@ovh.com.\n\nL’objet des présentes Conditions Générales d’Utilisation (les « Conditions » ou prises dans leur ensemble, le « Contrat ») est de définir les termes et les conditions régissant les relations entre les Utilisateurs et Alteora. En cas de non-respect des termes des présentes Conditions, Alteora se réserve le droit de prendre toute mesure de nature à préserver ses intérêts et notamment à en assurer l'exécution.\n\nL’accès et l’utilisation du site sont soumis à l’acceptation et au respect des présentes Conditions Générales d’Utilisation.\n\nL’Éditeur se réserve le droit de modifier, à tout moment et sans préavis, le Site et des services ainsi que les présentes CGU, notamment pour s’adapter aux évolutions du Site par la mise à disposition de nouvelles fonctionnalités ou la suppression ou la modification de fonctionnalités existantes. Il est donc conseillé à l’Utilisateur de se référer avant toute navigation à la dernière version des Conditions Générales d’Utilisation accessible à tout moment sur le Site.\n\nLes présentes Conditions Générales d’Utilisation s’appliquent, en tant que de besoin, à toute déclinaison ou extension du Site sur les réseaux sociaux et/ou communautaires existants ou à venir."
+    "body": "crunchyvita est une plate-forme web, disponible à l’adresse https://www.crunchyvita.com/fr (le « Site »).\n\nCe Site est édité par Alteora, SAS au capital de 10000.0 euros, ayant son siège social situé au 1460 Chemin des Terriers, 06600 Antibes, France et immatriculé au registre du commerce et des sociétés de Antibes sous le numéro d’identification 993112952, (ci-après « l’Éditeur »). crunchyvita est accessibles aux utilisateurs (le ou les « Utilisateurs »).\n\ncrunchyvita est hébergé par OVH, dont le siège social est situé au 2 Rue Kellermann, 59100 Roubaix, France. Cet hébergeur peut être contacté à cette adresse électronique : dpo@ovh.com.\n\nL’objet des présentes Conditions Générales d’Utilisation (les « Conditions » ou prises dans leur ensemble, le « Contrat ») est de définir les termes et les conditions régissant les relations entre les Utilisateurs et Alteora. En cas de non-respect des termes des présentes Conditions, Alteora se réserve le droit de prendre toute mesure de nature à préserver ses intérêts et notamment à en assurer l'exécution.\n\nL’accès et l’utilisation du site sont soumis à l’acceptation et au respect des présentes Conditions Générales d’Utilisation.\n\nL’Éditeur se réserve le droit de modifier, à tout moment et sans préavis, le Site et des services ainsi que les présentes CGU, notamment pour s’adapter aux évolutions du Site par la mise à disposition de nouvelles fonctionnalités ou la suppression ou la modification de fonctionnalités existantes. Il est donc conseillé à l’Utilisateur de se référer avant toute navigation à la dernière version des Conditions Générales d’Utilisation accessible à tout moment sur le Site.\n\nLes présentes Conditions Générales d’Utilisation s’appliquent, en tant que de besoin, à toute déclinaison ou extension du Site sur les réseaux sociaux et/ou communautaires existants ou à venir."
   },
 
   "article1": {
@@ -807,12 +809,12 @@
 
   "article3": {
     "title": "Article 3 : Gestion du site",
-    "body": "L’Editeur met en œuvre des solutions techniques nécessaires afin de permettre un accès continu au site pour l’Utilisateur. Toutefois il se réserve la possibilité de limiter ou suspendre l’accès à tout ou partie du Site à tout moment, et sans préavis. Une telle interruption pourra notamment être rendue nécessaire pour des raisons de maintenances du site ou de son contenu, ou pour toute autre raison jugée nécessaire au bon fonctionnement du site par l’Editeur.\n\nL’utilisation de la Plateforme requiert une connexion et un navigateur internet. La plateforme est accessible à l’adresse suivante : https://www.crunchyvita.com/fr.\n\nTous matériels et logiciels nécessaires à l’accès à la Plateforme et à l’utilisation des Services restent exclusivement à la charge de l’Utilisateur."
+    "body": "L’Éditeur met en œuvre des solutions techniques nécessaires afin de permettre un accès continu au site pour l’Utilisateur. Toutefois il se réserve la possibilité de limiter ou suspendre l’accès à tout ou partie du Site à tout moment, et sans préavis. Une telle interruption pourra notamment être rendue nécessaire pour des raisons de maintenances du site ou de son contenu, ou pour toute autre raison jugée nécessaire au bon fonctionnement du site par l’Éditeur.\n\nL’utilisation de la Plateforme requiert une connexion et un navigateur internet. La plateforme est accessible à l’adresse suivante : https://www.crunchyvita.com/fr.\n\nTous matériels et logiciels nécessaires à l’accès à la Plateforme et à l’utilisation des Services restent exclusivement à la charge de l’Utilisateur."
   },
 
   "article4": {
     "title": "Article 4 : Contact",
-    "body": "L’utilisateur a la possibilité de contacter l’Editeur pour tout question ou demande d’information concernant le Site, ou tout signalement de contenu ou d’activités illicites par mail à l’adresse contact@crunchyvita.com."
+    "body": "L’utilisateur a la possibilité de contacter l’Éditeur pour tout question ou demande d’information concernant le Site, ou tout signalement de contenu ou d’activités illicites par mail à l’adresse contact@crunchyvita.com."
   },
 
   "article5": {
@@ -834,7 +836,7 @@
     ],
     "outro": "Il est rappelé que les violations de la sécurité du système ou du réseau peuvent conduire à des poursuites civiles et pénales. Alteora vérifie l’absence de telle violation et peut faire appel aux autorités judiciaires pour poursuivre, le cas échéant, des Utilisateurs ayant participé à de telles violations.\n\nLes Utilisateurs s’engagent à utiliser le Site de manière loyale, conformément à sa finalité et aux dispositions légales, réglementaires, aux présentes Conditions et aux usages en vigueur.",
     "subtitle2": "1.2 Compte clients des utilisateurs",
-    "body2": "L’Editeur réserve certains services de crunchyvita aux Utilisateurs ayant procédé à leur inscription sur le site, cela concerne notamment les services payants. Lors de son inscription, l’Utilisateur s’engage à fournir des informations valables et sincères. Il s’engage notamment à fournir à l’Editeur une adresse mail afin que ce dernier puisse lui communiquer des informations.\n\nToute information communiquée par mail de l’Editeur à l’Utilisateur sera réputée avoir été lue par ce dernier.\n\nTout utilisateur régulièrement inscrit sur le Site pourra demander la suppression de son compte client, l’Editeur s’engage à supprimer les comptes clients pour lesquels il aura reçu une telle demande.\n\nLes données personnelles des clients sont supprimées au bout de 36 mois sans que le client ne se soit connecté."
+    "body2": "L’Éditeur réserve certains services de crunchyvita aux Utilisateurs ayant procédé à leur inscription sur le site, cela concerne notamment les services payants. Lors de son inscription, l’Utilisateur s’engage à fournir des informations valables et sincères. Il s’engage notamment à fournir à l’Éditeur une adresse mail afin que ce dernier puisse lui communiquer des informations.\n\nToute information communiquée par mail de l’Éditeur à l’Utilisateur sera réputée avoir été lue par ce dernier.\n\nTout utilisateur régulièrement inscrit sur le Site pourra demander la suppression de son compte client, l’Éditeur s’engage à supprimer les comptes clients pour lesquels il aura reçu une telle demande.\n\nLes données personnelles des clients sont supprimées au bout de 36 mois sans que le client ne se soit connecté."
   },
 
   "article6": {
@@ -844,7 +846,7 @@
 
   "article7": {
     "title": "Article 7 : Données à caractère personnelles",
-    "body": "Toutes les données à caractère personnel dont dispose Alteora sont recueillies légalement et loyalement selon les modalités de la politique de confidentialité accessible à cette adresse : https://www.crunchyvita.com/fr/politique-confidentialite.\n\nCes données sont fournies par les Utilisateurs qui acceptent de manière volontaire et expresse les présentes Conditions autorisant Alteora à traiter, divulguer ou transférer ces données à tout tiers cela afin de permettre (i) à l’Utilisateur de profiter pleinement des Services et des fonctions proposés par le Site, (ii) prévenir toute fraude et /ou (iii) à des fins statistiques.\n\nLes données à caractère personnel sont stockées par Alteora en vue de leur traitement dans le cadre de l’utilisation des Services. Elles sont conservées aussi longtemps que nécessaire pour l’apport des Services et fonctions offerts par le Site.\n\nL’Utilisateur reste toujours propriétaire des informations le concernant qu’il transmet à Alteora. Il dispose, conformément à la loi n° 78-17 du 6 janvier 1978 selon sa version consolidée au 24 mars 2020, d’un droit d’accès, de rectification et de suppression des données à caractère personnel le concernant, ainsi que du droit de s’opposer à la communication de ces données à des tiers pour de justes motifs.\n\nL’Utilisateur pourra exercer ses droits en écrivant à l’adresse électronique suivante : contact@crunchyvita.com.\n\nUne réponse à la requête de l’Utilisateur lui sera adressée dans un délai de 30 jours."
+    "body": "Toutes les données à caractère personnel dont dispose Alteora sont recueillies légalement et loyalement selon les modalités de la politique de confidentialité accessible à cette adresse : https://www.crunchyvita.com/fr/politique-confidentialité.\n\nCes données sont fournies par les Utilisateurs qui acceptent de manière volontaire et expresse les présentes Conditions autorisant Alteora à traiter, divulguer ou transférer ces données à tout tiers cela afin de permettre (i) à l’Utilisateur de profiter pleinement des Services et des fonctions proposés par le Site, (ii) prévenir toute fraude et /ou (iii) à des fins statistiques.\n\nLes données à caractère personnel sont stockées par Alteora en vue de leur traitement dans le cadre de l’utilisation des Services. Elles sont conservées aussi longtemps que nécessaire pour l’apport des Services et fonctions offerts par le Site.\n\nL’Utilisateur reste toujours propriétaire des informations le concernant qu’il transmet à Alteora. Il dispose, conformément à la loi n° 78-17 du 6 janvier 1978 selon sa version consolidée au 24 mars 2020, d’un droit d’accès, de rectification et de suppression des données à caractère personnel le concernant, ainsi que du droit de s’opposer à la communication de ces données à des tiers pour de justes motifs.\n\nL’Utilisateur pourra exercer ses droits en écrivant à l’adresse électronique suivante : contact@crunchyvita.com.\n\nUne réponse à la requête de l’Utilisateur lui sera adressée dans un délai de 30 jours."
   },
 
   "article8": {
@@ -869,7 +871,7 @@
 
   "article12": {
     "title": "Article 12 : Durée des conditions générales d’utilisations",
-    "body": "Les présentes conditions générales d’utilisation sont conclues pour une durée indéterminée, l’Utilisateur est tenu de les respecter à compter du début de son utilisation des Services.\n\nL’Editeur se réserve la possibilité de modifier ce document à tout moment et sans préavis. Les utilisateurs seront informés de chaque mise à jour du document."
+    "body": "Les présentes conditions générales d’utilisation sont conclues pour une durée indéterminée, l’Utilisateur est tenu de les respecter à compter du début de son utilisation des Services.\n\nL’Éditeur se réserve la possibilité de modifier ce document à tout moment et sans préavis. Les utilisateurs seront informés de chaque mise à jour du document."
   }
 },
   "CGV": {
@@ -1024,7 +1026,7 @@
           "item2": "fournir une solution de remplacement permettant au Client de pouvoir utiliser les Services conformément à la Commande ;",
           "item3": "si aucune des deux possibilités n'est réalisable, rembourser le Client des sommes versées au titre des Services, déduction faite des sommes déjà payées par le Client pour la période d'utilisation effective des Services."
         },
-        "p2": "Le Prestataire n'aura aucune obligation d'indemnisation ou autre obligation au titre d'une action en contrefaçon ayant pour origine (a) une utilisation des Services autrement que conformément au Contrat, (b) une combinaison des Services avec d'autres services ou matériels non fournis par le Prestataire.",
+        "p2": "Le Prestataire n'aura aucune obligation d'indemnisation ou autre obligation au titre d'une action en contrefaçon ayant pour origine (à) une utilisation des Services autrement que conformément au Contrat, (b) une combinaison des Services avec d'autres services ou matériels non fournis par le Prestataire.",
         "p3": "Concernant les logiciels, données ou documents utilisés par le Prestataire dans le cadre de la fourniture des Services, dont le Client a acquis les droits d'utilisation auprès de tiers ou dont il est propriétaire, le Client garantit le Prestataire de toutes les conséquences ou suites dommageables que le Prestataire aurait à subir au titre de l'utilisation desdits logiciels, données ou documents contre toute action de la part d'une personne revendiquant un droit de propriété intellectuelle ou se fondant sur une demande en concurrence déloyale et/ou parasitisme sur ces logiciels, données ou documents."
       }
     },
@@ -1145,8 +1147,8 @@
 },
 
   "Profile": {
-    "title": "Parametres du profil",
-    "subtitle": "Gerez les informations et preferences de votre compte",
+    "title": "Paramètres du profil",
+    "subtitle": "Gérez les informations et préférences de votre compte",
     "sections": {
       "profilePhoto": "Photo de profil",
       "basicInfo": "Informations de base",
@@ -1159,7 +1161,7 @@
       "currentPassword": "Mot de passe actuel",
       "currentPasswordPlaceholder": "Entrez le mot de passe actuel",
       "newPassword": "Nouveau mot de passe",
-      "newPasswordPlaceholder": "Entrez un nouveau mot de passe (min 6 caracteres)",
+      "newPasswordPlaceholder": "Entrez un nouveau mot de passe (min 6 caractères)",
       "confirmPassword": "Confirmer le nouveau mot de passe",
       "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe"
     },
@@ -1167,9 +1169,9 @@
       "passwordHint": "Laissez vide si vous ne souhaitez pas changer votre mot de passe"
     },
     "googleAccount": "Compte Google",
-    "googlePhotoManaged": "La photo de profil est geree par votre compte Google",
-    "uploadPhoto": "Telecharger une nouvelle photo",
-    "emailCannotChange": "L'email ne peut pas etre modifie",
+    "googlePhotoManaged": "La photo de profil est gérée par votre compte Google",
+    "uploadPhoto": "Télécharger une nouvelle photo",
+    "emailCannotChange": "L'email ne peut pas être modifié",
     "actions": {
       "cancel": "Annuler",
       "save": "Enregistrer",
@@ -1178,14 +1180,14 @@
     },
     "alerts": {
       "googlePhotoLocked": "Les utilisateurs Google ne peuvent pas changer leur photo de profil",
-      "imageTooLarge": "La taille de l'image doit etre inferieure a 5 Mo",
-      "invalidImage": "Veuillez telecharger une image valide",
+      "imageTooLarge": "La taille de l'image doit être inférieure à 5 Mo",
+      "invalidImage": "Veuillez télécharger une image valide",
       "nameRequired": "Le nom est obligatoire",
-      "currentPasswordRequired": "Le mot de passe actuel est requis pour definir un nouveau mot de passe",
-      "newPasswordMin": "Le nouveau mot de passe doit contenir au moins 6 caracteres",
+      "currentPasswordRequired": "Le mot de passe actuel est requis pour définir un nouveau mot de passe",
+      "newPasswordMin": "Le nouveau mot de passe doit contenir au moins 6 caractères",
       "passwordsMismatch": "Les nouveaux mots de passe ne correspondent pas",
-      "updateFailed": "Echec de la mise a jour du profil",
-      "updateSuccess": "Profil mis a jour avec succes !"
+      "updateFailed": "Échec de la mise à jour du profil",
+      "updateSuccess": "Profil mis à jour avec succès !"
     },
     "alt": {
       "profilePhoto": "Photo de profil"
@@ -1193,9 +1195,9 @@
   },
   "Favorites": {
     "title": "Mes favoris",
-    "subtitle": "Retrouvez vos produits preferes en un clic.",
+    "subtitle": "Retrouvez vos produits préférés en un clic.",
     "search": {
-      "placeholder": "Rechercher par nom de produit, tag ou categorie...",
+      "placeholder": "Rechercher par nom de produit, tag ou catégorie...",
       "resultsProducts": "Trouve {count} produit(s) pour \"{query}\"",
       "resultsPackages": "Trouve {count} coffret(s) pour \"{query}\""
     },
@@ -1205,15 +1207,15 @@
     },
     "empty": {
       "title": "Votre liste de favoris est vide.",
-      "cta": "Decouvrir la boutique"
+      "cta": "Découvrir la boutique"
     },
     "package": {
-      "descriptionFallback": "Une selection gourmande et craquante pour vos moments de plaisir."
+      "descriptionFallback": "Une sélection gourmande et craquante pour vos moments de plaisir."
     },
     "actions": {
       "removeFavorite": "Retirer des favoris",
       "viewProduct": "Voir le produit",
-      "viewPack": "Decouvrir le pack"
+      "viewPack": "Découvrir le pack"
     },
     "errors": {
       "loadFavorites": "Erreur lors du chargement des favoris.",
@@ -1233,13 +1235,13 @@
       "title": "Informations de contact",
       "emailLabel": "Adresse e-mail",
       "emailPlaceholder": "email@example.com",
-      "phoneLabel": "Telephone",
+      "phoneLabel": "Téléphone",
       "phonePlaceholder": "+33 6 00 00 00 00",
-      "phoneInvalid": "Numero de telephone invalide"
+      "phoneInvalid": "Numéro de téléphone invalide"
     },
     "shipping": {
-      "title": "Details de livraison",
-      "firstName": "Prenom",
+      "title": "Détails de livraison",
+      "firstName": "Prénom",
       "firstNamePlaceholder": "Jeanne",
       "lastName": "Nom",
       "lastNamePlaceholder": "Dupont",
@@ -1252,9 +1254,9 @@
       "addressAutocompleteHint": "Après avoir choisi un pays, saisis au moins 3 caractères pour rechercher une adresse dans ce pays.",
       "countryPlaceholder": "France",
       "deliveryType": "Livraison",
-      "home": "Expedier a l'adresse",
+      "home": "Expédier à l'adresse",
       "homeHint": "A votre domicile",
-      "relay": "Expedier au point relais",
+      "relay": "Expédier au point relais",
       "relayHint": "Choisir un relais proche",
       "relayTitle": "Point relais",
       "useMyLocation": "Utiliser mon emplacement",
@@ -1279,42 +1281,42 @@
       },
       "relayList": "Liste des points relais",
       "hoursAvailable": "Horaires disponibles",
-      "relaySelected": "Relais selectionne",
+      "relaySelected": "Relais sélectionné",
       "relayMapTitle": "Carte des points relais",
       "openMap": "Ouvrir la carte",
       "mapUnavailable": "Carte indisponible pour ces points relais.",
       "noRelayFound": "Aucun point relais trouve.",
       "missingRelayQuery": "Veuillez saisir une adresse ou un code postal.",
-      "geoDenied": "Autorisation refusee. Active la localisation dans ton navigateur.",
-      "geoUnavailable": "Position indisponible. Reessaie.",
-      "geoTimeout": "Temps depasse. Reessaie.",
+      "geoDenied": "Autorisation refusée. Active la localisation dans ton navigateur.",
+      "geoUnavailable": "Position indisponible. Réessaie.",
+      "geoTimeout": "Temps dépassé. Réessaie.",
       "geoOutsideZone": "Ton emplacement est hors des zones de livraison relais ({country}).",
       "methodTitle": "Mode de livraison",
-      "methodHome": "Livraison a domicile",
+      "methodHome": "Livraison à domicile",
       "methodExpress": "Livraison express",
-      "homeDeliveryStandard": "Livraison a domicile (standard)",
+      "homeDeliveryStandard": "Livraison à domicile (standard)",
       "expressCheckboxLabel": "Livraison express",
       "expressCheckboxHint": "Tarif express fixe au lieu du tarif standard selon les paliers du panier.",
-      "appliedFeesTitle": "Frais de livraison appliques",
+      "appliedFeesTitle": "Frais de livraison appliqués",
       "infoCardTitle": "Informations livraison",
       "infoLabels": {
         "pickupPoint": "Point relais",
-        "homeDelivery": "Livraison a domicile"
+        "homeDelivery": "Livraison à domicile"
       },
       "infoRelaySimple": "GRATUIT dès {threshold} d'achats",
       "infoHomeReducedSimple": "{reducedPrice} dès {reducedThreshold} d'achats",
       "infoHomeFreeSimple": "Gratuit dès {freeThreshold} d'achats",
       "infoRelay": "Point Relais : GRATUIT - des {threshold} EUR",
-      "infoHome": "Livraison a domicile : {reducedPrice} EUR des {reducedThreshold} EUR | Gratuit des {freeThreshold} EUR",
-      "validationHome": "Remplis email + prenom/nom + adresse + ville + code postal.",
-      "validationRelay": "Remplis email + prenom/nom et selectionne un point relais.",
+      "infoHome": "Livraison à domicile : {reducedPrice} EUR des {reducedThreshold} EUR | Gratuit des {freeThreshold} EUR",
+      "validationHome": "Remplis email + prénom/nom + adresse + ville + code postal.",
+      "validationRelay": "Remplis email + prénom/nom et selectionne un point relais.",
       "errors": {
-        "noHomeOfferForAddress": "Aucune offre de livraison a domicile n'est disponible pour cette adresse.",
-        "invalidDestinationCountry": "Pays de destination invalide pour la livraison a domicile. Veuillez verifier le champ pays.",
-        "homeOfferCheckFailed": "Impossible de verifier les offres de livraison a domicile pour cette adresse.",
+        "noHomeOfferForAddress": "Aucune offre de livraison à domicile n'est disponible pour cette adresse.",
+        "invalidDestinationCountry": "Pays de destination invalide pour la livraison à domicile. Veuillez vérifier le champ pays.",
+        "homeOfferCheckFailed": "Impossible de vérifier les offres de livraison à domicile pour cette adresse.",
         "completeAddressForHomeQuote": "Choisis un pays et complète ton adresse pour obtenir une cotation de livraison.",
-        "missingContactForHomeQuote": "Renseigne ton prenom, nom et e-mail pour obtenir une cotation de livraison.",
-        "missingPhoneForHomeQuote": "Renseigne ton numero de telephone pour obtenir une cotation de livraison.",
+        "missingContactForHomeQuote": "Renseigne ton prénom, nom et e-mail pour obtenir une cotation de livraison.",
+        "missingPhoneForHomeQuote": "Renseigne ton numéro de téléphone pour obtenir une cotation de livraison.",
         "addressCountryMismatch": "Cette adresse ne correspond pas au pays sélectionné"
       }
     },
@@ -1327,17 +1329,17 @@
       "creditCard": "Carte bancaire",
       "nameOnCard": "Nom sur la carte",
       "nameOnCardPlaceholder": "ex. Houda Gh",
-      "cardNumber": "Numero de carte",
+      "cardNumber": "Numéro de carte",
       "cardNumberPlaceholder": "XXXX XXXX XXXX XXXX",
       "expiry": "Date d'expiration",
       "expiryPlaceholder": "MM / AA",
       "cvc": "CVC",
       "cvcPlaceholder": "CVV",
-      "redirectNote": "Apres confirmation, vous serez redirige vers Stripe pour finaliser votre paiement en toute securite.",
-      "poweredByStripe": "Paiement securise via Stripe"
+      "redirectNote": "Après confirmation, vous serez redirigé vers Stripe pour finaliser votre paiement en toute sécurité.",
+      "poweredByStripe": "Paiement sécurisé via Stripe"
     },
     "summary": {
-      "title": "Resume de la commande",
+      "title": "Résumé de la commande",
       "subtotal": "Sous-total",
       "shipping": "Livraison",
       "total": "Total",
@@ -1348,7 +1350,7 @@
       "catalogEur": "Tarifs en EUR",
       "pricesInCurrency": "Estimation en {currency}",
       "fxLoading": "Chargement du cours…",
-      "stripeCharge": "Debit carte (cours du jour)"
+      "stripeCharge": "Débit carte (cours du jour)"
     },
     "actions": {
       "confirmOrder": "Confirmer la commande",
@@ -1358,16 +1360,16 @@
       "back": "Retour à la modification"
     },
     "status": {
-      "successTitle": "Paiement recu",
-      "successBody": "Merci. Votre paiement a ete accepte et votre commande est en cours de traitement.",
-      "cancelledTitle": "Paiement annule",
-      "cancelledBody": "Aucun debit n'a ete effectue. Vous pouvez verifier votre commande et reessayer quand vous voulez."
+      "successTitle": "Paiement reçu",
+      "successBody": "Merci. Votre paiement a été accepté et votre commande est en cours de traitement.",
+      "cancelledTitle": "Paiement annulé",
+      "cancelledBody": "Aucun débit n'a été effectué. Vous pouvez vérifier votre commande et réessayer quand vous voulez."
     },
     "errors": {
-      "sessionCreateFailed": "Impossible de lancer le paiement securise. Veuillez reessayer.",
+      "sessionCreateFailed": "Impossible de lancer le paiement sécurisé. Veuillez réessayer.",
       "paymentFailed": "Le paiement a échoué"
     },
-    "securityNote": "Paiement securise SSL"
+    "securityNote": "Paiement sécurisé SSL"
   },
   "Cart": {
     "title": "Votre Panier",
@@ -1471,18 +1473,18 @@
     }
   },
   "Roulette": {
-    "description": "Tentez votre chance et remportez un code de reduction exclusif !",
-    "emailNote": "Nous enverrons votre code gagnant a cette adresse email",
-    "congratulations": "Felicitations !",
+    "description": "Tentez votre chance et remportez un code de réduction exclusif !",
+    "emailNote": "Nous enverrons votre code gagnant à cette adresse email",
+    "congratulations": "Félicitations !",
     "youWon": "Vous avez gagne :",
-    "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoye a votre email.",
+    "terms": "En tournant, vous acceptez de recevoir des emails marketing. Votre code sera envoyé à votre email.",
     "loadingWheel": "Chargement de la roue...",
-    "noRewards": "Aucune recompense disponible pour le moment.",
+    "noRewards": "Aucune récompense disponible pour le moment.",
     "loadError": "Impossible de charger la roue.",
     "wheelUnavailable": "Roue indisponible",
-    "retry": "Reessayer",
+    "retry": "Réessayer",
     "title": "Tournez pour Gagner !",
-    "subtitle": "Profitez d'une surprise fruitee pour votre prochaine commande",
+    "subtitle": "Profitez d'une surprise fruitée pour votre prochaine commande",
     "emailPlaceholder": "Votre adresse email",
     "invalidEmail": "Veuillez saisir une adresse email valide",
     "spinning": "EN COURS...",
@@ -1490,12 +1492,12 @@
     "loseSegment": "Perdu",
     "wonTitle": "C'est Gagne !",
     "lostTitle": "Vous avez perdu",
-    "lostMessage": "Pas de recompense cette fois-ci. Retentez votre chance la prochaine fois !",
+    "lostMessage": "Pas de récompense cette fois-ci. Retentez votre chance la prochaine fois !",
     "copied": "Copie !",
     "copyHint": "Cliquez pour copier",
     "continueShopping": "Continuer mes achats",
-    "spinError": "Une erreur est survenue. Veuillez reessayer.",
-    "codeError": "Impossible de generer votre code. Veuillez reessayer."
+    "spinError": "Une erreur est survenue. Veuillez réessayer.",
+    "codeError": "Impossible de générer votre code. Veuillez réessayer."
   },
   "Payment": {
     "paymentForm": "Informations de paiement",
@@ -1615,5 +1617,58 @@
     "text": "Le lien est peut-être erroné ou la page a été déplacée. Nos fruits lyophilisés bio vous attendent dans la boutique.",
     "shopCta": "Voir la boutique",
     "homeCta": "Retour à l'accueil"
+  },
+  "Meta": {
+    "home": {
+      "title": "Fruits lyophilisés bio sans sucre ajouté | Crunchy Vita",
+      "description": "Fruits lyophilisés bio et sans sucre ajouté : fraise, mangue, banane, ananas et myrtilles. Un encas sain, 100 % fruit et ultra-croquant, livré en France."
+    },
+    "shop": {
+      "title": "Boutique de fruits lyophilisés bio",
+      "description": "Achetez nos fruits lyophilisés bio sans sucre ajouté : fraise, mangue, banane, ananas et myrtilles, en sachets ou en coffrets. Des snacks sains livrés en France."
+    },
+    "about": {
+      "title": "À propos : la lyophilisation et notre mission",
+      "description": "Découvrez Crunchy Vita, marque de fruits lyophilisés bio : comment la lyophilisation préserve le goût et les nutriments des fruits, notre mission et nos engagements."
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "description": "Une question sur nos fruits lyophilisés bio, une commande ou un partenariat ? Écrivez à l'équipe Crunchy Vita, nous vous répondons rapidement."
+    },
+    "blog": {
+      "title": "Blog : encas sains et fruits lyophilisés",
+      "description": "Conseils, recettes et idées d'encas sains autour des fruits lyophilisés bio et sans sucre ajouté, par l'équipe Crunchy Vita."
+    },
+    "professional": {
+      "title": "Espace professionnel : fruits lyophilisés bio pour les pros",
+      "description": "Vous êtes un professionnel ? Découvrez nos offres de fruits lyophilisés bio et sans sucre ajouté pour les commerces, la restauration et les entreprises."
+    },
+    "cgv": {
+      "title": "Conditions générales de vente",
+      "description": "Conditions générales de vente du site Crunchy Vita : commandes, prix, paiement, livraison, droit de rétractation et garanties."
+    },
+    "cgu": {
+      "title": "Conditions générales d'utilisation",
+      "description": "Conditions générales d'utilisation du site crunchyvita.com."
+    },
+    "legalNotice": {
+      "title": "Mentions légales",
+      "description": "Mentions légales du site Crunchy Vita : éditeur, hébergeur et propriété intellectuelle."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "description": "Comment Crunchy Vita collecte, utilise et protège vos données personnelles, et comment exercer vos droits."
+    },
+    "shipping": {
+      "title": "Politique de livraison",
+      "description": "Délais, tarifs et modes de livraison (point relais ou domicile) de vos fruits lyophilisés Crunchy Vita."
+    },
+    "returns": {
+      "title": "Politique de retour",
+      "description": "Conditions de retour et de remboursement de vos commandes Crunchy Vita."
+    },
+    "article": {
+      "fallbackDescription": "Un article du blog Crunchy Vita sur les encas sains et les fruits lyophilisés bio."
+    }
   }
 }

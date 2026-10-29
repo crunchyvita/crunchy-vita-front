@@ -116,6 +116,8 @@
   },
   "Home": {
     "hero": {
+      "kicker": "Organic freeze-dried fruit, no added sugar",
+      "imageAlt": "Crunchy Vita bags of organic freeze-dried blueberry, mango, pineapple, banana and strawberry",
       "titleLine1": "Taste Nature",
       "titleLine2": "with",
       "brand": "CrunchyVita",
@@ -375,7 +377,7 @@
       "packages": "Crunchy Packs"
     },
     "heading": {
-      "productsTitle": "The Shop",
+      "productsTitle": "Our organic freeze-dried fruit",
       "packagesTitle": "The Boxes",
       "productsSubtitle": "The best freeze-dried fruits, with no additives.",
       "packagesSubtitle": "Build your perfect mix and enjoy exclusive discounts."
@@ -1591,5 +1593,58 @@
     "text": "The link may be wrong or the page may have moved. Our organic freeze-dried fruits are waiting for you in the shop.",
     "shopCta": "Visit the shop",
     "homeCta": "Back to home"
+  },
+  "Meta": {
+    "home": {
+      "title": "Organic freeze-dried fruit, no added sugar | Crunchy Vita",
+      "description": "Organic freeze-dried fruit with no added sugar: strawberry, mango, banana, pineapple and blueberry. A healthy, 100% fruit, ultra-crunchy snack."
+    },
+    "shop": {
+      "title": "Organic freeze-dried fruit shop",
+      "description": "Shop our organic freeze-dried fruit with no added sugar: strawberry, mango, banana, pineapple and blueberry, in single bags or boxes. Healthy snacks shipped from France."
+    },
+    "about": {
+      "title": "About us: freeze-drying and our mission",
+      "description": "Meet Crunchy Vita, an organic freeze-dried fruit brand: how freeze-drying preserves the taste and nutrients of fruit, our mission and our commitments."
+    },
+    "contact": {
+      "title": "Contact us",
+      "description": "A question about our organic freeze-dried fruit, an order or a partnership? Write to the Crunchy Vita team, we reply quickly."
+    },
+    "blog": {
+      "title": "Blog: healthy snacks and freeze-dried fruit",
+      "description": "Tips, recipes and healthy snack ideas built around organic freeze-dried fruit with no added sugar, by the Crunchy Vita team."
+    },
+    "professional": {
+      "title": "Professional area: organic freeze-dried fruit for businesses",
+      "description": "Are you a professional? Discover our organic, no-added-sugar freeze-dried fruit offers for retailers, food service and companies."
+    },
+    "cgv": {
+      "title": "Terms of sale",
+      "description": "Crunchy Vita terms of sale: orders, prices, payment, delivery, right of withdrawal and warranties."
+    },
+    "cgu": {
+      "title": "Terms of use",
+      "description": "Terms of use of the crunchyvita.com website."
+    },
+    "legalNotice": {
+      "title": "Legal notice",
+      "description": "Crunchy Vita legal notice: publisher, host and intellectual property."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "How Crunchy Vita collects, uses and protects your personal data, and how to exercise your rights."
+    },
+    "shipping": {
+      "title": "Shipping policy",
+      "description": "Delivery times, rates and methods (pickup point or home delivery) for your Crunchy Vita freeze-dried fruit."
+    },
+    "returns": {
+      "title": "Returns policy",
+      "description": "Return and refund conditions for your Crunchy Vita orders."
+    },
+    "article": {
+      "fallbackDescription": "An article from the Crunchy Vita blog about healthy snacks and organic freeze-dried fruit."
+    }
   }
 }

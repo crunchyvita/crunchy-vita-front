@@ -161,7 +161,17 @@ export default function Home() {
       <HeaderHome />
 
       {/* Hero Section */}
-      <section className="pt-12 pb-20 lg:py-24 relative overflow-hidden bg-[url('/assets/images/pack2.png')] bg-cover bg-center bg-no-repeat">
+      <main>
+      <section className="pt-12 pb-20 lg:py-24 relative overflow-hidden">
+        {/* LCP image: next/image serves AVIF/WebP at the right width instead of the 2 MB PNG. */}
+        <Image
+          src="/assets/images/pack2.png"
+          alt={t('hero.imageAlt')}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -173,14 +183,17 @@ export default function Home() {
               variants={staggerContainer}
               className="text-center lg:text-left"
             >
-              <motion.h1 
-                variants={fadeInUp}
+              {/* Not animated: an opacity-0 H1 delays LCP until hydration. */}
+              <h1
                 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tighter uppercase drop-shadow-lg"
                 style={{ fontFamily: 'Agrandir, sans-serif' }}
               >
+                <span className="block mb-4 text-base md:text-lg lg:text-xl tracking-[0.12em] text-white/90" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
+                  {t('hero.kicker')}
+                </span>
                 {t('hero.titleLine1')}<br />
                 {t('hero.titleLine2')} <br/><span className="text-[#E10C69]" style={{ fontFamily: 'Agrandir, sans-serif' }}>{t('hero.brand')}</span>
-              </motion.h1>
+              </h1>
               
               <motion.p 
                 variants={fadeInUp}
@@ -338,7 +351,8 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="group relative h-87.5 lg:h-112.5 rounded-[2.5rem] lg:rounded-[3.5rem] overflow-hidden border-4 border-white shadow-lg"
               >
-                <Image src={item.image} alt={item.desc} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                <Image src={item.image} alt={item.desc} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                <Link href="/shop" className="absolute inset-0 z-10" aria-label={`${t('products.title')} : ${item.desc}`} />
                 <div className="absolute inset-0 bg-linear-to-t from-[#556822]/90 via-transparent to-transparent opacity-70" />
                 <div className="absolute bottom-0 p-6 lg:p-8 w-full">
                   <p className="text-white font-black uppercase italic text-lg lg:text-xl leading-tight" style={{ fontFamily: 'Maison Neue, sans-serif' }}>
@@ -432,6 +446,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </main>
 
       <Footer />
       
