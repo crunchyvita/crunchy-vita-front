@@ -17,7 +17,7 @@ export default function AboutUs() {
         <h1 className="text-5xl font-bold text-slate-900 mb-16 font-[agrandir]">{t('title')}</h1>
 
         {/* La lyophilisation */}
-        <section className="mb-12">
+        <section id="lyophilisation" className="mb-12 scroll-mt-28">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('lyo.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('lyo.p1')}
@@ -42,7 +42,7 @@ export default function AboutUs() {
         </section>
 
         {/* Collaboration & Sponsoring */}
-        <section className="mb-12">
+        <section id="collaboration-sponsoring" className="mb-12 scroll-mt-28">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 font-[agrandir]">{t('collab.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">
             {t('collab.p1')}
@@ -56,7 +56,7 @@ export default function AboutUs() {
         </section>
 
         {/* Clients Professionnels B2B */}
-        <section className="mb-12">
+        <section id="clients-b2b" className="mb-12 scroll-mt-28">
           <h2 className="text-2xl font-bold text-slate-900 mb-4">{t('b2b.title')}</h2>
           <p className="text-slate-700 leading-relaxed mb-4">
             {t('b2b.p1')}

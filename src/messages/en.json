@@ -1571,5 +1571,12 @@
       "notFoundTitle": "Content not found",
       "notFoundDescription": "The page you are looking for does not exist or is not available."
     }
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "heading": "Oops, this page doesn't exist",
+    "text": "The link may be wrong or the page may have moved. Our organic freeze-dried fruits are waiting for you in the shop.",
+    "shopCta": "Visit the shop",
+    "homeCta": "Back to home"
   }
 }

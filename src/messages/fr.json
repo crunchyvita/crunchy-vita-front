@@ -1595,5 +1595,12 @@
       "notFoundTitle": "Contenu non trouve",
       "notFoundDescription": "La page que vous recherchez n'existe pas ou n'est pas disponible."
     }
+  },
+  "NotFound": {
+    "title": "Page introuvable",
+    "heading": "Oups, cette page n'existe pas",
+    "text": "Le lien est peut-être erroné ou la page a été déplacée. Nos fruits lyophilisés bio vous attendent dans la boutique.",
+    "shopCta": "Voir la boutique",
+    "homeCta": "Retour à l'accueil"
   }
 }
