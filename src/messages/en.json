@@ -372,13 +372,23 @@
     },
     "tabs": {
       "products": "All products",
-      "packages": "Crunchy Packs"
+      "packages": "Crunchy Packs",
+      "pros": "Pro Packs"
     },
     "heading": {
       "productsTitle": "The Shop",
       "packagesTitle": "The Boxes",
       "productsSubtitle": "The best freeze-dried fruits, with no additives.",
-      "packagesSubtitle": "Build your perfect mix and enjoy exclusive discounts."
+      "packagesSubtitle": "Build your perfect mix and enjoy exclusive discounts.",
+      "prosTitle": "Pro Packs",
+      "prosSubtitle": "Our freeze-dried fruit in large formats, for professionals and big eaters."
+    },
+    "pros": {
+      "empty": "Large formats will soon be available online. In the meantime, ask us for a quote.",
+      "quoteTitle": "Need a larger volume?",
+      "quoteText": "Formats available on quote: {formats}. Get an offer tailored to your volumes.",
+      "quoteTextNoFormats": "Get an offer tailored to your volumes.",
+      "quoteCta": "Request a quote"
     },
     "packages": {
       "descriptionFallback": "A crunchy, gourmet selection for your moments of pleasure.",

@@ -372,13 +372,23 @@
     },
     "tabs": {
       "products": "Tous nos produits",
-      "packages": "Crunchy Packs"
+      "packages": "Crunchy Packs",
+      "pros": "Packs Pros"
     },
     "heading": {
       "productsTitle": "La Boutique",
       "packagesTitle": "Les Coffrets",
       "productsSubtitle": "Le meilleur des fruits lyophilises, sans aucun additif.",
-      "packagesSubtitle": "Composez votre mix parfait et profitez de reductions exclusives."
+      "packagesSubtitle": "Composez votre mix parfait et profitez de reductions exclusives.",
+      "prosTitle": "Packs Pros",
+      "prosSubtitle": "Nos fruits lyophilisés en grands formats, pour les professionnels et les gros consommateurs."
+    },
+    "pros": {
+      "empty": "Les grands formats seront bientôt disponibles en ligne. En attendant, demandez-nous un devis.",
+      "quoteTitle": "Besoin d'un volume plus important ?",
+      "quoteText": "Formats disponibles sur devis : {formats}. Recevez une offre adaptée à vos volumes.",
+      "quoteTextNoFormats": "Recevez une offre adaptée à vos volumes.",
+      "quoteCta": "Demander un devis"
     },
     "packages": {
       "descriptionFallback": "Une selection gourmande et craquante pour vos moments de plaisir.",
