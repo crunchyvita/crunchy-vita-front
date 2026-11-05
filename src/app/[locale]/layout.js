@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { locales } from '@/i18n';
+import { clientMessages } from '@/lib/adminI18n';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -20,7 +21,7 @@ export default async function LocaleLayout({ children, params }) {
 
   return (
     <>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={clientMessages(messages)}>
         {children}
       </NextIntlClientProvider>
       <SpeedInsights />

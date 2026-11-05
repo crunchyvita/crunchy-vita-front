@@ -109,7 +109,10 @@ const getAvailableStock = (product) => {
 
 const isProductOutOfStock = (product) => getAvailableStock(product) <= 0;
 
-export default function PackageCustomizationPage() {
+// `initialPackage` / `initialProducts` come from the server page so the pack is in the HTML;
+// the effect below still refetches and restores the visitor's saved selection.
+export default function PackageDetailClient({ initialPackage = null, initialProducts = [] }) {
+  const isFixedInitial = initialPackage?.packageType === "FIXED";
   const router = useRouter();
   const params = useParams();
   const packageId = params?.id;
@@ -119,14 +122,16 @@ export default function PackageCustomizationPage() {
   const locale = useLocale();
   const { addToCart } = useCart();
 
-  const [packageData, setPackageData] = useState(null);
-  const [products, setProducts] = useState([]);
+  const [packageData, setPackageData] = useState(initialPackage);
+  const [products, setProducts] = useState(isFixedInitial ? [] : initialProducts);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPackage);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [quantities, setQuantities] = useState({});
-  const [fixedItems, setFixedItems] = useState([]);
+  const [quantities, setQuantities] = useState(() =>
+    isFixedInitial ? {} : Object.fromEntries(initialProducts.map((p) => [p._id, 1]))
+  );
+  const [fixedItems, setFixedItems] = useState(isFixedInitial ? initialPackage.products || [] : []);
   const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(false);
   const [showStockAlerts, setShowStockAlerts] = useState({});
   const [packageQuantity, setPackageQuantity] = useState(1);
@@ -156,7 +161,7 @@ export default function PackageCustomizationPage() {
 
   useEffect(() => {
     const fetchPackageData = async () => {
-      setLoading(true);
+      if (!initialPackage) setLoading(true);
       setError("");
 
       try {
@@ -513,7 +518,7 @@ export default function PackageCustomizationPage() {
   if (packageData?.packageType === "FIXED") {
     return (
       <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen overflow-x-hidden">
-        <HeaderAndBreadcrumbs />
+        <HeaderAndBreadcrumbs currentLabel={packageDisplayName} />
         <PromoBadge />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -723,7 +728,7 @@ export default function PackageCustomizationPage() {
   // ===================== CUSTOM PACKAGE UI =====================
   return (
     <div style={{ backgroundColor: COLORS.beige }} className="min-h-screen overflow-x-hidden">
-      <HeaderAndBreadcrumbs />
+      <HeaderAndBreadcrumbs currentLabel={packageDisplayName} />
       <PromoBadge />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

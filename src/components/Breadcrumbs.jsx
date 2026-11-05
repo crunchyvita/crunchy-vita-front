@@ -20,6 +20,7 @@ const STATIC_SEGMENTS = {
   'espace-professionnel': 'professional',
   espaceProfessionnel: 'professional',
   'about-us': 'about',
+  'fruits-lyophilises-bio': 'category',
   cgv: 'cgv',
   cgu: 'cgu',
   'mentions-legales': 'legalNotice',
@@ -66,11 +67,13 @@ function stripLocalePrefix(path) {
   return path;
 }
 
-export default function Breadcrumbs() {
+/** `currentLabel` lets server-rendered pages name the last crumb before any client effect runs. */
+export default function Breadcrumbs({ currentLabel = '' }) {
   const pathnameRaw = usePathname() || '';
   const pathname = stripLocalePrefix(pathnameRaw);
   const t = useTranslations('Breadcrumbs');
-  const { lastLabel } = useBreadcrumbOverride();
+  const { lastLabel: contextLabel } = useBreadcrumbOverride();
+  const lastLabel = currentLabel || contextLabel;
 
   const items = useMemo(() => {
     if (shouldHide(pathname)) return [];
