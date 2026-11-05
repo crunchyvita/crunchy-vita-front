@@ -17,7 +17,8 @@ import PromoBadge from '@/components/PromoBadge';
 import { useLocale, useTranslations } from 'next-intl';
 import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
 import { getPreviousPrice } from '@/lib/productPricing';
-import { formatProFormats, isProPack } from '@/lib/proPacks';
+import { optimizedImageUrl } from '@/lib/imageUrl';
+import { isProPack } from '@/lib/proPacks';
 
 const TABS = ['products', 'packages', 'pros'];
 
@@ -69,7 +70,7 @@ function PremiumPackageCard({
   const allProducts = pkg.products || [];
   const resolvedType = pkg.packageType || 'CUSTOM';
   const packageImageUrl = getPackageImageUrl(pkg);
-  const customBadgeLabel = locale === 'fr' ? 'Personnalise' : 'Custom';
+  const customBadgeLabel = locale === 'fr' ? 'Personnalisé' : 'Custom';
 
   // Placeholder images
   const placeholderSource = resolvedType === 'FIXED' ? allProducts : (fallbackProducts || []);
@@ -142,8 +143,11 @@ function PremiumPackageCard({
 
         {packageImageUrl ? (
           <img
-            src={packageImageUrl}
-            alt={pkg.name}
+            src={optimizedImageUrl(packageImageUrl, 640)}
+            alt={translatedPackage.name}
+            width={640}
+            height={480}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
         ) : placeholderItems.length > 0 ? (
@@ -162,7 +166,7 @@ function PremiumPackageCard({
                     idx % 2 === 0 ? 'translate-y-2 group-hover:translate-y-0' : '-translate-y-2 group-hover:translate-y-0'
                   }`}
                 >
-                  <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <img src={optimizedImageUrl(item.imageUrl, 240)} alt="" loading="lazy" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-[#556822]/0 group-hover:bg-[#556822]/5 transition-colors" />
                 </div>
               ))}
@@ -238,6 +242,7 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
   const price = getProductPrice(product);
   const stock = getAvailableStock(product.stock);
   const imageUrl = getProductImageUrl(product);
+  const productHref = `/shop/${product.id || product._id}`;
 
   const avgRating = product.ratings?.length
     ? product.ratings.reduce((acc, r) => acc + (r.rating || 0), 0) / product.ratings.length
@@ -246,17 +251,22 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
   return (
     <div className="group bg-white rounded-[2rem] shadow-sm border border-[#E1FBD9] overflow-hidden hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-square overflow-hidden bg-[#F2F8EE]">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={productName}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30">
-            <ImageIcon size={40} />
-          </div>
-        )}
+        <Link href={productHref} tabIndex={-1} aria-hidden="true" className="block w-full h-full">
+          {imageUrl ? (
+            <img
+              src={optimizedImageUrl(imageUrl, 500)}
+              alt={productName}
+              width={500}
+              height={500}
+              loading="lazy"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-[#B3C800] opacity-30">
+              <ImageIcon size={40} />
+            </div>
+          )}
+        </Link>
 
         <div className="product-card-actions absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300">
           <button
@@ -301,10 +311,12 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
         )}
 
         <div className="mb-3">
-          <h3 className="font-black text-[#556822] text-lg mb-2">{productName}</h3>
+          <h3 className="font-black text-[#556822] text-lg mb-2">
+            <Link href={productHref} className="hover:text-[#E10C69] transition-colors">{productName}</Link>
+          </h3>
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
-              <h4 className="font-black text-[#E10C69] text-xl">{price.toFixed(2)} €</h4>
+              <p className="font-black text-[#E10C69] text-xl">{price.toFixed(2)} €</p>
               {getPreviousPrice(product) && (
                 <span className="text-sm text-gray-400 line-through">
                   {getPreviousPrice(product).toFixed(2)} €
@@ -315,7 +327,7 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
         </div>
 
         <Link
-          href={`/shop/${product.id || product._id}`}
+          href={productHref}
           className="block w-full py-3.5 rounded-xl bg-[#F2F8EE] text-[#556822] font-black text-[10px] uppercase tracking-[0.5] text-center hover:bg-[#556822] hover:text-white transition-all"
         >
           {t('products.viewProduct')}
@@ -346,7 +358,7 @@ function ProQuoteBanner({ formats, isEmpty }) {
 }
 
 // --- MAIN PAGE ---
-function ClientShop() {
+function ClientShop({ initialProducts, initialPackages, proFormats = '' }) {
   const t = useTranslations('Shop');
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -358,9 +370,10 @@ function ClientShop() {
     ? rawApiBaseUrl.replace(/\/$/, '')
     : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
 
-  const [products, setProducts] = useState([]);
-  const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Server-provided lists render immediately; the client refetch below refreshes stock.
+  const [products, setProducts] = useState(initialProducts ?? []);
+  const [packages, setPackages] = useState(initialPackages ?? []);
+  const [loading, setLoading] = useState(!initialProducts);
 
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -377,15 +390,6 @@ function ClientShop() {
   const [packageFavoritesLoading, setPackageFavoritesLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [proFormats, setProFormats] = useState('');
-
-  // Formats offered on quote, configured in the admin settings (professional space).
-  useEffect(() => {
-    fetch(`${apiBaseUrl}/settings`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setProFormats(formatProFormats(data?.data?.professionalSpace?.productFormats)))
-      .catch(() => {});
-  }, [apiBaseUrl]);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -721,9 +725,9 @@ function ClientShop() {
           </div>
 
           <div className="text-center max-w-2xl">
-            <h2 className="text-6xl font-black text-[#556822] mb-6 tracking-tighter">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#556822] mb-6 tracking-tighter">
               {t(`heading.${activeTab}Title`)}
-            </h2>
+            </h1>
             <div className="w-20 h-1.5 bg-[#EF8EB8] mx-auto rounded-full mb-6" />
             <p className="text-[#556822]/70 font-bold text-xl">
               {t(`heading.${activeTab}Subtitle`)}
@@ -805,7 +809,7 @@ function ClientShop() {
   );
 }
 
-export default function ShopPage() {
+export default function ShopPage({ initialProducts, initialPackages, proFormats }) {
   return (
     <Suspense
       fallback={
@@ -814,7 +818,7 @@ export default function ShopPage() {
         </div>
       }
     >
-      <ClientShop />
+      <ClientShop initialProducts={initialProducts} initialPackages={initialPackages} proFormats={proFormats} />
     </Suspense>
   );
 }

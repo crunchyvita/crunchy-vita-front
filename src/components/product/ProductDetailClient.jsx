@@ -1,4 +1,3 @@
-// src/app/shop/[id]/page.jsx
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -24,6 +23,7 @@ import { trackMetaPixelEvent } from '@/lib/metaPixel';
 import { getPreviousPrice } from '@/lib/productPricing';
 import { hasNutritionData } from '@/lib/nutrition';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
+import { optimizedImageUrl } from '@/lib/imageUrl';
 
 const normalizeDescriptionLines = (description) => {
   if (typeof description !== 'string') return [];
@@ -34,7 +34,9 @@ const normalizeDescriptionLines = (description) => {
     .filter(Boolean);
 };
 
-export default function ProductDetailPage() {
+// `initialProduct` comes from the server page so name, price and H1 are in the HTML.
+// The client still refetches with the user's token to show their own pending reviews.
+export default function ProductDetailClient({ initialProduct = null, relatedSlot = null }) {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -47,8 +49,8 @@ export default function ProductDetailPage() {
     : `${rawApiBaseUrl.replace(/\/$/, '')}/api`;
 
   const [searchParams, setSearchParams] = useState({});
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
   const addCooldownUntilRef = useRef(0);
   const quantityPlusCooldownRef = useRef(0);
   const translatedProduct = getTranslatedProduct(product, locale);
@@ -117,6 +119,8 @@ export default function ProductDetailPage() {
   // ✅ IMPORTANT: ne fetch pas si params.id n’est pas prêt
   useEffect(() => {
     if (!params?.id) return;
+    // Server data is enough for guests; logged-in users may have pending reviews to see.
+    if (initialProduct && !localStorage.getItem('token')) return;
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.id]);
@@ -167,7 +171,7 @@ export default function ProductDetailPage() {
 
   const fetchProduct = async () => {
     try {
-      setLoading(true);
+      if (!initialProduct) setLoading(true);
       setError(null);       // ✅ FIX: reset error sinon page reste bloquée
       // setProduct(null);   // (optionnel) si tu veux éviter l’ancien produit pendant loading
 
@@ -231,8 +235,11 @@ export default function ProductDetailPage() {
       setProduct(data);
     } catch (err) {
       console.error('[Product Detail] Error:', err);
-      setProduct(null); // ✅ propre
-      setError(err.message || t('errors.productNotFound'));
+      // Keep the server-rendered product if only the authenticated refresh failed.
+      if (!initialProduct) {
+        setProduct(null);
+        setError(err.message || t('errors.productNotFound'));
+      }
     } finally {
       setLoading(false);
     }
@@ -699,7 +706,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderAndBreadcrumbs />
+      <HeaderAndBreadcrumbs currentLabel={productName} />
 
       <PromoBadge />
 
@@ -710,8 +717,11 @@ export default function ProductDetailPage() {
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden shadow-lg">
               {productImages.length > 0 ? (
                 <img
-                  src={productImages[selectedImageIndex]}
+                  src={optimizedImageUrl(productImages[selectedImageIndex], 1000)}
                   alt={productName}
+                  width={1000}
+                  height={1000}
+                  fetchPriority="high"
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.src = '/assets/images/placeholder.png';
@@ -736,7 +746,7 @@ export default function ProductDetailPage() {
                         : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <img src={img} alt={`${productName} - Image ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={optimizedImageUrl(img, 240)} alt={`${productName} - Image ${index + 1}`} width={240} height={240} loading="lazy" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -943,7 +953,7 @@ export default function ProductDetailPage() {
             >
               {/* Fresh Fruit Image */}
               <div className="absolute inset-0">
-                <img src={freshImg} alt={t('comparison.freshAlt')} className="w-full h-full object-cover" draggable="false" />
+                <img src={optimizedImageUrl(freshImg, 1280)} alt={t('comparison.freshAlt')} loading="lazy" className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-3 left-3 sm:top-6 sm:left-6 bg-white/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-3 rounded-full shadow-lg border-2 border-white/40">
                   <span className="font-agrandir font-bold text-white text-sm sm:text-lg drop-shadow-lg">{t('comparison.freshLabel')}</span>
                 </div>
@@ -954,7 +964,7 @@ export default function ProductDetailPage() {
                 className={`absolute inset-0 ${!isDragging ? 'transition-all duration-150 ease-out' : ''}`}
                 style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
               >
-                <img src={lyoImg} alt={t('comparison.lyoAlt')} className="w-full h-full object-cover" draggable="false" />
+                <img src={optimizedImageUrl(lyoImg, 1280)} alt={t('comparison.lyoAlt')} loading="lazy" className="w-full h-full object-cover" draggable="false" />
                 <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-white/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-3 rounded-full shadow-lg border-2 border-white/40">
                   <span className="font-agrandir font-bold text-white text-sm sm:text-lg drop-shadow-lg">{t('comparison.lyoLabel')}</span>
                 </div>
@@ -1221,6 +1231,8 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {relatedSlot}
       </main>
 
       <Footer />
