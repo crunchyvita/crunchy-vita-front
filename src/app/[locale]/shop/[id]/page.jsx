@@ -5,6 +5,7 @@ import RelatedProducts from '@/components/product/RelatedProducts';
 import JsonLd from '@/components/seo/JsonLd';
 import { buildMetadata, truncate } from '@/lib/seo';
 import { getProduct, getPublicProducts } from '@/lib/serverApi';
+import { isProPack } from '@/lib/proPacks';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import {
   breadcrumbJsonLd,
@@ -51,7 +52,10 @@ export default async function ProductPage({ params }) {
   ]);
 
   const { name } = getTranslatedProduct(product, locale);
-  const related = allProducts.filter((p) => p._id !== product._id).slice(0, RELATED_COUNT);
+  // Suggest products of the same kind: retail bags with retail bags, bulk formats with bulk formats.
+  const related = allProducts
+    .filter((p) => p._id !== product._id && isProPack(p) === isProPack(product))
+    .slice(0, RELATED_COUNT);
 
   return (
     <>

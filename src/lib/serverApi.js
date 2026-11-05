@@ -48,3 +48,8 @@ export async function getBlogs() {
 }
 
 export const getBlog = cache((id) => apiGet(`/blogs/${encodeURIComponent(id)}`));
+
+/** Public site settings (feature flags, professional-space formats…). */
+export async function getSettings() {
+  return apiGet('/settings');
+}

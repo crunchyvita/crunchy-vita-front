@@ -18,6 +18,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { getTranslatedPackage, getTranslatedProduct } from '@/lib/productTranslations';
 import { getPreviousPrice } from '@/lib/productPricing';
 import { optimizedImageUrl } from '@/lib/imageUrl';
+import { isProPack } from '@/lib/proPacks';
+
+const TABS = ['products', 'packages', 'pros'];
 
 // --- UTILS ---
 const getProductImageUrl = (product) => {
@@ -334,8 +337,28 @@ function ProductCard({ product, onOpenDetail, onToggleFavorite, isFavorite, favo
   );
 }
 
+/** Packs Pros tab: online 1–2 kg formats above, larger volumes on quote. */
+function ProQuoteBanner({ formats, isEmpty }) {
+  const t = useTranslations('Shop.pros');
+  return (
+    <div className="col-span-full bg-[#556822] text-white rounded-[2.5rem] p-8 sm:p-12 text-center">
+      {isEmpty && <p className="font-bold text-white/90 mb-6">{t('empty')}</p>}
+      <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-3">{t('quoteTitle')}</h2>
+      <p className="text-white/90 mb-8 max-w-2xl mx-auto">
+        {formats ? t('quoteText', { formats }) : t('quoteTextNoFormats')}
+      </p>
+      <Link
+        href="/espace-professionnel#pro-devis"
+        className="inline-block rounded-full bg-[#E10C69] px-8 py-4 font-black uppercase tracking-widest text-sm text-white"
+      >
+        {t('quoteCta')}
+      </Link>
+    </div>
+  );
+}
+
 // --- MAIN PAGE ---
-function ClientShop({ initialProducts, initialPackages }) {
+function ClientShop({ initialProducts, initialPackages, proFormats = '' }) {
   const t = useTranslations('Shop');
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -370,7 +393,7 @@ function ClientShop({ initialProducts, initialPackages }) {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab === 'packages') setActiveTab('packages');
+    if (TABS.includes(tab)) setActiveTab(tab);
   }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
@@ -404,6 +427,11 @@ function ClientShop({ initialProducts, initialPackages }) {
       return nameMatch || tagsMatch || categoryMatch;
     });
   }, [products, searchQuery, locale]);
+
+  // Bulk "Packs Pros" products live in their own tab, not among the retail bags.
+  const allRetailProducts = useMemo(() => products.filter((p) => !isProPack(p)), [products]);
+  const retailProducts = useMemo(() => filteredProducts.filter((p) => !isProPack(p)), [filteredProducts]);
+  const proProducts = useMemo(() => filteredProducts.filter(isProPack), [filteredProducts]);
 
   const filteredPackages = useMemo(() => {
     if (!searchQuery.trim()) return packages;
@@ -670,41 +698,39 @@ function ClientShop({ initialProducts, initialPackages }) {
 
           {searchQuery && (
             <p className="mt-4 text-center text-[#556822] font-medium font-[Maison Neue]">
-              {activeTab === 'products'
-                ? t('search.resultsProducts', { count: filteredProducts.length, query: searchQuery })
-                : t('search.resultsPackages', { count: filteredPackages.length, query: searchQuery })}
+              {activeTab === 'packages'
+                ? t('search.resultsPackages', { count: filteredPackages.length, query: searchQuery })
+                : t('search.resultsProducts', {
+                    count: (activeTab === 'pros' ? proProducts : retailProducts).length,
+                    query: searchQuery,
+                  })}
             </p>
           )}
         </section>
 
         {/* Tabs */}
         <div className="flex flex-col items-center mb-16">
-          <div className="flex bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] mb-12 border border-white">
-            <button
-              onClick={() => setActiveTab('products')}
-              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
-                activeTab === 'products' ? 'bg-[#E10c69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'
-              }`}
-            >
-              {t('tabs.products')}
-            </button>
-            <button
-              onClick={() => setActiveTab('packages')}
-              className={`px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
-                activeTab === 'packages' ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'
-              }`}
-            >
-              {t('tabs.packages')}
-            </button>
+          <div className="flex flex-wrap justify-center bg-white/50 backdrop-blur-sm p-2 rounded-[2rem] mb-12 border border-white">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 sm:px-10 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
+                  activeTab === tab ? 'bg-[#E10C69] text-white shadow-lg' : 'text-[#556822] hover:bg-white/50'
+                }`}
+              >
+                {t(`tabs.${tab}`)}
+              </button>
+            ))}
           </div>
 
           <div className="text-center max-w-2xl">
-            <h1 className="text-5xl md:text-6xl font-black text-[#556822] mb-6 tracking-tighter">
-              {activeTab === 'products' ? t('heading.productsTitle') : t('heading.packagesTitle')}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#556822] mb-6 tracking-tighter">
+              {t(`heading.${activeTab}Title`)}
             </h1>
             <div className="w-20 h-1.5 bg-[#EF8EB8] mx-auto rounded-full mb-6" />
             <p className="text-[#556822]/70 font-bold text-xl">
-              {activeTab === 'products' ? t('heading.productsSubtitle') : t('heading.packagesSubtitle')}
+              {t(`heading.${activeTab}Subtitle`)}
             </p>
           </div>
         </div>
@@ -718,8 +744,8 @@ function ClientShop({ initialProducts, initialPackages }) {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {activeTab === 'products' ? (
-              filteredProducts.map((p) => (
+            {activeTab !== 'packages' ? (
+              (activeTab === 'pros' ? proProducts : retailProducts).map((p) => (
                 <ProductCard
                   key={p._id}
                   product={p}
@@ -739,10 +765,13 @@ function ClientShop({ initialProducts, initialPackages }) {
                     pkg={pkg}
                     onToggleFavorite={handleTogglePackageFavorite}
                     isFavorite={packageFavoritesIds.has(pkg._id)}
-                    fallbackProducts={products}
+                    fallbackProducts={allRetailProducts}
                   />
                 ))}
               </div>
+            )}
+            {activeTab === 'pros' && (
+              <ProQuoteBanner formats={proFormats} isEmpty={proProducts.length === 0} />
             )}
           </div>
         )}
@@ -780,7 +809,7 @@ function ClientShop({ initialProducts, initialPackages }) {
   );
 }
 
-export default function ShopPage({ initialProducts, initialPackages }) {
+export default function ShopPage({ initialProducts, initialPackages, proFormats }) {
   return (
     <Suspense
       fallback={
@@ -789,7 +818,7 @@ export default function ShopPage({ initialProducts, initialPackages }) {
         </div>
       }
     >
-      <ClientShop initialProducts={initialProducts} initialPackages={initialPackages} />
+      <ClientShop initialProducts={initialProducts} initialPackages={initialPackages} proFormats={proFormats} />
     </Suspense>
   );
 }

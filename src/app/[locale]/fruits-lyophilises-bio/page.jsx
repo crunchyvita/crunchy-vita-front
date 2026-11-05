@@ -8,6 +8,7 @@ import { buildMetadata } from '@/lib/seo';
 import { breadcrumbJsonLd } from '@/lib/productSeo';
 import { getPublicProducts } from '@/lib/serverApi';
 import { isComplete } from '@/lib/placeholder';
+import { isProPack } from '@/lib/proPacks';
 
 const PATH = '/fruits-lyophilises-bio';
 // Keys match both the message keys and a word in the French product name.
@@ -27,11 +28,13 @@ const findProductFor = (fruit, products) =>
 
 export default async function OrganicFreezeDriedFruitPage({ params }) {
   const { locale } = await params;
-  const [t, tCrumbs, products] = await Promise.all([
+  const [t, tCrumbs, allProducts] = await Promise.all([
     getTranslations({ locale, namespace: 'Category' }),
     getTranslations({ locale, namespace: 'Breadcrumbs' }),
     getPublicProducts().catch(() => []),
   ]);
+  // Retail bags only: bulk formats have their own "Packs Pros" shop tab.
+  const products = allProducts.filter((p) => !isProPack(p));
 
   // Answers still marked [À COMPLÉTER] are left out until the real data is filled in.
   const certifier = t('faq.a4Certifier');
