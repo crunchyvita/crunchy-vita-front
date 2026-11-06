@@ -1,6 +1,8 @@
-// Bulk formats (1 kg, 2 kg…) are regular products filed under a "Packs Pros" category in the admin.
-// They get their own shop tab and are kept out of the retail lists.
-const PRO_PACK_CATEGORY = 'packspros';
+// Bulk formats (1 kg, 2 kg…) get their own "Packs Pros" shop tab and are kept out of the retail lists.
+// A product counts as one if it is filed under the "Packs Pros" category in the admin (also spelled
+// "PackPros"), or if its name carries a kilogram format — retail bags are sold in grams.
+const PRO_PACK_CATEGORIES = new Set(['packspros', 'packpros']);
+const KILO_FORMAT = /(^|[^a-z0-9])\d+(?:[.,]\d+)?\s?kg(?![a-z])/i;
 
 const normalize = (value) =>
   String(value || '')
@@ -11,7 +13,10 @@ const normalize = (value) =>
 
 export function isProPack(product) {
   const categories = [...(product?.categoryIds || []), product?.categoryId].filter(Boolean);
-  return categories.some((c) => typeof c === 'object' && normalize(c.name) === PRO_PACK_CATEGORY);
+  if (categories.some((c) => typeof c === 'object' && PRO_PACK_CATEGORIES.has(normalize(c.name)))) {
+    return true;
+  }
+  return [product?.name, product?.translations?.en?.name].some((name) => KILO_FORMAT.test(String(name || '')));
 }
 
 /** "1kg , 2 kg ,10kg" (admin setting) → "1 kg, 2 kg, 10 kg" */
