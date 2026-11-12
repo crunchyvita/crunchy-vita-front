@@ -996,8 +996,8 @@ export default function ProductDetailClient({ initialProduct = null, relatedSlot
           </div>
         )}
 
-        {/* Reviews Section (inchangé à part les fonctions déjà présentes) */}
-        <div className="mt-12 sm:mt-16 border-t border-gray-200 pt-8">
+        {/* Reviews Section — #avis is the target of the post-purchase review email */}
+        <div id="avis" className="mt-12 sm:mt-16 border-t border-gray-200 pt-8 scroll-mt-24">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-agrandir font-bold text-gray-900">{t('reviews.title')}</h2>
             <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-maison-neue-bold">
