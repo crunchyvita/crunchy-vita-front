@@ -58,7 +58,8 @@ export default function PolitiqueConfidentialite() {
           </ul>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('section1.p1')}</p>
           <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('section1.p2')}</p>
-          <p className="text-slate-700 leading-relaxed mb-6 font-[maison-neue-book]">{t('section1.p3')}</p>
+          <p className="text-slate-700 leading-relaxed mb-4 font-[maison-neue-book]">{t('section1.p3')}</p>
+          <p className="text-slate-700 leading-relaxed mb-6 font-[maison-neue-book]">{t('section1.p4')}</p>
 
           <h3 className="text-xl font-bold text-slate-900 mb-3 font-[agrandir]">
             {t('section1.legalBasis.title')}
