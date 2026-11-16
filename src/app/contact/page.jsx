@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import { 
@@ -23,6 +23,13 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  // /contact?type=pro (quote button of the Packs Pros shop tab): business form, quote subject.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('type') !== 'pro') return;
+    setContactType('professionnel');
+    setFormData((prev) => (prev.subject ? prev : { ...prev, subject: t('quoteSubject') }));
+  }, [t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

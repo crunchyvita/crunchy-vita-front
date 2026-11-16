@@ -348,7 +348,7 @@ function ProQuoteBanner({ formats, isEmpty }) {
         {formats ? t('quoteText', { formats }) : t('quoteTextNoFormats')}
       </p>
       <Link
-        href="/espace-professionnel#pro-devis"
+        href="/contact?type=pro"
         className="inline-block rounded-full bg-[#E10C69] px-8 py-4 font-black uppercase tracking-widest text-sm text-white"
       >
         {t('quoteCta')}

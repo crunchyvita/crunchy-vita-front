@@ -24,12 +24,15 @@ const nextConfig = {
   async redirects() {
     const legacyPublicPaths = [
       'shop', 'shop/packages/:id', 'shop/:id', 'about-us', 'contact', 'blogs', 'blogs/:id',
-      'espace-professionnel', 'cgv', 'cgu', 'mentions-legales', 'politique-confidentialite',
+      'cgv', 'cgu', 'mentions-legales', 'politique-confidentialite',
       'politique-livraison', 'politique-retour', 'fruits-lyophilises-bio',
     ];
     return [
       ...legacyPublicPaths.map((path) => ({ source: `/${path}`, destination: `/fr/${path}`, permanent: true })),
-      { source: '/espaceProfessionnel', destination: '/fr/espace-professionnel', permanent: true },
+      // The professional space page was removed: its audience now goes to the Packs Pros shop tab.
+      { source: '/espaceProfessionnel', destination: '/fr/shop?tab=pros', permanent: true },
+      { source: '/espace-professionnel', destination: '/fr/shop?tab=pros', permanent: true },
+      { source: '/:locale(fr|en)/espace-professionnel', destination: '/:locale/shop?tab=pros', permanent: true },
     ];
   },
 };
