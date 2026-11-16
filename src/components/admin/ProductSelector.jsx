@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { X, Plus, Check, Image as ImageIcon } from "lucide-react";
 import { getTranslatedProduct } from "@/lib/productTranslations";
 
+// Origin for legacy relative image paths (was hardcoded to localhost).
+const BACKEND_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+
 // Helper function to get image URL from product
 const getProductImageUrl = (product) => {
 	if (!product) return null;
@@ -26,7 +29,7 @@ const getProductImageUrl = (product) => {
 		
 		// Otherwise, construct full URL with backend domain
 		if (url) {
-			return `http://localhost:5000${url}`;
+			return `${BACKEND_ORIGIN}${url}`;
 		}
 	}
 	
@@ -36,7 +39,7 @@ const getProductImageUrl = (product) => {
 		if (url.startsWith('http://') || url.startsWith('https://')) {
 			return url;
 		}
-		return `http://localhost:5000${url}`;
+		return `${BACKEND_ORIGIN}${url}`;
 	}
 	
 	return null;

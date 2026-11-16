@@ -21,6 +21,9 @@ import {
 	Image as ImageIcon,
 } from "lucide-react";
 
+// Backend base URL (was hardcoded to localhost, which broke this form in production).
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
 export default function EditPackagePage() {
 	const t = useTranslations("admin.packagesForm");
 	const router = useRouter();
@@ -171,7 +174,7 @@ export default function EditPackagePage() {
 				formDataToSend.append("deleteImage", "true");
 			}
 
-			const response = await fetch(`http://localhost:5000/api/packages/${packageId}`, {
+			const response = await fetch(`${API_URL}/packages/${packageId}`, {
 				method: "PUT",
 				headers: {
 					Authorization: `Bearer ${token}`,
