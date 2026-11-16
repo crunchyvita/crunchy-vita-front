@@ -11,6 +11,8 @@ import { motion } from 'framer-motion';
 import './fonts.css';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from 'next-intl';
+import { optimizedImageUrl } from '@/lib/imageUrl';
+import { formatEuros } from '@/lib/shippingThresholds';
 import {
   Leaf,
   Ban,
@@ -67,7 +69,58 @@ const homeTickerItems = (t) => [
 { label: t('ticker.premiumSupport'), icon: Headset }
 ];
 
-export default function Home() {
+/** First-purchase offer shown right under the hero once a "Pack Découverte" exists in the admin. */
+function DiscoveryPackBanner({ pack, relayFreeShipping, t }) {
+  return (
+    <section className="bg-[#FCE7F2] py-10 sm:py-14">
+      <div className="container mx-auto px-6">
+        <div className="mx-auto max-w-5xl bg-white rounded-[2rem] shadow-lg overflow-hidden grid md:grid-cols-2">
+          <div className="relative min-h-56 bg-[#F2F8EE]">
+            {pack.image ? (
+              <img
+                src={optimizedImageUrl(pack.image, 800)}
+                alt={pack.name}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : null}
+          </div>
+          <div className="p-8 sm:p-10 flex flex-col justify-center">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#E10C69] mb-3">
+              {t('discovery.kicker')}
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#556822] uppercase tracking-tighter mb-4" style={{ fontFamily: 'Agrandir, sans-serif' }}>
+              {pack.name}
+            </h2>
+            {pack.description ? (
+              <p className="text-gray-600 font-medium mb-5 line-clamp-3">{pack.description}</p>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              {pack.price ? (
+                <span className="text-2xl font-black text-[#E10C69]">{formatEuros(pack.price)}</span>
+              ) : pack.discountPercentage > 0 ? (
+                <span className="rounded-full bg-[#E10C69] px-3 py-1 text-sm font-black text-white">
+                  -{pack.discountPercentage} %
+                </span>
+              ) : null}
+              <span className="text-sm font-bold text-[#556822]">
+                🚚 {t('discovery.freeShipping', { amount: formatEuros(relayFreeShipping) })}
+              </span>
+            </div>
+            <Link
+              href={`/shop/packages/${pack.id}`}
+              className="self-start rounded-full bg-[#E10C69] px-8 py-4 font-black uppercase tracking-widest text-white text-sm shadow-lg shadow-[#E10C69]/30"
+            >
+              {t('discovery.cta')}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Home({ discoveryPack = null, relayFreeShipping = 25 }) {
   const { user } = useAuth();
   const t = useTranslations('Home');
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
@@ -212,7 +265,17 @@ export default function Home() {
                     {t('hero.ctaDiscover')}
                   </Link>
                 </motion.div>
-                {!user && (
+                {/* Second CTA pushes the first purchase when a discovery pack exists, sign-up otherwise. */}
+                {discoveryPack ? (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      href={`/shop/packages/${discoveryPack.id}`}
+                      className="block rounded-full border-2 bg-white/10 border-white px-8 lg:px-10 py-4 text-center font-black uppercase tracking-widest text-white hover:bg-white hover:text-[#E10C69] transition-all text-sm lg:text-base"
+                    >
+                      {t('hero.ctaDiscoveryPack')}
+                    </Link>
+                  </motion.div>
+                ) : !user && (
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link
                       href="/auth/register"
@@ -228,6 +291,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {discoveryPack && <DiscoveryPackBanner pack={discoveryPack} relayFreeShipping={relayFreeShipping} t={t} />}
 
       <section className="bg-white border-y border-black/10 py-6 sm:py-7">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">

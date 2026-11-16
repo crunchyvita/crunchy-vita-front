@@ -117,7 +117,13 @@
     "copyright": " 2026 CrunchyVita - ALTEORA SAS. All rights reserved."
   },
   "Home": {
+    "discovery": {
+      "kicker": "New here? Start with this",
+      "freeShipping": "Free pickup-point delivery from {amount}",
+      "cta": "Discover the pack"
+    },
     "hero": {
+      "ctaDiscoveryPack": "Taste the whole range",
       "kicker": "Organic freeze-dried fruit, no added sugar",
       "imageAlt": "Crunchy Vita bags of organic freeze-dried blueberry, mango, pineapple, banana and strawberry",
       "titleLine1": "Taste Nature",
@@ -415,6 +421,12 @@
     "addedToCart": "Added to cart!"
   },
   "ProductDetail": {
+    "trust": {
+      "organic": "Certified organic",
+      "packedInFrance": "Packed in France by a sheltered workshop",
+      "freeShipping": "Free pickup-point delivery from {amount}",
+      "securePayment": "100% secure payment"
+    },
     "meta": {
       "title": "{name}",
       "description": "{name} by Crunchy Vita. {details} Price, nutrition facts and customer reviews on the product page.",
@@ -1362,6 +1374,11 @@
     "securityNote": "Secure SSL Encrypted Checkout"
   },
   "Cart": {
+    "freeShipping": {
+      "remaining": "Only {amount} more for free pickup-point delivery 🚚",
+      "reachedRelay": "🎉 Free pickup-point delivery! Home delivery is free from {home}.",
+      "reachedHome": "🎉 Free delivery, to a pickup point or to your home!"
+    },
     "title": "Your Cart",
     "breadcrumb": "Shop / Cart",
     "emptyTitle": "Your cart is empty",

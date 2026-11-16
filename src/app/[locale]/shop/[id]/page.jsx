@@ -4,7 +4,8 @@ import ProductDetailClient from '@/components/product/ProductDetailClient';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import JsonLd from '@/components/seo/JsonLd';
 import { buildMetadata, truncate } from '@/lib/seo';
-import { getProduct, getPublicProducts } from '@/lib/serverApi';
+import { getProduct, getPublicProducts, getSettings } from '@/lib/serverApi';
+import { getFranceShippingThresholds } from '@/lib/shippingThresholds';
 import { isProPack } from '@/lib/proPacks';
 import { getTranslatedProduct } from '@/lib/productTranslations';
 import {
@@ -45,10 +46,11 @@ export async function generateMetadata({ params }) {
 export default async function ProductPage({ params }) {
   const { locale, id } = await params;
   const product = await loadProduct(id);
-  const [tMeta, tCrumbs, allProducts] = await Promise.all([
+  const [tMeta, tCrumbs, allProducts, settings] = await Promise.all([
     getTranslations({ locale, namespace: 'ProductDetail.meta' }),
     getTranslations({ locale, namespace: 'Breadcrumbs' }),
     getPublicProducts().catch(() => []),
+    getSettings().catch(() => null),
   ]);
 
   const { name } = getTranslatedProduct(product, locale);
@@ -70,6 +72,7 @@ export default async function ProductPage({ params }) {
       <ProductDetailClient
         key={product._id}
         initialProduct={product}
+        relayFreeShipping={getFranceShippingThresholds(settings).relayFree}
         relatedSlot={<RelatedProducts products={related} locale={locale} />}
       />
     </>

@@ -117,7 +117,13 @@
     "copyright": " 2026 CrunchyVita - ALTEORA SAS. Tous droits réservés."
   },
   "Home": {
+    "discovery": {
+      "kicker": "Nouveau ? Commencez ici",
+      "freeShipping": "Livraison offerte dès {amount} en point relais",
+      "cta": "Je découvre le pack"
+    },
     "hero": {
+      "ctaDiscoveryPack": "Goûter toute la gamme",
       "kicker": "Fruits lyophilisés bio, sans sucre ajouté",
       "imageAlt": "Sachets Crunchy Vita de myrtilles, mangue, ananas, banane et fraise bio lyophilisées",
       "titleLine1": "Croquez la nature",
@@ -415,6 +421,12 @@
     "addedToCart": "Ajouté au panier !"
   },
   "ProductDetail": {
+    "trust": {
+      "organic": "Bio certifié",
+      "packedInFrance": "Conditionné en France par un ESAT",
+      "freeShipping": "Livraison offerte dès {amount} en point relais",
+      "securePayment": "Paiement 100 % sécurisé"
+    },
     "meta": {
       "title": "{name}",
       "description": "{name} signé Crunchy Vita. {details} Prix, valeurs nutritionnelles et avis clients sur la fiche produit.",
@@ -1386,6 +1398,11 @@
     "securityNote": "Paiement sécurisé SSL"
   },
   "Cart": {
+    "freeShipping": {
+      "remaining": "Plus que {amount} pour la livraison offerte en point relais 🚚",
+      "reachedRelay": "🎉 Livraison offerte en point relais ! À domicile, elle l'est dès {home}.",
+      "reachedHome": "🎉 Livraison offerte, en point relais comme à domicile !"
+    },
     "title": "Votre Panier",
     "breadcrumb": "Boutique / Panier",
     "emptyTitle": "Votre panier est vide",

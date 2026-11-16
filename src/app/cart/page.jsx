@@ -7,6 +7,7 @@ import { useRouter } from '@/navigation';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
 import PromoBadge from '@/components/PromoBadge';
+import FreeShippingProgress from '@/components/FreeShippingProgress';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -533,6 +534,7 @@ export default function CartPage() {
               <h2 className="text-lg sm:text-xl font-black text-[#556822] mb-4 sm:mb-6 font-[agrandir]">{t('summary.title')}</h2>
               {!isEmpty && (
                 <div className="space-y-4">
+                  <FreeShippingProgress subtotal={subtotal} />
                   <div className="flex justify-between text-gray-600">
                     <span className="font-medium">{t('summary.subtotal')}</span>
                     <span className="font-bold text-gray-900">{Number(subtotal || 0).toFixed(2)} €</span>

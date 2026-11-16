@@ -24,6 +24,7 @@ import { getPreviousPrice } from '@/lib/productPricing';
 import { hasNutritionData } from '@/lib/nutrition';
 import { useBreadcrumbOverride } from '@/context/BreadcrumbContext';
 import { optimizedImageUrl } from '@/lib/imageUrl';
+import { formatEuros } from '@/lib/shippingThresholds';
 
 const normalizeDescriptionLines = (description) => {
   if (typeof description !== 'string') return [];
@@ -36,7 +37,7 @@ const normalizeDescriptionLines = (description) => {
 
 // `initialProduct` comes from the server page so name, price and H1 are in the HTML.
 // The client still refetches with the user's token to show their own pending reviews.
-export default function ProductDetailClient({ initialProduct = null, relatedSlot = null }) {
+export default function ProductDetailClient({ initialProduct = null, relatedSlot = null, relayFreeShipping = 25 }) {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -57,6 +58,7 @@ export default function ProductDetailClient({ initialProduct = null, relatedSlot
   const productName = translatedProduct.name;
   const productDescription = translatedProduct.description;
   const descriptionLines = normalizeDescriptionLines(productDescription || t('descriptionFallback'));
+  const isOrganic = /\bbio\b|organic/i.test(`${product?.name || ''} ${productName || ''}`);
   const { setLastLabel, clearLastLabel } = useBreadcrumbOverride();
 
   // ✅ IMPORTANT: error doit être remis à null avant chaque fetch
@@ -906,6 +908,14 @@ export default function ProductDetailClient({ initialProduct = null, relatedSlot
                 </button>
               )}
             </div>
+
+            {/* Reassurance at the moment of purchase. "Bio" only for products named as organic. */}
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700 font-[maison-neue-book]">
+              {isOrganic && <li>🌱 {t('trust.organic')}</li>}
+              <li>🇫🇷 {t('trust.packedInFrance')}</li>
+              <li>🚚 {t('trust.freeShipping', { amount: formatEuros(relayFreeShipping) })}</li>
+              <li>🔒 {t('trust.securePayment')}</li>
+            </ul>
           </div>
         </div>
 
