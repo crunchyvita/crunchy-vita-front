@@ -1,5 +1,6 @@
 import { SITE_URL, truncate } from '@/lib/seo';
-import { getActivePackages, getPublicProducts } from '@/lib/serverApi';
+import { getActivePackages, getPublicProducts, getSettings } from '@/lib/serverApi';
+import { getFranceShippingThresholds } from '@/lib/shippingThresholds';
 import { getAvailableStock, getCurrentPrice, getDescriptionLines, getProductImages } from '@/lib/productSeo';
 import { isProPack } from '@/lib/proPacks';
 
@@ -18,7 +19,29 @@ const xml = (value) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 
-function item({ id, title, description, link, images, price, inStock, productType }) {
+// Net weight from the product name ("(13g)", "– 1kg") for Google's price-per-unit display.
+function unitPricing(name) {
+  const match = String(name || '').match(/(\d+(?:[.,]\d+)?)\s?(kg|g)(?![a-z])/i);
+  if (!match) return '';
+  const unit = match[2].toLowerCase();
+  const amount = match[1].replace(',', '.');
+  return `
+      <g:unit_pricing_measure>${amount}${unit}</g:unit_pricing_measure>
+      <g:unit_pricing_base_measure>${unit === 'kg' ? '1kg' : '100g'}</g:unit_pricing_base_measure>`;
+}
+
+// Cheapest France delivery (pickup point) for an order of just this item, per the shop's rules.
+function shipping(price, freeShipping, thresholds) {
+  const cost = freeShipping || price >= thresholds.relayFree ? 0 : thresholds.relayFee;
+  return `
+      <g:shipping>
+        <g:country>FR</g:country>
+        <g:service>Point relais</g:service>
+        <g:price>${cost.toFixed(2)} EUR</g:price>
+      </g:shipping>`;
+}
+
+function item({ id, title, description, link, images, price, inStock, productType, freeShipping = false, thresholds }) {
   if (!images.length || !(price > 0)) return ''; // Google rejects items without image or price
   const [main, ...extra] = images;
   return `
@@ -37,7 +60,7 @@ function item({ id, title, description, link, images, price, inStock, productTyp
       <g:condition>new</g:condition>
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>${xml(GOOGLE_CATEGORY)}</g:google_product_category>
-      <g:product_type>${xml(productType)}</g:product_type>
+      <g:product_type>${xml(productType)}</g:product_type>${unitPricing(title)}${shipping(price, freeShipping, thresholds)}
     </item>`;
 }
 
@@ -62,10 +85,12 @@ function fixedPackagePrice(pkg, productMap) {
 }
 
 export async function GET() {
-  const [products, packages] = await Promise.all([
+  const [products, packages, settings] = await Promise.all([
     getPublicProducts().catch(() => []),
     getActivePackages().catch(() => []),
+    getSettings().catch(() => null),
   ]);
+  const thresholds = getFranceShippingThresholds(settings);
 
   const productMap = new Map(products.map((p) => [String(p._id), p]));
 
@@ -80,6 +105,7 @@ export async function GET() {
       price: getCurrentPrice(p),
       inStock: getAvailableStock(p) > 0,
       productType: isProPack(p) ? 'Fruits lyophilisés > Grands formats' : 'Fruits lyophilisés',
+      thresholds,
     })
   );
 
@@ -95,6 +121,8 @@ export async function GET() {
         price: fixedPackagePrice(pkg, productMap),
         inStock: (pkg.products || []).every((entry) => getAvailableStock(resolveProduct(entry, productMap)) > 0),
         productType: 'Fruits lyophilisés > Coffrets',
+        freeShipping: pkg.freeShipping === true,
+        thresholds,
       })
     );
 
