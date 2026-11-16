@@ -109,8 +109,11 @@
       "privacy": "Privacy policy"
     },
     "newsletter": {
+      "success": "🎉 Thank you! Check your inbox: your code is waiting.",
+      "error": "We couldn't sign you up right now. Please try again shortly.",
+      "consent": "By signing up, you agree to receive our emails. Unsubscribe anytime in one click.",
       "title": "Newsletter",
-      "description": "Sign up to receive exclusive offers and new arrivals.",
+      "description": "Sign up and get 10% off your first order, plus our news and early-bird offers.",
       "placeholder": "Your email",
       "loading": "Signing up...",
       "submit": "Subscribe"

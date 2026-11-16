@@ -109,8 +109,11 @@
       "privacy": "Politique de confidentialité"
     },
     "newsletter": {
+      "success": "🎉 Merci ! Vérifiez votre boîte mail : votre code vous attend.",
+      "error": "Inscription impossible pour le moment. Réessayez dans quelques instants.",
+      "consent": "En vous inscrivant, vous acceptez de recevoir nos e-mails. Désinscription possible à tout moment en un clic.",
       "title": "Newsletter",
-      "description": "Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.",
+      "description": "Inscrivez-vous et recevez -10 % sur votre première commande, ainsi que nos nouveautés et offres en avant-première.",
       "placeholder": "Votre email",
       "loading": "Inscription...",
       "submit": "S'inscrire"

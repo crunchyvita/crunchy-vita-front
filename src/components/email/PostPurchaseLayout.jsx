@@ -47,7 +47,12 @@ export function ProductRow({ product, ctaLabel, ctaUrl }) {
   );
 }
 
-export function PostPurchaseLayout({ preview, children, unsubscribeUrl }) {
+export function PostPurchaseLayout({
+  preview,
+  children,
+  unsubscribeUrl,
+  reason = 'Vous recevez cet e-mail car vous avez passé commande sur crunchyvita.com.',
+}) {
   return (
     <div style={{ backgroundColor: '#F5F3ED', padding: '24px 12px', fontFamily: "'Segoe UI', Helvetica, Arial, sans-serif" }}>
       {/* Hidden preheader shown next to the subject in the inbox */}
@@ -65,9 +70,7 @@ export function PostPurchaseLayout({ preview, children, unsubscribeUrl }) {
           </p>
         </div>
         <div style={{ padding: '18px 24px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', backgroundColor: '#f8fafc' }}>
-          <p style={{ margin: '0 0 6px' }}>
-            Vous recevez cet e-mail car vous avez passé commande sur crunchyvita.com.
-          </p>
+          <p style={{ margin: '0 0 6px' }}>{reason}</p>
           <p style={{ margin: 0 }}>
             <a href={unsubscribeUrl} style={{ color: '#94a3b8', textDecoration: 'underline' }}>
               Ne plus recevoir ces e-mails

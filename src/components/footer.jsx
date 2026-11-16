@@ -4,27 +4,33 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from '@/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { MANAGE_COOKIES_EVENT } from '@/components/CookieConsent';
+
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
 export default function Footer() {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState('idle'); // idle | loading | success | error
   const t = useTranslations('Footer');
+  const locale = useLocale();
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
 
-    setLoading(true);
+    setNewsletterStatus('loading');
     try {
-      // Add your newsletter subscription API here
-      console.log('Subscribing:', email);
+      const res = await fetch(`${API_URL}/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'footer', locale }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setNewsletterStatus('success');
       setEmail('');
-    } catch (error) {
-      console.error('Error subscribing:', error);
-    } finally {
-      setLoading(false);
+    } catch {
+      setNewsletterStatus('error');
     }
   };
 
@@ -134,6 +140,39 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+        </div>
+
+        {/* Newsletter */}
+        <div className="mx-auto max-w-xl text-center">
+          <h3 className="text-lg font-bold text-[#E10C69] mb-2">{t('newsletter.title')}</h3>
+          <p className="text-sm text-gray-900 mb-4">{t('newsletter.description')}</p>
+          {newsletterStatus === 'success' ? (
+            <p className="text-sm font-bold text-[#556822] bg-white/80 rounded-full px-4 py-3">{t('newsletter.success')}</p>
+          ) : (
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3">
+              <label htmlFor="newsletter-email" className="sr-only">{t('newsletter.placeholder')}</label>
+              <input
+                id="newsletter-email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t('newsletter.placeholder')}
+                className="flex-1 rounded-full bg-white px-5 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#556822]"
+              />
+              <button
+                type="submit"
+                disabled={newsletterStatus === 'loading'}
+                className="rounded-full bg-[#556822] px-6 py-3 text-sm font-black text-white disabled:opacity-60"
+              >
+                {newsletterStatus === 'loading' ? t('newsletter.loading') : t('newsletter.submit')}
+              </button>
+            </form>
+          )}
+          {newsletterStatus === 'error' && (
+            <p className="mt-2 text-sm font-bold text-red-700">{t('newsletter.error')}</p>
+          )}
+          <p className="mt-3 text-xs text-gray-800">{t('newsletter.consent')}</p>
         </div>
 
         {/* Divider */}
