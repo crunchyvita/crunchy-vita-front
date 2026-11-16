@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
+import { MANAGE_COOKIES_EVENT } from '@/components/CookieConsent';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -122,6 +123,15 @@ export default function Footer() {
               <li><Link href="/cgu" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.cgu')}</Link></li>
               <li><Link href="/cgv" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.cgv')}</Link></li>
               <li><Link href="/politique-confidentialite" className="text-sm text-gray-900 hover:text-[#556822] transition">{t('legal.privacy')}</Link></li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event(MANAGE_COOKIES_EVENT))}
+                  className="text-sm text-gray-900 hover:text-[#556822] transition"
+                >
+                  {t('legal.cookies')}
+                </button>
+              </li>
             </ul>
           </div>
         </div>

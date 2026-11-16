@@ -101,6 +101,7 @@
       "collab": "Collaboration & Sponsoring"
     },
     "legal": {
+      "cookies": "Gérer les cookies",
       "title": "Informations légales",
       "mentions": "Mentions légales",
       "cgu": "CGU",
@@ -606,7 +607,7 @@
 },
  "PrivacyPolicy": {
     "title": "Politique de confidentialité de crunchyvita",
-    "updated": "Document mis à jour le 12/11/2026",
+    "updated": "Document mis à jour le 16/11/2026",
     "intro": {
       "p1": "Alteora (« Alteora », « notre », « nous » et « nos ») et nos partenaires respectent votre vie privée. Nous vous demandons de bien vouloir lire attentivement la présente politique de confidentialité pour comprendre comment sont collectées, traitées et conservées vos données personnelles lors de votre utilisation du présent site internet crunchyvita, accessible via l'url https://www.crunchyvita.com/fr.",
       "p2": "Le terme « données personnelles » désigne toute information se rapportant à une personne physique et permettant de l'identifier, directement ou indirectement, à partir d'une seule donnée ou du croisement d'un ensemble de données. Cela inclut des éléments comme le nom, l'adresse, l'adresse e-mail, les données de localisation, les identifiants en ligne, etc.",
@@ -645,6 +646,7 @@
       "p2": "Lorsque vous nous fournissez volontairement des données personnelles, la collecte de vos données personnelles est fondée sur l'intérêt légitime suivant : mieux répondre à vos demandes d'information.",
       "p3": "Le traitement de vos données personnelles afin de vous envoyer notre newsletter est, en revanche, basé uniquement sur votre consentement à recevoir notre newsletter, que vous pouvez retirer à tout moment. Si vous ne consentez pas à l'envoi de la newsletter, veuillez noter que cela ne vous empêchera pas de créer votre compte client et de passer des commandes sur notre site internet.",
       "p4": "Si vous avez passé commande sur notre site, Alteora peut vous adresser par e-mail une demande d'avis sur les produits achetés ainsi que des suggestions de produits similaires, sur la base de son intérêt légitime (article 6(1)(f) du RGPD et article L34-5 du Code des postes et des communications électroniques). Vous pouvez vous y opposer à tout moment, sans frais, via le lien de désinscription présent dans chacun de ces e-mails ou en écrivant à contact@crunchyvita.com.",
+      "p5": "Cookies et traceurs : avec votre accord uniquement, recueilli via le bandeau affiché lors de votre première visite, nous utilisons le pixel de Meta Platforms Ireland (cookie « _fbp », conservé 90 jours) afin de mesurer l'efficacité de nos publicités sur Facebook et Instagram. Si vous refusez, aucun traceur publicitaire n'est déposé et le site fonctionne de la même façon. Votre choix est conservé 6 mois ; vous pouvez le modifier à tout moment via le lien « Gérer les cookies » en bas de chaque page. Nous mesurons également la fréquentation du site de manière anonyme et agrégée (Vercel Analytics), sans cookie ni donnée permettant de vous identifier.",
       "legalBasis": {
         "title": "Base légale",
         "intro": "Le traitement de vos données repose sur :",
@@ -1776,5 +1778,12 @@
     "ctaText": "Composez votre coffret de fruits lyophilisés bio et profitez de réductions.",
     "ctaShop": "Voir toute la boutique",
     "ctaPacks": "Découvrir les coffrets"
+  },
+  "Cookies": {
+    "title": "Vos cookies, votre choix",
+    "text": "Avec votre accord, nous utilisons un cookie de mesure publicitaire (Meta) pour mieux comprendre l'efficacité de nos publicités. Vous pouvez refuser : le site fonctionne de la même façon. Vous pouvez changer d'avis à tout moment via « Gérer les cookies » en bas de page.",
+    "learnMore": "En savoir plus",
+    "accept": "Accepter",
+    "refuse": "Refuser"
   }
 }

@@ -101,6 +101,7 @@
       "collab": "Collaboration & Sponsoring"
     },
     "legal": {
+      "cookies": "Manage cookies",
       "title": "Legal information",
       "mentions": "Legal notice",
       "cgu": "Terms of use",
@@ -606,7 +607,7 @@
 },
 "PrivacyPolicy": {
     "title": "crunchyvita Privacy Policy",
-    "updated": "Document last updated on 11/12/2026",
+    "updated": "Document last updated on 11/16/2026",
     "intro": {
       "p1": "Alteora (\"Alteora\", \"our\", \"we\" and \"us\") and our partners respect your privacy. We ask that you carefully read this privacy policy to understand how your personal data is collected, processed, and retained when you use this crunchyvita website, accessible at https://www.crunchyvita.com/fr.",
       "p2": "The term \"personal data\" refers to any information relating to a natural person that allows them to be identified, directly or indirectly, from a single piece of data or by cross-referencing several pieces of data. This includes elements such as name, address, email address, location data, online identifiers, etc.",
@@ -645,6 +646,7 @@
       "p2": "When you voluntarily provide us with personal data, the collection of your personal data is based on the following legitimate interest: responding more effectively to your requests for information.",
       "p3": "The processing of your personal data to send you our newsletter is, however, based solely on your consent to receive our newsletter, which you can withdraw at any time. If you do not consent to receiving the newsletter, please note that this will not prevent you from creating your customer account and placing orders on our website.",
       "p4": "If you have placed an order on our website, Alteora may email you a request to review the products you bought, as well as suggestions of similar products, on the basis of its legitimate interest (Article 6(1)(f) GDPR and Article L34-5 of the French Postal and Electronic Communications Code). You can object at any time, free of charge, using the unsubscribe link included in each of these emails or by writing to contact@crunchyvita.com.",
+      "p5": "Cookies and trackers: only with your consent, collected through the banner shown on your first visit, we use the Meta Platforms Ireland pixel (\"_fbp\" cookie, kept for 90 days) to measure the performance of our ads on Facebook and Instagram. If you refuse, no advertising tracker is set and the site works exactly the same. Your choice is kept for 6 months; you can change it at any time via the \"Manage cookies\" link at the bottom of every page. We also measure site traffic anonymously and in aggregate (Vercel Analytics), without cookies or any data that identifies you.",
       "legalBasis": {
         "title": "Legal basis",
         "intro": "The processing of your data is based on:",
@@ -1752,5 +1754,12 @@
     "ctaText": "Build your own box of organic freeze-dried fruit and enjoy discounts.",
     "ctaShop": "Browse the whole shop",
     "ctaPacks": "Discover our boxes"
+  },
+  "Cookies": {
+    "title": "Your cookies, your choice",
+    "text": "With your consent, we use an advertising measurement cookie (Meta) to better understand how our ads perform. You can refuse: the site works exactly the same. You can change your mind at any time via \"Manage cookies\" at the bottom of the page.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "refuse": "Refuse"
   }
 }
