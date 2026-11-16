@@ -50,6 +50,7 @@ export default function CreateEditPackagePage() {
     maxProducts: 5,
     allowMultipleQuantities: false,
     isActive: true,
+    freeShipping: false,
     discountPercentage: 0
   });
 
@@ -150,6 +151,7 @@ export default function CreateEditPackagePage() {
       }
 
       formDataToSend.append("isActive", formData.isActive);
+      formDataToSend.append("freeShipping", formData.freeShipping);
 
       // Add image if user selected one
       if (fileInputRef.current?.files?.[0]) {
@@ -533,6 +535,20 @@ export default function CreateEditPackagePage() {
                     ? t("statusVisible") 
                     : t("statusHidden")}
                 </p>
+                <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
+                  <span className="text-sm text-slate-700">{t("freeShipping")}</span>
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      name="freeShipping"
+                      checked={formData.freeShipping}
+                      onChange={handleInputChange}
+                      className="peer sr-only"
+                    />
+                    <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/20"></div>
+                  </label>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">{t("freeShippingHelp")}</p>
               </div>
             </div>
 

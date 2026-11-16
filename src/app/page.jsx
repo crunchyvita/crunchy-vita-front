@@ -104,7 +104,9 @@ function DiscoveryPackBanner({ pack, relayFreeShipping, t }) {
                 </span>
               ) : null}
               <span className="text-sm font-bold text-[#556822]">
-                🚚 {t('discovery.freeShipping', { amount: formatEuros(relayFreeShipping) })}
+                🚚 {pack.freeShipping
+                  ? t('discovery.freeShippingIncluded')
+                  : t('discovery.freeShipping', { amount: formatEuros(relayFreeShipping) })}
               </span>
             </div>
             <Link

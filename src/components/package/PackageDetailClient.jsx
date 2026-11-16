@@ -532,6 +532,9 @@ export default function PackageDetailClient({ initialPackage = null, initialProd
             <p className="text-gray-500 mt-2 max-w-xl font-[Maison Neue]">
               {translatedPackage.description || t("descriptionFallback")}
             </p>
+            {packageData?.freeShipping && (
+              <p className="mt-3 text-sm font-bold text-[#556822]">🚚 {t("freeShippingNote")}</p>
+            )}
           </div>
 
           <div className="grid lg:grid-cols-12 gap-8 min-w-0">
@@ -742,6 +745,9 @@ export default function PackageDetailClient({ initialPackage = null, initialProd
           <p className="text-gray-500 mt-2 max-w-xl font-[Maison Neue]">
             {translatedPackage.description || t("descriptionFallback")}
           </p>
+          {packageData?.freeShipping && (
+            <p className="mt-3 text-sm font-bold text-[#556822]">🚚 {t("freeShippingNote")}</p>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 min-w-0">

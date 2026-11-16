@@ -899,6 +899,8 @@
     "rejectFailed": "Impossible de refuser le commentaire. Réessayez."
   },
   "packagesForm": {
+    "freeShipping": "Livraison offerte",
+    "freeShippingHelp": "Offerte en point relais et à domicile (hors express) quand le panier ne contient que ce coffret.",
     "back": "Retour aux coffrets",
     "createTitle": "Nouveau coffret",
     "editTitle": "Modifier le coffret",

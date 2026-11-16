@@ -7,7 +7,7 @@ import { formatEuros, getFranceShippingThresholds } from '@/lib/shippingThreshol
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
 /** "X € more for free pickup-point delivery" bar, based on the admin's France thresholds. */
-export default function FreeShippingProgress({ subtotal }) {
+export default function FreeShippingProgress({ subtotal, packOnly = false }) {
   const t = useTranslations('Cart.freeShipping');
   const [thresholds, setThresholds] = useState(() => getFranceShippingThresholds(null));
 
@@ -19,6 +19,11 @@ export default function FreeShippingProgress({ subtotal }) {
   }, []);
 
   const amount = Number(subtotal) || 0;
+  if (packOnly) {
+    return (
+      <div className="rounded-lg bg-[#F2F8EE] p-3 text-sm font-bold text-[#556822]">{t('packOnly')}</div>
+    );
+  }
   const { relayFree, homeFree } = thresholds;
   const remaining = Math.max(0, relayFree - amount);
   const progress = Math.min(100, (amount / relayFree) * 100);

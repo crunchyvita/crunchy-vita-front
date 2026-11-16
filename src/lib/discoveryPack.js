@@ -25,5 +25,6 @@ export function toDiscoveryPackProps(pkg, locale) {
     image: pkg.image || null,
     price: Number(pkg.price) > 0 ? Number(pkg.price) * (1 - (Number(pkg.discountPercentage) || 0) / 100) : null,
     discountPercentage: Number(pkg.discountPercentage) || 0,
+    freeShipping: pkg.freeShipping === true,
   };
 }

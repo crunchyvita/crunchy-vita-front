@@ -899,6 +899,8 @@
     "rejectFailed": "Failed to reject comment. Please try again."
   },
   "packagesForm": {
+    "freeShipping": "Free delivery",
+    "freeShippingHelp": "Free pickup-point and home delivery (except express) when the cart contains only this package.",
     "back": "Back to packages",
     "createTitle": "Create new package",
     "editTitle": "Edit package",

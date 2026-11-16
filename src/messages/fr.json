@@ -118,6 +118,7 @@
   },
   "Home": {
     "discovery": {
+      "freeShippingIncluded": "Livraison offerte",
       "kicker": "Nouveau ? Commencez ici",
       "freeShipping": "Livraison offerte dès {amount} en point relais",
       "cta": "Je découvre le pack"
@@ -525,6 +526,7 @@
     }
   },
   "PackageDetail": {
+    "freeShippingNote": "Livraison offerte pour ce coffret (point relais ou domicile)",
     "meta": {
       "title": "{name} – coffret de fruits lyophilisés",
       "description": "{name} : coffret de fruits lyophilisés Crunchy Vita. {details}"
@@ -1399,6 +1401,7 @@
   },
   "Cart": {
     "freeShipping": {
+      "packOnly": "🎉 Livraison offerte avec ce coffret (point relais ou domicile).",
       "remaining": "Plus que {amount} pour la livraison offerte en point relais 🚚",
       "reachedRelay": "🎉 Livraison offerte en point relais ! À domicile, elle l'est dès {home}.",
       "reachedHome": "🎉 Livraison offerte, en point relais comme à domicile !"

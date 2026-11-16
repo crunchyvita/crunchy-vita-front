@@ -118,6 +118,7 @@
   },
   "Home": {
     "discovery": {
+      "freeShippingIncluded": "Free delivery",
       "kicker": "New here? Start with this",
       "freeShipping": "Free pickup-point delivery from {amount}",
       "cta": "Discover the pack"
@@ -525,6 +526,7 @@
     }
   },
   "PackageDetail": {
+    "freeShippingNote": "Free delivery for this box (pickup point or home)",
     "meta": {
       "title": "{name} – freeze-dried fruit box",
       "description": "{name}: a box of Crunchy Vita freeze-dried fruit. {details}"
@@ -1375,6 +1377,7 @@
   },
   "Cart": {
     "freeShipping": {
+      "packOnly": "🎉 Free delivery with this box (pickup point or home).",
       "remaining": "Only {amount} more for free pickup-point delivery 🚚",
       "reachedRelay": "🎉 Free pickup-point delivery! Home delivery is free from {home}.",
       "reachedHome": "🎉 Free delivery, to a pickup point or to your home!"

@@ -14,6 +14,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { CheckoutProvider } from './CheckoutProvider';
 import { useCart } from '@/hooks/useCart';
+import { isFreeShippingPackageCart } from '@/lib/freeShippingPack';
 import { useAuth } from '@/context/AuthContext';
 import HeaderAndBreadcrumbs from '@/components/HeaderAndBreadcrumbs';
 import Footer from '@/components/footer';
@@ -515,6 +516,7 @@ const CheckoutPage = () => {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const { cartItems, subtotal, shipping, shippingBaseFee, total, removeFromCart } = useCart();
+  const freeShippingPackCart = isFreeShippingPackageCart(cartItems);
   const brandGreen = '#556822';
 
   // Redirect non-authenticated guests to login
@@ -1687,6 +1689,7 @@ const CheckoutPage = () => {
     if (!isShippingReady) return 0;
 
     const subtotalValue = Number(subtotal || 0);
+    if (freeShippingPackCart && !(deliveryType === 'home' && expressDelivery && expressAvailable)) return 0;
     if (deliveryType === 'relay') {
       const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
       const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
@@ -1707,7 +1710,7 @@ const CheckoutPage = () => {
       return Number(effectiveShippingRules?.home?.express ?? 9.9);
     }
     return base;
-  }, [deliveryType, expressDelivery, isShippingReady, effectiveShippingRules, subtotal, expressAvailable]);
+  }, [deliveryType, expressDelivery, isShippingReady, effectiveShippingRules, subtotal, expressAvailable, freeShippingPackCart]);
 
   const displayedTotal = useMemo(() => {
     return Number(subtotal || 0) + Number(displayedShipping || 0);
@@ -1796,11 +1799,11 @@ const CheckoutPage = () => {
     const relayFreeThreshold = Number(effectiveShippingRules?.relay?.freeShipping ?? 40);
     const relayBelowPrice = Number(effectiveShippingRules?.relay?.StandarShippingFee ?? 4.9);
     const subtotalValue = Number(subtotal || 0);
-    if (subtotalValue >= relayFreeThreshold) return 'Gratuit';
+    if (freeShippingPackCart || subtotalValue >= relayFreeThreshold) return 'Gratuit';
     const formatted = formatEurInSummaryCurrency(relayBelowPrice);
     if (formatted) return formatted;
     return `${relayBelowPrice.toFixed(2)} EUR`;
-  }, [effectiveShippingRules, subtotal, formatEurInSummaryCurrency]);
+  }, [effectiveShippingRules, subtotal, formatEurInSummaryCurrency, freeShippingPackCart]);
 
   useEffect(() => {
     setPaymentChargeTotals(null);
