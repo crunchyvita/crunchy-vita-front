@@ -14,6 +14,22 @@ export function findDiscoveryPack(packages) {
   }) || null;
 }
 
+// Same rule as checkout: fixed price if set, otherwise the sum of the products' latest prices,
+// minus the package discount. Needs `products.productId` populated (the packages API does).
+function packagePrice(pkg) {
+  let base = Number(pkg.price) > 0 ? Number(pkg.price) : 0;
+  if (!base) {
+    for (const item of pkg.products || []) {
+      const history = item?.productId?.pricingHistory;
+      const unit = Number(history?.length ? history[history.length - 1]?.price : item?.productId?.price);
+      if (!Number.isFinite(unit) || unit <= 0) return null;
+      base += unit * (Number(item.quantity) || 1);
+    }
+  }
+  if (!base) return null;
+  return Math.round(base * (1 - (Number(pkg.discountPercentage) || 0) / 100) * 100) / 100;
+}
+
 /** Plain, serialisable data for the home page banner. */
 export function toDiscoveryPackProps(pkg, locale) {
   if (!pkg) return null;
@@ -23,7 +39,7 @@ export function toDiscoveryPackProps(pkg, locale) {
     name: (en && pkg.translations?.en?.name) || pkg.name,
     description: (en && pkg.translations?.en?.description) || pkg.description || '',
     image: pkg.image || null,
-    price: Number(pkg.price) > 0 ? Number(pkg.price) * (1 - (Number(pkg.discountPercentage) || 0) / 100) : null,
+    price: packagePrice(pkg),
     discountPercentage: Number(pkg.discountPercentage) || 0,
     freeShipping: pkg.freeShipping === true,
   };

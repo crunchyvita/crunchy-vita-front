@@ -75,7 +75,7 @@ function DiscoveryPackBanner({ pack, relayFreeShipping, t }) {
     <section className="bg-[#FCE7F2] py-10 sm:py-14">
       <div className="container mx-auto px-6">
         <div className="mx-auto max-w-5xl bg-white rounded-[2rem] shadow-lg overflow-hidden grid md:grid-cols-2">
-          <div className="relative min-h-56 bg-[#F2F8EE]">
+          <div className="relative aspect-square bg-[#F2F8EE]">
             {pack.image ? (
               <img
                 src={optimizedImageUrl(pack.image, 800)}
