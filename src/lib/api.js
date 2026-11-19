@@ -646,6 +646,24 @@ export const notificationAPI = {
 };
 
 // Blog API functions
+export const newsletterAPI = {
+  subscribers: async () => apiRequest("/newsletter/subscribers", { method: "GET" }),
+  campaigns: async () => apiRequest("/newsletter/campaigns", { method: "GET" }),
+  sendTest: async (payload) =>
+    apiRequest("/newsletter/campaigns/test", { method: "POST", body: JSON.stringify(payload) }),
+  create: async (payload) =>
+    apiRequest("/newsletter/campaigns", { method: "POST", body: JSON.stringify(payload) }),
+  // CSV export needs the auth header, so it is fetched as a blob rather than opened as a link.
+  exportCsv: async () => {
+    const response = await fetch(`${API_URL}/newsletter/subscribers.csv`, {
+      credentials: "include",
+      headers: { Authorization: `Bearer ${getStoredAuthToken()}` },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.blob();
+  },
+};
+
 export const blogAPI = {
   // Get all blogs (public)
   list: async () => apiRequest("/blogs", { method: "GET" }),

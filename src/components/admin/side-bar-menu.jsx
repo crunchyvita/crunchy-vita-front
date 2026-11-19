@@ -27,6 +27,7 @@ import {
   Tag,
   ChevronDown,
   Truck,
+  Mail,
 } from "lucide-react";
 import { usePathname } from "@/navigation";
 import { useSearchParams } from "next/navigation";
@@ -71,7 +72,10 @@ const NAV_GROUPS = [
   },
   {
     titleKey: "contentMarketing",
-    items: [{ labelKey: "blog", href: "/admin/blogs", icon: FileText }],
+    items: [
+      { labelKey: "blog", href: "/admin/blogs", icon: FileText },
+      { labelKey: "newsletter", href: "/admin/newsletter", icon: Mail },
+    ],
   },
   {
     titleKey: "analytics",
